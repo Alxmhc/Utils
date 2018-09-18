@@ -31,12 +31,12 @@ function _eq_half(a,b,f,d){
 }
 
 //a.x*r1+a.y*r2+a.z=0; b.x*r1+b.y*r2+b.z=0
-function solv2l(a,b){
+function eq1_2(a,b){
 	let q = vt3.pr_v3(a,b);
 	return new vt2(q.x/q.z, q.y/q.z);
 }
 
-//y=r1+r2*x approximation
+//y=a+b*x approximation
 function linapr(x,y){
 	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
 	for(;n;){
@@ -47,10 +47,10 @@ function linapr(x,y){
 		b.z -= x[n]*y[n];
 	}
 	b.x = a.y;
-	return solv2l(a,b);
+	return eq1_2(a,b);
 }
 
-//y=r1+r2/x approximation
+//y=a+b/x approximation
 function gipapr(x,y){
 	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
 	for(;n;){
@@ -62,5 +62,5 @@ function gipapr(x,y){
 		b.z -= y[n]*q;
 	}
 	b.x = a.y;
-	return solv2l(a,b);
+	return eq1_2(a,b);
 }
