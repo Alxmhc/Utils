@@ -17,7 +17,10 @@ func ungzip_bb(b []byte) ([]byte, error) {
 }
 
 func ungzip_bf(b []byte, fname string) {
-	r,_ := ungzip_bb(b)
+	r,err := ungzip_bb(b)
+	if err != nil {
+		return
+	}
 	file,_ :=os.Create(fname)
 	defer file.Close()
 	file.Write(r)
