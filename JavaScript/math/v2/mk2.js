@@ -35,6 +35,9 @@ class mk2 extends Float64Array{
 		return this[0]*this[3]-this[1]*this[2];
 	}
 	dot(m){
+		if(this === m){
+			m = m.clone();
+		}
 		let a = this[0], b = this[1];
 		this[0] = a*m[0] + b*m[2];
 		this[1] = a*m[1] + b*m[3];

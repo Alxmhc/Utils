@@ -26,7 +26,7 @@ class sw{
 		}
 		if(this.is_on)
 			return true;
-		this._on()
+		this._on();
 		return false;
 	}
 	sw_all(o){
