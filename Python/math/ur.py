@@ -6,7 +6,7 @@ def eq1_2(a,b):
 	t = v3_pr(a,b)
 	return [t[0]/t[2], t[1]/t[2]]
 
-#y=a+b*x approximation
+#y=a+b*x
 def linappr(x,y):
 	n = len(x)
 	a = [float(n),0.0,0.0]
@@ -19,7 +19,7 @@ def linappr(x,y):
 	b[0] = a[1]
 	return eq1_2(a,b)
 
-#y=a+b/x approximation
+#y=a+b/x
 def gipappr(x,y):
 	n = len(x)
 	a = [float(n),0.0,0.0]
@@ -33,7 +33,7 @@ def gipappr(x,y):
 	b[0] = a[1]
 	return eq1_2(a,b)
 
-#решение ур. f(x)=0 делением пополам с точностью d
+#f(x)=0; a<=x<=b
 def solve_eq(a,b,f,d):
 	x = f(a)
 	if(x>-d and x<d):

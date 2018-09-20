@@ -36,7 +36,7 @@ function eq1_2(a,b){
 	return new vt2(q.x/q.z, q.y/q.z);
 }
 
-//y=a+b*x approximation
+//y=a+b*x
 function linapr(x,y){
 	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
 	for(;n;){
@@ -50,7 +50,7 @@ function linapr(x,y){
 	return eq1_2(a,b);
 }
 
-//y=a+b/x approximation
+//y=a+b/x
 function gipapr(x,y){
 	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
 	for(;n;){

@@ -6,19 +6,16 @@ public:
 	const cmpl& operator=(const vt2 &a){x=a.x; y=a.y; return *this;}
 	const cmpl& operator=(long double a){x=a; y=0.0; return *this;}
 
-	//*
 	cmpl operator*(const cmpl &a) const
 	{
 		return cmpl(x*a.x-y*a.y, y*a.x+x*a.y);
 	}
 
-	//*
 	cmpl operator*(long double k) const
 	{
 		return cmpl(x*k, y*k);
 	}
 
-	//*=
 	const cmpl& operator*=(const cmpl &a)
 	{
 		long double q=x*a.x-y*a.y;
@@ -27,21 +24,18 @@ public:
 		return *this;
 	}
 
-	//*=
 	const cmpl& operator*=(long double k)
 	{
 		x*=k; y*=k;
 		return *this;
 	}
 
-	// /
 	cmpl operator/(const cmpl &a) const
 	{
 		long double k=1.0/(a.x*a.x+a.y*a.y);
 		return cmpl(k*(x*a.x+y*a.y), k*(y*a.x-x*a.y));
 	}
 
-	// /=
 	const cmpl& operator/=(const cmpl &a)
 	{
 		long double k=1.0/(a.x*a.x+a.y*a.y);
