@@ -1,9 +1,11 @@
-def list_dict(l, d):
-	n = len(d)
-	r = {}
-	for st in l:
-		p = st.find(d)
-		if(p == -1):
-			continue
-		r[st[:p]] = st[p+n:]
+def bytes_int_be(b):
+	r = 0
+	for i in range(len(b)):
+		r = (r<<8) + b[i]
+	return r
+
+def bytes_int_le(b):
+	r = 0
+	for i in reversed(range(len(b))):
+		r = (r<<8) + b[i]
 	return r
