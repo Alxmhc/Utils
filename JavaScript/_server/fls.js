@@ -12,7 +12,7 @@ function _dir_fls(dir, fn, depth, res, onDone) {
 	res.Childs = [];
 	fs.readdir(dir, (err, fls) => {
 		if(err)
-			return onDone(res)
+			return onDone(res);
 		let n = fls.length;
 		for(let name of fls) {
 			const e = path.resolve(dir, name);
@@ -58,7 +58,8 @@ function calc_range(range, size){
 	if(isNaN(start)){
 		start = end < size ? size - end : 0;
 		end = size - 1;
-	} else {
+	}
+	else {
 		if(isNaN(end) || end >= size){
 			end = size - 1;
 		}
