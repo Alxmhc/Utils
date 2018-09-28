@@ -1,15 +1,18 @@
 const fs = require('fs');
 const path = require('path')
 
-function dir_fls(dir, fn, depth, onDone) {
-	const res = {};
-	res.Name = dir;
-	_dir_fls(dir, fn, depth, res, onDone);
+//list of paths or object
+function dir_fls(dir, filter, depth, need_object, onDone) {
+	const res = need_object ? {'Name':dir} : [];
+	_dir_fls(dir, filter, depth, res, onDone);
 }
 
-function _dir_fls(dir, fn, depth, res, onDone) {
-	res.Values = [];
-	res.Childs = [];
+function _dir_fls(dir, filter, depth, res, onDone) {
+	const need_object = !Array.isArray(res)
+	if(need_object){
+		res.Values = [];
+		res.Childs = [];
+	}
 	fs.readdir(dir, (err, fls) => {
 		if(err)
 			return onDone(res);
@@ -19,11 +22,15 @@ function _dir_fls(dir, fn, depth, res, onDone) {
 			fs.stat(e, function(err, s) {
 				if (s.isDirectory()) {
 					if (depth) {
-						const tmp = {};
-						tmp.Name = name;
-						_dir_fls(e, fn, depth-1, tmp, rs => {
-							if(rs.Values.length || rs.Childs.length) {
-								res.Childs.push(rs);
+						const tmp = need_object ? {'Name':name} : [];
+						_dir_fls(e, filter, depth-1, tmp, rs => {
+							if(need_object) {
+								if(rs.Values.length || rs.Childs.length) {
+									res.Childs.push(rs);
+								}
+							}
+							else {
+								res = res.concat(rs);
 							}
 							if(!--n)
 								return onDone(res);
@@ -33,8 +40,13 @@ function _dir_fls(dir, fn, depth, res, onDone) {
 						return onDone(res);
 				}
 				else {
-					if(fn(name)) {
-						res.Values.push(name);
+					if(filter(name)) {
+						if(need_object) {
+							res.Values.push(name);
+						}
+						else{
+							res.push(e);
+						}
 					}
 					if(!--n)
 						return onDone(res);
