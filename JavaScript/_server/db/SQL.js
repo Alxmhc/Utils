@@ -9,5 +9,8 @@ SQL.insert = function(t, vl, nm = null){
 SQL.select = function(t, nm, ext = ''){
 	return 'SELECT '+nm.join(',')+' FROM '+t+ext;
 }
+SQL.delete = function(t, ext){
+	return 'DELETE FROM '+t+' WHERE '+ext;
+}
 
 module.exports = SQL
