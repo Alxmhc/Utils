@@ -3,9 +3,8 @@ def list_dict(l, d):
 	r = {}
 	for st in l:
 		p = st.find(d)
-		if(p == -1):
-			continue
-		r[st[:p]] = st[p+n:]
+		if(p != -1):
+			r[st[:p]] = st[p+n:]
 	return r
 
 def is_pal(m):
