@@ -47,15 +47,15 @@ namespace reg
 
 	bool read(HKEY key, const std::string &path, const std::string &name, std::string &val)
 	{
-		if(RegOpenKeyEx_(key, path.c_str(), NULL, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
+		if(RegOpenKeyExA(key, path.c_str(), NULL, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
 			return false;
 		DWORD size = 0;
-		if(RegQueryValueEx_(key, name.c_str(), NULL, NULL, NULL, &size) != ERROR_SUCCESS)
+		if(RegQueryValueExA(key, name.c_str(), NULL, NULL, NULL, &size) != ERROR_SUCCESS)
 			return false;
 		char* r = new char[size];
-		RegQueryValueEx_(key, name.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(r), &size);
+		RegQueryValueExA(key, name.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(r), &size);
 		val = std::string(r);
-		delete r;
+		delete[] r;
 		return true;
 	}
 }
