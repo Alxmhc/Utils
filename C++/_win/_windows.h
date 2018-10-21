@@ -35,6 +35,9 @@ LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR sub, DWORD opt, REGSAM sam, PHKEY res){r
 LSTATUS RegQueryValueEx_(HKEY key, LPCSTR name, LPDWORD res, LPDWORD type, LPBYTE data, LPDWORD size){return RegQueryValueExA(key, name, res, type, data, size);}
 LSTATUS RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD res, LPDWORD type, LPBYTE data, LPDWORD size){return RegQueryValueExW(key, name, res, type, data, size);}
 
+HMODULE LoadLibrary_(LPCSTR filename){return LoadLibraryA(filename);}
+HMODULE LoadLibrary_(LPCWSTR filename){return LoadLibraryW(filename);}
+
 namespace reg
 {
 	bool read(HKEY key, const std::string &path, const std::string &name, DWORD &val)

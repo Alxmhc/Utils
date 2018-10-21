@@ -2,7 +2,8 @@ template<typename C>
 bool is_b(const std::basic_string<C> &s, const std::basic_string<C> &f)
 {
 	auto l = f.length();
-	if(l > s.length()){return false;}
+	if(l > s.length())
+		return false;
 	return s.compare(0, l, f) == 0;
 }
 
@@ -10,7 +11,8 @@ template<typename C>
 bool is_e(const std::basic_string<C> &s, const std::basic_string<C> &f)
 {
 	auto l = f.length();
-	if(l > s.length()){return false;}
+	if(l > s.length())
+		return false;
 	return s.compare(s.length() - l, l, f) == 0;
 }
 

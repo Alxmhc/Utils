@@ -126,6 +126,12 @@ public:
 		return *this;
 	}
 
+	b_int operator*(num a) const
+	{
+		b_int t(*this);
+		return t *= a;
+	}
+
 	num operator%(num a) const
 	{
 		auto i = n.size();
