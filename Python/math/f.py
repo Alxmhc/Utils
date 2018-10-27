@@ -17,7 +17,6 @@ def cf_bn(n,k):
 	return fctp(k+1,n)//fct(n-k)
 
 #min divisor (1 for prime, 0 for 0,1)
-#not optimized
 def min_pr(c):
 	if(c < 4):
 		if(c < 2):
@@ -25,10 +24,16 @@ def min_pr(c):
 		return 1
 	if(not(c&1)):
 		return 2
+	return min_pr_b(c)
+
+#odd > 1
+#not optimized
+def min_pr_b(c, o = 3):
+	if c == o:
+		return 1
 	q = math.floor(math.sqrt(c))+1
-	i = 3
-	while(i < q):
-		if(c%i == 0):
-			return i
-		i += 2
+	while(o < q):
+		if(c%o == 0):
+			return o
+		o += 2
 	return 1
