@@ -26,9 +26,11 @@ func dir_(d string, f func(string) bool, n int, is_dir bool) []string {
 }
 
 func dir_files(d string, f func(string) bool, n int) []string {
+	d = strings.Replace(d, "\\", "/", -1)
 	return dir_(d, f, n, false)
 }
 
 func dir_folders(d string, f func(string) bool, n int) []string {
+	d = strings.Replace(d, "\\", "/", -1)
 	return dir_(d, f, n, true)
 }

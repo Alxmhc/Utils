@@ -1,3 +1,9 @@
+def arr_pr(m):
+	r = 1
+	for c in m:
+		r *= c
+	return r
+
 def gcd(a,b):
 	while(b):a,b = b,a%b
 	return a
@@ -6,10 +12,8 @@ def fct(n):
 	return fctp(2,n)
 
 def fctp(n,m):
-	r = 1
-	for c in range(n, m+1):
-		r *= c
-	return r
+	t = range(n, m+1)
+	return arr_pr(t)
 
 def cf_bn(n,k):
 	if(k<n/2):

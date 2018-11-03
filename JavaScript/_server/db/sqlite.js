@@ -16,9 +16,27 @@ sqlite.select_all = function(db, t, nm, ext=''){
 }
 sqlite.insert = function(db, t, vl, nm = null){
 	const q = SQL.insert(t, vl, nm);
-	db.run(q, function(err){
-		return err ? 0 : this.lastID;
+	return new Promise((res, rej) => {
+		db.run(q, function(err){
+			if(err){
+				rej(err);
+				return;
+			}
+			res(this.lastID);
+		})
 	})
+}
+sqlite.delete = function(db, t, ext){
+	const q = SQL.delete(t, ext);
+	return new Promise((res, rej) => {
+		db.run(q, function(err){
+			if(err){
+				rej(err);
+				return;
+			}
+			res();
+		})
+	})	
 }
 
 module.exports = sqlite
