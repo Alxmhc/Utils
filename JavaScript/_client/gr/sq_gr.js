@@ -1,8 +1,17 @@
 class f_sqr extends fld_2d{
 	constructor(id,n){
 		super(id);
-		this.x = n[0]; this.y = n[1];
-		this.cw = this.w/n[0]; this.ch = this.h/n[1];	
+		this.x = n[0];
+		this.y = n[1];
+		this._set_cell_size();
+	}
+	_set_cell_size(){
+		this.cw = this.o.width/this.x;
+		this.ch = this.o.height/this.y;
+	}
+	resize(x,y){
+		super.resize(x,y);
+		this._set_cell_size();
 	}
 
 	crd_e(c){return this.crd_c(this.crd(c))}
@@ -28,6 +37,10 @@ class f_sqr extends fld_2d{
 		this.c.fillStyle=cl[0];
 		this.fill()
 		this.c.fillStyle=cl[1];
-		for(let i=0;i<this.x;i++){for(let j=0;j<this.y;j++){if((i+j)&1){this._fll([i,j])}}}
+		for(let i=0;i<this.x;i++){
+			for(let j=0;j<this.y;j++){
+				if((i+j)&1){this._fll([i,j])}
+			}
+		}
 	}
 }
