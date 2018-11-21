@@ -1,6 +1,10 @@
 class MD5
 {
-	constructor(){this.b = new rbuf(64); this.st = new Uint32Array(4); this.Clear()}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(4);
+		this.Clear();
+	}
 	Clear()
 	{
 		this.b.clear()

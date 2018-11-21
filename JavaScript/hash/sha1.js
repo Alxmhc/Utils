@@ -1,6 +1,10 @@
 class SHA1
 {
-	constructor(){this.b = new rbuf(64); this.st = new Uint32Array(5); this.Clear()}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(5);
+		this.Clear();
+	}
 	Clear()
 	{
 		this.b.clear()

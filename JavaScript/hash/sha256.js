@@ -1,6 +1,10 @@
 class SHA256
 {
-	constructor(){this.b = new rbuf(64); this.st = new Uint32Array(8); this.Clear()}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(8);
+		this.Clear();
+	}
 	Clear()
 	{
 		this.b.clear()

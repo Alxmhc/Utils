@@ -3,14 +3,19 @@ class rbuf
 {
 	std::size_t offset;
 public:
+	void init()
+	{
+		offset = 0;
+	}
+
 	static const std::size_t sz = SZ;
 	uint8_t d[sz];
 
 	void clear()
 	{
-		offset = 0;
+		memset(d, 0, sz);
 	}
-	template<typename C>
+	template<class C>
 	void process(const uint8_t *v, const std::size_t n, C &cl)
 	{
 		if(n + offset < sz)
@@ -31,10 +36,7 @@ public:
 			cl.process_block(v + part);
 		}
 		offset = n - part;
-		if(offset != 0)
-		{
-			std::copy_n(v + part, offset, d);
-		}
+		std::copy_n(v + part, offset, d);
 	}
 	std::size_t size() const
 	{
@@ -46,11 +48,7 @@ public:
 	}
 	void nul()
 	{
-		auto len = sz_e();
-		if(len != 0)
-		{
-			std::fill_n(d + offset, len, 0);
-		}
+		std::fill_n(d + offset, sz - offset, 0);
 	}
 	void push(uint8_t c)
 	{

@@ -2,11 +2,11 @@ namespace hash
 {
 	class MD5
 	{
-		static const uint_fast8_t hsz = 4;
-		uint32_t st[hsz];
+		uint32_t st[4];
 		uint64_t size;
 
 		rbuf<64> buf;
+		std::array<uint32_t, 16> x;
 
 		static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
 		{
@@ -29,7 +29,7 @@ namespace hash
 			a = rotl(a + t + x + ac, s) + b;
 		}
 
-		void Transform(const std::array<uint32_t, 16> &x)
+		void Transform()
 		{
 			uint32_t a=st[0], b=st[1], c=st[2], d=st[3];
 
@@ -106,27 +106,35 @@ namespace hash
 			st[2] += c;
 			st[3] += d;
 		}
-	public:
-		void process_block(const uint8_t *v)
-		{
-			auto x = conv::pack4_le<buf.sz>(v);
-			Transform(x);
-		}
 
-		void Clear()
+		void Init()
 		{
-			size = 0;
-			buf.clear();
-
 			st[0] = 0x67452301;
 			st[1] = 0xefcdab89;
 			st[2] = 0x98badcfe;
 			st[3] = 0x10325476;
+
+			size = 0;
+			buf.init();
+		}
+
+		void Clear()
+		{
+			buf.clear();
+			x.fill(0);
+		}
+	public:
+		static const uint_fast16_t hash_size = 16;
+
+		void process_block(const uint8_t *v)
+		{
+			conv::pack_le<buf.sz>(v, x);
+			Transform();
 		}
 
 		MD5()
 		{
-			Clear();
+			Init();
 		}
 
 		void Update(const uint8_t *v, const std::size_t n)
@@ -135,21 +143,23 @@ namespace hash
 			buf.process(v, n, *this);
 		}
 
-		std::vector<uint8_t> Final()
+		void Final(std::array<uint8_t, hash_size> &r)
 		{
 			buf.push(0x80);
 			buf.nul();
-			auto x = conv::pack4_le<buf.sz>(buf.d);
+			conv::pack_le<buf.sz>(buf.d, x);
 			if(buf.sz_e() < 8)
 			{
-				Transform(x);
+				Transform();
 				x.fill(0);
 			}
 			x[14] = static_cast<uint32_t>(size<<3);
 			x[15] = static_cast<uint32_t>(size>>29);
-			Transform(x);
+			Transform();
+			conv::unpack_le<4>(st, r);
 
-			return conv::unpack1_le(st, hsz);
+			Clear();
+			Init();
 		}
 	};
 }

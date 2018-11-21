@@ -2,50 +2,43 @@ namespace hash
 {
 	class SHA256
 	{
-		static const uint_fast8_t hsz = 8;
-		uint32_t st[hsz];
+		uint32_t st[8];
 		uint64_t size;
 
 		rbuf<64> buf;
+		std::array<uint32_t, 16> x;
 
 		static const uint32_t K[64];
 
-		static void rotate(uint32_t *wt, uint32_t t)
+		void Transform()
 		{
-			t += wt[7];
-			t += rotr(wt[4], 6)^rotr(wt[4], 11)^rotr(wt[4], 25);
-			t += (wt[4] & wt[5])^(~wt[4] & wt[6]);
-			uint32_t tmp = rotr(wt[0], 2)^rotr(wt[0], 13)^rotr(wt[0], 22);
-			tmp += (wt[0] & wt[1])|(wt[2] & (wt[0]|wt[1]));
-			wt[7] = wt[6];
-			wt[6] = wt[5];
-			wt[5] = wt[4];
-			wt[4] = wt[3] + t;
-			wt[3] = wt[2];
-			wt[2] = wt[1];
-			wt[1] = wt[0];
-			wt[0] = t + tmp;
-		}
+			uint32_t wt[8];
+			std::copy(st, st+8, wt);
 
-		void Transform(const std::array<uint32_t, 16> &x)
-		{
-			uint32_t wt[hsz];
-			std::copy(st, st+hsz, wt);
-
-			uint32_t w[64];
-			for(uint_fast8_t i = 0; i < 16; i++)
+			for(uint_fast8_t i = 0; i < 64; i++)
 			{
-				w[i] = x[i];
-
-				rotate(wt, x[i] + K[i]);
-			}
-			for(uint_fast8_t i = 16; i < 64; i++)
-			{
-				w[i] = w[i-16] + w[i-7];
-				w[i] += rotr(w[i-15], 7)^rotr(w[i-15], 18)^(w[i-15]>>3);
-				w[i] += rotr(w[i-2], 17)^rotr(w[i-2], 19)^(w[i-2]>>10);
-
-				rotate(wt, w[i] + K[i]);
+				uint_fast8_t j = i & 0x0f;
+				if(i > 15)
+				{
+					x[j] += x[(j+9)&0x0f];
+					uint32_t tmp = x[(j+1)&0x0f];
+					x[j] += rotr(tmp, 7) ^ rotr(tmp, 18) ^ (tmp>>3);
+					tmp = x[(j+14)&0x0f];
+					x[j] += rotr(tmp, 17) ^ rotr(tmp, 19) ^ (tmp>>10);
+				}
+				uint32_t t = x[j] + K[i] + wt[7];
+				t += rotr(wt[4], 6) ^ rotr(wt[4], 11) ^ rotr(wt[4], 25);
+				t += (wt[4] & wt[5]) ^ (~wt[4] & wt[6]);
+				uint32_t tmp = rotr(wt[0], 2) ^ rotr(wt[0], 13) ^ rotr(wt[0], 22);
+				tmp += (wt[0] & wt[1]) | (wt[2] & (wt[0]|wt[1]));
+				wt[7] = wt[6];
+				wt[6] = wt[5];
+				wt[5] = wt[4];
+				wt[4] = wt[3] + t;
+				wt[3] = wt[2];
+				wt[2] = wt[1];
+				wt[1] = wt[0];
+				wt[0] = t + tmp;
 			}
 			st[0] += wt[0];
 			st[1] += wt[1];
@@ -56,18 +49,9 @@ namespace hash
 			st[6] += wt[6];
 			st[7] += wt[7];
 		}
-	public:
-		void process_block(const uint8_t *v)
-		{
-			auto x = conv::pack4_be<buf.sz>(v);
-			Transform(x);
-		}
 
-		void Clear()
+		void Init()
 		{
-			size = 0;
-			buf.clear();
-
 			st[0] = 0x6a09e667;
 			st[1] = 0xbb67ae85;
 			st[2] = 0x3c6ef372;
@@ -76,11 +60,28 @@ namespace hash
 			st[5] = 0x9b05688c;
 			st[6] = 0x1f83d9ab;
 			st[7] = 0x5be0cd19;
+
+			size = 0;
+			buf.init();
+		}
+
+		void Clear()
+		{
+			buf.clear();
+			x.fill(0);
+		}
+	public:
+		static const uint_fast16_t hash_size = 32;
+
+		void process_block(const uint8_t *v)
+		{
+			conv::pack_be<buf.sz>(v, x);
+			Transform();
 		}
 
 		SHA256()
 		{
-			Clear();
+			Init();
 		}
 
 		void Update(const uint8_t *v, const std::size_t n)
@@ -89,21 +90,23 @@ namespace hash
 			buf.process(v, n, *this);
 		}
 
-		std::vector<uint8_t> Final()
+		void Final(std::array<uint8_t, hash_size> &r)
 		{
 			buf.push(0x80);
 			buf.nul();
-			auto x = conv::pack4_be<buf.sz>(buf.d);
+			conv::pack_be<buf.sz>(buf.d, x);
 			if(buf.sz_e() < 8)
 			{
-				Transform(x);
+				Transform();
 				x.fill(0);
 			}
 			x[14] = static_cast<uint32_t>(size>>29);
 			x[15] = static_cast<uint32_t>(size<<3);
-			Transform(x);
+			Transform();
+			conv::unpack_be<8>(st, r);
 
-			return conv::unpack1_be(st, hsz);
+			Clear();
+			Init();
 		}
 	};
 
