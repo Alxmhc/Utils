@@ -3,13 +3,11 @@ class vn extends Float64Array{
 		super(v);
 	}
 	clone(){return this.slice()}
-	add(v){for(let i=0; i<this.length; i++){this[i]+=v[i]} return this}
-	sub(v){for(let i=0; i<this.length; i++){this[i]-=v[i]} return this}
-	mul(k){for(let i=0; i<this.length; i++){this[i]*=k} return this}
+	add(v){for(let i=0; i<this.length; ++i){this[i]+=v[i]} return this}
+	sub(v){for(let i=0; i<this.length; ++i){this[i]-=v[i]} return this}
+	mul(k){for(let i=0; i<this.length; ++i){this[i]*=k} return this}
 
-	dot(v){let s=0; for(let i=0; i<this.length; i++){s+=this[i]*v[i]} return s}
-	sum(){return vn.sum(this)}
-	avr(){return vn.avr(this)}
+	dot(v){return _arr.dot(this, v)}
+	sum(){return _arr.sum(this)}
+	avr(){return _arr.avr(this)}
 }
-vn.sum = function(v){return v.reduce((s,e)=>s+e,0)}
-vn.avr = function(v){const n=v.length; return n!==0 ? vn.sum(v)/n : 0}

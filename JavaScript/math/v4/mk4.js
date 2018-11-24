@@ -78,6 +78,38 @@ class mk4 extends Float64Array{
 		this[15] = a*m[3] + b*m[7] + c*m[11] + d*m[15];
 		return this;
 	}
+	inverse(){
+		const q0 = this[8]*this[13] - this[9]*this[12],
+		      q1 = this[8]*this[14] - this[10]*this[12],
+		      q2 = this[8]*this[15] - this[11]*this[12],
+		      q3 = this[9]*this[14] - this[10]*this[13],
+		      q4 = this[9]*this[15] - this[11]*this[13],
+		      q5 = this[10]*this[15] - this[11]*this[14];
+		const a0 =  this[5]*q5 - this[6]*q4 + this[7]*q3,
+		      a1 = -this[4]*q5 + this[6]*q2 - this[7]*q1,
+		      a2 =  this[4]*q4 - this[5]*q2 + this[7]*q0,
+		      a3 = -this[4]*q3 + this[5]*q1 - this[6]*q0;
+		const d = this[0]*a0 + this[1]*a1 + this[2]*a2 + this[3]*a3;
+		if(d === 0)
+			return null;
+		const t0 = this[6]*this[15] - this[7]*this[14],
+		      t1 = this[5]*this[15] - this[7]*this[13],
+		      t2 = this[5]*this[14] - this[6]*this[13],
+		      t3 = this[6]*this[11] - this[7]*this[10],
+		      t4 = this[5]*this[11] - this[7]*this[9],
+		      t5 = this[5]*this[10] - this[6]*this[9],
+		      t6 = this[4]*this[15] - this[7]*this[12],
+		      t7 = this[4]*this[14] - this[6]*this[12],
+		      t8 = this[4]*this[11] - this[7]*this[8],
+		      t9 = this[4]*this[10] - this[6]*this[8],
+		      t10 = this[4]*this[13] - this[5]*this[12],
+		      t11 = this[4]*this[9] - this[5]*this[8];
+		this.set([a0, -this[1]*q5+this[2]*q4-this[3]*q3, this[1]*t0-this[2]*t1+this[3]*t2, -this[1]*t3+this[2]*t4-this[3]*t5,
+		          a1, this[0]*q5-this[2]*q2+this[3]*q1, -this[0]*t0+this[2]*t6-this[3]*t7, this[0]*t3-this[2]*t8+this[3]*t9,
+		          a2, -this[0]*q4+this[1]*q2-this[3]*q0, this[0]*t1-this[1]*t6+this[3]*t10, -this[0]*t4+this[1]*t8-this[3]*t11,
+		          a3, this[0]*q3-this[1]*q1+this[2]*q0, -this[0]*t2+this[1]*t7-this[2]*t10, this[0]*t5-this[1]*t9+this[2]*t11]);
+		return this.mul(1.0/d);
+	}
 }
 mk4.from_v = function(v1, v2, v3, v4){
 	let r = new mk4();
