@@ -1,3 +1,5 @@
+#include "lmcons.h"
+
 //Program path
 template<typename C>
 std::basic_string<C> get_ex_path(void)
@@ -25,4 +27,24 @@ std::vector<std::basic_string<C>> get_env(void)
 	}
 	FreeEnvironmentStrings_(env);
 	return res;
+}
+
+template<typename C>
+std::basic_string<C> get_username()
+{
+	C username[UNLEN + 1];
+	DWORD sz = UNLEN + 1;
+	GetUserName_(username, &sz);
+	std::basic_string<C> r(username);
+	return r;
+}
+
+template<typename C>
+std::basic_string<C> get_computername()
+{
+	C computername[CNLEN + 1];
+	DWORD sz = CNLEN + 1;
+	GetComputerName_(computername, &sz);
+	std::basic_string<C> r(computername);
+	return r;
 }

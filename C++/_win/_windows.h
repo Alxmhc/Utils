@@ -29,36 +29,11 @@ template<> LPWCH GetEnvironmentStrings_<wchar_t>(){return GetEnvironmentStringsW
 BOOL FreeEnvironmentStrings_(LPCH env){return FreeEnvironmentStringsA(env);}
 BOOL FreeEnvironmentStrings_(LPWCH env){return FreeEnvironmentStringsW(env);}
 
-LSTATUS RegOpenKeyEx_(HKEY key, LPCSTR sub, DWORD opt, REGSAM sam, PHKEY res){return RegOpenKeyExA(key, sub, opt, sam, res);}
-LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR sub, DWORD opt, REGSAM sam, PHKEY res){return RegOpenKeyExW(key, sub, opt, sam, res);}
-
-LSTATUS RegQueryValueEx_(HKEY key, LPCSTR name, LPDWORD res, LPDWORD type, LPBYTE data, LPDWORD size){return RegQueryValueExA(key, name, res, type, data, size);}
-LSTATUS RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD res, LPDWORD type, LPBYTE data, LPDWORD size){return RegQueryValueExW(key, name, res, type, data, size);}
-
 HMODULE LoadLibrary_(LPCSTR filename){return LoadLibraryA(filename);}
 HMODULE LoadLibrary_(LPCWSTR filename){return LoadLibraryW(filename);}
 
-namespace reg
-{
-	bool read(HKEY key, const std::string &path, const std::string &name, DWORD &val)
-	{
-		if(RegOpenKeyExA(key, path.c_str(), NULL, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
-			return false;
-		DWORD size = sizeof(DWORD);
-		return RegQueryValueExA(key, name.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(&val), &size) == ERROR_SUCCESS;
-	}
+BOOL GetUserName_(LPSTR buf, LPDWORD sz){return GetUserNameA(buf, sz);}
+BOOL GetUserName_(LPWSTR buf, LPDWORD sz){return GetUserNameW(buf, sz);}
 
-	bool read(HKEY key, const std::string &path, const std::string &name, std::string &val)
-	{
-		if(RegOpenKeyExA(key, path.c_str(), NULL, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
-			return false;
-		DWORD size = 0;
-		if(RegQueryValueExA(key, name.c_str(), NULL, NULL, NULL, &size) != ERROR_SUCCESS)
-			return false;
-		char* r = new char[size];
-		RegQueryValueExA(key, name.c_str(), NULL, NULL, reinterpret_cast<LPBYTE>(r), &size);
-		val = std::string(r);
-		delete[] r;
-		return true;
-	}
-}
+BOOL GetComputerName_(LPSTR buf, LPDWORD sz){return GetComputerNameA(buf, sz);}
+BOOL GetComputerName_(LPWSTR buf, LPDWORD sz){return GetComputerNameW(buf, sz);}
