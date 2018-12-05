@@ -26,7 +26,8 @@ public:
 
 	const cmpl& operator*=(long double k)
 	{
-		x*=k; y*=k;
+		x*=k;
+		y*=k;
 		return *this;
 	}
 
@@ -65,4 +66,12 @@ cmpl cos(const cmpl &a)
 cmpl sin(const cmpl &a)
 {
 	return cmpl(sin(a.x)*cosh(a.y), cos(a.x)*sinh(a.y));
+}
+
+cmpl pow(const cmpl &a, long double n)
+{
+	auto f = n * atan2(a.y, a.x);
+	cmpl r(cos(f), sin(f));
+	r *= pow(a.x*a.x+a.y*a.y, 0.5*n);
+	return r;
 }

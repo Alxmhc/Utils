@@ -1,13 +1,13 @@
 _arr = {
-	sum: function(m){
+	sum: function(v){
 		let s = 0;
-		const n = m.length;
-		for(let i=0; i<n; ++i){s+=m[i];}
+		const n = v.length;
+		for(let i=0; i<n; ++i){s+=v[i];}
 		return s;
 	},
-	avr: function(m){
-		const n = m.length;
-		return n!==0 ? _arr.sum(m)/n : 0;
+	avr: function(v){
+		const n = v.length;
+		return n!==0 ? _arr.sum(v)/n : 0;
 	},
 	dot: function(v1, v2){
 		let s = 0;
