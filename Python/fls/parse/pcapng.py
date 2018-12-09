@@ -2,12 +2,12 @@ import conv
 
 def read(fl):
 	while True:
-		h = fl.read(4)
-		if not h:
+		b = fl.read(4)
+		if not b:
 			break
-		type = conv.bytes_int_le(h)
-		h = fl.read(4)
-		len = conv.bytes_int_le(h)
+		type = conv.bytes_int_le(b)
+		b = fl.read(4)
+		len = conv.bytes_int_le(b)
 		b = fl.read(len-12)
 		fl.read(4)
 		if type==6:
