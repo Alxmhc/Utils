@@ -20,7 +20,8 @@ namespace conv
 			char t[3] = {};
 			for(size_t i=0; i<n; i++)
 			{
-				t[0] = s[p++]; t[1] = s[p++];
+				t[0] = s[p]; p++;
+				t[1] = s[p]; p++;
 				r[i] = static_cast<uint8_t>(strtoul(t, nullptr, 16));
 			}
 			return r;
