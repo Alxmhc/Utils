@@ -33,17 +33,17 @@ namespace decode
 		std::vector<uint8_t> r;
 		r.reserve(n);
 		char t[3] = {};
-		for(size_t i = 0; i < n; ++i)
+		for(size_t i = 0; i < n;)
 		{
 			if(s[i] != '%')
 			{
 				r.push_back(s[i]);
+				i++;
 				continue;
 			}
-			i++;
-			t[0] = s[i];
-			i++;
-			t[1] = s[i];
+			t[0] = s[i+1];
+			t[1] = s[i+2];
+			i += 3;
 			uint8_t c = static_cast<uint8_t>(strtoul(t, nullptr, 16));
 			r.push_back(c);
 		}
