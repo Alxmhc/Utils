@@ -66,39 +66,87 @@ public:
 		return *this;
 	}
 
+	bool operator>(num c) const
+	{
+		return (n.size() > 1) || (n[0] > c);
+	}
+	bool operator<(num c) const
+	{
+		return (n.size() == 1) && (n[0] < c);
+	}
 	bool operator==(num c) const
 	{
 		return (n.size() == 1) && (n[0] == c);
+	}
+
+	friend signed char compare(const b_int &a, const b_int &b);
+	bool operator>(const b_int &c) const
+	{
+		return compare(*this, c) > 0;
+	}
+	bool operator<(const b_int &c) const
+	{
+		return compare(*this, c) < 0;
 	}
 	bool operator==(const b_int &c) const
 	{
 		return n == c.n;
 	}
 
-	bool operator>(const b_int &c) const
+	b_int operator+=(num c)
 	{
-		auto sz = c.n.size();
-		if(n.size() != sz)
-			return n.size() > sz;
-		while(sz--)
+		n[0] += c;
+		if(n[0] < c)
 		{
-			if(n[sz] != c.n[sz])
-				return n[sz] > c.n[sz];
+			std::size_t i = 1;
+			auto sz = n.size();
+			for(; i < sz; ++i)
+			{
+				n[i]++;
+				if(n[i] != 0)
+					break;
+			}
+			if(i == sz)
+			{
+				n.push_back(1);
+			}
 		}
-		return false;
+		return *this;
 	}
 
-	bool operator<(const b_int &c) const
+	b_int operator+=(const b_int &c)
 	{
-		auto sz = c.n.size();
-		if(n.size() != sz)
-			return n.size() < sz;
-		while(sz--)
+		if(n.size() < c.n.size())
 		{
-			if(n[sz] != c.n[sz])
-				return n[sz] < c.n[sz];
+			n.resize(c.n.size());
 		}
-		return false;
+		std::size_t i = 0;
+		bool d = false;
+		for(auto sz = c.n.size(); i < sz; i++)
+		{
+			if(d)
+			{
+				n[i]++;
+				d = (n[i] == 0);
+			}
+			n[i] += c.n[i];
+			d |= (n[i] < c.n[i]);
+		}
+		if(d)
+		{
+			auto sz = n.size();
+			for(; i < sz; ++i)
+			{
+				n[i]++;
+				if(n[i] != 0)
+					break;
+			}
+			if(i == sz)
+			{
+				n.push_back(1);
+			}
+		}
+		return *this;
 	}
 
 	b_int operator*=(num a)
@@ -212,3 +260,16 @@ public:
 		return *this;
 	}
 };
+
+signed char compare(const b_int &a, const b_int &b)
+{
+	auto sz = b.n.size();
+	if(a.n.size() != sz)
+		return a.n.size()>sz ? 1 : -1;
+	while(sz--)
+	{
+		if(a.n[sz] != b.n[sz])
+			return a.n[sz]>b.n[sz] ? 1 : -1;
+	}
+	return 0;
+}
