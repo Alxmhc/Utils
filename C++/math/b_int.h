@@ -60,80 +60,31 @@ public:
 	b_int(num c = 0){n.push_back(c);}
 	b_int(const std::string &str){n = hex::from_str<num>(str);}
 
-	b_int operator=(num c)
+	b_int operator=(num a)
 	{
-		n = std::vector<num>(1, c);
+		n = std::vector<num>(1, a);
 		return *this;
 	}
 
-	bool operator>(num c) const
+	bool operator>(num a) const
 	{
-		return (n.size() > 1) || (n[0] > c);
+		return (n.size() > 1) || (n[0] > a);
 	}
-	bool operator<(num c) const
+	bool operator<(num a) const
 	{
-		return (n.size() == 1) && (n[0] < c);
+		return (n.size() == 1) && (n[0] < a);
 	}
-	bool operator==(num c) const
+	bool operator==(num a) const
 	{
-		return (n.size() == 1) && (n[0] == c);
-	}
-
-	friend signed char compare(const b_int &a, const b_int &b);
-	bool operator>(const b_int &c) const
-	{
-		return compare(*this, c) > 0;
-	}
-	bool operator<(const b_int &c) const
-	{
-		return compare(*this, c) < 0;
-	}
-	bool operator==(const b_int &c) const
-	{
-		return n == c.n;
+		return (n.size() == 1) && (n[0] == a);
 	}
 
-	b_int operator+=(num c)
+	b_int operator+=(num a)
 	{
-		n[0] += c;
-		if(n[0] < c)
+		n[0] += a;
+		if(n[0] < a)
 		{
 			std::size_t i = 1;
-			auto sz = n.size();
-			for(; i < sz; ++i)
-			{
-				n[i]++;
-				if(n[i] != 0)
-					break;
-			}
-			if(i == sz)
-			{
-				n.push_back(1);
-			}
-		}
-		return *this;
-	}
-
-	b_int operator+=(const b_int &c)
-	{
-		if(n.size() < c.n.size())
-		{
-			n.resize(c.n.size());
-		}
-		std::size_t i = 0;
-		bool d = false;
-		for(auto sz = c.n.size(); i < sz; i++)
-		{
-			if(d)
-			{
-				n[i]++;
-				d = (n[i] == 0);
-			}
-			n[i] += c.n[i];
-			d |= (n[i] < c.n[i]);
-		}
-		if(d)
-		{
 			auto sz = n.size();
 			for(; i < sz; ++i)
 			{
@@ -179,6 +130,104 @@ public:
 		b_int t(*this);
 		return t *= a;
 	}
+
+
+	friend signed char compare(const b_int &a, const b_int &b);
+	bool operator>(const b_int &c) const
+	{
+		return compare(*this, c) > 0;
+	}
+	bool operator<(const b_int &c) const
+	{
+		return compare(*this, c) < 0;
+	}
+	bool operator==(const b_int &c) const
+	{
+		return n == c.n;
+	}
+
+	b_int operator+=(const b_int &c)
+	{
+		auto csz = c.n.size();
+		if(csz == 1)
+		{
+			operator+=(c.n[0]);
+			return *this;
+		}
+		auto sz = n.size();
+		if(sz == 1)
+		{
+			auto tmp = n[0];
+			n = c.n;
+			operator+=(tmp);
+			return *this;
+		}
+		if(sz < csz)
+		{
+			n.resize(csz);
+			sz = csz;
+		}
+		std::size_t i = 0;
+		bool d = false;
+		for(; i < csz; i++)
+		{
+			if(d)
+			{
+				n[i]++;
+				d = (n[i] == 0);
+			}
+			n[i] += c.n[i];
+			d |= (n[i] < c.n[i]);
+		}
+		if(d)
+		{
+			for(; i < sz; ++i)
+			{
+				n[i]++;
+				if(n[i] != 0)
+					break;
+			}
+			if(i == sz)
+			{
+				n.push_back(1);
+			}
+		}
+		return *this;
+	}
+
+	b_int operator*=(const b_int &c)
+	{
+		auto csz = c.n.size();
+		if(csz == 1)
+		{
+			operator*=(c.n[0]);
+			return *this;
+		}
+		auto sz = n.size();
+		if(sz == 1)
+		{
+			auto tmp = n[0];
+			n = c.n;
+			operator*=(tmp);
+			return *this;
+		}
+		auto tmp = *this;
+		n.reserve(sz + csz);
+		operator*=(c.n[0]);
+		for(std::size_t i = 1; i < csz; ++i)
+		{
+			tmp.n.insert(tmp.n.begin(), 0);
+			operator+=(tmp * c.n[i]);
+		}
+		return *this;
+	}
+
+	b_int operator*(const b_int &c) const
+	{
+		b_int t(*this);
+		return t *= c;
+	}
+
 
 	num operator%(num a) const
 	{
