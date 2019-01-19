@@ -28,10 +28,13 @@ def from_har_req(obj):
 	return http.http(inf, ver, hdr, body)
 def from_har_resp(obj):
 	obj = obj['response']
+	code = obj['status']
+	if code == 0:
+		return None
 	ver, hdr = from_har_(obj)
 	inf = {}
 	inf['type'] = 1
-	inf['code'] = obj['status']
+	inf['code'] = code
 	inf['code_text'] = obj['statusText']
 	body = b''
 	if 'content' in obj:
@@ -46,5 +49,7 @@ def from_har_resp(obj):
 		del hdr['transfer-encoding']
 	if 'content-encoding' in hdr:
 		del hdr['content-encoding']
-	hdr['content-length'] = str(len(body))
+	sz = len(body)
+	if sz != 0:
+		hdr['content-length'] = str(sz)
 	return http.http(inf, ver, hdr, body)
