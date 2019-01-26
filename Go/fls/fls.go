@@ -1,5 +1,8 @@
+package fls
+
 import (
 	"io/ioutil"
+	"strings"
 )
 
 func dir_(d string, f func(string) bool, n int, is_dir bool) []string {
@@ -25,12 +28,12 @@ func dir_(d string, f func(string) bool, n int, is_dir bool) []string {
 	return res
 }
 
-func dir_files(d string, f func(string) bool, n int) []string {
+func DirFiles(d string, f func(string) bool, n int) []string {
 	d = strings.Replace(d, "\\", "/", -1)
 	return dir_(d, f, n, false)
 }
 
-func dir_folders(d string, f func(string) bool, n int) []string {
+func DirFolders(d string, f func(string) bool, n int) []string {
 	d = strings.Replace(d, "\\", "/", -1)
 	return dir_(d, f, n, true)
 }

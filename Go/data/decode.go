@@ -1,9 +1,11 @@
+package data
+
 import (
 	"bytes"
 	"strconv"
 )
 
-func unchunk(v []byte) []byte {
+func Unchunk(v []byte) []byte {
 	var res []byte
 	for true {
 		n := bytes.Index(v, []byte("\r\n"))

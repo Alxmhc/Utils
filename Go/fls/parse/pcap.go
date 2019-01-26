@@ -1,9 +1,11 @@
+package parse
+
 import (
 	"encoding/binary"
 	"os"
 )
 
-func read_pcap(fl string) [][]byte {
+func ReadPcap(fl string) [][]byte {
 	res := [][]byte{}
 	f, err := os.Open(fl)
 	if err != nil {

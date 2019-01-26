@@ -1,4 +1,6 @@
-func unpack1_le(m []uint32) []byte {
+package data
+
+func Unpack1LE(m []uint32) []byte {
 	r := make([]byte, len(m)<<2)
 	for k,c := range m {
 		r[k<<2] = byte(c)
@@ -9,7 +11,7 @@ func unpack1_le(m []uint32) []byte {
 	return r
 }
 
-func unpack1_be(m []uint32) []byte {
+func Unpack1BE(m []uint32) []byte {
 	r := make([]byte, len(m)<<2)
 	for k,c := range m {
 		r[k<<2] = byte(c>>24)

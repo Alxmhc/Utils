@@ -12,7 +12,7 @@ hex = {
 		const sz = s.length;
 		let r = new Uint8Array(sz>>>1);
 		for(let i=0,j=0; i<sz; i+=2){
-			r[j++] = parseInt(s.substring(i,i+2),16);
+			r[j++] = parseInt(s.substr(i,2),16);
 		}
 		return r;
 	}
