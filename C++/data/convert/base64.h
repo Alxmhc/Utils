@@ -6,6 +6,16 @@ namespace conv
 	{
 		std::string en;
 		std::array<uint8_t, 256> de;
+
+		void init_de()
+		{
+			de.fill(-1);
+			uint8_t sz = static_cast<uint8_t>(en.size());
+			while(sz--)
+			{
+				de[en[sz]] = sz;
+			}
+		}
 	public:
 		base64(const std::string &b)
 		{
@@ -15,13 +25,7 @@ namespace conv
 		void reinit(const std::string &b)
 		{
 			en = b;
-
-			de.fill(-1);
-			uint8_t sz = static_cast<uint8_t>(b.size());
-			while(sz--)
-			{
-				de[b[sz]] = sz;
-			}
+			init_de();
 		}
 
 		std::string encode(const uint8_t *v, std::size_t n) const
