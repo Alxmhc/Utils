@@ -28,10 +28,12 @@ class f_sqr extends fld_2d{
 		this.c.clearRect(this.cw*cr[0], this.ch*cr[1], this.cw, this.ch);
 	}
 	pct(cr,p){
-		if(p.complete)
+		if(p.complete){
 			this._pct(cr,p);
-		else
+		}
+		else{
 			p.addEventListener('load', () => this._pct(cr,p), {once: true});
+		}
 	}
 	fll(cr, p){
 		this.c.fillStyle = p;

@@ -1,6 +1,5 @@
 conv = {
-	pack_le: function(m)
-	{
+	pack_le: function(m){
 		const sz = m.length;
 		let r = new Uint32Array(sz>>>2);
 		for(let i=0,j=0; i<sz; i+=4){
@@ -8,8 +7,7 @@ conv = {
 		}
 		return r;
 	},
-	pack_be: function(m)
-	{
+	pack_be: function(m){
 		const sz = m.length;
 		let r = new Uint32Array(sz>>>2);
 		for(let i=0,j=0; i<sz; i+=4){
@@ -17,8 +15,7 @@ conv = {
 		}
 		return r;
 	},
-	unpack_le: function(m)
-	{
+	unpack_le: function(m){
 		const sz = m.length;
 		let r = new Uint8Array(sz<<2);
 		for(let i=0; i<sz; i++){
@@ -26,8 +23,7 @@ conv = {
 		}
 		return r;
 	},
-	unpack_be: function(m)
-	{
+	unpack_be: function(m){
 		const sz = m.length;
 		let r = new Uint8Array(sz<<2);
 		for(let i=0; i<sz; i++){
