@@ -41,12 +41,14 @@ class f_sqr extends fld_2d{
 	}
 
 	f_f(cl){
-		this.c.fillStyle=cl[0];
-		this.fill()
-		this.c.fillStyle=cl[1];
-		for(let i=0;i<this.x;i++){
-			for(let j=0;j<this.y;j++){
-				if((i+j)&1){this._fll([i,j])}
+		this.c.fillStyle = cl[0];
+		this.fill();
+		this.c.fillStyle = cl[1];
+		for(let i=0; i<this.x; ++i){
+			for(let j=0; j<this.y; ++j){
+				if((i+j)&1){
+					this._fll([i,j]);
+				}
 			}
 		}
 	}
