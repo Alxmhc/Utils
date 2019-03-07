@@ -1,16 +1,14 @@
 template<std::size_t SZ>
 class rbuf
 {
+	uint8_t d[SZ];
 	std::size_t offset;
 public:
+	static const std::size_t sz = SZ;
 	void init()
 	{
 		offset = 0;
 	}
-
-	static const std::size_t sz = SZ;
-	uint8_t d[sz];
-
 	void clear()
 	{
 		memset(d, 0, sz);
@@ -38,6 +36,21 @@ public:
 		offset = n - part;
 		std::copy_n(v + part, offset, d);
 	}
+	template<class C>
+	void push(uint8_t c, C &cl)
+	{
+		d[offset] = c;
+		offset++;
+		if(offset == sz)
+		{
+			cl.process_block(d);
+			offset = 0;
+		}
+	}
+	const uint8_t* data() const
+	{
+		return d;
+	}
 	std::size_t size() const
 	{
 		return offset;
@@ -49,10 +62,5 @@ public:
 	void nul()
 	{
 		std::fill_n(d + offset, sz - offset, 0);
-	}
-	void push(uint8_t c)
-	{
-		d[offset] = c;
-		offset++;
 	}
 };

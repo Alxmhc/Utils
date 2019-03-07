@@ -90,12 +90,19 @@ namespace hash
 
 		void Final(std::array<uint8_t, hash_size> &r)
 		{
-			buf.push(0x80);
-			buf.nul();
-			conv::pack_be<buf.sz>(buf.d, x);
-			if(buf.sz_e() < 8)
+			buf.push(0x80, *this);
+			if(buf.size() != 0)
 			{
-				Transform();
+				buf.nul();
+				conv::pack_be<buf.sz>(buf.data(), x);
+				if(buf.sz_e() < 8)
+				{
+					Transform();
+					x.fill(0);
+				}
+			}
+			else
+			{
 				x.fill(0);
 			}
 			x[14] = static_cast<uint32_t>(size>>29);

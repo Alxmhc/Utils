@@ -1,43 +1,48 @@
 Chess = {}
 Chess.fen = 'PRNBQKprnbqk'
 
-Chess.pos_from_fen = function(s){
-	const res = new Uint8Array(64);
-	res.fill(0);
-	for(let j=0, l=s.length, i=0; i<l; ++i){
+Chess.fen_to_moves = function(s){
+	let res = [], x=0, y=0;
+	for(let i=0, l=s.length; i<l; ++i){
 		const c = s[i];
-		if(c === '/')
-			continue;
-		const e = Chess.fen.indexOf(c) + 1;
-		if(e == 0){
-			j += parseInt(c, 10);
+		if(c === '/'){
+			y++;
+			x = 0;
 			continue;
 		}
-		res[j] = e;
-		j++;
+		const e = Chess.fen.indexOf(c) + 1;
+		if(e == 0){
+			x += parseInt(c, 10);
+			continue;
+		}
+		res.push([[x,y],e]);
+		x++;
 	}
 	return res;
 }
 
-Chess.pos_to_fen = function(pos){
+Chess.pos_to_fen = function(v){
 	let res = "", t = 0;
-	for(let l=pos.length, i=0; i<l; ++i){
-		if(i%8 == 0 && i != 0){
+	for(let y=0; y<8; ++y){
+		if(y != 0){
 			if(t != 0){
 				res += t;
 				t = 0;
 			}
 			res += '/';
 		}
-		if(pos[i] == 0){
-			t++;
-			continue;
+		for(let x=0; x<8; ++x){
+			const o = v.get([x,y]);
+			if(o == 0){
+				t++;
+				continue;
+			}
+			if(t != 0){
+				res += t;
+				t = 0;
+			}
+			res += Chess.fen[o-1];
 		}
-		if(t != 0){
-			res += t;
-			t = 0;
-		}
-		res += Chess.fen[ pos[i] - 1 ];
 	}
 	return res;
 }

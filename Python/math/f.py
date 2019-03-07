@@ -20,16 +20,26 @@ def min_pr(c):
 		if(c < 2):
 			return 0
 		return 1
-	if(not(c&1)):
+	if(c&1 == 0):
 		return 2
 	return min_pr_b(c)
+
+# r*r <= a; (r+1)*(r+1) > a
+def sqrt_int(a):
+	r = 0
+	t = 1<<(a.bit_length()>>1)
+	while t:
+		if (r+t)*(r+t) <= a:
+			r += t
+		t >>= 1
+	return r
 
 #odd > 1
 #not optimized
 def min_pr_b(c, o = 3):
 	if c == o:
 		return 1
-	q = math.floor(math.sqrt(c))+1
+	q = sqrt_int(c)+1
 	while(o < q):
 		if(c%o == 0):
 			return o

@@ -1,12 +1,16 @@
-function game_field(id, sz, im){
-	this.f = new f_sqr(id, sz);
+function game_field(fld, im){
+	this.f = fld;
 	this.im = im.slice();
 	this.im.unshift(null);
 }
 game_field.prototype = {
-	clear: function(){this.f.clear();},
-	crd: function(cr){return this.f.crd_e(cr);},
+	crd: function(cr){
+		return this.f.crd_e(cr);
+	},
 
+	clear: function(){
+		this.f.clear();
+	},
 	draw: function(cr, n){
 		const o = this.im[n];
 		if(!o){
@@ -20,22 +24,14 @@ game_field.prototype = {
 			this.f.fll(cr, o);
 		}
 	},
-
-	set_arr: function(m){
+	set_pos: function(p){
 		this.clear();
-		for(let i=0,o=0; i<this.f.y; ++i){
-			for(let j=0; j<this.f.x; ++j){
-				if(m[o]){
-					this.draw([j,i],m[o]);
-				}
-				o++;
-			}
-		}
+		this.moves(p);
 	},
+	//m - [[cr,o],...]
 	moves: function(m){
 		for(let v of m){
-			const cr = this.f.crd1_2(v[0]);
-			this.draw(cr, v[1]);
+			this.draw(v[0], v[1]);
 		}
 	}
 }

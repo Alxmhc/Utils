@@ -18,8 +18,6 @@ class f_sqr extends fld_2d{
 	crd_e(c){return this.crd_c(this.crd(c))}
 	//cell from internal coordinates
 	crd_c(c){return [Math.floor(c[0]/this.cw), Math.floor(c[1]/this.ch)]}
-	crd1_2(c){const e=c%this.x; return [e, (c-e)/this.x]}
-	crd2_1(c){return c[1]*this.x + c[0]}
 
 	_pct(cr,p){this.c.drawImage(p, this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
 	_fll(cr){this.c.fillRect(this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
