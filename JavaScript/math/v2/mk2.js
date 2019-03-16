@@ -46,6 +46,10 @@ class mk2 extends Float64Array{
 		this[3] = a*m[1] + b*m[3];
 		return this;
 	}
+	transpose(){
+		[this[1],this[2]] = [this[2],this[1]];
+		return this;
+	}
 	inverse(){
 		const d = this.det();
 		if(d === 0)

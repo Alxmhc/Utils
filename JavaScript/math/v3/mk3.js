@@ -59,6 +59,12 @@ class mk3 extends Float64Array{
 		this[8] = a*m[2] + b*m[5] + c*m[8];
 		return this;
 	}
+	transpose(){
+		[this[1],this[3]] = [this[3],this[1]];
+		[this[2],this[6]] = [this[6],this[2]];
+		[this[5],this[7]] = [this[7],this[5]];
+		return this;
+	}
 	inverse(){
 		const a0 = this[4]*this[8] - this[5]*this[7],
 		      a1 = this[5]*this[6] - this[3]*this[8],

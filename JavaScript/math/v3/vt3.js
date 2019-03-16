@@ -1,9 +1,12 @@
 class vt3 extends Float64Array{
 	constructor(x, y, z){super([x,y,z])}
+
 	clone(){return this.slice()}
+	copy(v){this[0]=v[0]; this[1]=v[1]; this[2]=v[2]; return this}
 	add(v){this[0]+=v[0]; this[1]+=v[1]; this[2]+=v[2]; return this}
 	sub(v){this[0]-=v[0]; this[1]-=v[1]; this[2]-=v[2]; return this}
 	mul(k){this[0]*=k; this[1]*=k; this[2]*=k; return this}
+	dot(v){return this[0]*v[0]+this[1]*v[1]+this[2]*v[2]}
 
 	get x(){return this[0]}
 	set x(v){this[0] = v}
@@ -11,7 +14,6 @@ class vt3 extends Float64Array{
 	set y(v){this[1] = v}
 	get z(){return this[2]}
 	set z(v){this[2] = v}
-	dot(v){return this[0]*v[0]+this[1]*v[1]+this[2]*v[2]}
 	dot_m(m){
 		const a = this[0], b = this[1], c = this[2];
 		this[0] = a*m[0] + b*m[1] + c*m[2];
