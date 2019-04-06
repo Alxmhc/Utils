@@ -1,7 +1,7 @@
 from . import http
 import base64
 
-def from_har_(obj):
+def from_(obj):
 	ver = obj['httpVersion'].upper()
 	hdr = {}
 	for h in obj['headers']:
@@ -10,9 +10,9 @@ def from_har_(obj):
 			continue
 		http._hdr_add_(hdr, k.lower(), h['value'])
 	return ver, hdr
-def from_har_req(obj):
+def from_req(obj):
 	obj = obj['request']
-	ver, hdr = from_har_(obj)
+	ver, hdr = from_(obj)
 	inf = {}
 	inf['type'] = 0
 	inf['method'] = obj['method'].upper()
@@ -26,12 +26,12 @@ def from_har_req(obj):
 	if 'postData' in obj:
 		body = bytes(obj['postData']['text'],'utf8')
 	return http.http(inf, ver, hdr, body)
-def from_har_resp(obj):
+def from_resp(obj):
 	obj = obj['response']
 	code = obj['status']
 	if code == 0:
 		return None
-	ver, hdr = from_har_(obj)
+	ver, hdr = from_(obj)
 	inf = {}
 	inf['type'] = 1
 	inf['code'] = code

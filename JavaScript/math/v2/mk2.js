@@ -8,6 +8,10 @@ class mk2 extends Float64Array{
 		this.sy=2;
 	}
 	clone(){return this.slice()}
+	copy(m){
+		this.set(m);
+		return this;
+	}
 	add(m){
 		this[0] += m[0]; this[1] += m[1];
 		this[2] += m[2]; this[3] += m[3];
@@ -35,15 +39,11 @@ class mk2 extends Float64Array{
 		return this[0]*this[3]-this[1]*this[2];
 	}
 	dot(m){
-		if(this === m){
-			m = m.clone();
-		}
-		let a = this[0], b = this[1];
-		this[0] = a*m[0] + b*m[2];
-		this[1] = a*m[1] + b*m[3];
-		a = this[2]; b = this[3];
-		this[2] = a*m[0] + b*m[2];
-		this[3] = a*m[1] + b*m[3];
+		const a0 = this[0]*m[0] + this[1]*m[2],
+		      a1 = this[0]*m[1] + this[1]*m[3],
+		      a2 = this[2]*m[0] + this[3]*m[2],
+		      a3 = this[2]*m[1] + this[3]*m[3];
+		this.set([a0,a1,a2,a3]);
 		return this;
 	}
 	transpose(){
@@ -51,7 +51,7 @@ class mk2 extends Float64Array{
 		return this;
 	}
 	inverse(){
-		const d = this.det();
+		const d = this[0]*this[3]-this[1]*this[2];
 		if(d === 0)
 			return null;
 		this.set([this[3], -this[1],

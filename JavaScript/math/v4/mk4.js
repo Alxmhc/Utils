@@ -8,6 +8,10 @@ class mk4 extends Float64Array{
 		this.sy=4;
 	}
 	clone(){return this.slice()}
+	copy(m){
+		this.set(m);
+		return this;
+	}
 	add(m){
 		this[0] += m[0]; this[1] += m[1]; this[2] += m[2]; this[3] += m[3];
 		this[4] += m[4]; this[5] += m[5]; this[6] += m[6]; this[7] += m[7];
@@ -56,26 +60,32 @@ class mk4 extends Float64Array{
 		if(this === m){
 			m = m.clone();
 		}
-		let a = this[0], b = this[1], c = this[2], d = this[3];
-		this[0] = a*m[0] + b*m[4] + c*m[8] + d*m[12];
-		this[1] = a*m[1] + b*m[5] + c*m[9] + d*m[13];
-		this[2] = a*m[2] + b*m[6] + c*m[10] + d*m[14];
-		this[3] = a*m[3] + b*m[7] + c*m[11] + d*m[15];
-		a = this[4]; b = this[5]; c = this[6]; d = this[7];
-		this[4] = a*m[0] + b*m[4] + c*m[8] + d*m[12];
-		this[5] = a*m[1] + b*m[5] + c*m[9] + d*m[13];
-		this[6] = a*m[2] + b*m[6] + c*m[10] + d*m[14];
-		this[7] = a*m[3] + b*m[7] + c*m[11] + d*m[15];
-		a = this[8]; b = this[9]; c = this[10]; d = this[11];
-		this[8] = a*m[0] + b*m[4] + c*m[8] + d*m[12];
-		this[9] = a*m[1] + b*m[5] + c*m[9] + d*m[13];
-		this[10] = a*m[2] + b*m[6] + c*m[10] + d*m[14];
-		this[11] = a*m[3] + b*m[7] + c*m[11] + d*m[15];
-		a = this[12]; b = this[13]; c = this[14]; d = this[15];
-		this[12] = a*m[0] + b*m[4] + c*m[8] + d*m[12];
-		this[13] = a*m[1] + b*m[5] + c*m[9] + d*m[13];
-		this[14] = a*m[2] + b*m[6] + c*m[10] + d*m[14];
-		this[15] = a*m[3] + b*m[7] + c*m[11] + d*m[15];
+		const a0 =  this[0]*m[0]  + this[1]*m[4]  + this[2]*m[8]   + this[3]*m[12],
+		      a1 =  this[0]*m[1]  + this[1]*m[5]  + this[2]*m[9]   + this[3]*m[13],
+		      a2 =  this[0]*m[2]  + this[1]*m[6]  + this[2]*m[10]  + this[3]*m[14],
+		      a3 =  this[0]*m[3]  + this[1]*m[7]  + this[2]*m[11]  + this[3]*m[15],
+		      a4 =  this[4]*m[0]  + this[5]*m[4]  + this[6]*m[8]   + this[7]*m[12],
+		      a5 =  this[4]*m[1]  + this[5]*m[5]  + this[6]*m[9]   + this[7]*m[13],
+		      a6 =  this[4]*m[2]  + this[5]*m[6]  + this[6]*m[10]  + this[7]*m[14],
+		      a7 =  this[4]*m[3]  + this[5]*m[7]  + this[6]*m[11]  + this[7]*m[15],
+		      a8 =  this[8]*m[0]  + this[9]*m[4]  + this[10]*m[8]  + this[11]*m[12],
+		      a9 =  this[8]*m[1]  + this[9]*m[5]  + this[10]*m[9]  + this[11]*m[13],
+		      a10 = this[8]*m[2]  + this[9]*m[6]  + this[10]*m[10] + this[11]*m[14],
+		      a11 = this[8]*m[3]  + this[9]*m[7]  + this[10]*m[11] + this[11]*m[15],
+		      a12 = this[12]*m[0] + this[13]*m[4] + this[14]*m[8]  + this[15]*m[12],
+		      a13 = this[12]*m[1] + this[13]*m[5] + this[14]*m[9]  + this[15]*m[13],
+		      a14 = this[12]*m[2] + this[13]*m[6] + this[14]*m[10] + this[15]*m[14],
+		      a15 = this[12]*m[3] + this[13]*m[7] + this[14]*m[11] + this[15]*m[15];
+		this.set([a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15]);
+		return this;
+	}
+	transpose(){
+		[this[1],this[4]] = [this[4], this[1]];
+		[this[2],this[8]] = [this[8], this[2]];
+		[this[3],this[12]] = [this[12], this[3]];
+		[this[6],this[9]] = [this[9], this[6]];
+		[this[7],this[13]] = [this[13], this[7]];
+		[this[11],this[14]] = [this[14], this[11]];
 		return this;
 	}
 	inverse(){

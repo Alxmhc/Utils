@@ -1,6 +1,6 @@
 from . import http
 
-def from_bytes_(frame):
+def from_(frame):
 	p = frame.find(b"\r\n\r\n")
 	body = frame[p+4:]
 	frame = frame[:p].decode('utf8')
@@ -12,16 +12,16 @@ def from_bytes_(frame):
 	ln = frame[:p].split(' ', 2)
 	ln[0] = ln[0].upper()
 	return ln, hdr, body
-def from_bytes_req(frame):
-	ln, hdr, body = from_bytes_(frame)
+def from_req(frame):
+	ln, hdr, body = from_(frame)
 	ver = ln[2].upper()
 	inf = {}
 	inf['type'] = 0
 	inf['method'] = ln[0]
 	inf['url'] = ln[1]
 	return http.http(inf, ver, hdr, body)
-def from_bytes_resp(frame):
-	ln, hdr, body = from_bytes_(frame)
+def from_resp(frame):
+	ln, hdr, body = from_(frame)
 	ver = ln[0]
 	inf = {}
 	inf['type'] = 1

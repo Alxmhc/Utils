@@ -8,6 +8,10 @@ class mk3 extends Float64Array{
 		this.sy=3;
 	}
 	clone(){return this.slice()}
+	copy(m){
+		this.set(m);
+		return this;
+	}
 	add(m){
 		this[0] += m[0]; this[1] += m[1]; this[2] += m[2];
 		this[3] += m[3]; this[4] += m[4]; this[5] += m[5];
@@ -42,21 +46,16 @@ class mk3 extends Float64Array{
 		return this[0]*a0 + this[1]*a1 + this[2]*a2;
 	}
 	dot(m){
-		if(this === m){
-			m = m.clone();
-		}
-		let a = this[0], b = this[1], c = this[2];
-		this[0] = a*m[0] + b*m[3] + c*m[6];
-		this[1] = a*m[1] + b*m[4] + c*m[7];
-		this[2] = a*m[2] + b*m[5] + c*m[8];
-		a = this[3]; b = this[4]; c = this[5];
-		this[3] = a*m[0] + b*m[3] + c*m[6];
-		this[4] = a*m[1] + b*m[4] + c*m[7];
-		this[5] = a*m[2] + b*m[5] + c*m[8];
-		a = this[6]; b = this[7]; c = this[8];
-		this[6] = a*m[0] + b*m[3] + c*m[6];
-		this[7] = a*m[1] + b*m[4] + c*m[7];
-		this[8] = a*m[2] + b*m[5] + c*m[8];
+		const a0 = this[0]*m[0] + this[1]*m[3] + this[2]*m[6],
+		      a1 = this[0]*m[1] + this[1]*m[4] + this[2]*m[7],
+		      a2 = this[0]*m[2] + this[1]*m[5] + this[2]*m[8],
+		      a3 = this[3]*m[0] + this[4]*m[3] + this[5]*m[6],
+		      a4 = this[3]*m[1] + this[4]*m[4] + this[5]*m[7],
+		      a5 = this[3]*m[2] + this[4]*m[5] + this[5]*m[8],
+		      a6 = this[6]*m[0] + this[7]*m[3] + this[8]*m[6],
+		      a7 = this[6]*m[1] + this[7]*m[4] + this[8]*m[7],
+		      a8 = this[6]*m[2] + this[7]*m[5] + this[8]*m[8];
+		this.set([a0,a1,a2,a3,a4,a5,a6,a7,a8]);
 		return this;
 	}
 	transpose(){
