@@ -57,9 +57,6 @@ class mk4 extends Float64Array{
 		return this[0]*a0 + this[1]*a1 + this[2]*a2 + this[3]*a3;
 	}
 	dot(m){
-		if(this === m){
-			m = m.clone();
-		}
 		const a0 =  this[0]*m[0]  + this[1]*m[4]  + this[2]*m[8]   + this[3]*m[12],
 		      a1 =  this[0]*m[1]  + this[1]*m[5]  + this[2]*m[9]   + this[3]*m[13],
 		      a2 =  this[0]*m[2]  + this[1]*m[6]  + this[2]*m[10]  + this[3]*m[14],
