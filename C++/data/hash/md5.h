@@ -115,7 +115,6 @@ namespace hash
 			st[3] = 0x10325476;
 
 			size = 0;
-			buf.init();
 		}
 
 		void Clear()

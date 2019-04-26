@@ -5,13 +5,14 @@ class rbuf
 	std::size_t offset;
 public:
 	static const std::size_t sz = SZ;
-	void init()
+	rbuf()
 	{
 		offset = 0;
 	}
 	void clear()
 	{
-		memset(d, 0, sz);
+		offset = 0;
+		nul();
 	}
 	template<class C>
 	void process(const uint8_t *v, const std::size_t n, C &cl)
@@ -61,6 +62,6 @@ public:
 	}
 	void nul()
 	{
-		std::fill_n(d + offset, sz - offset, 0);
+		std::fill(d + offset, d + sz, 0);
 	}
 };

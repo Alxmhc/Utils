@@ -62,7 +62,6 @@ namespace hash
 			st[7] = 0x5be0cd19;
 
 			size = 0;
-			buf.init();
 		}
 
 		void Clear()

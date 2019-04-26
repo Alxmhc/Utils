@@ -60,7 +60,6 @@ namespace hash
 			st[4] = 0xc3d2e1f0;
 
 			size = 0;
-			buf.init();
 		}
 
 		void Clear()
