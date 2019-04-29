@@ -5,10 +5,7 @@ class rbuf
 	std::size_t offset;
 public:
 	static const std::size_t sz = SZ;
-	rbuf()
-	{
-		offset = 0;
-	}
+	rbuf() : offset(0) {}
 	void clear()
 	{
 		offset = 0;

@@ -1,10 +1,24 @@
-class cmpl:public vt2{
+class cmpl : public vt2 {
 public:
-	explicit cmpl(long double a = 0.0, long double b = 0.0):vt2(a,b){}
-	cmpl(const vt2 &v){x=v.x; y=v.y;}
+	explicit cmpl(long double a = 0.0, long double b = 0.0) : vt2(a,b) {}
+	cmpl(const vt2 &v)
+	{
+		x = v.x;
+		y = v.y;
+	}
 
-	const cmpl& operator=(const vt2 &a){x=a.x; y=a.y; return *this;}
-	const cmpl& operator=(long double a){x=a; y=0.0; return *this;}
+	const cmpl& operator=(const vt2 &a)
+	{
+		x = a.x;
+		y = a.y;
+		return *this;
+	}
+	const cmpl& operator=(long double a)
+	{
+		x = a;
+		y = 0.0;
+		return *this;
+	}
 
 	cmpl operator*(const cmpl &a) const
 	{
@@ -18,31 +32,31 @@ public:
 
 	const cmpl& operator*=(const cmpl &a)
 	{
-		long double q=x*a.x-y*a.y;
-		y=y*a.x+x*a.y;
-		x=q;
+		long double q = x*a.x-y*a.y;
+		y = y*a.x+x*a.y;
+		x = q;
 		return *this;
 	}
 
 	const cmpl& operator*=(long double k)
 	{
-		x*=k;
-		y*=k;
+		x *= k;
+		y *= k;
 		return *this;
 	}
 
 	cmpl operator/(const cmpl &a) const
 	{
-		long double k=1.0/(a.x*a.x+a.y*a.y);
+		long double k = 1.0/(a.x*a.x+a.y*a.y);
 		return cmpl(k*(x*a.x+y*a.y), k*(y*a.x-x*a.y));
 	}
 
 	const cmpl& operator/=(const cmpl &a)
 	{
-		long double k=1.0/(a.x*a.x+a.y*a.y);
-		long double q=k*(x*a.x+y*a.y);
-		y=k*(y*a.x-x*a.y);
-		x=q;
+		long double k = 1.0/(a.x*a.x+a.y*a.y);
+		long double q = k*(x*a.x+y*a.y);
+		y = k*(y*a.x-x*a.y);
+		x = q;
 		return *this;
 	}
 };

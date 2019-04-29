@@ -1,9 +1,14 @@
 class vt3{
 public:
 	long double x, y, z;
-	vt3(void){x=0.0; y=0.0; z=0.0;}
-	vt3(long double a, long double b, long double c){x=a; y=b; z=c;}
-	vt3(const vt3 &v){x=v.x; y=v.y; z=v.z;}
+	vt3(void) : x(0), y(0), z(0) {}
+	vt3(long double a, long double b, long double c) : x(a), y(b), z(c) {}
+	vt3(const vt3 &v)
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+	}
 
 	vt3 operator-() const
 	{
@@ -27,19 +32,25 @@ public:
 
 	const vt3& operator+=(const vt3 &a)
 	{
-		x+=a.x; y+=a.y; z+=a.z;
+		x += a.x;
+		y += a.y;
+		z += a.z;
 		return *this;
 	}
 
 	const vt3& operator-=(const vt3 &a)
 	{
-		x-=a.x; y-=a.y; z-=a.z;
+		x -= a.x;
+		y -= a.y;
+		z -= a.z;
 		return *this;
 	}
 
 	const vt3& operator*=(long double k)
 	{
-		x*=k; y*=k; z*=k;
+		x *= k;
+		y *= k;
+		z *= k;
 		return *this;
 	}
 

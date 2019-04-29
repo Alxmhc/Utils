@@ -2,7 +2,7 @@ class p_sph
 {
 public:
 	long double r;
-	p_sph(long double c){r = c;}
+	p_sph(long double c) : r(c) {}
 
 	static long double vl(long double r)
 	{

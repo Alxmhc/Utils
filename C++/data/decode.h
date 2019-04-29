@@ -7,7 +7,11 @@ namespace decode
 		r.reserve(n);
 		for(size_t i=0, j=0; i<n; )
 		{
-			if(v[i] != '\r'){i++; continue;}
+			if(v[i] != '\r')
+			{
+				i++;
+				continue;
+			}
 			v[i] = 0;
 			const char *c = reinterpret_cast<char*>(v.data()) + j;
 			auto sz = strtoul(c, nullptr, 16);
