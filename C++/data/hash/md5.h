@@ -127,7 +127,7 @@ namespace hash
 
 		void process_block(const uint8_t *v)
 		{
-			conv::pack_le<buf.sz>(v, x);
+			conv::pack<buf.sz, endianness::LITTLE_ENDIAN>(v, x);
 			Transform();
 		}
 
@@ -148,7 +148,7 @@ namespace hash
 			if(buf.size() != 0)
 			{
 				buf.nul();
-				conv::pack_le<buf.sz>(buf.data(), x);
+				conv::pack<buf.sz, endianness::LITTLE_ENDIAN>(buf.data(), x);
 				if(buf.sz_e() < 8)
 				{
 					Transform();
