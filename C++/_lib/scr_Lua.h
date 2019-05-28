@@ -2,18 +2,34 @@ class scr_Lua
 {
 	lua_State *s;
 public:
-	scr_Lua(){s = luaL_newstate();}
-	~scr_Lua(){lua_close(s);}
-
-	bool exec(const std::string& fl)
+	scr_Lua()
 	{
-		int r = luaL_loadfile(s, fl.c_str());
+		s = luaL_newstate();
+	}
+	~scr_Lua()
+	{
+		lua_close(s);
+	}
+
+	bool exec_file(const char* fl)
+	{
+		int r = luaL_loadfile(s, fl);
 		if ( r != LUA_OK )
 			return false;
 		r = lua_pcall(s, 0, LUA_MULTRET, 0);
 		if ( r != LUA_OK )
 			return false;
 		return true;
+	}
+
+	void select_func(const char* fname)
+	{
+		lua_getglobal(s, fname);
+	}
+
+	void call_func(int narg, int nres)
+	{
+		lua_call(s, narg, nres);
 	}
 
 	template<typename T>
