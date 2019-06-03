@@ -1,6 +1,11 @@
-function rbuf(sz){this.buf = new Uint8Array(sz)}
+function rbuf(sz){
+	this.buf = new Uint8Array(sz);
+	this.offset = 0;
+}
 rbuf.prototype = {
-clear: function(){this.offset=0},
+clear: function(){
+	this.offset = 0;
+},
 process: function(v, c){
 	const sz = v.length;
 	if(this.offset + sz < this.buf.length){
@@ -22,7 +27,14 @@ process: function(v, c){
 		this.buf.set( v.slice(part, sz) );
 	}
 },
-sz_e: function(){return this.buf.length - this.offset},
-nul: function(){this.buf.fill(0, this.offset)},
-push: function(c){this.buf[this.offset]=c;this.offset++}
+sz_e: function(){
+	return this.buf.length - this.offset;
+},
+nul: function(){
+	this.buf.fill(0, this.offset);
+},
+push: function(c){
+	this.buf[this.offset] = c;
+	this.offset++;
+}
 }

@@ -1,4 +1,6 @@
-function $(id){return document.getElementById(id)}
+function $(id){
+	return document.getElementById(id);
+}
 
 function imgs(p){
 	return p.map(e => {

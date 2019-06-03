@@ -7,9 +7,15 @@ class mk2 extends Float64Array{
 		this.sx=2;
 		this.sy=2;
 	}
-	clone(){return this.slice()}
+	clone(){
+		return this.slice();
+	}
 	copy(m){
 		this.set(m);
+		return this;
+	}
+	setI(){
+		this.set([1,0,0,1]);
 		return this;
 	}
 	add(m){
@@ -28,8 +34,12 @@ class mk2 extends Float64Array{
 		return this;
 	}
 
-	getx(k){return new vt2(this[2*k], this[2*k+1])}
-	gety(k){return new vt2(this[k], this[k+2])}
+	getx(k){
+		return new vt2(this[2*k], this[2*k+1]);
+	}
+	gety(k){
+		return new vt2(this[k], this[k+2]);
+	}
 	set_v(v1, v2){
 		this.set([v1[0], v1[1],
 		          v2[0], v2[1]]);
@@ -58,6 +68,10 @@ class mk2 extends Float64Array{
 		          -this[2], this[0]]);
 		return this.mul(1.0/d);
 	}
+}
+mk2.I = function(){
+	let r = new mk2();
+	return r.setI();
 }
 mk2.from_v = function(v1, v2){
 	let r = new mk2();

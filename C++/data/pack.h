@@ -17,7 +17,7 @@ namespace endianness
 		return UNKNOWN;
 	}
 	const char current = get_endianness();
-};
+}
 
 namespace conv
 {

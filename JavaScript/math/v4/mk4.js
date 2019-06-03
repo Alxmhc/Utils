@@ -7,9 +7,15 @@ class mk4 extends Float64Array{
 		this.sx=4;
 		this.sy=4;
 	}
-	clone(){return this.slice()}
+	clone(){
+		return this.slice();
+	}
 	copy(m){
 		this.set(m);
+		return this;
+	}
+	setI(){
+		this.set([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
 		return this;
 	}
 	add(m){
@@ -34,8 +40,12 @@ class mk4 extends Float64Array{
 		return this;
 	}
 
-	getx(k){return new vt4(this[4*k], this[4*k+1], this[4*k+2], this[4*k+3])}
-	gety(k){return new vt4(this[k], this[k+4], this[k+8], this[k+12])}
+	getx(k){
+		return new vt4(this[4*k], this[4*k+1], this[4*k+2], this[4*k+3]);
+	}
+	gety(k){
+		return new vt4(this[k], this[k+4], this[k+8], this[k+12]);
+	}
 	set_v(v1, v2, v3, v4){
 		this.set([v1[0], v1[1], v1[2], v1[3],
 		          v2[0], v2[1], v2[2], v2[3],
@@ -117,6 +127,10 @@ class mk4 extends Float64Array{
 		          a3, this[0]*q3-this[1]*q1+this[2]*q0, -this[0]*t2+this[1]*t7-this[2]*t10, this[0]*t5-this[1]*t9+this[2]*t11]);
 		return this.mul(1.0/d);
 	}
+}
+mk4.I = function(){
+	let r = new mk4();
+	return r.setI();
 }
 mk4.from_v = function(v1, v2, v3, v4){
 	let r = new mk4();
