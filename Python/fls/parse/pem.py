@@ -1,5 +1,6 @@
 import base64
 
+#text mode
 def read(fl):
 	str = ""
 	k = ""
