@@ -25,6 +25,9 @@ def from_req(obj):
 	body = b''
 	if 'postData' in obj:
 		body = bytes(obj['postData']['text'],'utf8')
+	sz = len(body)
+	if sz != 0 or inf['method'] == 'POST':
+		hdr['content-length'] = str(sz)
 	return http.http(inf, ver, hdr, body)
 def from_resp(obj):
 	obj = obj['response']
