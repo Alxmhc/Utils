@@ -1,4 +1,27 @@
 Chess = {}
+
+Chess.color = {
+	none: 0,
+	white: 1,
+	black: 2
+}
+Chess.type = {
+	none: 0,
+	pawn: 1,
+	rook: 2,
+	knight: 3,
+	bishop: 4,
+	queen: 5,
+	king: 6
+}
+Chess.inf = function(p){
+	if(p === 0)
+		return {color: 0, type: 0};
+	if(p < 7)
+		return {color: 1, type: p};
+	return {color: 2, type: p - 6};
+}
+
 Chess.fen = 'PRNBQKprnbqk'
 
 Chess.fen_to_moves = function(s){

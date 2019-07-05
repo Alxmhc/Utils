@@ -1,6 +1,10 @@
 class vt2 extends Float64Array{
-	constructor(x, y){super([x,y])}
-
+	constructor(a){
+		super(2);
+		if(a){
+			this.set(a);
+		}
+	}
 	clone(){return this.slice()}
 	copy(v){this[0]=v[0]; this[1]=v[1]; return this}
 	add(v){this[0]+=v[0]; this[1]+=v[1]; return this}

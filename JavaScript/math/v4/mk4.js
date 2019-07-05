@@ -4,8 +4,8 @@ class mk4 extends Float64Array{
 		if(m){
 			this.set(m);
 		}
-		this.sx=4;
-		this.sy=4;
+		this.sx = 4;
+		this.sy = 4;
 	}
 	clone(){
 		return this.slice();
@@ -15,36 +15,35 @@ class mk4 extends Float64Array{
 		return this;
 	}
 	setI(){
-		this.set([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
-		return this;
+		return this.copy([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
 	}
 	add(m){
-		this[0] += m[0]; this[1] += m[1]; this[2] += m[2]; this[3] += m[3];
-		this[4] += m[4]; this[5] += m[5]; this[6] += m[6]; this[7] += m[7];
-		this[8] += m[8]; this[9] += m[9]; this[10] += m[10]; this[11] += m[11];
+		this[0] += m[0];   this[1] += m[1];   this[2] += m[2];   this[3] += m[3];
+		this[4] += m[4];   this[5] += m[5];   this[6] += m[6];   this[7] += m[7];
+		this[8] += m[8];   this[9] += m[9];   this[10] += m[10]; this[11] += m[11];
 		this[12] += m[12]; this[13] += m[13]; this[14] += m[14]; this[15] += m[15];
 		return this;
 	}
 	sub(m){
-		this[0] -= m[0]; this[1] -= m[1]; this[2] -= m[2]; this[3] -= m[3];
-		this[4] -= m[4]; this[5] -= m[5]; this[6] -= m[6]; this[7] -= m[7];
-		this[8] -= m[8]; this[9] -= m[9]; this[10] -= m[10]; this[11] -= m[11];
+		this[0] -= m[0];   this[1] -= m[1];   this[2] -= m[2];   this[3] -= m[3];
+		this[4] -= m[4];   this[5] -= m[5];   this[6] -= m[6];   this[7] -= m[7];
+		this[8] -= m[8];   this[9] -= m[9];   this[10] -= m[10]; this[11] -= m[11];
 		this[12] -= m[12]; this[13] -= m[13]; this[14] -= m[14]; this[15] -= m[15];
 		return this;
 	}
 	mul(k){
-		this[0] *= k; this[1] *= k; this[2] *= k; this[3] *= k;
-		this[4] *= k; this[5] *= k; this[6] *= k; this[7] *= k;
-		this[8] *= k; this[9] *= k; this[10] *= k; this[11] *= k;
+		this[0] *= k;  this[1] *= k;  this[2] *= k;  this[3] *= k;
+		this[4] *= k;  this[5] *= k;  this[6] *= k;  this[7] *= k;
+		this[8] *= k;  this[9] *= k;  this[10] *= k; this[11] *= k;
 		this[12] *= k; this[13] *= k; this[14] *= k; this[15] *= k;
 		return this;
 	}
 
 	getx(k){
-		return new vt4(this[4*k], this[4*k+1], this[4*k+2], this[4*k+3]);
+		return new vt4([this[4*k], this[4*k+1], this[4*k+2], this[4*k+3]]);
 	}
 	gety(k){
-		return new vt4(this[k], this[k+4], this[k+8], this[k+12]);
+		return new vt4([this[k], this[k+4], this[k+8], this[k+12]]);
 	}
 	set_v(v1, v2, v3, v4){
 		this.set([v1[0], v1[1], v1[2], v1[3],
@@ -83,8 +82,7 @@ class mk4 extends Float64Array{
 		      a13 = this[12]*m[1] + this[13]*m[5] + this[14]*m[9]  + this[15]*m[13],
 		      a14 = this[12]*m[2] + this[13]*m[6] + this[14]*m[10] + this[15]*m[14],
 		      a15 = this[12]*m[3] + this[13]*m[7] + this[14]*m[11] + this[15]*m[15];
-		this.set([a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15]);
-		return this;
+		return this.copy([a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15]);
 	}
 	transpose(){
 		[this[1],this[4]] = [this[4], this[1]];

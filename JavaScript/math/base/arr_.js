@@ -1,3 +1,22 @@
+_v = {
+	qlen: function(v){
+		return v.dot(v);
+	},
+	len: function(v){
+		return Math.sqrt(this.qlen(v));
+	},
+	qdst: function(a,b){
+		return this.qlen(a.clone().sub(b));
+	},
+	dst: function(a,b){
+		return Math.sqrt(this.qdst(a,b));
+	}
+}
+
+function nrm(v){
+	return v.mul(1.0/_v.len(v))
+}
+
 _arr = {
 	eq: function(a1, a2){
 		let n = a1.length;
@@ -11,8 +30,7 @@ _arr = {
 	},
 	sum: function(v){
 		let s = 0;
-		const n = v.length;
-		for(let i=0; i<n; ++i){
+		for(let i=0, n=v.length; i<n; ++i){
 			s += v[i];
 		}
 		return s;
@@ -23,9 +41,8 @@ _arr = {
 	},
 	dot: function(v1, v2){
 		let s = 0;
-		const n = v1.length;
-		for(let i=0; i<n; ++i){
-			s += v1[i]*v2[i];
+		for(let i=0, n=v1.length; i<n; ++i){
+			s += v1[i] * v2[i];
 		}
 		return s;
 	}

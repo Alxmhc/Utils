@@ -13,7 +13,7 @@ class pl{
 }
 pl.from_3p = function(a,b,c){
 	let n = vt3.pr(b.clone().sub(a), c.clone().sub(a));
-	_v.nrm_s(n);
+	nrm(n);
 	let p = a.dot(n);
 	if(p < 0){
 		p = -p;

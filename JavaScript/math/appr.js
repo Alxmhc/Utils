@@ -1,6 +1,6 @@
 //y=a+b*x
 function linapr(x,y){
-	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
+	let n=x.length, a=new vt3([n,0,0]), b=new vt3([0,0,0]);
 	for(;n;){
 		n--;
 		a.y += x[n];
@@ -14,7 +14,7 @@ function linapr(x,y){
 
 //y=a+b/x
 function gipapr(x,y){
-	let n=x.length, a=new vt3(n,0,0), b=new vt3(0,0,0);
+	let n=x.length, a=new vt3([n,0,0]), b=new vt3([0,0,0]);
 	for(;n;){
 		n--;
 		q = 1.0/x[n];
