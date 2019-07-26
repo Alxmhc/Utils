@@ -1,4 +1,4 @@
-long f_size(FILE *f)
+long int f_size(FILE *f)
 {
 	if(f == nullptr)
 		return -1;
@@ -6,7 +6,7 @@ long f_size(FILE *f)
 	return ftell(f);
 }
 
-long fsize(const char *fl)
+long int fsize(const char *fl)
 {
 	FILE *f = fopen(fl, "rb");
 	auto s = f_size(f);
