@@ -65,6 +65,14 @@ namespace conv
 		c = t;
 	}
 
+	template<char E, typename T>
+	void read(std::istream &s, T &c)
+	{
+		char t[sizeof(T)];
+		s.read(t, sizeof(T));
+		read<E>(reinterpret_cast<const uint8_t*>(t), c);
+	}
+
 	template<std::size_t SZ, char E>
 	void pack(const uint8_t *a, std::array<uint32_t, (SZ>>2)> &r)
 	{
