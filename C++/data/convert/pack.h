@@ -10,9 +10,9 @@ namespace endianness
 		const char a[4] = {1,2,3,4};
 		uint32_t t;
 		memcpy(&t, a, 4);
-		if(t == 67305985)
+		if(t == 0x04030201)
 			return LITTLE_ENDIAN;
-		if(t == 16909060)
+		if(t == 0x01020304)
 			return BIG_ENDIAN;
 		return UNKNOWN;
 	}
@@ -63,14 +63,6 @@ namespace conv
 		t = (t<<8) | a[2];
 		t = (t<<8) | a[3];
 		c = t;
-	}
-
-	template<char E, typename T>
-	void read(std::istream &s, T &c)
-	{
-		char t[sizeof(T)];
-		s.read(t, sizeof(T));
-		read<E>(reinterpret_cast<const uint8_t*>(t), c);
 	}
 
 	template<std::size_t SZ, char E>
