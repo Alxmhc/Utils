@@ -4,6 +4,6 @@ def get_hdr_size(frame):
 	return 8
 
 def get_src_port(data):
-	return (data[0]<<8) + data[1]
+	return int.from_bytes(data[0:2], byteorder='big')
 def get_dst_port(data):
-	return (data[2]<<8) + data[3]
+	return int.from_bytes(data[2:4], byteorder='big')

@@ -8,13 +8,13 @@ def get_hdr_size(frame):
 	return sz
 
 def get_src_port(data):
-	return (data[0]<<8) + data[1]
+	return int.from_bytes(data[0:2], byteorder='big')
 def get_dst_port(data):
-	return (data[2]<<8) + data[3]
+	return int.from_bytes(data[2:4], byteorder='big')
 def get_num(data):
-	return (data[4]<<24) + (data[5]<<16) + (data[6]<<8) + data[7]
+	return int.from_bytes(data[4:8], byteorder='big')
 def get_ack_num(data):
-	return (data[8]<<24) + (data[9]<<16) + (data[10]<<8) + data[11]
+	return int.from_bytes(data[8:12], byteorder='big')
 def is_urg(data):
 	return (data[13] & 0x20) != 0
 def is_ack(data):
@@ -28,4 +28,4 @@ def is_syn(data):
 def is_fin(data):
 	return (data[13] & 0x01) != 0
 def get_urgent(data):
-	return (data[18]<<8) + data[19]
+	return int.from_bytes(data[18:20], byteorder='big')

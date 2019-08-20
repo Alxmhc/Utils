@@ -8,4 +8,4 @@ def get_src(data):
 def get_dst(data):
 	return data[:6]
 def get_type(data):
-	return (data[12]<<8) + data[13]
+	return int.from_bytes(data[12:14], byteorder='big')
