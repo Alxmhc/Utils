@@ -27,6 +27,15 @@ namespace stream
 		v.resize(end + n);
 		d.read(reinterpret_cast<char*>(v.data() + end), n);
 	}
+
+	void copy_n(std::istream &in, std::size_t n, std::ostream &out)
+	{
+		while(n != 0)
+		{
+			--n;
+			out.put( in.get() );
+		}
+	}
 }
 
 class bitReader

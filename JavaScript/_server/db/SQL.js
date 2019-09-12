@@ -1,4 +1,4 @@
-module.exports =  {
+module.exports = {
 	insert: function(t, vl, nm = null){
 		let s = 'INSERT INTO '+t;
 		if(nm){
