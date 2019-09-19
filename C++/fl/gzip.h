@@ -3,6 +3,7 @@ namespace gzip
 	struct inf
 	{
 		std::string fname, comment;
+		uint32_t time;
 		uint8_t crc32[4];
 		uint32_t fsize;
 	};
@@ -17,7 +18,8 @@ namespace gzip
 		s.get(flg);
 		if(flg < 0 || flg > 31)
 			return 0;
-		s.seekg(6, std::ios_base::cur);
+		stream::read<endianness::LITTLE_ENDIAN>(s, res.time);
+		s.seekg(2, std::ios_base::cur);
 		if( (flg & 4) != 0 )
 		{
 			uint16_t sz;
