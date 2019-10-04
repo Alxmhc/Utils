@@ -6,6 +6,8 @@ protected:
 
 	bitReader(std::istream &d) : o(0), s(d)	{}
 public:
+	virtual uint_fast8_t read1() = 0;
+
 	template<char E, typename T>
 	void getB(T &c)
 	{

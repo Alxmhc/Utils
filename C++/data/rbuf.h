@@ -11,6 +11,7 @@ public:
 		offset = 0;
 		nul();
 	}
+
 	template<class C>
 	void process(const uint8_t *v, const std::size_t n, C &cl)
 	{
@@ -34,6 +35,33 @@ public:
 		offset = n - part;
 		std::copy_n(v + part, offset, d);
 	}
+	template<class C>
+	std::size_t process(std::istream &s, C &cl)
+	{
+		std::size_t r = 0;
+		if(offset != 0)
+		{
+			s.read(reinterpret_cast<char*>(d + offset), sz - offset);
+			if(!s)
+			{
+				r = s.gcount();
+				offset += r;
+				return r;
+			}
+			cl.process_block(d);
+			r = sz - offset;
+		}
+		s.read(reinterpret_cast<char*>(d), sz);
+		while(s)
+		{
+			r += sz;
+			cl.process_block(d);
+			s.read(reinterpret_cast<char*>(d), sz);
+		}
+		offset = s.gcount();
+		return r + offset;
+	}
+
 	template<class C>
 	void push(uint8_t c, C &cl)
 	{

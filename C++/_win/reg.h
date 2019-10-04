@@ -6,25 +6,27 @@ LSTATUS RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD res, LPDWORD type, LPBY
 
 namespace reg
 {
-	bool read(HKEY key, const std::string &path, const std::string &name, DWORD &val)
+	bool read(HKEY key, const char *path, const char *name, DWORD &val)
 	{
-		if(RegOpenKeyExA(key, path.c_str(), 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
+		if(RegOpenKeyExA(key, path, 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
 			return false;
 		DWORD size = sizeof(DWORD);
-		return RegQueryValueExA(key, name.c_str(), nullptr, nullptr, reinterpret_cast<LPBYTE>(&val), &size) == ERROR_SUCCESS;
+		auto t = RegQueryValueExA(key, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&val), &size);
+		return t == ERROR_SUCCESS;
 	}
 
-	bool read(HKEY key, const std::string &path, const std::string &name, std::string &val)
+	bool read(HKEY key, const char *path, const char *name, std::string &val)
 	{
-		if(RegOpenKeyExA(key, path.c_str(), 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
+		if(RegOpenKeyExA(key, path, 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
 			return false;
 		DWORD size = 0;
-		if(RegQueryValueExA(key, name.c_str(), nullptr, nullptr, nullptr, &size) != ERROR_SUCCESS)
+		if(RegQueryValueExA(key, name, nullptr, nullptr, nullptr, &size) != ERROR_SUCCESS)
 			return false;
-		char* r = new char[size];
-		RegQueryValueExA(key, name.c_str(), nullptr, nullptr, reinterpret_cast<LPBYTE>(r), &size);
-		val = std::string(r);
-		delete[] r;
+		val.resize(size);
+		auto t = RegQueryValueExA(key, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&val[0]), &size);
+		if(t != ERROR_SUCCESS)
+			return false;
+		val.pop_back();
 		return true;
 	}
 }

@@ -141,6 +141,10 @@ namespace hash
 			size += n;
 			buf.process(v, n, *this);
 		}
+		void Update(std::istream &s)
+		{
+			size += buf.process(s, *this);
+		}
 
 		void Final(std::array<uint8_t, hash_size> &r)
 		{
