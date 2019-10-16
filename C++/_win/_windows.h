@@ -1,5 +1,7 @@
 #include "windows.h"
 
+#undef GetEnvironmentStrings
+
 DWORD GetModuleFileName_(HMODULE hmd, LPSTR filename, DWORD sz){return GetModuleFileNameA(hmd, filename, sz);}
 DWORD GetModuleFileName_(HMODULE hmd, LPWSTR filename, DWORD sz){return GetModuleFileNameW(hmd, filename, sz);}
 
@@ -21,7 +23,6 @@ BOOL CreateDirectory_(LPCWSTR path, LPSECURITY_ATTRIBUTES attr){return CreateDir
 BOOL MoveFileEx_(LPCSTR old_path, LPCSTR new_path, DWORD flags){return MoveFileExA(old_path, new_path, flags);}
 BOOL MoveFileEx_(LPCWSTR old_path, LPCWSTR new_path, DWORD flags){return MoveFileExW(old_path, new_path, flags);}
 
-#undef GetEnvironmentStrings
 template<typename C> C* GetEnvironmentStrings_(){}
 template<> LPCH GetEnvironmentStrings_<char>(){return GetEnvironmentStrings();}
 template<> LPWCH GetEnvironmentStrings_<wchar_t>(){return GetEnvironmentStringsW();}
