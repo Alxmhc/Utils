@@ -27,7 +27,7 @@ class fl_s
 		HANDLE hf = FindFirstFile_(n.c_str(), &ffd);
 		if (hf == INVALID_HANDLE_VALUE)
 			return;
-		do{
+		do {
 			n = ffd.cFileName;
 			S pth = d + n;
 			if(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
@@ -48,7 +48,7 @@ class fl_s
 			{
 				r.push_back(pth);
 			}
-		}while (FindNextFile_(hf, &ffd)!=0);
+		} while ( FindNextFile_(hf, &ffd) );
 		FindClose(hf);
 	}
 public:
