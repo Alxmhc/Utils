@@ -7,7 +7,6 @@ game_field.prototype = {
 	crd: function(cr){
 		return this.f.crd_e(cr);
 	},
-
 	clear: function(){
 		this.f.clear();
 	},
@@ -24,9 +23,14 @@ game_field.prototype = {
 			this.f.fll(cr, o);
 		}
 	},
+
 	set_pos: function(p){
 		this.clear();
-		this.moves(p);
+		for(let k in p){
+			for(let cr of p[k]){
+				this.draw(cr, k);
+			}
+		}
 	},
 	//m - [[cr,o],...]
 	moves: function(m){
