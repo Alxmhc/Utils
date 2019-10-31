@@ -2,8 +2,8 @@ class cr_pl
 {
 public:
 	long double r, f;
-	cr_pl(void){r=0.0; f=0.0;}
-	cr_pl(long double s, long double a){r=s; f=a;}
+	cr_pl(void) : r(0.0), f(0.0) {}
+	cr_pl(long double s, long double a) : r(s), f(a) {}
 };
 
 long double abs(const cr_pl &c)

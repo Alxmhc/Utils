@@ -4,7 +4,7 @@ protected:
 	std::istream &s;
 	uint_fast8_t o, b;
 
-	bitReader(std::istream &d) : o(0), s(d)	{}
+	bitReader(std::istream &d) : s(d), o(0) {}
 public:
 	virtual uint_fast8_t read1() = 0;
 

@@ -1,11 +1,7 @@
 class cmpl : public vt2 {
 public:
 	explicit cmpl(long double a = 0.0, long double b = 0.0) : vt2(a,b) {}
-	cmpl(const vt2 &v)
-	{
-		x = v.x;
-		y = v.y;
-	}
+	cmpl(const vt2 &v) : vt2(v) {}
 
 	const cmpl& operator=(const vt2 &a)
 	{

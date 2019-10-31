@@ -8,7 +8,7 @@ class b_int
 		typedef uint64_t num2;
 		int2(num2 c)
 		{
-			l = c & static_cast<num>(-1);
+			l = static_cast<num>(c);
 			h = c >> SZ;
 		}
 
@@ -19,7 +19,7 @@ class b_int
 		}
 	public:
 		num l, h;
-		int2(num a, num b){l=a; h=b;}
+		int2(num a, num b) : l(a), h(b) {}
 		//a*b + c
 		static int2 mul_p(num a, num b, num c = 0)
 		{
@@ -57,10 +57,13 @@ class b_int
 
 	std::vector<num> n;
 public:
-	b_int(num c = 0){n.push_back(c);}
-	b_int(const std::string &str){n = hex::from_str<num>(str);}
+	b_int(num c = 0) : n(1, c) {}
+	b_int(const std::string &str)
+	{
+		n = hex::from_str<num>(str);
+	}
 
-	b_int operator=(num a)
+	const b_int& operator=(num a)
 	{
 		n = std::vector<num>(1, a);
 		return *this;
@@ -79,7 +82,7 @@ public:
 		return (n.size() == 1) && (n[0] == a);
 	}
 
-	b_int operator+=(num a)
+	const b_int& operator+=(num a)
 	{
 		n[0] += a;
 		if(n[0] < a)
@@ -100,7 +103,7 @@ public:
 		return *this;
 	}
 
-	b_int operator*=(num a)
+	const b_int& operator*=(num a)
 	{
 		if(*this == 0 || a == 1)
 			return *this;
@@ -110,7 +113,10 @@ public:
 			return *this;
 		}
 		std::size_t i = 0;
-		while(n[i] == 0){i++;}
+		while(n[i] == 0)
+		{
+			i++;
+		}
 		num d = 0;
 		for(auto sz = n.size(); i < sz; i++)
 		{
@@ -146,7 +152,7 @@ public:
 		return n == c.n;
 	}
 
-	b_int operator+=(const b_int &c)
+	const b_int& operator+=(const b_int &c)
 	{
 		auto csz = c.n.size();
 		if(csz == 1)
@@ -195,7 +201,7 @@ public:
 		return *this;
 	}
 
-	b_int operator*=(const b_int &c)
+	const b_int& operator*=(const b_int &c)
 	{
 		auto csz = c.n.size();
 		if(csz == 1)
@@ -247,7 +253,7 @@ public:
 		return int2::pw_m(operator%(a), p, a);
 	}
 
-	b_int operator>>=(num d)
+	const b_int& operator>>=(num d)
 	{
 		if(*this == 0)
 			return *this;
@@ -278,7 +284,7 @@ public:
 		return *this;
 	}
 
-	b_int operator<<=(num d)
+	const b_int& operator<<=(num d)
 	{
 		if(*this == 0)
 			return *this;
