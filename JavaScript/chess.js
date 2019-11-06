@@ -50,16 +50,17 @@ Chess.fen_to_pos = function(s){
 	return res;
 }
 
+Chess.pos_to_obj = function(p){
+	return vn2.from_pos(p, [8,8]);
+}
+
 Chess.obj_to_fen = function(o){
-	let res = "", t = 0;
+	let res = "";
 	for(let y=0; y<8; ++y){
 		if(y != 0){
-			if(t != 0){
-				res += t;
-				t = 0;
-			}
 			res += '/';
 		}
+		let t = 0;
 		const cx = o.getx(y);
 		for(c of cx){
 			if(c == 0){
@@ -72,11 +73,14 @@ Chess.obj_to_fen = function(o){
 			}
 			res += Chess.fen[c-1];
 		}
+		if(t != 0){
+			res += t;
+		}
 	}
 	return res;
 }
 
 Chess.pos_to_fen = function(p){
-	const o = vn2.from_pos(p, [8,8]);
+	const o = Chess.pos_to_obj(p);
 	return Chess.obj_to_fen(o);
 }
