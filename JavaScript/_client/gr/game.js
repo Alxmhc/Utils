@@ -1,7 +1,6 @@
 function game_field(fld, im){
 	this.f = fld;
 	this.im = im.slice();
-	this.im.unshift(null);
 }
 game_field.prototype = {
 	crd: function(cr){
@@ -11,15 +10,16 @@ game_field.prototype = {
 		this.f.clear();
 	},
 	draw: function(cr, n){
-		const o = this.im[n];
-		if(!o){
+		if(n === null){
 			this.f.del(cr);
-		}
-		else if(o instanceof HTMLImageElement){
+			return;
+		}		
+		const o = this.im[n];
+		if(o instanceof HTMLImageElement){
 			this.f.del(cr);
 			this.f.pct(cr, o);
 		}
-		else{
+		else if(typeof o === "string"){
 			this.f.fll(cr, o);
 		}
 	},

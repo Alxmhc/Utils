@@ -1,22 +1,14 @@
 template<typename T>
 const std::vector<T>& operator+=(std::vector<T> &v, const T &a)
 {
-	for(auto n = v.size(); n > 0;)
-	{
-		--n;
-		v[n] += a;
-	}
+	std::for_each(v.begin(), v.end(), [&](T &e){e += a;});
 	return v;
 }
 
 template<typename T>
 const std::vector<T>& operator-=(std::vector<T> &v, const T &a)
 {
-	for(auto n = v.size(); n > 0;)
-	{
-		--n;
-		v[n] -= a;
-	}
+	std::for_each(v.begin(), v.end(), [&](T &e){e -= a;});
 	return v;
 }
 
@@ -34,22 +26,14 @@ const std::vector<T>& operator*=(std::vector<T> &v, long double k)
 template<typename T>
 const std::vector<T>& operator+=(std::vector<T> &v, const std::vector<T> &a)
 {
-	for(auto n = v.size(); n > 0;)
-	{
-		--n;
-		v[n] += a[n];
-	}
+	std::transform(v.begin(), v.end(), a.cbegin(), v.begin(), [](T a, T b){return a + b;});
 	return v;
 }
 
 template<typename T>
 const std::vector<T>& operator-=(std::vector<T> &v, const std::vector<T> &a)
 {
-	for(auto n = v.size(); n > 0;)
-	{
-		--n;
-		v[n] -= a[n];
-	}
+	std::transform(v.begin(), v.end(), a.cbegin(), v.begin(), [](T a, T b){return a - b;});
 	return v;
 }
 

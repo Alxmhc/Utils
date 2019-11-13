@@ -4,12 +4,12 @@ class vn2{
 		this.e1 = sz[1];
 		if(m === undefined){
 			this.arr = new Array(sz[0]*sz[1]);
-			this.arr.fill(0);
 		}
 		else{
 			this.arr = m.slice();
 		}
 	}
+	fill(n){this.arr.fill(n);}
 	clone(){return new vn2([this.e0, this.e1], this.arr);}
 	_c(c){return c[0]+this.e0*c[1];}
 	get(c){return this.arr[this._c(c)];}
@@ -63,6 +63,7 @@ class vn2{
 }
 vn2.from_pos = function(p, sz){
 	let res = new vn2(sz);
+	res.fill(null);
 	for(let k in p){
 		for(let cr of p[k]){
 			res.set(cr, k);

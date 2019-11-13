@@ -1,25 +1,14 @@
 Chess = {}
 
-Chess.color = {
-	none: 0,
-	white: 1,
-	black: 2
-}
-Chess.type = {
-	none: 0,
-	pawn: 1,
-	rook: 2,
-	knight: 3,
-	bishop: 4,
-	queen: 5,
-	king: 6
-}
+Chess.color = ['white', 'black'];
+Chess.type = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
+
 Chess.inf = function(p){
-	if(p === 0)
-		return {color: 0, type: 0};
-	if(p < 7)
-		return {color: 1, type: p};
-	return {color: 2, type: p - 6};
+	if(p === null)
+		return null;
+	if(p < 6)
+		return {color: 0, type: p};
+	return {color: 1, type: p - 6};
 }
 
 Chess.fen = 'PRNBQKprnbqk'
@@ -33,8 +22,8 @@ Chess.fen_to_pos = function(s){
 			x = 0;
 			continue;
 		}
-		const e = Chess.fen.indexOf(c) + 1;
-		if(e == 0){
+		const e = Chess.fen.indexOf(c);
+		if(e === -1){
 			x += parseInt(c, 10);
 			continue;
 		}
@@ -63,7 +52,7 @@ Chess.obj_to_fen = function(o){
 		let t = 0;
 		const cx = o.getx(y);
 		for(c of cx){
-			if(c == 0){
+			if(c === null){
 				t++;
 				continue;
 			}
@@ -71,7 +60,7 @@ Chess.obj_to_fen = function(o){
 				res += t;
 				t = 0;
 			}
-			res += Chess.fen[c-1];
+			res += Chess.fen[c];
 		}
 		if(t != 0){
 			res += t;
