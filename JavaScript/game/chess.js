@@ -1,5 +1,5 @@
 Chess = {}
-
+Chess.sz = [8,8];
 Chess.color = ['white', 'black'];
 Chess.type = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king'];
 
@@ -39,19 +39,36 @@ Chess.fen_to_pos = function(s){
 	return res;
 }
 
-Chess.pos_to_obj = function(p){
-	return vn2.from_pos(p, [8,8]);
+Chess.fen_to_arr = function(s){
+	let res = new Array(Chess.sz[0]*Chess.sz[1]);
+	res.fill(null);
+	let k = 0;
+	for(let i=0, l=s.length; i<l; ++i){
+		const c = s[i];
+		if(c === '/')
+			continue;
+		const e = Chess.fen.indexOf(c);
+		if(e === -1){
+			k += parseInt(c, 10);
+			continue;
+		}
+		res[k] = e;
+		k++;
+	}
+	return res;
 }
 
-Chess.obj_to_fen = function(o){
-	let res = "";
-	for(let y=0; y<8; ++y){
+Chess.arr_to_fen = function(arr){
+	const sx = Chess.sz[0], sy = Chess.sz[1];
+	let res = "", k = 0;
+	for(let y=0; y<sy; ++y){
 		if(y != 0){
 			res += '/';
 		}
 		let t = 0;
-		const cx = o.getx(y);
-		for(c of cx){
+		for(let x=0; x<sx; ++x){
+			const c = arr[k];
+			k++;
 			if(c === null){
 				t++;
 				continue;
@@ -67,9 +84,4 @@ Chess.obj_to_fen = function(o){
 		}
 	}
 	return res;
-}
-
-Chess.pos_to_fen = function(p){
-	const o = Chess.pos_to_obj(p);
-	return Chess.obj_to_fen(o);
 }

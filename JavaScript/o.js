@@ -2,7 +2,6 @@ class object_pool{
 	constructor(f){
 		this.create = f;
 		this.o = [];
-		this.count = 0;
 	}
 	init(){
 		this.count = 0;

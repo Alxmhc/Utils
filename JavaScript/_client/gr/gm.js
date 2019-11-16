@@ -32,6 +32,19 @@ game_field.prototype = {
 			}
 		}
 	},
+	set_arr: function(arr, sz){
+		this.clear();
+		let k = 0;
+		for(let y = 0; y < sz[1]; ++y){
+			for(let x = 0; x < sz[0]; ++x){
+				const c = arr[k];
+				k++;
+				if(c === null)
+					continue;
+				this.draw([x,y], c);
+			}
+		}
+	},
 	//m - [[cr,o],...]
 	moves: function(m){
 		for(let v of m){

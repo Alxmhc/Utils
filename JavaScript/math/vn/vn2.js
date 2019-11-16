@@ -38,6 +38,7 @@ class vn2{
 			i += this.e0;
 		}
 	}
+	get_all(){return this.arr.slice();}
 	// down-right; k - shift up
 	diag1(k = 0){
 		let x, y;
@@ -47,7 +48,7 @@ class vn2{
 			r.push(this.arr[c]);
 			x++; y++;
 		}
-		return r
+		return r;
 	}
 	// down-left; k - shift up
 	diag2(k = 0){
@@ -58,16 +59,6 @@ class vn2{
 			r.push(this.arr[c]);
 			x--; y++;
 		}
-		return r
+		return r;
 	}
-}
-vn2.from_pos = function(p, sz){
-	let res = new vn2(sz);
-	res.fill(null);
-	for(let k in p){
-		for(let cr of p[k]){
-			res.set(cr, k);
-		}
-	}
-	return res;
 }
