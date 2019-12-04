@@ -17,6 +17,9 @@ HANDLE FindFirstFile_(LPCWSTR filename, LPWIN32_FIND_DATAW ffd){return FindFirst
 BOOL FindNextFile_(HANDLE hff, LPWIN32_FIND_DATAA ffd){return FindNextFileA(hff, ffd);}
 BOOL FindNextFile_(HANDLE hff, LPWIN32_FIND_DATAW ffd){return FindNextFileW(hff, ffd);}
 
+BOOL DeleteFile_(LPCWSTR filename){return DeleteFileW(filename);}
+BOOL DeleteFile_(LPCSTR filename){return DeleteFileA(filename);}
+
 BOOL CreateDirectory_(LPCSTR path, LPSECURITY_ATTRIBUTES attr){return CreateDirectoryA(path, attr);}
 BOOL CreateDirectory_(LPCWSTR path, LPSECURITY_ATTRIBUTES attr){return CreateDirectoryW(path, attr);}
 
