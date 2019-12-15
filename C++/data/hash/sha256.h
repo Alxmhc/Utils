@@ -118,6 +118,12 @@ namespace hash
 			Clear();
 			Init();
 		}
+		std::vector<uint8_t> Final()
+		{
+			std::array<uint8_t, hash_size> tmp;
+			Final(tmp);
+			return std::vector<uint8_t>(tmp.cbegin(), tmp.cend());
+		}
 	};
 
 	const uint32_t SHA256::K[64] = {

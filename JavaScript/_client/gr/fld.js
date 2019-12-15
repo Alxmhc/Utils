@@ -16,4 +16,7 @@ class fld_2d{
 		if(x){this.o.width = x;}
 		if(y){this.o.height = y;}
 	}
+	get size(){
+		return [this.o.width, this.o.height];
+	}
 }
