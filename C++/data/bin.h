@@ -15,24 +15,21 @@ uint8_t byte_rev[256] = {0x00,0x80,0x40,0xc0,0x20,0xa0,0x60,0xe0,0x10,0x90,0x50,
                          0x07,0x87,0x47,0xc7,0x27,0xa7,0x67,0xe7,0x17,0x97,0x57,0xd7,0x37,0xb7,0x77,0xf7,
                          0x0f,0x8f,0x4f,0xcf,0x2f,0xaf,0x6f,0xef,0x1f,0x9f,0x5f,0xdf,0x3f,0xbf,0x7f,0xff};
 
-namespace conv
+uint8_t bitRev(uint8_t c)
 {
-	uint8_t bitRev(uint8_t c)
-	{
-		return byte_rev[c];
-	}
+	return byte_rev[c];
+}
 
-	uint16_t bitRev(uint16_t c)
-	{
-		uint8_t a1 = c & 0xff;
-		uint8_t a2 = c >> 8;
-		return (bitRev(a1) << 8) | bitRev(a2);
-	}
+uint16_t bitRev(uint16_t c)
+{
+	uint8_t a1 = c & 0xff;
+	uint8_t a2 = c >> 8;
+	return (bitRev(a1) << 8) | bitRev(a2);
+}
 
-	uint32_t bitRev(uint32_t c)
-	{
-		uint16_t a1 = c & 0xffff;
-		uint16_t a2 = c >> 16;
-		return (bitRev(a1) << 16) | bitRev(a2);
-	}
+uint32_t bitRev(uint32_t c)
+{
+	uint16_t a1 = c & 0xffff;
+	uint16_t a2 = c >> 16;
+	return (bitRev(a1) << 16) | bitRev(a2);
 }

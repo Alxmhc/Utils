@@ -1,10 +1,8 @@
 namespace hash
 {
-	class SHA256
+	class SHA256 : public hash<32>
 	{
 		uint32_t st[8];
-		uint64_t size;
-
 		rbuf<64> buf;
 		std::array<uint32_t, 16> x;
 
@@ -70,8 +68,6 @@ namespace hash
 			x.fill(0);
 		}
 	public:
-		static const uint_fast16_t hash_size = 32;
-
 		void process_block(const uint8_t *v)
 		{
 			conv::pack<buf.sz, endianness::BIG_ENDIAN>(v, x);
@@ -117,12 +113,6 @@ namespace hash
 
 			Clear();
 			Init();
-		}
-		std::vector<uint8_t> Final()
-		{
-			std::array<uint8_t, hash_size> tmp;
-			Final(tmp);
-			return std::vector<uint8_t>(tmp.cbegin(), tmp.cend());
 		}
 	};
 

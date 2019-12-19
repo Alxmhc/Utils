@@ -14,10 +14,15 @@ public:
 		o = 0;
 		stream::read<E>(s, c);
 	}
-	void copyB(std::size_t n, std::ostream &out)
+	void readB(std::size_t n, std::ostream &out)
 	{
 		o = 0;
 		stream::copy_n(s, n, out);
+	}
+	std::vector<uint8_t> readB(std::size_t n)
+	{
+		o = 0;
+		return stream::read_vector(s, n);
 	}
 	void skipB(std::size_t n)
 	{

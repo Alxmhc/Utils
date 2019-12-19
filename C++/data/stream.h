@@ -13,6 +13,13 @@ namespace stream
 		return r;
 	}
 
+	std::vector<uint8_t> read_vector(std::istream &s, std::size_t n)
+	{
+		std::vector<uint8_t> res(n);
+		s.read(reinterpret_cast<char*>(res.data()), n);
+		return res;
+	}
+
 	template<char E, typename T>
 	void read(std::istream &s, T &c)
 	{
@@ -21,11 +28,11 @@ namespace stream
 		conv::read<E>(reinterpret_cast<const uint8_t*>(t), c);
 	}
 
-	void append(std::istream &d, std::vector<uint8_t> &v, std::size_t n)
+	void append(std::istream &s, std::vector<uint8_t> &v, std::size_t n)
 	{
 		auto end = v.size();
 		v.resize(end + n);
-		d.read(reinterpret_cast<char*>(v.data() + end), n);
+		s.read(reinterpret_cast<char*>(v.data() + end), n);
 	}
 
 	void copy_n(std::istream &in, std::size_t n, std::ostream &out)
