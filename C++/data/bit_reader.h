@@ -19,6 +19,11 @@ public:
 		o = 0;
 		stream::copy_n(s, n, out);
 	}
+	void readB(std::size_t n, std::vector<uint8_t> &out)
+	{
+		o = 0;
+		stream::append(s, out, n);
+	}
 	std::vector<uint8_t> readB(std::size_t n)
 	{
 		o = 0;

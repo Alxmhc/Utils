@@ -1,34 +1,30 @@
 namespace decode
 {
-	void unchunk(std::vector<uint8_t> &v)
+	std::vector<uint8_t> unchunk(const uint8_t *v, const std::size_t n)
 	{
-		auto n = v.size();
 		std::vector<uint8_t> r;
 		r.reserve(n);
-		for(size_t i=0, j=0; i<n; )
+		size_t i = 0;
+		while(i < n)
 		{
-			if(v[i] != '\r')
+			auto sz = strtoul(reinterpret_cast<const char*>(v + i), nullptr, 16);
+			if(sz == 0)
+				break;
+			while(v[i] != '\r')
 			{
 				i++;
-				continue;
 			}
-			v[i] = 0;
-			const char *c = reinterpret_cast<char*>(v.data()) + j;
-			auto sz = strtoul(c, nullptr, 16);
-			if(!sz)
-				break;
 			i += 2;
 			if(i + sz >= n)
 			{
-				r.insert(r.end(), v.cbegin() + i, v.cend());
+				r.insert(r.end(), v + i, v + n);
 				break;
 			}
-			r.insert(r.end(), v.cbegin() + i, v.cbegin() + i + sz);
+			r.insert(r.end(), v + i, v + i + sz);
 			i += sz + 2;
-			j = i;
 		}
-		v = r;
-		v.shrink_to_fit();
+		r.shrink_to_fit();
+		return r;
 	}
 
 	std::vector<uint8_t> URL(const std::string &s)
