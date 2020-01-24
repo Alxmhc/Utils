@@ -44,7 +44,7 @@ public:
 			s.read(reinterpret_cast<char*>(d + offset), sz - offset);
 			if(!s)
 			{
-				r = s.gcount();
+				r = static_cast<std::size_t>(s.gcount());
 				offset += r;
 				return r;
 			}
@@ -58,7 +58,7 @@ public:
 			cl.process_block(d);
 			s.read(reinterpret_cast<char*>(d), sz);
 		}
-		offset = s.gcount();
+		offset = static_cast<std::size_t>(s.gcount());
 		return r + offset;
 	}
 
