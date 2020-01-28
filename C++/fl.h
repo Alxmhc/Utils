@@ -1,45 +1,26 @@
-long int f_size(FILE *f)
-{
-	if(f == nullptr)
-		return -1;
-	fseek(f, 0, SEEK_END);
-	return ftell(f);
-}
-
-long int fsize(const char *fl)
-{
-	FILE *f = fopen(fl, "rb");
-	auto s = f_size(f);
-	if(s >= 0)
-	{
-		fclose(f);
-	}
-	return s;
-}
-
 std::vector<uint8_t> frd(const char *fl)
 {
 	std::vector<uint8_t> v;
-	FILE *f = fopen(fl, "rb");
-	auto s = f_size(f);
-	if(s < 0)
+	std::ifstream f(fl, std::ios_base::binary | std::ios_base::ate);
+	if(!f.is_open())
 		return v;
-	if(s > 0)
+	const std::size_t sz = f.tellg();
+	if(sz != 0)
 	{
-		fseek(f, 0, SEEK_SET);
-		v.resize(s);
-		fread(&v[0], s, 1, f);
+		v.resize(sz);
+		f.seekg(std::ios_base::beg);
+		f.read(reinterpret_cast<char*>(&v[0]), sz);
 	}
-	fclose(f);
+	f.close();
 	return v;
 }
 
-bool fwt(const char *fl, const uint8_t *v, const std::size_t n)
+bool fwt(const char *fl, const char *c, const std::size_t n)
 {
-	FILE *f = fopen(fl, "wb");
-	if(f == nullptr)
+	std::ofstream f(fl, std::ios_base::binary);
+	if(!f.is_open())
 		return false;
-	bool s = (fwrite(v, n, 1, f) == 1);
-	fclose(f);
-	return s;
+	f.write(c, n);
+	f.close();
+	return true;
 }
