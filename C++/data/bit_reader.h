@@ -1,10 +1,15 @@
 class bitReader
 {
-protected:
 	std::istream &s;
+protected:
 	uint_fast8_t o, b;
-
 	bitReader(std::istream &d) : s(d), o(0) {}
+
+	bool get(uint_fast8_t &b)
+	{
+		b = s.get();
+		return !s.fail();
+	}
 public:
 	virtual uint_fast8_t read1() = 0;
 
@@ -48,7 +53,7 @@ public:
 			o = (o + 1) & 7;
 			return r & 1;
 		}
-		b = s.get();
+		get(b);
 		o = 1;
 		return b >> 7;
 	}
@@ -90,7 +95,7 @@ public:
 			o = (o + 1) & 7;
 			return r & 1;
 		}
-		b = s.get();
+		get(b);
 		o = 1;
 		return b & 1;
 	}
