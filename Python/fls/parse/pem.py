@@ -3,17 +3,12 @@ import base64
 #text mode
 def read(fl):
 	str = ""
-	k = ""
-	for s in f:
-		if s.startswith("-----BEGIN "):
-			k = s[11:]
-			k = k[:k.index('-')]
-			continue
-		if not k:
-			continue
-		if s.startswith("-----END "):
-			yield [k, base64.b64decode(str)]
-			str = ""
-			k = ""
+	for s in fl:
+		if s.startswith("-----"):
+			if s.startswith("-----END "):
+				s = s[9:]
+				s = s[:s.index('-')]
+				yield [s, base64.b64decode(str)]
+				str = ""
 			continue
 		str += s.rstrip()

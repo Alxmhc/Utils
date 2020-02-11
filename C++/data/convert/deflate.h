@@ -164,11 +164,11 @@ namespace convert
 				const uint_fast16_t HLIT = brd.readBE(5) + 257;
 				const uint_fast8_t HDIST = brd.readBE(5) + 1;
 				const uint_fast8_t HCLEN = brd.readBE(4) + 4;
-				const uint_fast8_t csz = 19;
 
+				const uint_fast8_t csz = 19;
 				static const uint_fast8_t co[csz] = {16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15};
 				uint_fast8_t clen[csz] = {};
-				for(uint_fast8_t i = 0; i < HCLEN; ++i)
+				for(uint_fast8_t i = 0; i < HCLEN; i++)
 				{
 					const uint_fast8_t len = brd.readBE(3);
 					if(len == 0)
@@ -202,9 +202,9 @@ namespace convert
 		public:
 			Decoder() {}
 
-			std::vector<uint8_t> Convert(std::istream &s) const
+			void Convert(byteReader &br, std::ostream &r) const
 			{
-				bitReaderL brd(s);
+				bitReaderL brd(br);
 				std::vector<uint8_t> out;
 				for(;;)
 				{
@@ -227,7 +227,7 @@ namespace convert
 					if(isFin)
 						break;
 				}
-				return out;
+				r.write(reinterpret_cast<const char*>(out.data()), out.size());
 			}
 		};
 	}

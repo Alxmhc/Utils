@@ -16,8 +16,8 @@ func WriteFile(d io.Reader, fl string) error {
 	if err != nil {
 		return err
 	}
-	defer of.Close()
 	_, err = io.Copy(of, d)
+	of.Close()
 	return err
 }
 
@@ -26,7 +26,7 @@ func WriteFileB(d []byte, fl string) error {
 	if err != nil {
 		return err
 	}
-	defer of.Close()
 	of.Write(d)
+	of.Close()
 	return nil
 }

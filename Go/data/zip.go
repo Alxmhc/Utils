@@ -28,7 +28,7 @@ func Unzip(fl string, pth string) {
 		if err != nil {
 			continue
 		}
-		defer zfl.Close()
 		fls.WriteFile(zfl, fo)
+		zfl.Close()
 	}
 }

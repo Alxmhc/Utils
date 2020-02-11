@@ -1,15 +1,10 @@
 class bitReader
 {
-	std::istream &s;
 protected:
+	byteReader *r;
 	uint_fast8_t o, b;
-	bitReader(std::istream &d) : s(d), o(0) {}
 
-	bool get(uint_fast8_t &b)
-	{
-		b = s.get();
-		return !s.fail();
-	}
+	bitReader(byteReader &d) : r(&d), o(0) {}
 public:
 	virtual uint_fast8_t read1() = 0;
 
@@ -17,27 +12,21 @@ public:
 	void getB(T &c)
 	{
 		o = 0;
-		stream::read<E>(s, c);
+		r->getC<E>(c);
 	}
-	void readB(std::size_t n, std::ostream &out)
-	{
-		o = 0;
-		stream::copy_n(s, n, out);
-	}
+
 	void readB(std::size_t n, std::vector<uint8_t> &out)
 	{
 		o = 0;
-		stream::append(s, out, n);
+		const auto end = out.size();
+		out.resize(end + n);
+		r->read(out.data() + end, n);
 	}
-	std::vector<uint8_t> readB(std::size_t n)
-	{
-		o = 0;
-		return stream::read_vector(s, n);
-	}
+
 	void skipB(std::size_t n)
 	{
 		o = 0;
-		s.seekg(n, std::ios_base::cur);
+		r->skip(n);
 	}
 };
 
@@ -53,12 +42,12 @@ public:
 			o = (o + 1) & 7;
 			return r & 1;
 		}
-		get(b);
+		r->get(b);
 		o = 1;
 		return b >> 7;
 	}
 
-	bitReaderR(std::istream &d) : bitReader(d){}
+	bitReaderR(byteReader &d) : bitReader(d){}
 
 	uint_fast32_t readLE(uint_fast8_t n)
 	{
@@ -95,12 +84,12 @@ public:
 			o = (o + 1) & 7;
 			return r & 1;
 		}
-		get(b);
+		r->get(b);
 		o = 1;
 		return b & 1;
 	}
 
-	bitReaderL(std::istream &d) : bitReader(d){}
+	bitReaderL(byteReader &d) : bitReader(d){}
 
 	uint_fast32_t readLE(uint_fast8_t n)
 	{
