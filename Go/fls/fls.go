@@ -2,38 +2,33 @@ package fls
 
 import (
 	"io/ioutil"
-	"strings"
+	"path/filepath"
 )
 
-func dir_(d string, f func(string) bool, n int, is_dir bool) []string {
+func dirAll(d string, f func(string, bool) bool, n int) []string {
 	var res []string
-	fls,err := ioutil.ReadDir(d)
+	fls, err := ioutil.ReadDir(d)
 	if err != nil {
 		return res
 	}
-	for _,o := range fls {
-		pth := d + "/" + o.Name()
-		if o.IsDir() {
-			if is_dir && f(pth) {
-				res = append(res, pth)
-			}
-			if n != 0 {
-				tmp := dir_(pth, f, n-1, is_dir)
-				res = append(res, tmp...)
-			}
-		} else if !is_dir && f(pth) {
+	for _, o := range fls {
+		pth := filepath.Join(d, o.Name())
+		isDir := o.IsDir()
+		if f(pth, isDir) {
 			res = append(res, pth)
+		}
+		if isDir && n != 0 {
+			tmp := dirAll(pth, f, n-1)
+			res = append(res, tmp...)
 		}
 	}
 	return res
 }
 
 func DirFiles(d string, f func(string) bool, n int) []string {
-	d = strings.Replace(d, "\\", "/", -1)
-	return dir_(d, f, n, false)
+	return dirAll(d, func(pth string, isDir bool) bool { return !isDir && f(pth) }, n)
 }
 
 func DirFolders(d string, f func(string) bool, n int) []string {
-	d = strings.Replace(d, "\\", "/", -1)
-	return dir_(d, f, n, true)
+	return dirAll(d, func(pth string, isDir bool) bool { return isDir && f(pth) }, n)
 }

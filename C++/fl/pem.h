@@ -1,5 +1,3 @@
-#include <map>
-
 namespace pem
 {
 	std::map<std::string, std::vector<uint8_t>> read(byteReader &s)
