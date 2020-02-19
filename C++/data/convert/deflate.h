@@ -34,6 +34,8 @@ namespace convert
 				return sz;
 			}
 
+			static const uint_fast16_t mx_dist = 32768;
+
 			static uint_fast16_t get_dist(const uint_fast16_t c, bitReaderL &brd)
 			{
 				static const uint_fast16_t distT[30] = {1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577};
@@ -137,7 +139,9 @@ namespace convert
 				uint16_t sz;
 				brd.getB<endianness::LITTLE_ENDIAN>(sz);
 				brd.skipB(2);
-				brd.readB(sz, out);
+				const auto end = out.size();
+				out.resize(end + sz);
+				brd.readB(out.data() + end, sz);
 			}
 
 			static void inflate_fixed(bitReaderL &brd, std::vector<uint8_t> &out)
@@ -223,6 +227,12 @@ namespace convert
 						break;
 					default:
 						isFin = true;
+					}
+					if(out.size() > mx_dist)
+					{
+						std::size_t t = out.size() - mx_dist;
+						r.write(reinterpret_cast<const char*>(out.data()), t);
+						out.erase(out.begin(), out.begin() + t);
 					}
 					if(isFin)
 						break;

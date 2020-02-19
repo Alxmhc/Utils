@@ -15,12 +15,10 @@ public:
 		r->getC<E>(c);
 	}
 
-	void readB(std::size_t n, std::vector<uint8_t> &out)
+	void readB(uint8_t *v, std::size_t n)
 	{
 		o = 0;
-		const auto end = out.size();
-		out.resize(end + n);
-		r->read(out.data() + end, n);
+		r->read(v, n);
 	}
 
 	void skipB(std::size_t n)
