@@ -25,7 +25,7 @@ class binTree
 public:
 	binTree() : left(nullptr), right(nullptr), fin(false){}
 
-	binTree(binTree &&t) : left(t.left), right(t.right), fin(t.fin), val(t.val)
+	binTree(binTree &&t) : left(t.left), right(t.right), val(t.val), fin(t.fin)
 	{
 		t.left = nullptr;
 		t.right = nullptr;

@@ -17,7 +17,7 @@ namespace gzip
 			return res;
 		uint8_t flg;
 		s.get(flg);
-		if(flg < 0 || flg > 31)
+		if(flg > 31)
 			return res;
 		s.getC<endianness::LITTLE_ENDIAN>(res.time);
 		s.skip(2);
@@ -69,7 +69,7 @@ namespace gzip
 				uint32_t c = n;
 				for (uint_fast8_t k = 0; k < 8; k++)
 				{
-					if (c & 1 != 0)
+					if ((c & 1) != 0)
 					{
 						c = (c >> 1) ^ 0xedb88320;
 					}

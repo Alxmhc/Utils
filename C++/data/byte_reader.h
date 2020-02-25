@@ -78,7 +78,7 @@ public:
 class br_array : public byteReader
 {
 	const uint8_t *d;
-	std::size_t o, sz;
+	std::size_t sz, o;
 public:
 	br_array(const uint8_t *v, std::size_t size) : d(v), sz(size), o(0) {}
 
