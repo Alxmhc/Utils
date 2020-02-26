@@ -8,7 +8,7 @@ namespace hash
 	public:
 		static const uint_fast16_t hash_size = hsz;
 
-		virtual void Update(const uint8_t *v, const std::size_t n) = 0;
+		virtual void Update(byteReader &br) = 0;
 		virtual void Final(std::array<uint8_t, hsz>&) = 0;
 	};
 }

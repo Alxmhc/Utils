@@ -11,9 +11,9 @@ namespace gzip
 	{
 		inf res = {};
 
-		char hdr[3];
+		uint8_t hdr[3];
 		s.read(hdr, 3);
-		if(hdr[0] != '\x1f' || hdr[1] != '\x8b' || hdr[2] != '\x08')
+		if(hdr[0] != 0x1f || hdr[1] != 0x8b || hdr[2] != 0x08)
 			return res;
 		uint8_t flg;
 		s.get(flg);
@@ -24,20 +24,18 @@ namespace gzip
 		if( (flg & 4) != 0 )
 		{
 			uint16_t sz;
-			s.getC<endianness::LITTLE_ENDIAN>(sz);
+			if( !s.getC<endianness::LITTLE_ENDIAN>(sz) )
+				return res;
 			s.skip(sz);
 		}
-		std::string fname, comment;
 		if( (flg & 8) != 0 )
 		{
-			fname = s.read_string(0);
+			res.fname = s.read_string(0);
 		}
 		if( (flg & 16) != 0 )
 		{
-			comment = s.read_string(0);
+			res.comment = s.read_string(0);
 		}
-		res.fname = fname;
-		res.comment = comment;
 		if( (flg & 2) != 0 )
 		{
 			s.skip(2);

@@ -13,53 +13,31 @@ public:
 	}
 
 	template<class C>
-	void process(const uint8_t *v, const std::size_t n, C &cl)
-	{
-		if(n + offset < sz)
-		{
-			std::copy_n(v, n, d + offset);
-			offset += n;
-			return;
-		}
-		std::size_t part = 0;
-		if(offset != 0)
-		{
-			part = sz - offset;
-			std::copy_n(v, part, d + offset);
-			cl.process_block(d);
-		}
-		for (; part + sz <= n; part += sz)
-		{
-			cl.process_block(v + part);
-		}
-		offset = n - part;
-		std::copy_n(v + part, offset, d);
-	}
-	template<class C>
-	std::size_t process(std::istream &s, C &cl)
+	std::size_t process(byteReader &br, C &cl)
 	{
 		std::size_t r = 0;
 		if(offset != 0)
 		{
-			s.read(reinterpret_cast<char*>(d + offset), sz - offset);
-			if(!s)
+			r = sz - offset;
+			const auto rsz = br.read(d + offset, r);
+			if(rsz < r)
 			{
-				r = static_cast<std::size_t>(s.gcount());
-				offset += r;
+				offset += rsz;
+				return rsz;
+			}
+			cl.process_block(d);
+		}
+		for(;;)
+		{
+			const auto rsz = br.read(d, sz);
+			r += rsz;
+			if(rsz < sz)
+			{
+				offset = rsz;
 				return r;
 			}
 			cl.process_block(d);
-			r = sz - offset;
 		}
-		s.read(reinterpret_cast<char*>(d), sz);
-		while(s)
-		{
-			r += sz;
-			cl.process_block(d);
-			s.read(reinterpret_cast<char*>(d), sz);
-		}
-		offset = static_cast<std::size_t>(s.gcount());
-		return r + offset;
 	}
 
 	template<class C>

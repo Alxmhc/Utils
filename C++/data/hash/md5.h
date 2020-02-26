@@ -132,14 +132,9 @@ namespace hash
 			Init();
 		}
 
-		void Update(const uint8_t *v, const std::size_t n)
+		void Update(byteReader &br)
 		{
-			size += n;
-			buf.process(v, n, *this);
-		}
-		void Update(std::istream &s)
-		{
-			size += buf.process(s, *this);
+			size += buf.process(br, *this);
 		}
 
 		void Final(std::array<uint8_t, hash_size> &r)

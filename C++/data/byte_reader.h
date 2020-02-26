@@ -4,7 +4,6 @@ public:
 	virtual std::size_t get_pos() const = 0;
 	virtual void set_pos(int_fast32_t) = 0;
 
-	virtual std::size_t read(char*, std::size_t) = 0;
 	virtual std::size_t read(uint8_t*, std::size_t) = 0;
 
 	virtual bool get(uint8_t&) = 0;
@@ -57,14 +56,10 @@ public:
 		s.seekg(n, std::ios_base::cur);
 	}
 
-	std::size_t read(char *c, std::size_t n)
-	{
-		s.read(c, n);
-		return s.gcount();
-	}
 	std::size_t read(uint8_t *v, std::size_t n)
 	{
-		return read(reinterpret_cast<char*>(v), n);
+		s.read(reinterpret_cast<char*>(v), n);
+		return s.gcount();
 	}
 
 	std::string read_string(char e)
@@ -112,17 +107,10 @@ public:
 		o += n;
 	}
 
-	std::size_t read(char *c, std::size_t n)
-	{
-		return read(reinterpret_cast<uint8_t*>(c), n);
-	}
 	std::size_t read(uint8_t *v, std::size_t n)
 	{
-		if(n > sz - o)
-		{
-			n = sz - o;
-		}
-		memcpy(v, d + o, n);
+		n = std::min(n, sz - o);
+		std::copy_n(d + o, n, v);
 		o += n;
 		return n;
 	}
