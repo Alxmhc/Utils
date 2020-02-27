@@ -7,7 +7,7 @@ namespace gzip
 		std::size_t c_fsize;
 	};
 
-	inf read(byteReader &s)
+	inf read_inf(byteReader &s)
 	{
 		inf res = {};
 
