@@ -31,7 +31,7 @@ public:
 
 	std::size_t get_pos() const
 	{
-		return s.tellg();
+		return static_cast<std::size_t>(s.tellg());
 	}
 	void set_pos(int_fast32_t p)
 	{
@@ -59,7 +59,7 @@ public:
 	std::size_t read(uint8_t *v, std::size_t n)
 	{
 		s.read(reinterpret_cast<char*>(v), n);
-		return s.gcount();
+		return static_cast<std::size_t>(s.gcount());
 	}
 
 	std::string read_string(char e)

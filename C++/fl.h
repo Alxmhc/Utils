@@ -4,7 +4,7 @@ std::vector<uint8_t> frd(const char *fl)
 	std::ifstream f(fl, std::ios_base::binary | std::ios_base::ate);
 	if(!f.is_open())
 		return v;
-	const std::size_t sz = f.tellg();
+	const std::size_t sz = static_cast<std::size_t>(f.tellg());
 	if(sz != 0)
 	{
 		v.resize(sz);

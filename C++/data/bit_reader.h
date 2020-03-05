@@ -36,9 +36,9 @@ public:
 	{
 		if(o != 0)
 		{
-			uint_fast8_t r = b >> (7 - o);
+			uint_fast8_t rs = b >> (7 - o);
 			o = (o + 1) & 7;
-			return r & 1;
+			return rs & 1;
 		}
 		r->get(b);
 		o = 1;
@@ -49,24 +49,24 @@ public:
 
 	uint_fast32_t readLE(uint_fast8_t n)
 	{
-		uint_fast32_t r = 0;
-		for(uint_fast8_t i=0; i<n; ++i)
+		uint_fast32_t rs = 0;
+		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			auto c = read1();
-			r |= c << i;
+			rs |= c << i;
 		}
-		return r;
+		return rs;
 	}
 
 	uint_fast32_t readBE(uint_fast8_t n)
 	{
-		uint_fast32_t r = 0;
-		for(uint_fast8_t i=0; i<n; ++i)
+		uint_fast32_t rs = 0;
+		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			auto c = read1();
-			r = (r<<1) | c;
+			rs = (rs<<1) | c;
 		}
-		return r;
+		return rs;
 	}
 };
 
@@ -78,9 +78,9 @@ public:
 	{
 		if(o != 0)
 		{
-			uint_fast8_t r = b >> o;
+			uint_fast8_t rs = b >> o;
 			o = (o + 1) & 7;
-			return r & 1;
+			return rs & 1;
 		}
 		r->get(b);
 		o = 1;
@@ -91,23 +91,23 @@ public:
 
 	uint_fast32_t readLE(uint_fast8_t n)
 	{
-		uint_fast32_t r = 0;
-		for(uint_fast8_t i=0; i<n; ++i)
+		uint_fast32_t rs = 0;
+		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			auto c = read1();
-			r = (r<<1) | c;
+			rs = (rs<<1) | c;
 		}
-		return r;
+		return rs;
 	}
 
 	uint_fast32_t readBE(uint_fast8_t n)
 	{
-		uint_fast32_t r = 0;
-		for(uint_fast8_t i=0; i<n; ++i)
+		uint_fast32_t rs = 0;
+		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			auto c = read1();
-			r |= c << i;
+			rs |= c << i;
 		}
-		return r;
+		return rs;
 	}
 };

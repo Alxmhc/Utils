@@ -1,3 +1,17 @@
+void LZSS_repeat(uint_fast16_t sz, uint_fast16_t dist, std::vector<uint8_t> &out)
+{
+	std::size_t osz = out.size();
+	out.resize(osz + sz);
+	std::size_t n = osz - dist;
+	while(sz > dist)
+	{
+		std::copy_n(out.begin() + n, dist, out.begin() + osz);
+		osz += dist;
+		sz -= dist;
+	}
+	std::copy_n(out.begin() + n, sz, out.begin() + osz);
+}
+
 namespace convert
 {
 	namespace deflate
@@ -50,52 +64,7 @@ namespace convert
 				return dist;
 			}
 
-			static void repeat(uint_fast16_t sz, uint_fast16_t dist, std::vector<uint8_t> &out)
-			{
-				std::size_t osz = out.size();
-				out.resize(osz + sz);
-				std::size_t n = osz - dist;
-				while(sz > dist)
-				{
-					std::copy_n(out.begin() + n, dist, out.begin() + osz);
-					osz += dist;
-					sz -= dist;
-				}
-				std::copy_n(out.begin() + n, sz, out.begin() + osz);
-			}
-
-			template<typename T>
-			static binTree<T> buildTree(T *m, T n)
-			{
-				typedef std::pair<uint_fast16_t, uint_fast16_t> pr;
-				std::vector<pr> tmp(n);
-				T sz = 0;
-				for(T i = 0; i < n; ++i)
-				{
-					if(m[i] == 0)
-						continue;
-					tmp[sz].first = i;
-					tmp[sz].second = m[i];
-					sz++;
-				}
-				std::sort(tmp.begin(), tmp.begin() + sz, [](const pr &a, const pr &b){return a.second == b.second ? a.first < b.first : a.second < b.second;});
-
-				binTree<T> t;
-				for(T i = 0, k = 0, p = 0; i < sz; ++i)
-				{
-					const T s = tmp[i].second;
-					if(p != s)
-					{
-						k <<= s - p;
-						p = s;
-					}
-					t.add(k, s, tmp[i].first);
-					k++;
-				}
-				return t;
-			}
-
-			static std::vector<uint_fast16_t> decode(const binTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd)
+			static std::vector<uint_fast16_t> decode(const huffmanTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd)
 			{
 				std::vector<uint_fast16_t> res(ncode);
 				uint_fast16_t n = 0, o = 0;
@@ -159,7 +128,7 @@ namespace convert
 					uint_fast16_t sz = get_size(c & 0xff, brd);
 					c = brd.readLE(5);
 					uint_fast16_t dist = get_dist(c, brd);
-					repeat(sz, dist, out);
+					LZSS_repeat(sz, dist, out);
 				}
 			}
 
@@ -179,11 +148,11 @@ namespace convert
 						continue;
 					clen[ co[i] ] = len;
 				}
-				auto codes = buildTree<uint_fast8_t>(clen, csz);
+				huffmanTree<uint_fast8_t> codes(clen, csz);
 
 				auto vcodes = decode(codes, HLIT + HDIST, brd);
-				auto hlit = buildTree<uint_fast16_t>(vcodes.data(), HLIT);
-				auto hdist = buildTree<uint_fast16_t>(vcodes.data() + HLIT, HDIST);
+				huffmanTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
+				huffmanTree<uint_fast16_t> hdist(vcodes.data() + HLIT, HDIST);
 
 				uint_fast16_t c;
 				while( hlit.find(brd, c) )
@@ -199,7 +168,7 @@ namespace convert
 					uint_fast16_t sz = get_size(c & 0xff, brd);
 					hdist.find(brd, c);
 					uint_fast16_t dist = get_dist(c, brd);
-					repeat(sz, dist, out);
+					LZSS_repeat(sz, dist, out);
 				}
 			}
 

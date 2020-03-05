@@ -5,23 +5,6 @@ class binTree
 	T val;
 	bool fin;
 
-	binTree* get_left()
-	{
-		if(left == nullptr)
-		{
-			left = new binTree();
-		}
-		return left;
-	}
-	binTree* get_right()
-	{
-		if(right == nullptr)
-		{
-			right = new binTree();
-		}
-		return right;
-	}
-
 public:
 	binTree() : left(nullptr), right(nullptr), fin(false){}
 
@@ -44,8 +27,23 @@ public:
 		while(f != 0)
 		{
 			const auto c = n & f;
+			if(c == 0)
+			{
+				if(a->left == nullptr)
+				{
+					a->left = new binTree();
+				}
+				a = a->left;
+			}
+			else
+			{
+				if(a->right == nullptr)
+				{
+					a->right = new binTree();
+				}
+				a = a->right;
+			}
 			f >>= 1;
-			a = c == 0 ? a->get_left() : a->get_right();
 		}
 		a->val = c;
 		a->fin = true;
