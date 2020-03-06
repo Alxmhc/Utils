@@ -64,7 +64,7 @@ namespace fl_pr
 		public:
 			CRC32() : crc(0xffffffff)
 			{
-				uint_fast8_t n = 0;
+				uint8_t n = 0;
 				do {
 					n--;
 					uint32_t c = n;
@@ -83,11 +83,12 @@ namespace fl_pr
 				} while(n != 0);
 			}
 
-			void Update(const uint8_t *v, const std::size_t n)
+			void Update(byteReader &br)
 			{
-				for(std::size_t i = 0; i < n; i++)
+				uint8_t c;
+				while(br.get(c))
 				{
-					crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
+					crc = tbl[(crc & 0xff) ^ c] ^ (crc >> 8);
 				}
 			}
 
