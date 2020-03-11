@@ -1,4 +1,4 @@
-void LZSS_repeat(uint_fast16_t sz, uint_fast16_t dist, std::vector<uint8_t> &out)
+void LZ77_repeat(uint_fast16_t sz, uint_fast16_t dist, std::vector<uint8_t> &out)
 {
 	std::size_t osz = out.size();
 	out.resize(osz + sz);
@@ -128,7 +128,7 @@ namespace convert
 					uint_fast16_t sz = get_size(c & 0xff, brd);
 					c = brd.readLE(5);
 					uint_fast16_t dist = get_dist(c, brd);
-					LZSS_repeat(sz, dist, out);
+					LZ77_repeat(sz, dist, out);
 				}
 			}
 
@@ -168,7 +168,7 @@ namespace convert
 					uint_fast16_t sz = get_size(c & 0xff, brd);
 					hdist.find(brd, c);
 					uint_fast16_t dist = get_dist(c, brd);
-					LZSS_repeat(sz, dist, out);
+					LZ77_repeat(sz, dist, out);
 				}
 			}
 

@@ -5,8 +5,8 @@ namespace fl_pr
 		struct inf
 		{
 			std::string fname, comment;
-			uint32_t time, fsize, crc32;
-			std::size_t c_fsize;
+			uint32_t fsize, crc32;
+			std::size_t f_size, f_pos;
 		};
 
 		inf read_inf(byteReader &s)
@@ -22,8 +22,7 @@ namespace fl_pr
 			s.get(flg);
 			if(flg > 31)
 				return res;
-			s.getC<endianness::LITTLE_ENDIAN>(res.time);
-			s.skip(2);
+			s.skip(6);
 			if( (flg & 4) != 0 )
 			{
 				uint16_t sz;
@@ -49,7 +48,8 @@ namespace fl_pr
 			const auto end = s.get_pos();
 			if(st >= end)
 				return res;
-			res.c_fsize = end - st;
+			res.f_pos = st;
+			res.f_size = end - st;
 			s.getC<endianness::LITTLE_ENDIAN>(res.crc32);
 			s.getC<endianness::LITTLE_ENDIAN>(res.fsize);
 			s.set_pos(st);
@@ -57,11 +57,13 @@ namespace fl_pr
 		}
 
 		//rfc 1952
-		class CRC32
+		class CRC32 : public hash::hash
 		{
 			uint32_t tbl[256];
 			uint32_t crc;
 		public:
+			static const uint_fast8_t hash_size = 4;
+
 			CRC32() : crc(0xffffffff)
 			{
 				uint8_t n = 0;
@@ -83,12 +85,11 @@ namespace fl_pr
 				} while(n != 0);
 			}
 
-			void Update(byteReader &br)
+			void Update(const uint8_t *v, const std::size_t n)
 			{
-				uint8_t c;
-				while(br.get(c))
+				for(std::size_t i = 0; i < n; i++)
 				{
-					crc = tbl[(crc & 0xff) ^ c] ^ (crc >> 8);
+					crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
 				}
 			}
 

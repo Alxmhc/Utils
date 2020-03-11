@@ -6,9 +6,9 @@ namespace fl_pr
 		{
 			bool is_encrypted;
 			std::string fname;
-			uint16_t c_method;
+			uint16_t method;
 			uint32_t fsize, crc32;
-			std::size_t c_fsize, offset;
+			std::size_t f_size, f_pos;
 			std::vector<uint8_t> ext;
 		};
 
@@ -27,10 +27,10 @@ namespace fl_pr
 					uint16_t flg;
 					s.getC<endianness::LITTLE_ENDIAN>(flg);
 					r.is_encrypted = (flg & 1) != 0;
-					s.getC<endianness::LITTLE_ENDIAN>(r.c_method);
+					s.getC<endianness::LITTLE_ENDIAN>(r.method);
 					s.skip(4);
 					s.getC<endianness::LITTLE_ENDIAN>(r.crc32);
-					s.getC<endianness::LITTLE_ENDIAN>(r.c_fsize);
+					s.getC<endianness::LITTLE_ENDIAN>(r.f_size);
 					s.getC<endianness::LITTLE_ENDIAN>(r.fsize);
 					uint16_t szfn, szex;
 					s.getC<endianness::LITTLE_ENDIAN>(szfn);
@@ -42,9 +42,9 @@ namespace fl_pr
 						r.ext.resize(szex);
 						s.read(r.ext.data(), szex);
 					}
-					r.offset = s.get_pos();
+					r.f_pos = s.get_pos();
 					res.push_back(r);
-					s.skip(r.c_fsize);
+					s.skip(r.f_size);
 				}
 				else
 					return res;

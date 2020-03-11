@@ -13,31 +13,27 @@ public:
 	}
 
 	template<class C>
-	std::size_t process(byteReader &br, C &cl)
+	void process(const uint8_t *v, const std::size_t n, C &cl)
 	{
-		std::size_t r = 0;
+		if(n < sz - offset)
+		{
+			std::copy_n(v, n, d + offset);
+			offset += n;
+			return;
+		}
+		std::size_t part = 0;
 		if(offset != 0)
 		{
-			r = sz - offset;
-			const auto rsz = br.read(d + offset, r);
-			if(rsz < r)
-			{
-				offset += rsz;
-				return rsz;
-			}
+			part = sz - offset;
+			std::copy_n(v, part, d + offset);
 			cl.process_block(d);
 		}
-		for(;;)
+		for (; part + sz <= n; part += sz)
 		{
-			const auto rsz = br.read(d, sz);
-			r += rsz;
-			if(rsz < sz)
-			{
-				offset = rsz;
-				return r;
-			}
-			cl.process_block(d);
+			cl.process_block(v + part);
 		}
+		offset = n - part;
+		std::copy_n(v + part, offset, d);
 	}
 
 	template<class C>

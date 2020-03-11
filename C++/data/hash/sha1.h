@@ -1,7 +1,8 @@
 namespace hash
 {
-	class SHA1 : public hash<20>
+	class SHA1 : public hash
 	{
+		uint64_t size;
 		uint32_t st[5];
 		rbuf<64> buf;
 		std::array<uint32_t, 16> x;
@@ -66,6 +67,8 @@ namespace hash
 			x.fill(0);
 		}
 	public:
+		static const uint_fast8_t hash_size = 20;
+
 		void process_block(const uint8_t *v)
 		{
 			conv::pack<buf.sz, endianness::BIG_ENDIAN>(v, x);
@@ -77,9 +80,10 @@ namespace hash
 			Init();
 		}
 
-		void Update(byteReader &br)
+		void Update(const uint8_t *v, const std::size_t n)
 		{
-			size += buf.process(br, *this);
+			buf.process(v, n, *this);
+			size += n;
 		}
 
 		void Final(std::array<uint8_t, hash_size> &r)
