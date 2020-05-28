@@ -6,6 +6,15 @@ public:
 
 	virtual std::size_t read(uint8_t*, std::size_t) = 0;
 
+	std::size_t read(std::vector<uint8_t> &v, std::size_t n)
+	{
+		if(n == 0)
+			return 0;
+		auto sz = v.size();
+		v.resize(sz + n);
+		return read(&v[sz], n);
+	}
+
 	virtual bool get(uint8_t&) = 0;
 	virtual void skip(std::size_t) = 0;
 	virtual std::string read_string(char) = 0;
