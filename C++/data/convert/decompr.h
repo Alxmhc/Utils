@@ -1,4 +1,4 @@
-void LZ77_repeat(uint_fast16_t sz, uint_fast16_t dist, std::vector<uint8_t> &out)
+void LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 {
 	std::size_t osz = out.size();
 	out.resize(osz + sz);
