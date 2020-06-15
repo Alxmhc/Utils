@@ -30,7 +30,7 @@ namespace convert
 				while(br.get(b))
 				{
 					std::size_t size = get_size(br, b >> 4);
-					if(br.read(out, size) < size)
+					if(br.read_v(out, size) < size)
 						break;
 					uint16_t offset;
 					if(!br.getC<endianness::LITTLE_ENDIAN>(offset))

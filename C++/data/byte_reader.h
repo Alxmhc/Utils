@@ -6,7 +6,7 @@ public:
 
 	virtual std::size_t read(uint8_t*, std::size_t) = 0;
 
-	std::size_t read(std::vector<uint8_t> &v, std::size_t n)
+	std::size_t read_v(std::vector<uint8_t> &v, std::size_t n)
 	{
 		if(n == 0)
 			return 0;

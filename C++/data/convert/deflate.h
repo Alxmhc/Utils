@@ -36,7 +36,7 @@ namespace convert
 
 			static const uint_fast16_t mx_dist = 32768;
 
-			static uint_fast16_t get_dist(const uint_fast16_t c, bitReaderL &brd)
+			static uint_fast16_t get_dist(const uint_fast8_t c, bitReaderL &brd)
 			{
 				static const uint_fast16_t distT[30] = {1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577};
 				static const uint_fast8_t dist_exT[30] = {0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13};
