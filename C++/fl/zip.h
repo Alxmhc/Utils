@@ -2,14 +2,30 @@ namespace fl_pr
 {
 	namespace zip
 	{
+		enum comprType
+		{
+			Deflate   =   8,
+			Deflate64 =   9,
+			BZIP2     =  12,
+			LZMA      =  14,
+			PPMd      =  98
+		};
+		enum encrType
+		{
+			NO       =  0,
+			UNKNOWN  =  1,
+			AES128   =  2,
+			AES192   =  3,
+			AES256   =  4
+		};
+
 		struct inf
 		{
-			bool is_encrypted;
+			uint_fast8_t encryption;
 			std::string fname;
 			uint16_t method;
 			uint32_t fsize, crc32;
 			std::size_t f_size, f_pos;
-			std::vector<uint8_t> ext;
 		};
 
 		std::vector<inf> read_inf(byteReader &s)
@@ -26,7 +42,7 @@ namespace fl_pr
 					s.skip(2);
 					uint16_t flg;
 					s.getC<endianness::LITTLE_ENDIAN>(flg);
-					r.is_encrypted = (flg & 1) != 0;
+					r.encryption = flg & 1;
 					s.getC<endianness::LITTLE_ENDIAN>(r.method);
 					s.skip(4);
 					s.getC<endianness::LITTLE_ENDIAN>(r.crc32);
@@ -39,8 +55,13 @@ namespace fl_pr
 					s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
 					if(szex != 0)
 					{
-						r.ext.resize(szex);
-						s.read(r.ext.data(), szex);
+						std::vector<uint8_t> ext(szex);
+						s.read(ext.data(), szex);
+						if(r.method == 99)
+						{
+							r.encryption = ext[8] + 1;
+							r.method = ext[9] | (ext[10]<<8);
+						}
 					}
 					r.f_pos = s.get_pos();
 					res.push_back(r);

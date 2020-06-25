@@ -79,6 +79,13 @@ public:
 	}
 };
 
+class br_fstream : public br_stream
+{
+	std::ifstream fst;
+public:
+	br_fstream(const char *fl) : br_stream(fst), fst(fl, std::ios_base::binary) {}
+};
+
 class br_array : public byteReader
 {
 	const uint8_t *d;
