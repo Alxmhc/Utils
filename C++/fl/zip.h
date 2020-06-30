@@ -2,22 +2,29 @@ namespace fl_pr
 {
 	namespace zip
 	{
-		enum comprType
+		namespace comprType
 		{
-			Deflate   =   8,
-			Deflate64 =   9,
-			BZIP2     =  12,
-			LZMA      =  14,
-			PPMd      =  98
-		};
-		enum encrType
+			enum
+			{
+				NO        =   0,
+				Deflate   =   8,
+				Deflate64 =   9,
+				BZIP2     =  12,
+				LZMA      =  14,
+				PPMd      =  98
+			};
+		}
+		namespace encrType
 		{
-			NO       =  0,
-			UNKNOWN  =  1,
-			AES128   =  2,
-			AES192   =  3,
-			AES256   =  4
-		};
+			enum
+			{
+				NO       =  0,
+				UNKNOWN  =  1,
+				AES128   =  2,
+				AES192   =  3,
+				AES256   =  4
+			};
+		}
 
 		struct inf
 		{
@@ -25,7 +32,7 @@ namespace fl_pr
 			std::string fname;
 			uint16_t method;
 			uint32_t fsize, crc32;
-			std::size_t f_size, f_pos;
+			fl_inf f_inf;
 		};
 
 		std::vector<inf> read_inf(byteReader &s)
@@ -46,7 +53,8 @@ namespace fl_pr
 					s.getC<endianness::LITTLE_ENDIAN>(r.method);
 					s.skip(4);
 					s.getC<endianness::LITTLE_ENDIAN>(r.crc32);
-					s.getC<endianness::LITTLE_ENDIAN>(r.f_size);
+					uint32_t sz;
+					s.getC<endianness::LITTLE_ENDIAN>(sz);
 					s.getC<endianness::LITTLE_ENDIAN>(r.fsize);
 					uint16_t szfn, szex;
 					s.getC<endianness::LITTLE_ENDIAN>(szfn);
@@ -63,9 +71,12 @@ namespace fl_pr
 							r.method = ext[9] | (ext[10]<<8);
 						}
 					}
-					r.f_pos = s.get_pos();
+					if(sz == 0)
+						continue;
+					r.f_inf.pos = s.get_pos();
+					r.f_inf.size = sz;
+					s.skip(sz);
 					res.push_back(r);
-					s.skip(r.f_size);
 				}
 				else
 					return res;

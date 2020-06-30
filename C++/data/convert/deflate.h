@@ -161,7 +161,7 @@ namespace convert
 		public:
 			Decoder() {}
 
-			void Convert(byteReader &br, std::ostream &r) const
+			static void Convert(byteReader &br, std::ostream &r)
 			{
 				bitReaderL brd(br);
 				std::vector<uint8_t> out;

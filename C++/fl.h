@@ -29,3 +29,8 @@ bool fwt(const char *fl, const uint8_t *v, const std::size_t n)
 {
 	return fwt(fl, reinterpret_cast<const char*>(v), n);
 }
+
+struct fl_inf
+{
+	std::size_t size, pos;
+};
