@@ -17,8 +17,7 @@ namespace fl_pr
 		}
 		void Unpack(const char* f_in, const char* f_out)
 		{
-			std::ifstream fl(f_in, std::ios_base::binary);
-			br_stream br(fl);
+			br_fstream br(f_in);
 			auto size = read_size(br);
 			if(size == 0)
 				return;
