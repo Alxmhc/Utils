@@ -1,6 +1,6 @@
 namespace hash
 {
-	class SHA256 : public hash
+	class SHA256
 	{
 		uint64_t size;
 		uint32_t st[8];
@@ -88,7 +88,7 @@ namespace hash
 			size += n;
 		}
 
-		void Final(std::array<uint8_t, hash_size> &r)
+		void Final(uint8_t *r)
 		{
 			buf.push(0x80, *this);
 			if(buf.size() != 0)

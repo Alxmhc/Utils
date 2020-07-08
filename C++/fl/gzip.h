@@ -1,11 +1,12 @@
 namespace fl_pr
 {
-	namespace gzip
+	namespace F_gzip
 	{
 		struct inf
 		{
 			std::string fname, comment;
-			uint32_t fsize, crc32;
+			uint32_t fsize;
+			uint8_t crc32[4];
 			fl_inf f_inf;
 		};
 
@@ -50,14 +51,13 @@ namespace fl_pr
 				return res;
 			res.f_inf.pos = st;
 			res.f_inf.size = end - st;
-			s.getC<endianness::LITTLE_ENDIAN>(res.crc32);
+			s.read(res.crc32, 4);
 			s.getC<endianness::LITTLE_ENDIAN>(res.fsize);
-			s.set_pos(st);
 			return res;
 		}
 
 		//rfc 1952
-		class CRC32 : public hash::hash
+		class CRC32
 		{
 			uint32_t tbl[256];
 			uint32_t crc;
@@ -93,11 +93,11 @@ namespace fl_pr
 				}
 			}
 
-			uint32_t Final()
+			void Final(uint8_t *r)
 			{
 				auto res = ~crc;
 				crc = 0xffffffff;
-				return res;
+				conv::unpack_le<1>(&res, r);
 			}
 		};
 	}

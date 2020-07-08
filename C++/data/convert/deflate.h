@@ -161,7 +161,7 @@ namespace convert
 		public:
 			Decoder() {}
 
-			static void Convert(byteReader &br, std::ostream &r)
+			static void Convert(byteReader &br, byteWriter &bw)
 			{
 				bitReaderL brd(br);
 				std::vector<uint8_t> out;
@@ -186,13 +186,13 @@ namespace convert
 					if(out.size() > mx_dist)
 					{
 						std::size_t t = out.size() - mx_dist;
-						r.write(reinterpret_cast<const char*>(out.data()), t);
+						bw.write(out.data(), t);
 						out.erase(out.begin(), out.begin() + t);
 					}
 					if(isFin)
 						break;
 				}
-				r.write(reinterpret_cast<const char*>(out.data()), out.size());
+				bw.write(out.data(), out.size());
 			}
 		};
 	}

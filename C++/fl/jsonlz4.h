@@ -1,6 +1,6 @@
 namespace fl_pr
 {
-	namespace jsonlz4
+	namespace F_jsonlz4
 	{
 		const uint_fast8_t offset = 12;
 		uint32_t read_size(byteReader &s)

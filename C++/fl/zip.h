@@ -1,6 +1,6 @@
 namespace fl_pr
 {
-	namespace zip
+	namespace F_zip
 	{
 		namespace comprType
 		{
