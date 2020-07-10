@@ -71,7 +71,7 @@ namespace fl_pr
 							r.method = ext[9] | (ext[10]<<8);
 						}
 					}
-					if(sz == 0)
+					if(r.fname[szfn-1] == '/') //folder
 						continue;
 					r.f_inf.pos = s.get_pos();
 					r.f_inf.size = sz;

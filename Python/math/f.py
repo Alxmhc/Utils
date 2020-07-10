@@ -9,3 +9,23 @@ def is_sqr(c):
 		return False
 	t = math.isqrt(c)
 	return c == t * t
+
+#min divisor (c > 1)
+def minDiv(c):
+	if c&1 == 0:
+		if c == 2:
+			return 1
+		return 2
+	return minDivOdd(c)
+
+#min divisor (c > 1)
+def minDivOdd(c):
+	if c < 9:
+		return 1
+	q = math.isqrt(c) + 1
+	o = 3
+	while(o < q):
+		if(c%o == 0):
+			return o
+		o += 2
+	return 1
