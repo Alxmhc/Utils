@@ -5,7 +5,7 @@ namespace hash
 		uint64_t size;
 		uint32_t st[8];
 		rbuf<64> buf;
-		std::array<uint32_t, 16> x;
+		uint32_t x[16];
 
 		static const uint32_t K[64];
 
@@ -66,14 +66,14 @@ namespace hash
 		void Clear()
 		{
 			buf.clear();
-			x.fill(0);
+			memset(x, 0, sizeof(x));
 		}
 	public:
 		static const uint_fast8_t hash_size = 32;
 
 		void process_block(const uint8_t *v)
 		{
-			conv::pack<buf.sz, endianness::BIG_ENDIAN>(v, x);
+			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);
 			Transform();
 		}
 
@@ -94,21 +94,21 @@ namespace hash
 			if(buf.size() != 0)
 			{
 				buf.nul();
-				conv::pack<buf.sz, endianness::BIG_ENDIAN>(buf.data(), x);
+				conv::pack<endianness::BIG_ENDIAN>(buf.data(), buf.sz, x);
 				if(buf.sz_e() < 8)
 				{
 					Transform();
-					x.fill(0);
+					memset(x, 0, sizeof(x));
 				}
 			}
 			else
 			{
-				x.fill(0);
+				memset(x, 0, sizeof(x));
 			}
 			x[14] = static_cast<uint32_t>(size>>29);
 			x[15] = static_cast<uint32_t>(size<<3);
 			Transform();
-			conv::unpack_be<8>(st, r);
+			conv::unpack<endianness::BIG_ENDIAN>(st, 8, r);
 
 			Clear();
 			Init();

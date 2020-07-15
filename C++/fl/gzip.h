@@ -97,7 +97,7 @@ namespace fl_pr
 			{
 				auto res = ~crc;
 				crc = 0xffffffff;
-				conv::unpack_le<1>(&res, r);
+				conv::unpack<endianness::LITTLE_ENDIAN>(res,  r);
 			}
 		};
 	}

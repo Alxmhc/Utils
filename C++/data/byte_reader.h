@@ -27,7 +27,7 @@ public:
 		const std::size_t k = read(t, sz);
 		if(k != sz)
 			return false;
-		conv::read<E>(t, c);
+		conv::pack<E>(t, c);
 		return true;
 	}
 };

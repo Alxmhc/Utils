@@ -1,3 +1,5 @@
+#include <set>
+
 template<typename T>
 std::set<T> operator&(const std::set<T> &a, const std::set<T> &b)
 {

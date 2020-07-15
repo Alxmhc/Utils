@@ -30,7 +30,7 @@ namespace convert
 		public:
 			Decoder(){}
 
-			std::vector<uint8_t> Convert(const uint8_t *v, const std::size_t n) const
+			static std::vector<uint8_t> Convert(const uint8_t *v, const std::size_t n)
 			{
 				std::vector<uint8_t> out;
 				out.reserve(n>>1);

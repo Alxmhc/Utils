@@ -21,124 +21,73 @@ namespace endianness
 
 namespace conv
 {
-	template<char E>
-	void read(const uint8_t *a, uint8_t &c)
+	void sw_e(uint16_t &c)
 	{
-		c = a[0];
+		c = (c << 8) | (c >> 8);
+	}
+	void sw_e(uint32_t &c)
+	{
+		c = (c << 16) | (c >> 16);
+		c = ((c & 0xff00ff00) >> 8) | ((c & 0x00ff00ff) << 8);
+	}
+	void sw_e(uint64_t &c)
+	{
+		c = (c << 32) | (c >> 32);
+		c = ((c & 0xffff0000ffff0000) >> 16) | ((c & 0x0000ffff0000ffff) << 16);
+		c = ((c & 0xff00ff00ff00ff00) >> 8) | ((c & 0x00ff00ff00ff00ff) << 8);
 	}
 
-	template<char E>
-	void read(const uint8_t *a, uint16_t &c);
-	template<>
-	void read<endianness::LITTLE_ENDIAN>(const uint8_t *a, uint16_t &c)
+	template<char E, typename T>
+	void pack(const uint8_t *a, T &c)
 	{
-		uint16_t t = a[1];
-		t = (t<<8) | a[0];
-		c = t;
-	}
-	template<>
-	void read<endianness::BIG_ENDIAN>(const uint8_t *a, uint16_t &c)
-	{
-		uint16_t t = a[0];
-		t = (t<<8) | a[1];
-		c = t;
-	}
-
-	template<char E>
-	void read(const uint8_t *a, uint32_t &c);
-	template<>
-	void read<endianness::LITTLE_ENDIAN>(const uint8_t *a, uint32_t &c)
-	{
-		uint32_t t = a[3];
-		t = (t<<8) | a[2];
-		t = (t<<8) | a[1];
-		t = (t<<8) | a[0];
-		c = t;
-	}
-	template<>
-	void read<endianness::BIG_ENDIAN>(const uint8_t *a, uint32_t &c)
-	{
-		uint32_t t = a[0];
-		t = (t<<8) | a[1];
-		t = (t<<8) | a[2];
-		t = (t<<8) | a[3];
-		c = t;
-	}
-
-	template<char E>
-	void read(const uint8_t *a, uint64_t &c);
-	template<>
-	void read<endianness::LITTLE_ENDIAN>(const uint8_t *a, uint64_t &c)
-	{
-		uint64_t t = a[7];
-		t = (t<<8) | a[6];
-		t = (t<<8) | a[5];
-		t = (t<<8) | a[4];
-		t = (t<<8) | a[3];
-		t = (t<<8) | a[2];
-		t = (t<<8) | a[1];
-		t = (t<<8) | a[0];
-		c = t;
-	}
-	template<>
-	void read<endianness::BIG_ENDIAN>(const uint8_t *a, uint64_t &c)
-	{
-		uint64_t t = a[0];
-		t = (t<<8) | a[1];
-		t = (t<<8) | a[2];
-		t = (t<<8) | a[3];
-		t = (t<<8) | a[4];
-		t = (t<<8) | a[5];
-		t = (t<<8) | a[6];
-		t = (t<<8) | a[7];
-		c = t;
-	}
-
-	template<std::size_t SZ, char E>
-	void pack(const uint8_t *a, std::array<uint32_t, (SZ>>2)> &r)
-	{
-		if(endianness::current == E)
+		memcpy(&c, a, sizeof(T));
+		if(E != endianness::current)
 		{
-			memcpy(r.data(), a, SZ);
+			sw_e(c);
+		}
+	}
+	template<char E, typename T>
+	void pack(const uint8_t *a, const std::size_t n, T *r)
+	{
+		memcpy(r, a, n);
+		if(E != endianness::current)
+		{
+			for(std::size_t i = 0; i < n / sizeof(T); ++i)
+			{
+				sw_e(r[i]);
+			}
+		}
+	}
+
+	template<char E>
+	void unpack(uint32_t c, uint8_t *a);
+	template<>
+	void unpack<endianness::LITTLE_ENDIAN>(uint32_t c, uint8_t *a)
+	{
+		a[0] = c & 0xff;
+		a[1] = (c>>8) & 0xff;
+		a[2] = (c>>16) & 0xff;
+		a[3] = c>>24;
+	}
+	template<>
+	void unpack<endianness::BIG_ENDIAN>(uint32_t c, uint8_t *a)
+	{
+		a[3] = c & 0xff;
+		a[2] = (c>>8) & 0xff;
+		a[1] = (c>>16) & 0xff;
+		a[0] = c>>24;
+	}
+	template<char E>
+	void unpack(const uint32_t *a, std::size_t n, uint8_t *r)
+	{
+		if(E == endianness::current)
+		{
+			memcpy(r, a, n<<2);
 			return;
 		}
-		for(std::size_t i = 0; i < (SZ>>2); ++i)
+		for(std::size_t i = 0; i < n; ++i)
 		{
-			read<E>(a+(i<<2), r[i]);
-		}
-	}
-
-	template<std::size_t SZ>
-	void unpack_le(const uint32_t *a, uint8_t *r)
-	{
-		if(endianness::current == endianness::LITTLE_ENDIAN)
-		{
-			memcpy(r, a, SZ<<2);
-			return;
-		}
-		for(std::size_t i = 0; i < SZ; ++i)
-		{
-			r[i*4] = a[i] & 0xff;
-			r[i*4+1] = (a[i]>>8) & 0xff;
-			r[i*4+2] = (a[i]>>16) & 0xff;
-			r[i*4+3] = (a[i]>>24) & 0xff;
-		}
-	}
-
-	template<std::size_t SZ>
-	void unpack_be(const uint32_t *a, uint8_t *r)
-	{
-		if(endianness::current == endianness::BIG_ENDIAN)
-		{
-			memcpy(r, a, SZ<<2);
-			return;
-		}
-		for(std::size_t i = 0; i < SZ; ++i)
-		{
-			r[i*4] = (a[i]>>24) & 0xff;
-			r[i*4+1] = (a[i]>>16) & 0xff;
-			r[i*4+2] = (a[i]>>8) & 0xff;
-			r[i*4+3] = a[i] & 0xff;
+			unpack<E>(a[i], r + (i<<2));
 		}
 	}
 }
