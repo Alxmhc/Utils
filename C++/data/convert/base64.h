@@ -1,5 +1,3 @@
-#include <array>
-
 namespace convert
 {
 	namespace base64

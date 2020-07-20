@@ -1,20 +1,3 @@
-std::vector<uint8_t> frd(const char *fl)
-{
-	std::vector<uint8_t> v;
-	std::ifstream f(fl, std::ios_base::binary | std::ios_base::ate);
-	if(!f.is_open())
-		return v;
-	const std::size_t sz = static_cast<std::size_t>(f.tellg());
-	if(sz != 0)
-	{
-		v.resize(sz);
-		f.seekg(std::ios_base::beg);
-		f.read(reinterpret_cast<char*>(&v[0]), sz);
-	}
-	f.close();
-	return v;
-}
-
 template<typename C>
 bool fwt(const C *fl, const char *c, const std::size_t n)
 {
