@@ -22,7 +22,7 @@ namespace fl_pr
 						{
 							sz--;
 						}
-						auto vt = d.Convert(bytes(v), sz);
+						auto vt = d.Convert(reinterpret_cast<const uint8_t*>(v.c_str()), sz);
 						v.clear();
 						res.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
 					}

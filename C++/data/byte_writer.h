@@ -38,7 +38,8 @@ class bw_fstream : public bw_stream
 {
 	std::ofstream fst;
 public:
-	bw_fstream(const char *fl) : bw_stream(fst), fst(fl, std::ios_base::binary) {}
+	template<typename C>
+	bw_fstream(const C *fl) : bw_stream(fst), fst(fl, std::ios_base::binary) {}
 };
 
 template<class H>

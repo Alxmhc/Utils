@@ -22,7 +22,8 @@ namespace fl_pr
 			if(size == 0)
 				return;
 			auto data = convert::lz4::Decoder::Decode_block(br, size);
-			fwt(f_out, data.data(), data.size());
+			bw_fstream fl(f_out);
+			fl.write(data.data(), data.size());
 		}
 	}
 }
