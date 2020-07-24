@@ -59,23 +59,14 @@ namespace conv
 		}
 	}
 
-	template<char E>
-	void unpack(uint32_t c, uint8_t *a);
-	template<>
-	void unpack<endianness::LITTLE_ENDIAN>(uint32_t c, uint8_t *a)
+	template<char E, typename T>
+	void unpack(T c, uint8_t *a)
 	{
-		a[0] = c & 0xff;
-		a[1] = (c>>8) & 0xff;
-		a[2] = (c>>16) & 0xff;
-		a[3] = c>>24;
-	}
-	template<>
-	void unpack<endianness::BIG_ENDIAN>(uint32_t c, uint8_t *a)
-	{
-		a[3] = c & 0xff;
-		a[2] = (c>>8) & 0xff;
-		a[1] = (c>>16) & 0xff;
-		a[0] = c>>24;
+		if(E != endianness::current)
+		{
+			sw_e(c);
+		}
+		memcpy(a, &c, sizeof(T));
 	}
 	template<char E>
 	void unpack(const uint32_t *a, std::size_t n, uint8_t *r)
