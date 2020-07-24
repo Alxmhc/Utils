@@ -4,6 +4,12 @@ Chess = {
 	type: ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king']
 }
 
+Chess.crd = function(s){
+	const x = {'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7,'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7}[s[0]];
+	const y = {'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7}[s[1]];
+	return [x, y];
+}
+
 Chess.inf = function(p){
 	if(p === null)
 		return {color: null, type: null};
