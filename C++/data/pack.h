@@ -21,29 +21,13 @@ namespace endianness
 
 namespace conv
 {
-	void sw_e(uint16_t &c)
-	{
-		c = (c << 8) | (c >> 8);
-	}
-	void sw_e(uint32_t &c)
-	{
-		c = (c << 16) | (c >> 16);
-		c = ((c & 0xff00ff00) >> 8) | ((c & 0x00ff00ff) << 8);
-	}
-	void sw_e(uint64_t &c)
-	{
-		c = (c << 32) | (c >> 32);
-		c = ((c & 0xffff0000ffff0000) >> 16) | ((c & 0x0000ffff0000ffff) << 16);
-		c = ((c & 0xff00ff00ff00ff00) >> 8) | ((c & 0x00ff00ff00ff00ff) << 8);
-	}
-
 	template<char E, typename T>
 	void pack(const uint8_t *a, T &c)
 	{
 		memcpy(&c, a, sizeof(T));
 		if(E != endianness::current)
 		{
-			sw_e(c);
+			ByteRev(c);
 		}
 	}
 	template<char E, typename T>
@@ -54,7 +38,7 @@ namespace conv
 		{
 			for(std::size_t i = 0; i < n / sizeof(T); ++i)
 			{
-				sw_e(r[i]);
+				ByteRev(r[i]);
 			}
 		}
 	}
@@ -64,7 +48,7 @@ namespace conv
 	{
 		if(E != endianness::current)
 		{
-			sw_e(c);
+			ByteRev(c);
 		}
 		memcpy(a, &c, sizeof(T));
 	}

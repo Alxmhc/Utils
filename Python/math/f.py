@@ -16,12 +16,6 @@ def minDiv(c):
 		if c == 2:
 			return 1
 		return 2
-	return minDivOdd(c)
-
-#min divisor (c > 1)
-def minDivOdd(c):
-	if c < 9:
-		return 1
 	q = math.isqrt(c) + 1
 	o = 3
 	while(o < q):
