@@ -23,16 +23,16 @@ void BitRev(uint16_t &c)
 {
 	uint8_t a1 = c & 0xff;
 	uint8_t a2 = c >> 8;
-	bitRev(a1);
-	bitRev(a2);
+	BitRev(a1);
+	BitRev(a2);
 	c = (a1 << 8) | a2;
 }
 void BitRev(uint32_t &c)
 {
 	uint16_t a1 = c & 0xffff;
 	uint16_t a2 = c >> 16;
-	bitRev(a1);
-	bitRev(a2);
+	BitRev(a1);
+	BitRev(a2);
 	c = (a1 << 16) | a2;
 }
 
