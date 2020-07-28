@@ -52,17 +52,17 @@ namespace conv
 		}
 		memcpy(a, &c, sizeof(T));
 	}
-	template<char E>
-	void unpack(const uint32_t *a, std::size_t n, uint8_t *r)
+	template<char E, typename T>
+	void unpack(const T *a, std::size_t n, uint8_t *r)
 	{
 		if(E == endianness::current)
 		{
-			memcpy(r, a, n<<2);
+			memcpy(r, a, n*sizeof(T));
 			return;
 		}
 		for(std::size_t i = 0; i < n; ++i)
 		{
-			unpack<E>(a[i], r + (i<<2));
+			unpack<E>(a[i], r + i*sizeof(T));
 		}
 	}
 }
