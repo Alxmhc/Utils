@@ -27,7 +27,7 @@ namespace conv
 		memcpy(&c, a, sizeof(T));
 		if(E != endianness::current)
 		{
-			ByteRev(c);
+			ByteRev<sizeof(T)>(c);
 		}
 	}
 	template<char E, typename T>
@@ -38,7 +38,7 @@ namespace conv
 		{
 			for(std::size_t i = 0; i < n / sizeof(T); ++i)
 			{
-				ByteRev(r[i]);
+				ByteRev<sizeof(T)>(r[i]);
 			}
 		}
 	}
@@ -48,7 +48,7 @@ namespace conv
 	{
 		if(E != endianness::current)
 		{
-			ByteRev(c);
+			ByteRev<sizeof(T)>(c);
 		}
 		memcpy(a, &c, sizeof(T));
 	}

@@ -35,52 +35,64 @@ namespace fl_pr
 			fl_inf f_inf;
 		};
 
+		bool read_file_hdr(byteReader &s, inf &r)
+		{
+			uint8_t h[26];
+			if(s.read(h, sizeof(h)) != sizeof(h))
+				return false;
+			r.encryption = h[2] & 1;
+			conv::pack<endianness::LITTLE_ENDIAN>(h+4, r.method);
+			conv::pack<endianness::LITTLE_ENDIAN>(h+10, r.crc32);
+			conv::pack<endianness::LITTLE_ENDIAN>(h+18, r.fsize);
+
+			uint32_t sz;
+			conv::pack<endianness::LITTLE_ENDIAN>(h+14, sz);
+			r.f_inf.size = sz;
+
+			uint16_t szfn;
+			conv::pack<endianness::LITTLE_ENDIAN>(h+22, szfn);
+			r.fname.resize(szfn);
+			s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
+
+			uint16_t szex;
+			conv::pack<endianness::LITTLE_ENDIAN>(h+24, szex);
+			if(szex != 0)
+			{
+				std::vector<uint8_t> ext(szex);
+				s.read(ext.data(), szex);
+				if(r.method == 99)
+				{
+					r.encryption = ext[8] + 1;
+					conv::pack<endianness::LITTLE_ENDIAN>(ext.data()+9, r.method);
+				}
+			}
+
+			r.f_inf.pos = s.get_pos();
+			return true;
+		}
+
 		std::vector<inf> read_inf(byteReader &s)
 		{
 			std::vector<inf> res;
 			for(;;)
 			{
 				uint8_t hdr[4];
-				if(s.read(hdr, 4) != 4)
-					return res;
+				if(s.read(hdr, sizeof(hdr)) != sizeof(hdr))
+					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
 				{
-					inf r = {};
-					s.skip(2);
-					uint16_t flg;
-					s.getC<endianness::LITTLE_ENDIAN>(flg);
-					r.encryption = flg & 1;
-					s.getC<endianness::LITTLE_ENDIAN>(r.method);
-					s.skip(4);
-					s.getC<endianness::LITTLE_ENDIAN>(r.crc32);
-					uint32_t sz;
-					s.getC<endianness::LITTLE_ENDIAN>(sz);
-					s.getC<endianness::LITTLE_ENDIAN>(r.fsize);
-					uint16_t szfn, szex;
-					s.getC<endianness::LITTLE_ENDIAN>(szfn);
-					s.getC<endianness::LITTLE_ENDIAN>(szex);
-					r.fname.resize(szfn);
-					s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
-					if(szex != 0)
-					{
-						std::vector<uint8_t> ext(szex);
-						s.read(ext.data(), szex);
-						if(r.method == 99)
-						{
-							r.encryption = ext[8] + 1;
-							r.method = ext[9] | (ext[10]<<8);
-						}
-					}
-					if(r.fname[szfn-1] == '/') //folder
+					inf r;
+					if( !read_file_hdr(s, r) )
+						break;
+					if( r.fname[r.fname.length() - 1] == '/' ) //folder
 						continue;
-					r.f_inf.pos = s.get_pos();
-					r.f_inf.size = sz;
-					s.skip(sz);
 					res.push_back(r);
+					s.skip(r.f_inf.size);
 				}
 				else
-					return res;
+					break;
 			}
+			return res;
 		}
 	}
 }
