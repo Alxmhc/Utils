@@ -19,17 +19,68 @@ namespace endianness
 	const char current = get_endianness();
 }
 
+template <unsigned char sz, char E>
+struct bconv{};
+
+template<>
+struct bconv<2, endianness::LITTLE_ENDIAN>
+{
+	static uint_fast16_t pack(const uint8_t *a)
+	{
+		uint_fast16_t r = a[1];
+		return (r<<8) | a[0];
+	}
+};
+template<>
+struct bconv<2, endianness::BIG_ENDIAN>
+{
+	static uint_fast16_t pack(const uint8_t *a)
+	{
+		uint_fast16_t r = a[0];
+		return (r<<8) | a[1];
+	}
+};
+
+template<>
+struct bconv<4, endianness::LITTLE_ENDIAN>
+{
+	static uint_fast32_t pack(const uint8_t *a)
+	{
+		uint_fast32_t r = bconv<2, endianness::LITTLE_ENDIAN>::pack(a+2);
+		return (r<<16) | bconv<2, endianness::LITTLE_ENDIAN>::pack(a);
+	}
+};
+template<>
+struct bconv<4, endianness::BIG_ENDIAN>
+{
+	static uint_fast32_t pack(const uint8_t *a)
+	{
+		uint_fast32_t r = bconv<2, endianness::BIG_ENDIAN>::pack(a);
+		return (r<<16) | bconv<2, endianness::BIG_ENDIAN>::pack(a+2);
+	}
+};
+
+template<>
+struct bconv<8, endianness::LITTLE_ENDIAN>
+{
+	static uint_fast64_t pack(const uint8_t *a)
+	{
+		uint_fast64_t r = bconv<4, endianness::LITTLE_ENDIAN>::pack(a+4);
+		return (r<<16) | bconv<4, endianness::LITTLE_ENDIAN>::pack(a);
+	}
+};
+template<>
+struct bconv<8, endianness::BIG_ENDIAN>
+{
+	static uint_fast64_t pack(const uint8_t *a)
+	{
+		uint_fast64_t r = bconv<4, endianness::BIG_ENDIAN>::pack(a);
+		return (r<<16) | bconv<4, endianness::BIG_ENDIAN>::pack(a+4);
+	}
+};
+
 namespace conv
 {
-	template<char E, typename T>
-	void pack(const uint8_t *a, T &c)
-	{
-		memcpy(&c, a, sizeof(T));
-		if(E != endianness::current)
-		{
-			ByteRev<sizeof(T)>(c);
-		}
-	}
 	template<char E, typename T>
 	void pack(const uint8_t *a, const std::size_t n, T *r)
 	{

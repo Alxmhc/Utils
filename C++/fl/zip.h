@@ -41,21 +41,16 @@ namespace fl_pr
 			if(s.read(h, sizeof(h)) != sizeof(h))
 				return false;
 			r.encryption = h[2] & 1;
-			conv::pack<endianness::LITTLE_ENDIAN>(h+4, r.method);
-			conv::pack<endianness::LITTLE_ENDIAN>(h+10, r.crc32);
-			conv::pack<endianness::LITTLE_ENDIAN>(h+18, r.fsize);
+			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
+			r.crc32 = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+10);
+			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
+			r.f_inf.size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 
-			uint32_t sz;
-			conv::pack<endianness::LITTLE_ENDIAN>(h+14, sz);
-			r.f_inf.size = sz;
-
-			uint16_t szfn;
-			conv::pack<endianness::LITTLE_ENDIAN>(h+22, szfn);
+			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
 			r.fname.resize(szfn);
 			s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
 
-			uint16_t szex;
-			conv::pack<endianness::LITTLE_ENDIAN>(h+24, szex);
+			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
 				std::vector<uint8_t> ext(szex);
@@ -63,7 +58,7 @@ namespace fl_pr
 				if(r.method == 99)
 				{
 					r.encryption = ext[8] + 1;
-					conv::pack<endianness::LITTLE_ENDIAN>(ext.data()+9, r.method);
+					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 				}
 			}
 
