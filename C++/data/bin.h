@@ -15,62 +15,86 @@ uint8_t bitRevT[256] = {0x00,0x80,0x40,0xc0,0x20,0xa0,0x60,0xe0,0x10,0x90,0x50,0
                          0x07,0x87,0x47,0xc7,0x27,0xa7,0x67,0xe7,0x17,0x97,0x57,0xd7,0x37,0xb7,0x77,0xf7,
                          0x0f,0x8f,0x4f,0xcf,0x2f,0xaf,0x6f,0xef,0x1f,0x9f,0x5f,0xdf,0x3f,0xbf,0x7f,0xff};
 
-void BitRev(uint8_t &c)
-{
-	c = bitRevT[c];
-}
-void BitRev(uint16_t &c)
-{
-	uint8_t a1 = c & 0xff;
-	uint8_t a2 = c >> 8;
-	BitRev(a1);
-	BitRev(a2);
-	c = (a1 << 8) | a2;
-}
-void BitRev(uint32_t &c)
-{
-	uint16_t a1 = c & 0xffff;
-	uint16_t a2 = c >> 16;
-	BitRev(a1);
-	BitRev(a2);
-	c = (a1 << 16) | a2;
-}
-
 template <unsigned char sz>
 struct bRev{};
+template<>
+struct bRev<1>
+{
+	template<typename T>
+	static void ByteRev(T &c)
+	{
+	}
+	template<typename T>
+	static void BitRev(T &c)
+	{
+		c = bitRevT[c];
+	}
+};
 template<>
 struct bRev<2>
 {
 	template<typename T>
-	static void rev(T &c)
+	static void ByteRev(T &c)
 	{
 		c = ((c & 0x00ff) << 8) | ((c & 0xff00) >> 8);
+	}
+	template<typename T>
+	static void BitRev(T &c)
+	{
+		auto a = c >> 8;
+		bRev<1>::BitRev(a);
+		c &= 0xff;
+		bRev<1>::BitRev(c);
+		c = (c << 8) | a;
 	}
 };
 template<>
 struct bRev<4>
 {
 	template<typename T>
-	static void rev(T &c)
+	static void ByteRev(T &c)
 	{
 		c = ((c & 0x0000ffff) << 16) | ((c & 0xffff0000) >> 16);
 		c = ((c & 0x00ff00ff) <<  8) | ((c & 0xff00ff00) >>  8);
+	}
+	template<typename T>
+	static void BitRev(T &c)
+	{
+		auto a = c >> 16;
+		bRev<2>::BitRev(a);
+		c &= 0xffff;
+		bRev<2>::BitRev(c);
+		c = (c << 16) | a;
 	}
 };
 template<>
 struct bRev<8>
 {
 	template<typename T>
-	static void rev(T &c)
+	static void ByteRev(T &c)
 	{
 		c = ((c & 0x00000000ffffffff) << 32) | ((c & 0xffffffff00000000) >> 32);
 		c = ((c & 0x0000ffff0000ffff) << 16) | ((c & 0xffff0000ffff0000) >> 16);
 		c = ((c & 0x00ff00ff00ff00ff) <<  8) | ((c & 0xff00ff00ff00ff00) >>  8);
 	}
+	template<typename T>
+	static void BitRev(T &c)
+	{
+		auto a = c >> 32;
+		bRev<4>::BitRev(a);
+		c &= 0xffffffff;
+		bRev<4>::BitRev(c);
+		c = (c << 32) | a;
+	}
 };
 
 template<unsigned char sz, typename T>
+void BitRev(T &c)
+{
+	bRev<sz>::BitRev(c);
+}
+template<unsigned char sz, typename T>
 void ByteRev(T &c)
 {
-	bRev<sz>::rev(c);
+	bRev<sz>::ByteRev(c);
 }
