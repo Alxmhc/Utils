@@ -42,6 +42,18 @@ public:
 	bw_fstream(const C *fl) : bw_stream(fst), fst(fl, std::ios_base::binary) {}
 };
 
+class bw_array : public byteWriter
+{
+	std::vector<uint8_t> &d;
+public:
+	bw_array(std::vector<uint8_t> &v) : d(v) {}
+
+	void write(const uint8_t* v, std::size_t n)
+	{
+		d.insert(d.end(), v, v + n);
+	}
+};
+
 template<class H>
 class bw_hash : public byteWriter
 {
