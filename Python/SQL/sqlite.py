@@ -1,5 +1,5 @@
 import sqlite3
-import SQL
+from . import SQL
 
 class sqlite( object ):
 	def __init__(self,db):
