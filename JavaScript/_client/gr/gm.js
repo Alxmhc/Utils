@@ -21,13 +21,11 @@ class game_field{
 	}
 	draw(cr, n){
 		this.corr_cr(cr);
-		if(n === null){
-			this.f.del(cr);
+		this.f.del(cr);
+		if(n === null)
 			return;
-		}
 		const o = this.im[n];
 		if(o instanceof HTMLImageElement){
-			this.f.del(cr);
 			this.f.pct(cr, o);
 		}
 		else if(typeof o === "string"){
@@ -39,11 +37,8 @@ class game_field{
 		let k = 0;
 		for(let y = 0; y < this.f.sy; ++y){
 			for(let x = 0; x < this.f.sx; ++x){
-				const c = arr[k];
+				this.draw([x,y], arr[k]);
 				k++;
-				if(c === null)
-					continue;
-				this.draw([x,y], c);
 			}
 		}
 	}
