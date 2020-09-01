@@ -1,6 +1,10 @@
-void LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
+bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 {
-	std::size_t osz = out.size();
+	auto osz = out.size();
+	if(osz < dist)
+		return false;
+	if(sz == 0)
+		return true;
 	out.resize(osz + sz);
 	std::size_t n = osz - dist;
 	while(sz > dist)
@@ -10,4 +14,5 @@ void LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 		sz -= dist;
 	}
 	std::copy_n(out.begin() + n, sz, out.begin() + osz);
+	return true;
 }
