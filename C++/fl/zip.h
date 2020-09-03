@@ -30,8 +30,9 @@ namespace fl_pr
 		{
 			uint_fast8_t encryption;
 			std::string fname;
-			uint16_t method;
-			uint32_t fsize, crc32;
+			uint_fast16_t method;
+			uint8_t crc32[4];
+			uint_fast32_t fsize;
 			fl_inf f_inf;
 		};
 
@@ -42,7 +43,7 @@ namespace fl_pr
 				return false;
 			r.encryption = h[2] & 1;
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
-			r.crc32 = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+10);
+			std::copy_n(h+10, 4, r.crc32);
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 			r.f_inf.size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 
