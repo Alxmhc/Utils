@@ -19,12 +19,10 @@ class f_sqr extends fld_2d{
 	//cell from internal coordinates
 	crd_c(c){return [Math.floor(c[0]/this.cw), Math.floor(c[1]/this.ch)]}
 
-	_pct(cr,p){this.c.drawImage(p, this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
-	_fll(cr){this.c.fillRect(this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
-
 	del(cr){
 		this.c.clearRect(this.cw*cr[0], this.ch*cr[1], this.cw, this.ch);
 	}
+	_pct(cr,p){this.c.drawImage(p, this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
 	pct(cr,p){
 		if(p.complete){
 			this._pct(cr,p);
@@ -33,20 +31,18 @@ class f_sqr extends fld_2d{
 			p.addEventListener('load', () => this._pct(cr,p), {once: true});
 		}
 	}
-	fll(cr, p){
-		this.c.fillStyle = p;
-		this._fll(cr);
-	}
+	set_clr(c){this.c.fillStyle = c;}
+	fll(cr){this.c.fillRect(this.cw*cr[0], this.ch*cr[1], this.cw, this.ch)}
+}
 
-	f_f(cl){
-		this.c.fillStyle = cl[0];
-		this.fill();
-		this.c.fillStyle = cl[1];
-		for(let i=0; i<this.sx; ++i){
-			for(let j=0; j<this.sy; ++j){
-				if((i+j)&1){
-					this._fll([i,j]);
-				}
+function f_f(fld, c){
+	fld.set_clr(c[0]);
+	fld.fill();
+	fld.set_clr(c[1]);
+	for(let i=0; i<fld.sx; ++i){
+		for(let j=0; j<fld.sy; ++j){
+			if((i+j)&1){
+				fld.fll([i,j]);
 			}
 		}
 	}

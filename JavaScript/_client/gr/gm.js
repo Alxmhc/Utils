@@ -29,9 +29,11 @@ class game_field{
 			this.f.pct(cr, o);
 		}
 		else if(typeof o === "string"){
-			this.f.fll(cr, o);
+			this.f.set_clr(o);
+			this.f.fll(cr);
 		}
 	}
+
 	set_arr(arr){
 		this.clear();
 		let k = 0;
@@ -42,7 +44,6 @@ class game_field{
 			}
 		}
 	}
-
 	set_pos(p){
 		this.clear();
 		for(let k in p){
@@ -51,6 +52,7 @@ class game_field{
 			}
 		}
 	}
+
 	//m - [[cr,o],...]
 	moves(m){
 		for(let v of m){

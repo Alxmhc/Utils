@@ -46,7 +46,7 @@ Chess.fen = {
 		return res;
 	},
 	to_arr: function(s){
-		let res = new Array(Chess.sz[0]*Chess.sz[1]);
+		let res = new Array(8*8);
 		res.fill(null);
 		let k = 0;
 		for(let i=0, l=s.length; i<l; ++i){
@@ -64,14 +64,13 @@ Chess.fen = {
 		return res;
 	},
 	from_arr: function(arr){
-		const sx = Chess.sz[0], sy = Chess.sz[1];
 		let res = "", k = 0;
-		for(let y=0; y<sy; ++y){
+		for(let y=0; y<8; ++y){
 			if(y != 0){
 				res += '/';
 			}
 			let t = 0;
-			for(let x=0; x<sx; ++x){
+			for(let x=0; x<8; ++x){
 				const c = arr[k];
 				k++;
 				if(c === null){

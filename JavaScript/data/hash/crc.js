@@ -1,4 +1,5 @@
-class crc32_rfc1952{
+//rfc1952
+class crc32{
 	constructor(){
 		this.crc = 0xffffffff;
 		this.tbl = new Uint32Array(256);
