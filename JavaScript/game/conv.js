@@ -14,17 +14,13 @@ function arr_to_pos2(arr, sz){
 	let res = {}, k = 0;
 	for(let y = 0; y < sz[1]; ++y){
 		for(let x = 0; x < sz[0]; ++x){
-			const c = this.arr[k];
+			const c = arr[k];
 			k++;
 			if(c === null)
 				continue;
 			const cr = [x,y];
-			if(res[c] === undefined){
-				res[c] = [cr];
-			}
-			else{
-				res[c].push(cr);
-			}
+			res[c] ??= [];
+			res[c].push(cr);
 		}
 	}
 	return res;

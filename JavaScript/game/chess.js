@@ -1,69 +1,20 @@
-Chess = {
-	sz: [8,8],
-	color: ['white', 'black'],
-	type: ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king']
-}
+class Chess{
+	color = ['white', 'black']
+	type = ['pawn', 'rook', 'knight', 'bishop', 'queen', 'king']
+	fen_dict = 'PRNBQKprnbqk'
 
-Chess.crd = function(s){
-	const x = {'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7,'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7}[s[0]];
-	const y = {'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7}[s[1]];
-	return [x, y];
-}
-
-Chess.inf = function(p){
-	if(p === null)
-		return {color: null, type: null};
-	if(p < 6)
-		return {color: 0, type: p};
-	return {color: 1, type: p - 6};
-}
-
-Chess.fen = {
-	_dict: 'PRNBQKprnbqk',
-	to_pos: function(s){
-		let res = {}, x=0, y=0;
-		for(let i=0, l=s.length; i<l; ++i){
-			const c = s[i];
-			if(c === '/'){
-				y++;
-				x = 0;
-				continue;
-			}
-			const e = this._dict.indexOf(c);
-			if(e === -1){
-				x += parseInt(c, 10);
-				continue;
-			}
-			const cr = [x,y];
-			if(res[e] === undefined){
-				res[e] = [cr];
-			}
-			else{
-				res[e].push(cr);
-			}
-			x++;
+	constructor(p){
+		if(p){
+			this.arr = p.slice()
 		}
-		return res;
-	},
-	to_arr: function(s){
-		let res = new Array(8*8);
-		res.fill(null);
-		let k = 0;
-		for(let i=0, l=s.length; i<l; ++i){
-			const c = s[i];
-			if(c === '/')
-				continue;
-			const e = this._dict.indexOf(c);
-			if(e === -1){
-				k += parseInt(c, 10);
-				continue;
-			}
-			res[k] = e;
-			k++;
+		else {
+			this.arr = new Array(8*8);
+			this.arr.fill(null);
 		}
-		return res;
-	},
-	from_arr: function(arr){
+	}
+	get pos(){return this.arr.slice()}
+	set pos(p){this.arr = p.slice()}
+	get fen(){
 		let res = "", k = 0;
 		for(let y=0; y<8; ++y){
 			if(y != 0){
@@ -71,7 +22,7 @@ Chess.fen = {
 			}
 			let t = 0;
 			for(let x=0; x<8; ++x){
-				const c = arr[k];
+				const c = this.arr[k];
 				k++;
 				if(c === null){
 					t++;
@@ -81,7 +32,7 @@ Chess.fen = {
 					res += t;
 					t = 0;
 				}
-				res += this._dict[c];
+				res += this.fen_dict[c];
 			}
 			if(t != 0){
 				res += t;
@@ -89,4 +40,47 @@ Chess.fen = {
 		}
 		return res;
 	}
+	set fen(s){
+		this.arr.fill(null);
+		let k = 0;
+		for(let i=0, l=s.length; i<l; ++i){
+			const c = s[i];
+			if(c === '/')
+				continue;
+			const e = this.fen_dict.indexOf(c);
+			if(e === -1){
+				k += parseInt(c, 10);
+				continue;
+			}
+			this.arr[k] = e;
+			k++;
+		}
+	}
+
+	get_p(cr){
+		return this.arr[cr[0] + (cr[1]<<3)];
+	}
+	set_p(cr, p){
+		this.arr[cr[0] + (cr[1]<<3)] = p;
+	}
+	get_type(p){
+		if(p === null)
+			return {color: null, type: null};
+		if(p < 6)
+			return {color: 0, type: p};
+		return {color: 1, type: p - 6};
+	}
+
+	moves(m){
+		for(let v of m){
+			this.set_p(v[0], v[1]);
+		}
+	}
+
+	_crd1(s){
+		const x = {'A':0,'B':1,'C':2,'D':3,'E':4,'F':5,'G':6,'H':7,'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7}[s[0]];
+		const y = {'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7}[s[1]];
+		return [x, y];
+	}
 }
+Chess.sz = [8,8]
