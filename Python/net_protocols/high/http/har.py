@@ -1,18 +1,14 @@
 from . import http
 import base64
 
-def from_(obj):
-	ver = obj['httpVersion'].upper()
+def from_req(obj):
+	obj = obj['request']
 	hdr = {}
 	for h in obj['headers']:
 		k = h['name']
 		if k[0] == ':':
 			continue
 		http._hdr_add_(hdr, k.lower(), h['value'])
-	return ver, hdr
-def from_req(obj):
-	obj = obj['request']
-	ver, hdr = from_(obj)
 	inf = {}
 	inf['type'] = 0
 	inf['method'] = obj['method'].upper()
@@ -28,13 +24,20 @@ def from_req(obj):
 	sz = len(body)
 	if sz != 0 or inf['method'] == 'POST':
 		hdr['content-length'] = str(sz)
-	return http.http(inf, ver, hdr, body)
+	return http.http(inf, "HTTP/1.1", hdr, body)
 def from_resp(obj):
 	obj = obj['response']
 	code = obj['status']
 	if code == 0:
 		return None
-	ver, hdr = from_(obj)
+	hdr = {}
+	for h in obj['headers']:
+		k = h['name'].lower()
+		if (k == 'status'
+		or k == 'content-encoding'
+		or k == 'transfer-encoding'):
+			continue
+		http._hdr_add_(hdr, k, h['value'])
 	inf = {}
 	inf['type'] = 1
 	inf['code'] = code
@@ -48,11 +51,7 @@ def from_resp(obj):
 				body = base64.b64decode(text)
 			else:
 				body = bytes(text,'utf8')
-	if 'transfer-encoding' in hdr:
-		del hdr['transfer-encoding']
-	if 'content-encoding' in hdr:
-		del hdr['content-encoding']
 	sz = len(body)
 	if sz != 0:
 		hdr['content-length'] = str(sz)
-	return http.http(inf, ver, hdr, body)
+	return http.http(inf, "HTTP/1.1", hdr, body)
