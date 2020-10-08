@@ -1,41 +1,49 @@
 import os
 
-def dir_(dir, flt, depth, is_dir):
+def dir_(dir, flt, depth):
 	l = [(dir,depth)]
 	while(l):
 		dir, depth = l.pop()
-		for t in os.listdir(dir):
+		try:
+			lst = os.listdir(dir)
+		except Exception:
+			continue
+		for t in lst:
 			e = dir + "/" + t
-			if(os.path.isdir(e)):
-				if(is_dir and flt(e)):
-					yield e
-				if(depth):
-					l.append((e, depth-1))
-			elif((not is_dir) and flt(e)):
+			is_dir = os.path.isdir(e)
+			if is_dir and depth != 0:
+				l.append((e, depth-1))
+			if flt(e, is_dir):
 				yield e
 
 def dir_files(dir, flt, depth = -1):
-	return dir_(dir, flt, depth, False)
+	def fltr(pth, isDir): return (not isDir) and flt(pth)
+	return dir_(dir, fltr, depth)
 
 def dir_folders(dir, flt, depth = -1):
-	return dir_(dir, flt, depth, True)
+	def fltr(pth, isDir): return isDir and flt(pth)
+	return dir_(dir, fltr, depth)
 
 
 def fls_json(dir, f, d = -1):
 	res = {'Name': dir}
-	_fls_js(dir, f, d, res)
+	_fls_json(dir, f, d, res)
 	return res
 
 def _fls_json(dir, f, d, obj):
 	obj['Values'] = []
 	obj['Childs'] = []
-	for name in os.listdir(dir):
+	try:
+		lst = os.listdir(dir)
+	except Exception:
+		return
+	for name in lst:
 		e = dir + "/" + name
-		if(os.path.isfile(e)):
-			if(f(name)):
+		if os.path.isfile(e):
+			if f(name):
 				obj['Values'].append(name)
-		elif(d):
+		elif d != 0:
 			tmp = {'Name': name}
-			_fls_js(e, f, d - 1, tmp)
-			if(len(tmp['Values']) or len(tmp['Childs'])):
+			_fls_json(e, f, d - 1, tmp)
+			if (len(tmp['Values']) != 0) or (len(tmp['Childs']) != 0):
 				obj['Childs'].append(tmp)
