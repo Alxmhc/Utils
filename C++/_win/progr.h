@@ -1,12 +1,29 @@
-#include <tlhelp32.h>
+//Program path
+template<typename C>
+std::basic_string<C> get_ex_path(void)
+{
+	C path[MAX_PATH];
+    GetModuleFileName_(nullptr, path, MAX_PATH);
+	std::basic_string<C> p(path);
+	std::replace(p.begin(), p.end(), '\\', '/');
+	return p;
+}
 
-#undef PROCESSENTRY32
-#undef Process32First
-#undef Process32Next
-
-#undef MODULEENTRY32
-#undef Module32First
-#undef Module32Next
+template<typename C>
+std::basic_string<C> get_process_path(DWORD PID)
+{
+	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PID);
+	if(!Handle)
+		return std::basic_string<C>();
+	C path[MAX_PATH];
+	DWORD l = GetModuleFileNameEx_(Handle, 0, path, MAX_PATH);
+	CloseHandle(Handle);
+	if (l == 0)
+		return std::basic_string<C>();
+	std::basic_string<C> r(path);
+	std::replace(r.begin(), r.end(), '\\', '/');
+	return r;
+}
 
 struct procInf
 {

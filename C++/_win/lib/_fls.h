@@ -1,9 +1,4 @@
-#include "windows.h"
-
-#undef GetEnvironmentStrings
-
-DWORD GetModuleFileName_(HMODULE hmd, LPSTR filename, DWORD sz){return GetModuleFileNameA(hmd, filename, sz);}
-DWORD GetModuleFileName_(HMODULE hmd, LPWSTR filename, DWORD sz){return GetModuleFileNameW(hmd, filename, sz);}
+#include <windows.h>
 
 template<typename S> struct WIN32_FIND_DATA_{};
 template<> struct WIN32_FIND_DATA_<char>{typedef WIN32_FIND_DATAA T;};
@@ -25,19 +20,3 @@ BOOL CreateDirectory_(LPCWSTR path, LPSECURITY_ATTRIBUTES attr){return CreateDir
 
 BOOL MoveFileEx_(LPCSTR old_path, LPCSTR new_path, DWORD flags){return MoveFileExA(old_path, new_path, flags);}
 BOOL MoveFileEx_(LPCWSTR old_path, LPCWSTR new_path, DWORD flags){return MoveFileExW(old_path, new_path, flags);}
-
-template<typename C> C* GetEnvironmentStrings_(){}
-template<> LPCH GetEnvironmentStrings_<char>(){return GetEnvironmentStrings();}
-template<> LPWCH GetEnvironmentStrings_<wchar_t>(){return GetEnvironmentStringsW();}
-
-BOOL FreeEnvironmentStrings_(LPCH env){return FreeEnvironmentStringsA(env);}
-BOOL FreeEnvironmentStrings_(LPWCH env){return FreeEnvironmentStringsW(env);}
-
-HMODULE LoadLibrary_(LPCSTR filename){return LoadLibraryA(filename);}
-HMODULE LoadLibrary_(LPCWSTR filename){return LoadLibraryW(filename);}
-
-BOOL GetUserName_(LPSTR buf, LPDWORD sz){return GetUserNameA(buf, sz);}
-BOOL GetUserName_(LPWSTR buf, LPDWORD sz){return GetUserNameW(buf, sz);}
-
-BOOL GetComputerName_(LPSTR buf, LPDWORD sz){return GetComputerNameA(buf, sz);}
-BOOL GetComputerName_(LPWSTR buf, LPDWORD sz){return GetComputerNameW(buf, sz);}
