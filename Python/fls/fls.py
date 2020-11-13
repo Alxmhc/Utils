@@ -1,6 +1,6 @@
 import os
 
-def dir_(dir, flt, depth):
+def dir_(dir, depth):
 	l = [(dir,depth)]
 	while(l):
 		dir, depth = l.pop()
@@ -9,20 +9,17 @@ def dir_(dir, flt, depth):
 		except Exception:
 			continue
 		for t in lst:
-			e = dir + "/" + t
+			e = os.path.join(dir, t)
 			is_dir = os.path.isdir(e)
 			if is_dir and depth != 0:
 				l.append((e, depth-1))
-			if flt(e, is_dir):
-				yield e
+			yield e, is_dir
 
-def dir_files(dir, flt, depth = -1):
-	def fltr(pth, isDir): return (not isDir) and flt(pth)
-	return dir_(dir, fltr, depth)
+def dir_files(dir, depth = -1):
+	return (p for p,f in dir_(dir, depth) if not f)
 
-def dir_folders(dir, flt, depth = -1):
-	def fltr(pth, isDir): return isDir and flt(pth)
-	return dir_(dir, fltr, depth)
+def dir_folders(dir, depth = -1):
+	return (p for p,f in dir_(dir, depth) if f)
 
 
 def fls_json(dir, f, d = -1):
@@ -38,7 +35,7 @@ def _fls_json(dir, f, d, obj):
 	except Exception:
 		return
 	for name in lst:
-		e = dir + "/" + name
+		e = os.path.join(dir, name)
 		if os.path.isfile(e):
 			if f(name):
 				obj['Values'].append(name)
