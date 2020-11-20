@@ -25,18 +25,9 @@ std::basic_string<C> get_process_path(DWORD PID)
 	return r;
 }
 
-struct procInf
+std::vector<PROCESSENTRY32> processList()
 {
-	DWORD id;
-	std::string name;
-
-	procInf(DWORD c, const char *n) : id(c), name(n) {}
-};
-
-std::vector<procInf> processList()
-{
-	std::vector<procInf> res;
-
+	std::vector<PROCESSENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if ( sns == INVALID_HANDLE_VALUE )
 		return res;
@@ -46,26 +37,16 @@ std::vector<procInf> processList()
 	if (Process32First(sns, &inf))
 	{
 		do {
-			res.push_back( procInf(inf.th32ProcessID, inf.szExeFile) );
+			res.push_back(inf);
 		} while ( Process32Next(sns, &inf) );
 	}
 	CloseHandle(sns);
 	return res;
 }
 
-struct moduleInf
+std::vector<MODULEENTRY32> moduleList(DWORD id)
 {
-	std::string path;
-	const uint8_t* addr;
-	DWORD size;
-	DWORD procID;
-
-	moduleInf(DWORD id, const uint8_t *h, DWORD sz, const char *p) : procID(id), addr(h), size(sz), path(p) {}
-};
-
-std::vector<moduleInf> moduleList(DWORD id)
-{
-	std::vector<moduleInf> res;
+	std::vector<MODULEENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, id);
 	if (sns == INVALID_HANDLE_VALUE)
 		return res;
@@ -75,7 +56,7 @@ std::vector<moduleInf> moduleList(DWORD id)
 	if(Module32First(sns, &inf))
 	{
 		do {
-			res.push_back( moduleInf(id, inf.modBaseAddr, inf.modBaseSize, inf.szExePath) );
+			res.push_back(inf);
 		} while ( Module32Next(sns, &inf) );
 	}
 	CloseHandle(sns);
