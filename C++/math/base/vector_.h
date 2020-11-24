@@ -15,11 +15,7 @@ const std::vector<T>& operator-=(std::vector<T> &v, const T &a)
 template<typename T>
 const std::vector<T>& operator*=(std::vector<T> &v, long double k)
 {
-	for(auto n = v.size(); n > 0;)
-	{
-		--n;
-		v[n] *= k;
-	}
+	std::for_each(v.begin(), v.end(), [&](T &e){e *= k;});
 	return v;
 }
 
@@ -69,7 +65,7 @@ long double operator*(const std::vector<T> &a, const std::vector<T> &b)
 	for(auto n = a.size(); n > 0;)
 	{
 		--n;
-		s += a[n]*b[n];
+		s += a[n] * b[n];
 	}
 	return s;
 }

@@ -32,8 +32,8 @@ namespace fl_pr
 			std::string fname;
 			uint_fast16_t method;
 			uint8_t crc32[4];
-			uint_fast32_t fsize;
-			fl_inf f_inf;
+			uint_fast32_t fsize, psize;
+			std::size_t ppos;
 		};
 
 		bool read_file_hdr(byteReader &s, inf &r)
@@ -45,7 +45,7 @@ namespace fl_pr
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
 			std::copy_n(h+10, 4, r.crc32);
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
-			r.f_inf.size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
+			r.psize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
 			r.fname.resize(szfn);
@@ -63,7 +63,7 @@ namespace fl_pr
 				}
 			}
 
-			r.f_inf.pos = s.get_pos();
+			r.ppos = s.get_pos();
 			return true;
 		}
 
@@ -83,7 +83,7 @@ namespace fl_pr
 					if( r.fname[r.fname.length() - 1] == '/' ) //folder
 						continue;
 					res.push_back(r);
-					s.skip(r.f_inf.size);
+					s.skip(r.psize);
 				}
 				else
 					break;

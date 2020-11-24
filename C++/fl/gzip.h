@@ -7,7 +7,7 @@ namespace fl_pr
 			std::string fname, comment;
 			uint32_t fsize;
 			uint8_t crc32[4];
-			fl_inf f_inf;
+			std::size_t psize, ppos;
 		};
 
 		inf read_inf(byteReader &s)
@@ -49,8 +49,8 @@ namespace fl_pr
 			const auto end = s.get_pos();
 			if(st >= end)
 				return res;
-			res.f_inf.pos = st;
-			res.f_inf.size = end - st;
+			res.ppos = st;
+			res.psize = end - st;
 			s.read(res.crc32, 4);
 			s.getC<endianness::LITTLE_ENDIAN>(res.fsize);
 			return res;
