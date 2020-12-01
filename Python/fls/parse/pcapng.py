@@ -1,7 +1,7 @@
 def read(fl):
 	while True:
 		b = fl.read(4)
-		if not b:
+		if b == b'':
 			break
 		type = int.from_bytes(b, byteorder='little')
 		b = fl.read(4)

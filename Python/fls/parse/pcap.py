@@ -1,8 +1,8 @@
 def read(fl):
-	fl.read(24)
+	fl.seek(24, 1)
 	while True:
 		b = fl.read(16)
-		if not b:
+		if b == b'':
 			break
 		sz = int.from_bytes(b[8:12], byteorder='little')
 		r = {}
