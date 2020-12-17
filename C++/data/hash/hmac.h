@@ -1,24 +1,50 @@
-//rfc 2104
-template<class H, std::size_t BSZ>
-void HMAC(const uint8_t *key, std::size_t ksize, const uint8_t *data, std::size_t dsize, uint8_t *res)
+namespace hash
 {
-	uint8_t v[BSZ] = {};
-	H hash;
-	if(ksize > BSZ)
+	//rfc 2104
+	template<class H>
+	class HMAC
 	{
-		hash.Update(key, ksize);
-		hash.Final(v);
-	}
-	else
-	{
-		std::copy(key, key + ksize, v);
-	}
-	std::for_each(v, v + BSZ, [&](uint8_t &e){e ^= 0x36;});
-	hash.Update(v, BSZ);
-	hash.Update(data, dsize);
-	hash.Final(res);
-	std::for_each(v, v + BSZ, [&](uint8_t &e){e ^= 0x6a;}); // 0x36 ^ 0x5c
-	hash.Update(v, BSZ);
-	hash.Update(res, H::hash_size);
-	hash.Final(res);
+		H hash;
+		uint8_t ki[H::block_size], ko[H::block_size];
+	public:
+		void SetKey(const uint8_t *key, std::size_t ksize)
+		{
+			std::fill(ki, ki + H::block_size, 0x36);
+			std::fill(ko, ko + H::block_size, 0x5c);
+			if(ksize > H::block_size)
+			{
+				uint8_t tmp[H::hash_size];
+				hash.Update(key, ksize);
+				hash.Final(tmp);
+				for(uint_fast16_t i = 0; i < H::hash_size; ++i)
+				{
+					ki[i] ^= tmp[i];
+					ko[i] ^= tmp[i];
+				}
+			}
+			else
+			{
+				for(uint_fast16_t i = 0; i < ksize; ++i)
+				{
+					ki[i] ^= key[i];
+					ko[i] ^= key[i];
+				}
+			}
+		}
+		void Init()
+		{
+			hash.Update(ki, H::block_size);
+		}
+		void Update(const uint8_t *data, std::size_t dsize)
+		{
+			hash.Update(data, dsize);
+		}
+		void Final(uint8_t *res)
+		{
+			hash.Final(res);
+			hash.Update(ko, H::block_size);
+			hash.Update(res, H::hash_size);
+			hash.Final(res);
+		}
+	};
 }

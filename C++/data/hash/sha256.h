@@ -70,6 +70,7 @@ namespace hash
 		}
 	public:
 		static const uint_fast8_t hash_size = 32;
+		static const uint_fast8_t block_size = 64;
 
 		void process_block(const uint8_t *v)
 		{
