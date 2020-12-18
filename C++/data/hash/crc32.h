@@ -3,11 +3,12 @@ namespace hash
 	//rfc 1952
 	class CRC32
 	{
+	public:
+		static const uint_fast8_t hash_size = 4;
+	private:
 		uint32_t tbl[256];
 		uint32_t crc;
 	public:
-		static const uint_fast8_t hash_size = 4;
-
 		CRC32() : crc(0xffffffff)
 		{
 			uint8_t n = 0;

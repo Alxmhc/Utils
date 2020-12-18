@@ -2,10 +2,14 @@ namespace hash
 {
 	class SHA1
 	{
+	public:
+		static const uint_fast8_t hash_size = 20;
+		static const uint_fast8_t block_size = 64;
+	private:
 		uint64_t size;
-		uint32_t st[5];
-		rbuf<64> buf;
-		uint32_t x[16];
+		uint32_t st[hash_size >> 2];
+		rbuf<block_size> buf;
+		uint32_t x[block_size >> 2];
 
 		void Transform()
 		{
@@ -67,9 +71,6 @@ namespace hash
 			memset(x, 0, sizeof(x));
 		}
 	public:
-		static const uint_fast8_t hash_size = 20;
-		static const uint_fast8_t block_size = 64;
-
 		void process_block(const uint8_t *v)
 		{
 			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);

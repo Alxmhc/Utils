@@ -2,10 +2,14 @@ namespace hash
 {
 	class SHA256
 	{
+	public:
+		static const uint_fast8_t hash_size = 32;
+		static const uint_fast8_t block_size = 64;
+	private:
 		uint64_t size;
-		uint32_t st[8];
-		rbuf<64> buf;
-		uint32_t x[16];
+		uint32_t st[hash_size >> 2];
+		rbuf<block_size> buf;
+		uint32_t x[block_size >> 2];
 
 		static const uint32_t K[64];
 
@@ -69,9 +73,6 @@ namespace hash
 			memset(x, 0, sizeof(x));
 		}
 	public:
-		static const uint_fast8_t hash_size = 32;
-		static const uint_fast8_t block_size = 64;
-
 		void process_block(const uint8_t *v)
 		{
 			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);

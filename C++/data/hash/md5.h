@@ -2,10 +2,14 @@ namespace hash
 {
 	class MD5
 	{
+	public:
+		static const uint_fast8_t hash_size = 16;
+		static const uint_fast8_t block_size = 64;
+	private:
 		uint64_t size;
-		uint32_t st[4];
-		rbuf<64> buf;
-		uint32_t x[16];
+		uint32_t st[hash_size >> 2];
+		rbuf<block_size> buf;
+		uint32_t x[block_size >> 2];
 
 		static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
 		{
@@ -122,9 +126,6 @@ namespace hash
 			memset(x, 0, sizeof(x));
 		}
 	public:
-		static const uint_fast8_t hash_size = 16;
-		static const uint_fast8_t block_size = 64;
-
 		void process_block(const uint8_t *v)
 		{
 			conv::pack<endianness::LITTLE_ENDIAN>(v, buf.sz, x);

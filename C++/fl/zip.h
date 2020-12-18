@@ -90,37 +90,5 @@ namespace fl_pr
 			}
 			return res;
 		}
-
-		struct encr_inf
-		{
-			std::vector<uint8_t> salt;
-			uint8_t psv[2];
-			uint8_t auth[10];
-		};
-
-		encr_inf parse_encr(byteReader &s, const inf &dat)
-		{
-			uint_fast8_t ssize = 0;
-			switch(dat.encryption)
-			{
-				case encrType::AES128:
-					ssize = 8;
-					break;
-				case encrType::AES192:
-					ssize = 12;
-					break;
-				case encrType::AES256:
-					ssize = 16;
-					break;
-			}
-			encr_inf res;
-			if(ssize == 0)
-				return res;
-			s.read_v(res.salt, ssize);
-			s.read(res.psv, 2);
-			s.skip(dat.psize - ssize - 12);
-			s.read(res.auth, 10);
-			return res;
-		}
 	}
 }
