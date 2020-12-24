@@ -7,6 +7,8 @@ namespace hash
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];
 	public:
+		static const uint_fast8_t hash_size = H::hash_size;
+
 		void SetKey(const uint8_t *key, std::size_t ksize)
 		{
 			std::fill(ki, ki + H::block_size, 0x36);

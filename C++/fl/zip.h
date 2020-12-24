@@ -28,12 +28,15 @@ namespace fl_pr
 
 		struct inf
 		{
+			std::size_t Hpos;
+			uint_fast16_t Hsize;
+
 			uint_fast8_t encryption;
-			std::string fname;
 			uint_fast16_t method;
 			uint8_t crc32[4];
-			uint_fast32_t fsize, psize;
-			std::size_t ppos;
+			uint_fast32_t Dsize;
+			uint_fast32_t fsize;
+			std::string fname;
 		};
 
 		bool read_file_hdr(byteReader &s, inf &r)
@@ -41,17 +44,22 @@ namespace fl_pr
 			uint8_t h[26];
 			if(s.read(h, sizeof(h)) != sizeof(h))
 				return false;
+			r.Hpos = s.get_pos() - 26;
+			r.Hsize = 26;
+
 			r.encryption = h[2] & 1;
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
 			std::copy_n(h+10, 4, r.crc32);
+			r.Dsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
-			r.psize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
+			r.Hsize += szfn;
 			r.fname.resize(szfn);
 			s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
 
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
+			r.Hsize += szex;
 			if(szex != 0)
 			{
 				std::vector<uint8_t> ext(szex);
@@ -62,8 +70,6 @@ namespace fl_pr
 					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 				}
 			}
-
-			r.ppos = s.get_pos();
 			return true;
 		}
 
@@ -83,7 +89,7 @@ namespace fl_pr
 					if( r.fname[r.fname.length() - 1] == '/' ) //folder
 						continue;
 					res.push_back(r);
-					s.skip(r.psize);
+					s.skip(r.Dsize);
 				}
 				else
 					break;

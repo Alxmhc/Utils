@@ -28,20 +28,20 @@ public:
 
 //rfc 2898
 template<class F>
-std::vector<uint8_t> PBKDF2(const std::vector<uint8_t> &passw, const std::vector<uint8_t> &salt, std::size_t c, std::size_t ksize)
+std::vector<uint8_t> PBKDF2(const uint8_t *passw, std::size_t psz, const uint8_t *salt, std::size_t ssz, std::size_t c, std::size_t ksz)
 {
 	std::vector<uint8_t> key;
-	if(ksize == 0)
+	if(ksz == 0)
 		return key;
-	uint32_t kl = (ksize - 1) / F::out_size + 1;
+	uint32_t kl = (ksz - 1) / F::out_size + 1;
 	key.reserve(kl * F::out_size);
 
-	F fcr(passw.data(), passw.size());
+	F fcr(passw, psz);
 	for(uint_fast32_t i = 1; i <= kl; i++)
 	{
 		uint8_t tmp[F::out_size], res[F::out_size];
 		uint8_t num[4] = {i>>24, i>>16, i>>8, i};
-		fcr.Calc(salt.data(), salt.size(), num, tmp);
+		fcr.Calc(salt, ssz, num, tmp);
 		std::copy_n(tmp, F::out_size, res);
 
 		for(std::size_t j = 1; j < c; j++)
@@ -51,6 +51,6 @@ std::vector<uint8_t> PBKDF2(const std::vector<uint8_t> &passw, const std::vector
 		}
 		key.insert(key.end(), res, res + F::out_size);
 	}
-	key.resize(ksize);
+	key.resize(ksz);
 	return key;
 }
