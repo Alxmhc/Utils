@@ -24,13 +24,15 @@ const (
 )
 
 type Infzip struct {
+	Hpos  uint64
+	Hsize uint16
+
 	Encryption byte
-	Fname      string
 	Method     uint16
 	CRC32      [4]byte
+	Dsize      uint32
 	Fsize      uint32
-	Psize      uint32
-	Ppos       uint64
+	Fname      string
 }
 
 func readHdr(rs io.ReadSeeker) *Infzip {
@@ -40,22 +42,28 @@ func readHdr(rs io.ReadSeeker) *Infzip {
 		return nil
 	}
 	var res Infzip
-	{
-		szfn := binary.LittleEndian.Uint16(hdr[22:24])
-		fns := make([]byte, szfn)
-		_, err = rs.Read(fns)
-		if err != nil {
-			return nil
-		}
-		res.Fname = string(fns)
-	}
+	offset, _ := rs.Seek(0, io.SeekCurrent)
+	res.Hpos = uint64(offset - 26)
+	res.Hsize = 26
+
 	res.Encryption = hdr[2] & 1
 	res.Method = binary.LittleEndian.Uint16(hdr[4:6])
 	copy(res.CRC32[:], hdr[10:14])
+	res.Dsize = binary.LittleEndian.Uint32(hdr[14:18])
 	res.Fsize = binary.LittleEndian.Uint32(hdr[18:22])
-	res.Psize = binary.LittleEndian.Uint32(hdr[14:18])
+
+	szfn := binary.LittleEndian.Uint16(hdr[22:24])
+	res.Hsize += szfn
+	fns := make([]byte, szfn)
+	_, err = rs.Read(fns)
+	if err != nil {
+		return nil
+	}
+	res.Fname = string(fns)
+
 	szex := binary.LittleEndian.Uint16(hdr[24:26])
 	if szex != 0 {
+		res.Hsize += szex
 		ext := make([]byte, szex)
 		_, err = rs.Read(ext)
 		if err != nil {
@@ -66,8 +74,6 @@ func readHdr(rs io.ReadSeeker) *Infzip {
 			res.Method = binary.LittleEndian.Uint16(ext[9:11])
 		}
 	}
-	offset, _ := rs.Seek(0, io.SeekCurrent)
-	res.Ppos = uint64(offset)
 	return &res
 }
 
@@ -89,38 +95,10 @@ func ReadInfzip(rs io.ReadSeeker) []Infzip {
 				continue
 			}
 			res = append(res, *inf)
-			rs.Seek(int64(inf.Psize), io.SeekCurrent)
+			rs.Seek(int64(inf.Dsize), io.SeekCurrent)
 		} else {
 			break
 		}
 	}
 	return res
-}
-
-type InfzipEncr struct {
-	Salt []byte
-	Psv  [2]byte
-	Auth [10]byte
-}
-
-func ReadInfzipEncr(rs io.ReadSeeker, inf Infzip) *InfzipEncr {
-	ssize := 0
-	switch inf.Encryption {
-	case eAES128:
-		ssize = 8
-	case eAES192:
-		ssize = 12
-	case eAES256:
-		ssize = 16
-	}
-	if ssize == 0 {
-		return nil
-	}
-	var res InfzipEncr
-	res.Salt = make([]byte, ssize)
-	rs.Read(res.Salt)
-	rs.Read(res.Psv[:])
-	rs.Seek(int64(inf.Psize)-int64(ssize)-12, io.SeekCurrent)
-	rs.Read(res.Auth[:])
-	return &res
 }

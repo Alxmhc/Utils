@@ -59,9 +59,9 @@ namespace fl_pr
 			s.read(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
 
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
-			r.Hsize += szex;
 			if(szex != 0)
 			{
+				r.Hsize += szex;
 				std::vector<uint8_t> ext(szex);
 				s.read(ext.data(), szex);
 				if(r.method == 99)
