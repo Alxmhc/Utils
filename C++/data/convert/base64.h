@@ -10,12 +10,12 @@ namespace convert
 		public:
 			Encoder(const std::string &b) : en(b) {}
 
-			std::vector<uint8_t> Convert(const uint8_t *v, const std::size_t n) const
+			std::vector<uint8_t> Convert(const uint8_t *v, const size_t n) const
 			{
 				std::vector<uint8_t> out;
 				out.reserve(((n/3)<<2)+3);
 
-				std::size_t k = 0;
+				size_t k = 0;
 				for(; k + 2 < n; k += 3)
 				{
 					uint_fast32_t t = (v[k] << 16) | (v[k+1] << 8) | v[k+2];
@@ -57,12 +57,12 @@ namespace convert
 				}
 			}
 
-			std::vector<uint8_t> Convert(const uint8_t *v, const std::size_t n) const
+			std::vector<uint8_t> Convert(const uint8_t *v, const size_t n) const
 			{
 				std::vector<uint8_t> out;
 				out.reserve(3*(n>>2)+2);
 
-				std::size_t k = 0;
+				size_t k = 0;
 				for(; k + 3 < n; k += 4)
 				{
 					uint8_t c1 = de[v[k]];

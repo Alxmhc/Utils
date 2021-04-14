@@ -1,7 +1,7 @@
 class byteWriter
 {
 public:
-	virtual void write(const uint8_t*, std::size_t) = 0;
+	virtual void write(const uint8_t*, size_t) = 0;
 };
 
 class bw_  : public byteWriter
@@ -13,9 +13,9 @@ public:
 	{
 		m.push_back(&w);
 	}
-	void write(const uint8_t* v, std::size_t n)
+	void write(const uint8_t* v, size_t n)
 	{
-		for(std::size_t i = 0; i < m.size(); i++)
+		for(size_t i = 0; i < m.size(); i++)
 		{
 			m[i]->write(v, n);
 		}
@@ -28,7 +28,7 @@ class bw_stream : public byteWriter
 public:
 	bw_stream(std::ostream &d) : s(d) {}
 
-	void write(const uint8_t* v, std::size_t n)
+	void write(const uint8_t* v, size_t n)
 	{
 		s.write(reinterpret_cast<const char*>(v), n);
 	}
@@ -48,7 +48,7 @@ class bw_array : public byteWriter
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
-	void write(const uint8_t* v, std::size_t n)
+	void write(const uint8_t* v, size_t n)
 	{
 		d.insert(d.end(), v, v + n);
 	}
@@ -61,7 +61,7 @@ class bw_hash : public byteWriter
 public:
 	bw_hash(){}
 
-	void write(const uint8_t* v, std::size_t n)
+	void write(const uint8_t* v, size_t n)
 	{
 		hash.Update(v, n);
 	}

@@ -30,9 +30,9 @@ namespace hash
 			} while(n != 0);
 		}
 
-		void Update(const uint8_t *v, const std::size_t n)
+		void Update(const uint8_t *v, const size_t n)
 		{
-			for(std::size_t i = 0; i < n; i++)
+			for(size_t i = 0; i < n; i++)
 			{
 				crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
 			}

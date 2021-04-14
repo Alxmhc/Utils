@@ -28,7 +28,7 @@ namespace fl_pr
 
 		struct inf
 		{
-			std::size_t Hpos;
+			size_t Hpos;
 			uint_fast16_t Hsize;
 
 			uint_fast8_t encryption;

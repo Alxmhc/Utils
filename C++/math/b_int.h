@@ -87,7 +87,7 @@ public:
 		n[0] += a;
 		if(n[0] < a)
 		{
-			std::size_t i = 1;
+			size_t i = 1;
 			auto sz = n.size();
 			for(; i < sz; ++i)
 			{
@@ -112,7 +112,7 @@ public:
 			*this = 0;
 			return *this;
 		}
-		std::size_t i = 0;
+		size_t i = 0;
 		while(n[i] == 0)
 		{
 			i++;
@@ -173,7 +173,7 @@ public:
 			n.resize(csz);
 			sz = csz;
 		}
-		std::size_t i = 0;
+		size_t i = 0;
 		bool d = false;
 		for(; i < csz; i++)
 		{
@@ -220,7 +220,7 @@ public:
 		auto tmp = *this;
 		n.reserve(sz + csz);
 		operator*=(c.n[0]);
-		for(std::size_t i = 1; i < csz; ++i)
+		for(size_t i = 1; i < csz; ++i)
 		{
 			tmp.n.insert(tmp.n.begin(), 0);
 			operator+=(tmp * c.n[i]);

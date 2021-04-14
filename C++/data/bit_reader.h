@@ -15,13 +15,13 @@ public:
 		r->getC<E>(c);
 	}
 
-	void readB(uint8_t *v, std::size_t n)
+	void readB(uint8_t *v, size_t n)
 	{
 		o = 0;
 		r->read(v, n);
 	}
 
-	void skipB(std::size_t n)
+	void skipB(size_t n)
 	{
 		o = 0;
 		r->skip(n);

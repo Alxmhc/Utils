@@ -137,7 +137,7 @@ namespace hash
 			Init();
 		}
 
-		void Update(const uint8_t *v, const std::size_t n)
+		void Update(const uint8_t *v, const size_t n)
 		{
 			buf.process(v, n, *this);
 			size += n;

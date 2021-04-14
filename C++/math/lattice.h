@@ -2,7 +2,7 @@ namespace lattice
 {
 	namespace sc
 	{
-		std::size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
+		size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
 		{
 			return n1*n2*n3;
 		}
@@ -12,7 +12,7 @@ namespace lattice
 			std::vector<vt3> r( num(n1,n2,n3) );
 			vt3 d(0.5*(n1-1), 0.5*(n2-1), 0.5*(n3-1));
 
-			std::size_t k = 0;
+			size_t k = 0;
 			for(uint_fast32_t x=0; x<n1; x++)
 			{
 				for(uint_fast32_t y=0; y<n2; y++)
@@ -29,7 +29,7 @@ namespace lattice
 
 	namespace bcc
 	{
-		std::size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
+		size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
 		{
 			return n1*n2*n3 + (n1-1)*(n2-1)*(n3-1);
 		}
@@ -39,7 +39,7 @@ namespace lattice
 			std::vector<vt3> r( num(n1,n2,n3) );
 			vt3 d(0.5*(n1-1), 0.5*(n2-1), 0.5*(n3-1));
 
-			std::size_t k = 0;
+			size_t k = 0;
 			for(uint_fast32_t x=0; x<n1; x++)
 			{
 				for(uint_fast32_t y=0; y<n2; y++)
@@ -57,7 +57,7 @@ namespace lattice
 
 	namespace fcc
 	{
-		std::size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
+		size_t num(uint_fast32_t n1, uint_fast32_t n2, uint_fast32_t n3)
 		{
 			return 2*(2*n1*n2*n3 - n1*n2 - n1*n3 - n2*n3) + n1 + n2 + n3;
 		}
@@ -67,7 +67,7 @@ namespace lattice
 			std::vector<vt3> r( num(n1,n2,n3) );
 			vt3 d(0.5*(n1-1), 0.5*(n2-1), 0.5*(n3-1));
 
-			std::size_t k = 0;
+			size_t k = 0;
 			for(uint_fast32_t x=0; x<n1; x++)
 			{
 				for(uint_fast32_t y=0; y<n2; y++)

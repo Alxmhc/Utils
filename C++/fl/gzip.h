@@ -7,7 +7,7 @@ namespace fl_pr
 			std::string fname, comment;
 			uint32_t fsize;
 			uint8_t crc32[4];
-			std::size_t psize, ppos;
+			size_t psize, ppos;
 		};
 
 		inf read_inf(byteReader &s)

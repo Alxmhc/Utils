@@ -1,6 +1,6 @@
 namespace decode
 {
-	void unchunk(const uint8_t *v, const std::size_t n, byteWriter &bw)
+	void unchunk(const uint8_t *v, const size_t n, byteWriter &bw)
 	{
 		size_t i = 0;
 		while(i < n)

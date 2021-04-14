@@ -185,7 +185,7 @@ namespace convert
 					}
 					if(out.size() > mx_dist)
 					{
-						std::size_t t = out.size() - mx_dist;
+						size_t t = out.size() - mx_dist;
 						bw.write(out.data(), t);
 						out.erase(out.begin(), out.begin() + t);
 					}

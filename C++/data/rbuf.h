@@ -1,10 +1,10 @@
-template<std::size_t SZ>
+template<size_t SZ>
 class rbuf
 {
 	uint8_t d[SZ];
-	std::size_t offset;
+	size_t offset;
 public:
-	static const std::size_t sz = SZ;
+	static const size_t sz = SZ;
 	rbuf() : offset(0) {}
 	void clear()
 	{
@@ -13,7 +13,7 @@ public:
 	}
 
 	template<class C>
-	void process(const uint8_t *v, const std::size_t n, C &cl)
+	void process(const uint8_t *v, const size_t n, C &cl)
 	{
 		if(n < sz - offset)
 		{
@@ -21,7 +21,7 @@ public:
 			offset += n;
 			return;
 		}
-		std::size_t part = 0;
+		size_t part = 0;
 		if(offset != 0)
 		{
 			part = sz - offset;
@@ -51,11 +51,11 @@ public:
 	{
 		return d;
 	}
-	std::size_t size() const
+	size_t size() const
 	{
 		return offset;
 	}
-	std::size_t sz_e() const
+	size_t sz_e() const
 	{
 		return sz - offset;
 	}

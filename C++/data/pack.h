@@ -82,12 +82,12 @@ struct bconv<8, endianness::BIG_ENDIAN>
 namespace conv
 {
 	template<char E, typename T>
-	void pack(const uint8_t *a, const std::size_t n, T *r)
+	void pack(const uint8_t *a, const size_t n, T *r)
 	{
 		memcpy(r, a, n);
 		if(E != endianness::current)
 		{
-			for(std::size_t i = 0; i < n / sizeof(T); ++i)
+			for(size_t i = 0; i < n / sizeof(T); ++i)
 			{
 				ByteRev<sizeof(T)>(r[i]);
 			}
@@ -104,14 +104,14 @@ namespace conv
 		memcpy(a, &c, sizeof(T));
 	}
 	template<char E, typename T>
-	void unpack(const T *a, std::size_t n, uint8_t *r)
+	void unpack(const T *a, size_t n, uint8_t *r)
 	{
 		if(E == endianness::current)
 		{
 			memcpy(r, a, n*sizeof(T));
 			return;
 		}
-		for(std::size_t i = 0; i < n; ++i)
+		for(size_t i = 0; i < n; ++i)
 		{
 			unpack<E>(a[i], r + i*sizeof(T));
 		}
