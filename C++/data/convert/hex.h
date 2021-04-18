@@ -10,7 +10,7 @@ namespace convert
 			std::string en;
 		public:
 			Encoder(const std::string &b) : en(b) {}
-			
+
 			std::vector<uint8_t> Convert(const uint8_t *v, const size_t n) const
 			{
 				std::vector<uint8_t> out;

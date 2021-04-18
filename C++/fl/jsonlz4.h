@@ -5,14 +5,16 @@ namespace fl_pr
 		const uint_fast8_t offset = 12;
 		uint32_t read_size(byteReader &s)
 		{
-			{
-				uint8_t hdr[8];
-				s.read(hdr, 8);
-				if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
-					return 0;
-			}
-			uint32_t fsize = 0;
-			s.getC<endianness::LITTLE_ENDIAN>(fsize);
+			uint8_t hdr[8];
+			if(!s.readN(hdr, 8))
+				return 0;
+			if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
+				return 0;
+
+			uint8_t sz[4];
+			if(!s.readN(sz, 4))
+				return 0;
+			auto fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(sz);
 			return fsize;
 		}
 		void Unpack(const char* f_in, const char* f_out)

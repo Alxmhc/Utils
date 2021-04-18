@@ -5,6 +5,12 @@ public:
 	virtual void set_pos(int_fast32_t) = 0;
 
 	virtual size_t read(uint8_t*, size_t) = 0;
+	bool readN(uint8_t* d, size_t n)
+	{
+		if(n == 0)
+			return true;
+		return read(d, n) == n;
+	}
 
 	size_t read_v(std::vector<uint8_t> &v, size_t n)
 	{

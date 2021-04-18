@@ -15,7 +15,7 @@ namespace fl_pr
 			inf res = {};
 			{
 				uint8_t hdr[3];
-				s.read(hdr, 3);
+				s.readN(hdr, 3);
 				if(std::memcmp(hdr, "\x1f\x8b\x08", 3) != 0)
 					return res;
 			}
