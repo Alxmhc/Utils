@@ -8,7 +8,7 @@ public:
 	pl(const vt3 &a, const vt3 &b, const vt3 &c)
 	{
 		n = vt3::pr(b-a, c-a);
-		nrm(n);
+		n /= abs(n);
 		p = a*n;
 		if(p < 0)
 		{
@@ -20,12 +20,6 @@ public:
 	long double dst(const vt3 &k) const
 	{
 		return abs(dst_(k));
-	}
-
-	vt3 prct(const vt3 &c) const
-	{
-		long double d = dst_(c);
-		return c - n*d;
 	}
 
 private:

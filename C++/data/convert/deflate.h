@@ -34,8 +34,6 @@ namespace convert
 				return sz;
 			}
 
-			static const uint_fast16_t mx_dist = 32768;
-
 			static uint_fast16_t get_dist(const uint_fast8_t c, bitReaderL &brd)
 			{
 				static const uint_fast16_t distT[30] = {1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577};
@@ -161,10 +159,11 @@ namespace convert
 		public:
 			Decoder() {}
 
-			static void Convert(byteReader &br, byteWriter &bw)
+			static std::vector<uint8_t> Convert(byteReader &br, size_t nsz = 0)
 			{
 				bitReaderL brd(br);
 				std::vector<uint8_t> out;
+				out.reserve(nsz);
 				for(;;)
 				{
 					bool isFin = (brd.read1() == 1);
@@ -183,16 +182,10 @@ namespace convert
 					default:
 						isFin = true;
 					}
-					if(out.size() > mx_dist)
-					{
-						size_t t = out.size() - mx_dist;
-						bw.write(out.data(), t);
-						out.erase(out.begin(), out.begin() + t);
-					}
 					if(isFin)
 						break;
 				}
-				bw.write(out.data(), out.size());
+				return out;
 			}
 		};
 	}
