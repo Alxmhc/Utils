@@ -1,4 +1,4 @@
-package parsefile
+package fl_har
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ type header struct {
 	Value string
 }
 
-type harRequest struct {
+type request struct {
 	Method   string
 	Url      string
 	Headers  []header
@@ -24,7 +24,7 @@ type harRequest struct {
 	}
 }
 
-type harResponse struct {
+type response struct {
 	Status     int
 	StatusText string
 	Headers    []header
@@ -34,12 +34,12 @@ type harResponse struct {
 	}
 }
 
-type harEntrie struct {
-	Request  harRequest
-	Response harResponse
+type entrie struct {
+	Request  request
+	Response response
 }
 
-func (e harEntrie) getReq() *http.Request {
+func (e entrie) getReq() *http.Request {
 	rq := e.Request
 	req, _ := http.NewRequest(rq.Method, rq.Url, strings.NewReader(rq.PostData.Text))
 	for _, hdr := range rq.Headers {
@@ -52,12 +52,12 @@ func (e harEntrie) getReq() *http.Request {
 	return req
 }
 
-func (e harEntrie) getResp() *http.Response {
+func (e entrie) getResp() *http.Response {
 	rs := e.Response
 	if rs.Status == 0 {
 		return nil
 	}
-	res := http.Response{Proto: "HTTP/1.1", ProtoMajor: 1, ProtoMinor: 1, Header: make(http.Header, 0)}
+	res := &http.Response{Proto: "HTTP/1.1", ProtoMajor: 1, ProtoMinor: 1, Header: make(http.Header, 0)}
 	res.StatusCode = rs.Status
 	res.Status = rs.StatusText
 
@@ -76,7 +76,6 @@ func (e harEntrie) getResp() *http.Response {
 	for _, hdr := range rs.Headers {
 		name := strings.ToLower(hdr.Name)
 		if name == "status" ||
-			name == "content-length" ||
 			name == "content-encoding" ||
 			name == "transfer-encoding" {
 			continue
@@ -84,16 +83,16 @@ func (e harEntrie) getResp() *http.Response {
 		res.Header.Set(strings.Title(name), hdr.Value)
 	}
 	res.Header.Set("Content-Length", strconv.FormatInt(res.ContentLength, 10))
-	return &res
+	return res
 }
 
 type har struct {
 	Log struct {
-		Entries []harEntrie
+		Entries []entrie
 	}
 }
 
-func ParseHar(fname string) []http.Request {
+func Parse(fname string) []http.Request {
 	fl, _ := ioutil.ReadFile(fname)
 	var data har
 	json.Unmarshal([]byte(fl), &data)
