@@ -5,11 +5,8 @@ namespace hash
 	{
 	public:
 		static const uint_fast8_t hash_size = 4;
-	private:
-		uint32_t tbl[256];
-		uint32_t crc;
-	public:
-		CRC32() : crc(0xffffffff)
+
+		static void InitTable(uint32_t *tbl, const uint_fast32_t I)
 		{
 			uint8_t n = 0;
 			do {
@@ -19,7 +16,7 @@ namespace hash
 				{
 					if ((c & 1) != 0)
 					{
-						c = (c >> 1) ^ 0xedb88320;
+						c = (c >> 1) ^ I;
 					}
 					else
 					{
@@ -28,6 +25,14 @@ namespace hash
 				}
 				tbl[n] = c;
 			} while(n != 0);
+		}
+	private:
+		uint32_t tbl[256];
+		uint32_t crc;
+	public:
+		CRC32() : crc(0xffffffff)
+		{
+			InitTable(tbl, 0xedb88320);
 		}
 
 		void Update(const uint8_t *v, const size_t n)

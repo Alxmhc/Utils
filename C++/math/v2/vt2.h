@@ -1,4 +1,5 @@
-class vt2{
+class vt2
+{
 public:
 	long double x, y;
 	vt2(void) : x(0), y(0) {}

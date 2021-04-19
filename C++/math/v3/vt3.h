@@ -1,4 +1,5 @@
-class vt3{
+class vt3
+{
 public:
 	long double x, y, z;
 	vt3(void) : x(0), y(0), z(0) {}
