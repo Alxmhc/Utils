@@ -23,13 +23,13 @@ namespace fl_pr
 			s.get(flg);
 			if(flg > 31)
 				return res;
-			s.skip(6);
+			s.set_pos(6, std::ios_base::cur);
 			if( (flg & 4) != 0 )
 			{
 				uint16_t sz;
 				if( !s.getC<endianness::LITTLE_ENDIAN>(sz) )
 					return res;
-				s.skip(sz);
+				s.set_pos(sz, std::ios_base::cur);
 			}
 			if( (flg & 8) != 0 )
 			{
@@ -41,17 +41,17 @@ namespace fl_pr
 			}
 			if( (flg & 2) != 0 )
 			{
-				s.skip(2);
+				s.set_pos(2, std::ios_base::cur);
 			}
 
 			const auto st = s.get_pos();
-			s.set_pos(-8);
+			s.set_pos(-8, std::ios_base::end);
 			const auto end = s.get_pos();
 			if(st >= end)
 				return res;
 			res.ppos = st;
 			res.psize = end - st;
-			s.read(res.crc32, 4);
+			s.readN(res.crc32, 4);
 			s.getC<endianness::LITTLE_ENDIAN>(res.fsize);
 			return res;
 		}

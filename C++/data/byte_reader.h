@@ -1,10 +1,11 @@
 class byteReader
 {
+protected:
+	virtual size_t read(uint8_t*, size_t) = 0;
 public:
 	virtual size_t get_pos() const = 0;
-	virtual void set_pos(int_fast32_t) = 0;
+	virtual void set_pos(int_fast64_t, std::ios_base::seekdir) = 0;
 
-	virtual size_t read(uint8_t*, size_t) = 0;
 	bool readN(uint8_t* d, size_t n)
 	{
 		if(n == 0)
@@ -12,17 +13,18 @@ public:
 		return read(d, n) == n;
 	}
 
-	size_t read_v(std::vector<uint8_t> &v, size_t n)
+	bool readN_v(std::vector<uint8_t> &v, size_t n)
 	{
 		if(n == 0)
-			return 0;
-		auto sz = v.size();
-		v.resize(sz + n);
-		return read(&v[sz], n);
+			return true;
+		std::vector<uint8_t> t(n);
+		if(!readN(t.data(), n))
+			return false;
+		v.insert(v.end(), t.begin(), t.end());
+		return true;
 	}
 
 	virtual bool get(uint8_t&) = 0;
-	virtual void skip(size_t) = 0;
 	virtual std::string read_string(char) = 0;
 
 	template<char E, typename T>
@@ -48,27 +50,15 @@ public:
 	{
 		return static_cast<size_t>(s.tellg());
 	}
-	void set_pos(int_fast32_t p)
+	void set_pos(int_fast64_t pos, std::ios_base::seekdir t)
 	{
-		if(p < 0)
-		{
-			s.seekg(p, std::ios_base::end);
-		}
-		else
-		{
-			s.seekg(p, std::ios_base::beg);
-		}
+		s.seekg(pos, t);
 	}
 
 	bool get(uint8_t &b)
 	{
-		b = s.get();
+		b = static_cast<uint8_t>(s.get());
 		return !s.fail();
-	}
-
-	void skip(size_t n)
-	{
-		s.seekg(n, std::ios_base::cur);
 	}
 
 	size_t read(uint8_t *v, size_t n)
@@ -103,15 +93,19 @@ public:
 	{
 		return o;
 	}
-	void set_pos(int_fast32_t p)
+	void set_pos(int_fast64_t pos, std::ios_base::seekdir t)
 	{
-		if(p < 0)
+		switch(t)
 		{
-			o = sz + p;
-		}
-		else
-		{
-			o = p;
+		case std::ios_base::beg:
+			o = pos;
+			break;
+		case std::ios_base::cur:
+			o += pos;
+			break;
+		case std::ios_base::end:
+			o = sz + pos;
+			break;
 		}
 	}
 
@@ -122,11 +116,6 @@ public:
 		b = d[o];
 		o++;
 		return true;
-	}
-
-	void skip(size_t n)
-	{
-		o += n;
 	}
 
 	size_t read(uint8_t *v, size_t n)

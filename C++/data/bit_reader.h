@@ -18,13 +18,13 @@ public:
 	void readB(uint8_t *v, size_t n)
 	{
 		o = 0;
-		r->read(v, n);
+		r->readN(v, n);
 	}
 
 	void skipB(size_t n)
 	{
 		o = 0;
-		r->skip(n);
+		r->set_pos(n, std::ios_base::cur);
 	}
 };
 

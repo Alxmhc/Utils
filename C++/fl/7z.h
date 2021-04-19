@@ -35,9 +35,11 @@ namespace fl_pr
 		bool getHeader(byteReader &s, std::vector<uint8_t> &hdr)
 		{
 			uint8_t header[32];
-			if(s.read(header, 32) != 32)
+			if(!s.readN(header, 32))
 				return false;
 			if(std::memcmp(header, "\x37\x7a\xbc\xaf\x27\x1c", 6) != 0)
+				return false;
+			if(header[6] != 0)
 				return false;
 
 			hash::CRC32 hs;
@@ -48,12 +50,12 @@ namespace fl_pr
 			if(std::memcmp(hash, header + 8, hash::CRC32::hash_size) != 0)
 				return false;
 
-			const auto NHoffset = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 12);
 			const auto NHsize = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 20);
-			s.skip(NHoffset);
+			const auto NHoffset = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 12);
+			s.set_pos(NHoffset, std::ios_base::cur);
 
 			hdr.resize(NHsize);
-			if(s.read(&hdr[0], NHsize) != NHsize)
+			if(!s.readN(hdr.data(), NHsize))
 				return false;
 			hs.Update(hdr.data(), hdr.size());
 			hs.Final(hash);
