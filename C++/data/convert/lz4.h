@@ -32,9 +32,10 @@ namespace convert
 					size_t size = get_size(br, b >> 4);
 					if(!br.readN_v(out, size))
 						break;
-					uint16_t offset;
-					if(!br.getC<endianness::LITTLE_ENDIAN>(offset))
+					uint8_t o[2];
+					if(!br.readN(o, 2))
 						break;
+					auto offset = bconv<2, endianness::LITTLE_ENDIAN>::pack(o);
 					size_t len = get_size(br, b & 0xf) + 4;
 					LZ77_repeat(len, offset, out);
 				}

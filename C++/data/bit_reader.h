@@ -8,19 +8,16 @@ protected:
 public:
 	virtual uint_fast8_t read1() = 0;
 
-	template<char E, typename T>
-	void getB(T &c)
+	bool readB(uint8_t *v, size_t n)
 	{
 		o = 0;
-		r->getC<E>(c);
+		return r->readN(v, n);
 	}
-
-	void readB(uint8_t *v, size_t n)
+	bool readB_v(std::vector<uint8_t> &v, size_t n)
 	{
 		o = 0;
-		r->readN(v, n);
+		return r->readN_v(v, n);
 	}
-
 	void skipB(size_t n)
 	{
 		o = 0;

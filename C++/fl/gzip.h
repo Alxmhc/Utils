@@ -5,7 +5,7 @@ namespace fl_pr
 		struct inf
 		{
 			std::string fname, comment;
-			uint32_t fsize;
+			uint_fast32_t fsize;
 			uint8_t crc32[4];
 			size_t psize, ppos;
 		};
@@ -26,9 +26,10 @@ namespace fl_pr
 			s.set_pos(6, std::ios_base::cur);
 			if( (flg & 4) != 0 )
 			{
-				uint16_t sz;
-				if( !s.getC<endianness::LITTLE_ENDIAN>(sz) )
+				uint8_t t[2];
+				if(!s.readN(t, 2))
 					return res;
+				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(t);
 				s.set_pos(sz, std::ios_base::cur);
 			}
 			if( (flg & 8) != 0 )
@@ -52,7 +53,10 @@ namespace fl_pr
 			res.ppos = st;
 			res.psize = end - st;
 			s.readN(res.crc32, 4);
-			s.getC<endianness::LITTLE_ENDIAN>(res.fsize);
+
+			uint8_t fsz[4];
+			s.readN(fsz, 4);
+			res.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(fsz);
 			return res;
 		}
 	}

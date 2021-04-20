@@ -96,6 +96,28 @@ namespace fl_pr
 			}
 			res.erase(res.begin(), res.begin() + 12);
 		}
+
+		static std::vector<uint8_t> decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, const std::vector<uint8_t> &data)
+		{
+			if(data.size() <= ssz + 12)
+				return std::vector<uint8_t>();
+			std::vector<uint8_t> key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(passw, psz, data.data(), ssz, 1000, ssz*4 + 2);
+			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
+				return std::vector<uint8_t>();
+			std::vector<uint8_t> res(data.cbegin() + ssz + 2, data.cend() - 10);
+			{
+				hash::HMAC<hash::SHA1> h;
+				h.SetKey(key.data() + ssz*2, ssz*2);
+				h.Init();
+				h.Update(res.data(), res.size());
+				uint8_t hs[hash::SHA1::hash_size];
+				h.Final(hs);
+				if(std::memcmp(data.data() + data.size() - 10, hs, 10) != 0)
+					return std::vector<uint8_t>();
+			}
+			//AESCTRDecryptLE(key.data(), ssz*2, res);
+			return res;
+		}
 	public:
 		static std::vector<inf> read_inf(byteReader &s)
 		{
@@ -122,14 +144,22 @@ namespace fl_pr
 
 		static std::vector<uint8_t> Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz)
 		{
+			s.set_pos(inf.Hpos + inf.Hsize, std::ios_base::beg);
+			std::vector<uint8_t> data(inf.Dsize);
+			s.readN(data.data(), inf.Dsize);
 			switch(inf.encryption)
 			{
 			case eZIP:
-				s.set_pos(inf.Hpos + inf.Hsize, std::ios_base::beg);
-				std::vector<uint8_t> res(inf.Dsize);
-				s.readN(res.data(), inf.Dsize);
-				decryptZIP(passw, psz, res);
-				return res;
+				if(inf.Dsize <= 12)
+					break;
+				decryptZIP(passw, psz, data);
+				return data;
+			case eAES128:
+				return decryptAES(passw, psz, 8, data);
+			case eAES192:
+				return decryptAES(passw, psz, 12, data);
+			case eAES256:
+				return decryptAES(passw, psz, 16, data);
 			}
 			return std::vector<uint8_t>();
 		}

@@ -87,14 +87,14 @@ namespace convert
 				return res;
 			}
 
-			static void inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
+			static bool inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
 			{
-				uint16_t sz;
-				brd.getB<endianness::LITTLE_ENDIAN>(sz);
+				uint8_t sza[2];
+				if(!brd.readB(sza, 2))
+					return false;
 				brd.skipB(2);
-				const auto end = out.size();
-				out.resize(end + sz);
-				brd.readB(out.data() + end, sz);
+				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(sza);
+				return brd.readB_v(out, sz);
 			}
 
 			static void inflate_fixed(bitReaderL &brd, std::vector<uint8_t> &out)

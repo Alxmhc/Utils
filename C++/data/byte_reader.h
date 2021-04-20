@@ -1,10 +1,15 @@
 class byteReader
 {
 protected:
+	size_t sz;
 	virtual size_t read(uint8_t*, size_t) = 0;
 public:
+	virtual size_t get_size() = 0;
 	virtual size_t get_pos() const = 0;
 	virtual void set_pos(int_fast64_t, std::ios_base::seekdir) = 0;
+
+	virtual bool get(uint8_t&) = 0;
+	virtual std::string read_string(char) = 0;
 
 	bool readN(uint8_t* d, size_t n)
 	{
@@ -12,30 +17,14 @@ public:
 			return true;
 		return read(d, n) == n;
 	}
-
 	bool readN_v(std::vector<uint8_t> &v, size_t n)
 	{
 		if(n == 0)
 			return true;
 		std::vector<uint8_t> t(n);
-		if(!readN(t.data(), n))
+		if(read(t.data(), n) != n)
 			return false;
 		v.insert(v.end(), t.begin(), t.end());
-		return true;
-	}
-
-	virtual bool get(uint8_t&) = 0;
-	virtual std::string read_string(char) = 0;
-
-	template<char E, typename T>
-	bool getC(T &c)
-	{
-		const auto sz = sizeof(T);
-		uint8_t t[sz];
-		const size_t k = read(t, sz);
-		if(k != sz)
-			return false;
-		c = bconv<sz, E>::pack(t);
 		return true;
 	}
 };
@@ -43,9 +32,29 @@ public:
 class br_stream : public byteReader
 {
 	std::istream &s;
+protected:
+	size_t read(uint8_t *v, size_t n)
+	{
+		s.read(reinterpret_cast<char*>(v), n);
+		return static_cast<size_t>(s.gcount());
+	}
 public:
-	br_stream(std::istream &d) : s(d) {}
+	br_stream(std::istream &d, size_t size = 0) : s(d)
+	{
+		sz = size;
+	}
 
+	size_t get_size()
+	{
+		if(sz == 0)
+		{
+			auto pos = s.tellg();
+			s.seekg(0, std::ios_base::end);
+			sz = static_cast<size_t>(s.tellg());
+			s.seekg(pos, std::ios_base::beg);
+		}
+		return sz;
+	}
 	size_t get_pos() const
 	{
 		return static_cast<size_t>(s.tellg());
@@ -59,12 +68,6 @@ public:
 	{
 		b = static_cast<uint8_t>(s.get());
 		return !s.fail();
-	}
-
-	size_t read(uint8_t *v, size_t n)
-	{
-		s.read(reinterpret_cast<char*>(v), n);
-		return static_cast<size_t>(s.gcount());
 	}
 
 	std::string read_string(char e)
@@ -85,10 +88,25 @@ public:
 class br_array : public byteReader
 {
 	const uint8_t *d;
-	size_t sz, o;
+	size_t o;
+protected:
+	size_t read(uint8_t *v, size_t n)
+	{
+		n = std::min(n, sz - o);
+		std::copy_n(d + o, n, v);
+		o += n;
+		return n;
+	}
 public:
-	br_array(const uint8_t *v, size_t size) : d(v), sz(size), o(0) {}
+	br_array(const uint8_t *v, size_t size) : d(v), o(0)
+	{
+		sz = size;
+	}
 
+	size_t get_size()
+	{
+		return sz;
+	}
 	size_t get_pos() const
 	{
 		return o;
@@ -116,14 +134,6 @@ public:
 		b = d[o];
 		o++;
 		return true;
-	}
-
-	size_t read(uint8_t *v, size_t n)
-	{
-		n = std::min(n, sz - o);
-		std::copy_n(d + o, n, v);
-		o += n;
-		return n;
 	}
 
 	std::string read_string(char e)

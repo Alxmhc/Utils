@@ -38,6 +38,7 @@ type Inf struct {
 	Dsize      uint32
 	Fsize      uint32
 	Fname      string
+	IsDir      bool
 }
 
 func readHdr(rs io.ReadSeeker) *Inf {
@@ -95,10 +96,7 @@ func ReadInf(rs io.ReadSeeker) []Inf {
 			if inf == nil {
 				break
 			}
-			//folder
-			if inf.Fname[len(inf.Fname)-1] == '/' {
-				continue
-			}
+			inf.IsDir = (inf.Fname[len(inf.Fname)-1] == '/')
 			res = append(res, *inf)
 			rs.Seek(int64(inf.Dsize), io.SeekCurrent)
 		} else {
