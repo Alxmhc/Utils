@@ -1,8 +1,13 @@
 class byteReader
 {
+	bool check(size_t n)
+	{
+		return get_pos() + n <= get_size();
+	}
 protected:
 	size_t sz;
 	virtual size_t read(uint8_t*, size_t) = 0;
+	virtual void readNAll(uint8_t*, const size_t) = 0;
 public:
 	virtual size_t get_size() = 0;
 	virtual size_t get_pos() const = 0;
@@ -15,16 +20,20 @@ public:
 	{
 		if(n == 0)
 			return true;
-		return read(d, n) == n;
+		if(!check(n))
+			return false;
+		readNAll(d, n);
+		return true;
 	}
 	bool readN_v(std::vector<uint8_t> &v, size_t n)
 	{
 		if(n == 0)
 			return true;
-		std::vector<uint8_t> t(n);
-		if(read(t.data(), n) != n)
+		if(!check(n))
 			return false;
-		v.insert(v.end(), t.begin(), t.end());
+		const auto sz = v.size();
+		v.resize(sz + n);
+		readNAll(v.data() + sz, n);
 		return true;
 	}
 };
@@ -33,6 +42,10 @@ class br_stream : public byteReader
 {
 	std::istream &s;
 protected:
+	void readNAll(uint8_t *v, const size_t n)
+	{
+		s.read(reinterpret_cast<char*>(v), n);
+	}
 	size_t read(uint8_t *v, size_t n)
 	{
 		s.read(reinterpret_cast<char*>(v), n);
@@ -90,6 +103,11 @@ class br_array : public byteReader
 	const uint8_t *d;
 	size_t o;
 protected:
+	void readNAll(uint8_t *v, const size_t n)
+	{
+		std::copy_n(d + o, n, v);
+		o += n;
+	}
 	size_t read(uint8_t *v, size_t n)
 	{
 		n = std::min(n, sz - o);
