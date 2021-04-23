@@ -48,17 +48,17 @@ namespace fl_pr
 			uint8_t b;
 			while(s.get(b))
 			{
-				c |= static_cast<uint_fast64_t>(b) << p;
-				p += 8;
-				if((f & m) == 0)
-				{
-					if(m > 1)
-					{
-						f &= m - 1;
-						c |= static_cast<uint_fast64_t>(f) << p;
-					}
-					return true;
-				}
+				c |= static_cast<uint_fast64_t>(b) << p;
+				p += 8;
+				if((f & m) == 0)
+				{
+					if(m > 1)
+					{
+						f &= m - 1;
+						c |= static_cast<uint_fast64_t>(f) << p;
+					}
+					return true;
+				}
 				m >>= 1;
 			}
 			return false;
