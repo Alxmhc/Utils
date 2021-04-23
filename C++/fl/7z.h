@@ -32,6 +32,38 @@ namespace fl_pr
 			kDummy
 		};
 
+		bool getNum(byteReader &s, uint_fast64_t &c)
+		{
+			uint8_t f;
+			if(!s.get(f))
+				return false;
+			if((f & 0x80) == 0)
+			{
+				c = f;
+				return true;
+			}
+
+			c = 0;
+			uint_fast8_t m = 0x40, p = 0;
+			uint8_t b;
+			while(s.get(b))
+			{
+				c |= static_cast<uint_fast64_t>(b) << p;
+				p += 8;
+				if((f & m) == 0)
+				{
+					if(m > 1)
+					{
+						f &= m - 1;
+						c |= static_cast<uint_fast64_t>(f) << p;
+					}
+					return true;
+				}
+				m >>= 1;
+			}
+			return false;
+		}
+
 		bool getHeader(byteReader &s, std::vector<uint8_t> &hdr)
 		{
 			uint8_t header[32];

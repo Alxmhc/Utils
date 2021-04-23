@@ -10,6 +10,9 @@
 #undef Module32First
 #undef Module32Next
 
+HMODULE GetModuleHandle_(LPCSTR ModuleName){return GetModuleHandleA(ModuleName);}
+HMODULE GetModuleHandle_(LPCWSTR ModuleName){return GetModuleHandleW(ModuleName);}
+
 DWORD GetModuleFileName_(HMODULE hmd, LPSTR filename, DWORD sz){return GetModuleFileNameA(hmd, filename, sz);}
 DWORD GetModuleFileName_(HMODULE hmd, LPWSTR filename, DWORD sz){return GetModuleFileNameW(hmd, filename, sz);}
 
