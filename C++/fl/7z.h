@@ -32,6 +32,13 @@ namespace fl_pr
 			kDummy
 		};
 
+		bool getID(byteReader &s, uint8_t &c)
+		{
+			if(!s.get(c))
+				return false;
+			return (c & 0x80) == 0;
+		}
+
 		bool getNum(byteReader &s, uint_fast64_t &c)
 		{
 			uint8_t f;
