@@ -2,14 +2,12 @@ class byteReader
 {
 	bool check(size_t n)
 	{
-		return get_pos() + n <= get_size();
+		return get_pos() + n <= sz;
 	}
 protected:
 	size_t sz;
-	virtual size_t read(uint8_t*, size_t) = 0;
-	virtual void readNAll(uint8_t*, const size_t) = 0;
+	virtual void readAll(uint8_t*, const size_t) = 0;
 public:
-	virtual size_t get_size() = 0;
 	virtual size_t get_pos() const = 0;
 	virtual void set_pos(int_fast64_t, std::ios_base::seekdir) = 0;
 
@@ -22,7 +20,7 @@ public:
 			return true;
 		if(!check(n))
 			return false;
-		readNAll(d, n);
+		readAll(d, n);
 		return true;
 	}
 	bool readN_v(std::vector<uint8_t> &v, size_t n)
@@ -33,7 +31,7 @@ public:
 			return false;
 		const auto sz = v.size();
 		v.resize(sz + n);
-		readNAll(v.data() + sz, n);
+		readAll(v.data() + sz, n);
 		return true;
 	}
 };
@@ -42,31 +40,25 @@ class br_stream : public byteReader
 {
 	std::istream &s;
 protected:
-	void readNAll(uint8_t *v, const size_t n)
+	void Init()
 	{
-		s.read(reinterpret_cast<char*>(v), n);
+		s.seekg(0, std::ios_base::end);
+		sz = static_cast<size_t>(s.tellg());
+		s.seekg(0, std::ios_base::beg);
 	}
-	size_t read(uint8_t *v, size_t n)
+
+	void readAll(uint8_t *v, const size_t n)
 	{
 		s.read(reinterpret_cast<char*>(v), n);
-		return static_cast<size_t>(s.gcount());
 	}
 public:
-	br_stream(std::istream &d, size_t size = 0) : s(d)
+	br_stream(std::istream &d, size_t size) : s(d)
 	{
 		sz = size;
 	}
-
-	size_t get_size()
+	br_stream(std::istream &d) : s(d)
 	{
-		if(sz == 0)
-		{
-			auto pos = s.tellg();
-			s.seekg(0, std::ios_base::end);
-			sz = static_cast<size_t>(s.tellg());
-			s.seekg(pos, std::ios_base::beg);
-		}
-		return sz;
+		Init();
 	}
 	size_t get_pos() const
 	{
@@ -95,7 +87,10 @@ class br_fstream : public br_stream
 {
 	std::ifstream fst;
 public:
-	br_fstream(const char *fl) : br_stream(fst), fst(fl, std::ios_base::binary) {}
+	br_fstream(const char *fl) : br_stream(fst, 0), fst(fl, std::ios_base::binary)
+	{
+		Init();
+	}
 };
 
 class br_array : public byteReader
@@ -103,17 +98,10 @@ class br_array : public byteReader
 	const uint8_t *d;
 	size_t o;
 protected:
-	void readNAll(uint8_t *v, const size_t n)
+	void readAll(uint8_t *v, const size_t n)
 	{
 		std::copy_n(d + o, n, v);
 		o += n;
-	}
-	size_t read(uint8_t *v, size_t n)
-	{
-		n = std::min(n, sz - o);
-		std::copy_n(d + o, n, v);
-		o += n;
-		return n;
 	}
 public:
 	br_array(const uint8_t *v, size_t size) : d(v), o(0)
@@ -121,10 +109,6 @@ public:
 		sz = size;
 	}
 
-	size_t get_size()
-	{
-		return sz;
-	}
 	size_t get_pos() const
 	{
 		return o;
