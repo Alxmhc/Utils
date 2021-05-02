@@ -10,25 +10,24 @@ namespace fl_pr
 			size_t psize, ppos;
 		};
 
-		inf read_inf(byteReader &s)
+		bool read_inf(byteReader &s, inf &res)
 		{
-			inf res = {};
 			{
 				uint8_t hdr[3];
 				s.readN(hdr, 3);
 				if(std::memcmp(hdr, "\x1f\x8b\x08", 3) != 0)
-					return res;
+					return false;
 			}
 			uint8_t flg;
 			s.get(flg);
 			if(flg > 31)
-				return res;
+				return false;
 			s.set_pos(6, std::ios_base::cur);
 			if( (flg & 4) != 0 )
 			{
 				uint8_t t[2];
 				if(!s.readN(t, 2))
-					return res;
+					return false;
 				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(t);
 				s.set_pos(sz, std::ios_base::cur);
 			}
@@ -49,7 +48,7 @@ namespace fl_pr
 			s.set_pos(-8, std::ios_base::end);
 			const auto end = s.get_pos();
 			if(st >= end)
-				return res;
+				return false;
 			res.ppos = st;
 			res.psize = end - st;
 			s.readN(res.crc32, 4);
@@ -57,7 +56,7 @@ namespace fl_pr
 			uint8_t fsz[4];
 			s.readN(fsz, 4);
 			res.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(fsz);
-			return res;
+			return true;
 		}
 	}
 }

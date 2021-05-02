@@ -33,7 +33,7 @@ std::vector<uint8_t> PBKDF2(const uint8_t *passw, size_t psz, const uint8_t *sal
 	std::vector<uint8_t> key;
 	if(ksz == 0)
 		return key;
-	uint32_t kl = (ksz - 1) / F::out_size + 1;
+	auto kl = (ksz - 1) / F::out_size + 1;
 	key.reserve(kl * F::out_size);
 
 	F fcr(passw, psz);
