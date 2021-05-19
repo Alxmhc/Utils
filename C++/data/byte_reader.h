@@ -55,8 +55,8 @@ protected:
 		pos += n;
 	}
 public:
-	br_stream(std::istream &d, size_t sz) : s(d), byteReader(sz) {}
-	br_stream(std::istream &d) : s(d), byteReader(0)
+	br_stream(std::istream &d, size_t sz) : byteReader(sz), s(d) {}
+	br_stream(std::istream &d) : byteReader(0), s(d)
 	{
 		Init();
 	}
@@ -104,7 +104,7 @@ protected:
 		pos += n;
 	}
 public:
-	br_array(const uint8_t *v, size_t sz) : d(v), byteReader(sz) {}
+	br_array(const uint8_t *v, size_t sz) : byteReader(sz), d(v) {}
 
 	void set_pos(int_fast64_t p, std::ios_base::seekdir t)
 	{
