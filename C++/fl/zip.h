@@ -115,7 +115,7 @@ namespace fl_pr
 				if(std::memcmp(data.data() + data.size() - 10, hs, 10) != 0)
 					return std::vector<uint8_t>();
 			}
-			//AESCTRDecryptLE(key.data(), ssz*2, res);
+			AESCTRDecryptLE(key.data(), ssz*2, res);
 			return res;
 		}
 	public:
