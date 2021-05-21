@@ -1,3 +1,49 @@
+template <unsigned char sz>
+struct byte_rev{};
+template<>
+struct byte_rev<1>
+{
+	template<typename T>
+	static void ByteRev(T &c)
+	{
+	}
+};
+template<>
+struct byte_rev<2>
+{
+	template<typename T>
+	static void ByteRev(T &c)
+	{
+		c = ((c & 0x00ff) << 8) | ((c & 0xff00) >> 8);
+	}
+};
+template<>
+struct byte_rev<4>
+{
+	template<typename T>
+	static void ByteRev(T &c)
+	{
+		c = ((c & 0x0000ffff) << 16) | ((c & 0xffff0000) >> 16);
+		c = ((c & 0x00ff00ff) <<  8) | ((c & 0xff00ff00) >>  8);
+	}
+};
+template<>
+struct byte_rev<8>
+{
+	template<typename T>
+	static void ByteRev(T &c)
+	{
+		c = ((c & 0x00000000ffffffff) << 32) | ((c & 0xffffffff00000000) >> 32);
+		c = ((c & 0x0000ffff0000ffff) << 16) | ((c & 0xffff0000ffff0000) >> 16);
+		c = ((c & 0x00ff00ff00ff00ff) <<  8) | ((c & 0xff00ff00ff00ff00) >>  8);
+	}
+};
+template<unsigned char sz, typename T>
+void ByteRev(T &c)
+{
+	byte_rev<sz>::ByteRev(c);
+}
+
 namespace endianness
 {
 	enum {
