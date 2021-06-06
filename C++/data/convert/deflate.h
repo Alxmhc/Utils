@@ -97,7 +97,7 @@ namespace convert
 				return brd.readB_v(out, sz);
 			}
 
-			static void inflate_fixed(bitReaderL &brd, std::vector<uint8_t> &out)
+			static bool inflate_fixed(bitReaderL &brd, std::vector<uint8_t> &out)
 			{
 				for(;;)
 				{
@@ -112,8 +112,10 @@ namespace convert
 					uint_fast16_t sz = get_size(c & 0xff, brd);
 					c = brd.readLE(5);
 					uint_fast16_t dist = get_dist(c, brd);
-					LZ77_repeat(sz, dist, out);
+					if( !LZ77_repeat(sz, dist, out) )
+						return false;
 				}
+				return true;
 			}
 
 			static void inflate_dynamic(bitReaderL &brd, std::vector<uint8_t> &out)

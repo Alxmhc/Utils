@@ -1,5 +1,7 @@
 bool LZ77_repeat(size_t sz, size_t dist, std::vector<uint8_t> &out)
 {
+	if(dist == 0)
+		return false;
 	auto osz = out.size();
 	if(osz < dist)
 		return false;
