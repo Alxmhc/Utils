@@ -20,20 +20,20 @@ class AES
 		t[0]  = Sbox[r[0]];
 		t[4]  = Sbox[r[4]];
 		t[8]  = Sbox[r[8]];
-		t[12]  = Sbox[r[12]];
+		t[12] = Sbox[r[12]];
 
 		t[1]  = Sbox[r[5]];
 		t[5]  = Sbox[r[9]];
 		t[9]  = Sbox[r[13]];
-		t[13]  = Sbox[r[1]];
+		t[13] = Sbox[r[1]];
 
 		t[2]  = Sbox[r[10]];
 		t[6]  = Sbox[r[14]];
 		t[10] = Sbox[r[2]];
 		t[14] = Sbox[r[6]];
 
-		t[3] = Sbox[r[15]];
-		t[7] = Sbox[r[3]];
+		t[3]  = Sbox[r[15]];
+		t[7]  = Sbox[r[3]];
 		t[11] = Sbox[r[7]];
 		t[15] = Sbox[r[11]];
 
@@ -52,19 +52,35 @@ class AES
 
 	static void Mix(uint8_t r[16])
 	{
-		uint8_t t1[4], t2[4];
-		for(int i = 0; i < 16; i += 4)
+		uint8_t d[16];
+		for(int i = 0; i < 16; i++)
 		{
-			memcpy(t1, r + i, 4);
-			for(int j = 0; j < 4; j++)
-			{
-				t2[j] = mul(t1[j]);
-			}
-			r[i]     = t1[1] ^ t1[2] ^ t1[3] ^ t2[0] ^ t2[1];
-			r[i + 1] = t1[0] ^ t1[2] ^ t1[3] ^ t2[1] ^ t2[2];
-			r[i + 2] = t1[0] ^ t1[1] ^ t1[3] ^ t2[2] ^ t2[3];
-			r[i + 3] = t1[0] ^ t1[1] ^ t1[2] ^ t2[0] ^ t2[3];
+			d[i] = mul(r[i]);
 		}
+
+		uint8_t t = r[0] ^ r[1] ^ r[2] ^ r[3];
+		r[0]  ^= t ^ d[0]  ^ d[1];
+		r[1]  ^= t ^ d[1]  ^ d[2];
+		r[2]  ^= t ^ d[2]  ^ d[3];
+		r[3]  ^= t ^ d[0]  ^ d[3];
+
+		t = r[4] ^ r[5] ^ r[6] ^ r[7];
+		r[4]  ^= t ^ d[4]  ^ d[5];
+		r[5]  ^= t ^ d[5]  ^ d[6];
+		r[6]  ^= t ^ d[6]  ^ d[7];
+		r[7]  ^= t ^ d[4]  ^ d[7];
+
+		t = r[8] ^ r[9] ^ r[10] ^ r[11];
+		r[8]  ^= t ^ d[8]  ^ d[9];
+		r[9]  ^= t ^ d[9]  ^ d[10];
+		r[10] ^= t ^ d[10] ^ d[11];
+		r[11] ^= t ^ d[8]  ^ d[11];
+
+		t = r[12] ^ r[13] ^ r[14] ^ r[15];
+		r[12] ^= t ^ d[12] ^ d[13];
+		r[13] ^= t ^ d[13] ^ d[14];
+		r[14] ^= t ^ d[14] ^ d[15];
+		r[15] ^= t ^ d[12] ^ d[15];
 	}
 
 public:
@@ -98,9 +114,8 @@ public:
 		}
 	}
 
-	void Encrypt(const uint8_t k[16], uint8_t r[16]) const
+	void Encrypt(uint8_t r[16]) const
 	{
-		memcpy(r, k, 16);
 		Xor(enc.data(), r);
 		size_t i = 16;
 		for(; i < enc.size() - 16; i += 16)
@@ -162,7 +177,7 @@ void incrLE(uint8_t *v, size_t sz)
 	}
 }
 
-void AESCTRDecrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, void incr(uint8_t*, size_t))
+void AESCTREncrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, void incr(uint8_t*, size_t))
 {
 	AES enc(key, ksz);
 
@@ -173,7 +188,8 @@ void AESCTRDecrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, v
 	while(offset < data.size() - 16)
 	{
 		incr(iv, 16);
-		enc.Encrypt(iv, tmp);
+		memcpy(tmp, iv, 16);
+		enc.Encrypt(tmp);
 		for(uint_fast8_t i = 0; i < 16; i++)
 		{
 			data[i+offset] ^= tmp[i];
@@ -184,7 +200,8 @@ void AESCTRDecrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, v
 	if(o != 0)
 	{
 		incr(iv, 16);
-		enc.Encrypt(iv, tmp);
+		memcpy(tmp, iv, 16);
+		enc.Encrypt(tmp);
 		for(uint_fast8_t i = 0; i < o; i++)
 		{
 			data[i+offset] ^= tmp[i];
@@ -194,10 +211,10 @@ void AESCTRDecrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, v
 
 void AESCTRDecryptLE(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data)
 {
-	AESCTRDecrypt(key, ksz, data, incrLE);
+	AESCTREncrypt(key, ksz, data, incrLE);
 }
 
 void AESCTRDecryptBE(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data)
 {
-	AESCTRDecrypt(key, ksz, data, incrBE);
+	AESCTREncrypt(key, ksz, data, incrBE);
 }
