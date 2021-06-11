@@ -2,7 +2,7 @@ class vt2
 {
 public:
 	long double x, y;
-	vt2(void) : x(0), y(0) {}
+	vt2() : x(0), y(0) {}
 	vt2(long double a, long double b) : x(a), y(b) {}
 	vt2(const vt2 &v) : x(v.x), y(v.y) {}
 
@@ -52,3 +52,8 @@ public:
 		return x*a.x + y*a.y;
 	}
 };
+
+long double abs(const vt2 &a)
+{
+	return sqrt(a*a);
+}

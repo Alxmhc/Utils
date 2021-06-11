@@ -2,7 +2,7 @@ class cr_pl
 {
 public:
 	long double r, f;
-	cr_pl(void) : r(0.0), f(0.0) {}
+	cr_pl() : r(0.0), f(0.0) {}
 	cr_pl(long double s, long double a) : r(s), f(a) {}
 	cr_pl(const vt2 &v) : r(abs(v)), f(atan2(v.y, v.x)) {}
 

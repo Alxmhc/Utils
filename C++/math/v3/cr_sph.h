@@ -2,7 +2,7 @@ class cr_sph
 {
 public:
 	long double r, t, f;
-	cr_sph(void) : r(0.0), t(0.0), f(0.0) {}
+	cr_sph() : r(0.0), t(0.0), f(0.0) {}
 	cr_sph(long double s, long double a, long double b) : r(s), t(a), f(b) {}
 	cr_sph(const vt3 &v) : r(abs(v)), t(acos(v.z/r)), f(atan2(v.y, v.x)) {}
 

@@ -9,7 +9,7 @@ public:
 		return 4.0*(pi/3.0)*r*r*r;
 	}
 
-	long double vl(void) const
+	long double vl() const
 	{
 		return vl(r);
 	}
