@@ -159,8 +159,6 @@ namespace convert
 			}
 
 		public:
-			Decoder() {}
-
 			static std::vector<uint8_t> Convert(byteReader &br, size_t nsz = 0)
 			{
 				bitReaderL brd(br);

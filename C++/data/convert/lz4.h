@@ -19,8 +19,6 @@ namespace convert
 				return sz;
 			}
 		public:
-			Decoder() {}
-
 			static std::vector<uint8_t> Decode_block(byteReader &br, size_t sz = 0)
 			{
 				std::vector<uint8_t> out;
