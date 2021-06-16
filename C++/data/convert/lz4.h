@@ -4,19 +4,19 @@ namespace convert
 	{
 		class Decoder
 		{
-			static size_t get_size(byteReader &br, size_t sz)
+			static bool get_size(byteReader &br, size_t &sz)
 			{
 				if(sz != 15)
-					return sz;
+					return true;
 				for(;;)
 				{
 					uint8_t b;
-					br.get(b);
+					if(!br.get(b))
+						return false;
 					sz += b;
 					if(b != 255)
-						break;
+						return true;
 				}
-				return sz;
 			}
 		public:
 			static std::vector<uint8_t> Decode_block(byteReader &br, size_t sz = 0)
@@ -27,15 +27,17 @@ namespace convert
 				uint8_t b;
 				while(br.get(b))
 				{
-					size_t size = get_size(br, b >> 4);
+					size_t size = b >> 4;
+					get_size(br, size);
 					if(!br.readN_v(out, size))
 						break;
 					uint8_t o[2];
 					if(!br.readN(o, 2))
 						break;
 					auto offset = bconv<2, endianness::LITTLE_ENDIAN>::pack(o);
-					size_t len = get_size(br, b & 0xf) + 4;
-					LZ77_repeat(len, offset, out);
+					size_t len = b & 0xf;
+					get_size(br, len);
+					LZ77_repeat(len + 4, offset, out);
 				}
 				return out;
 			}
