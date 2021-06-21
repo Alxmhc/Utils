@@ -12,6 +12,8 @@ namespace fl_pr
 
 		bool read_inf(byteReader &s, inf &res)
 		{
+			if(s.get_size() < 18)
+				return false;
 			{
 				uint8_t hdr[3];
 				s.readN(hdr, 3);

@@ -7,6 +7,10 @@ protected:
 
 	virtual void readAll(uint8_t*, const size_t) = 0;
 public:
+	size_t get_size() const
+	{
+		return size;
+	}
 	size_t get_pos() const
 	{
 		return pos;
@@ -44,6 +48,8 @@ class br_stream : public byteReader
 protected:
 	void Init()
 	{
+		if(s.fail())
+			return;
 		s.seekg(0, std::ios_base::end);
 		size = s.tellg();
 		s.seekg(0, std::ios_base::beg);
