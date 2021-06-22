@@ -2,6 +2,7 @@ class byteWriter
 {
 public:
 	virtual void write(const uint8_t*, size_t) = 0;
+	virtual void write(const char*, size_t) = 0;
 };
 
 class bw_stream : public byteWriter
@@ -13,6 +14,10 @@ public:
 	void write(const uint8_t* v, size_t n)
 	{
 		s.write(reinterpret_cast<const char*>(v), n);
+	}
+	void write(const char* v, size_t n)
+	{
+		s.write(v, n);
 	}
 };
 
@@ -31,6 +36,10 @@ public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
 	void write(const uint8_t* v, size_t n)
+	{
+		d.insert(d.end(), v, v + n);
+	}
+	void write(const char* v, size_t n)
 	{
 		d.insert(d.end(), v, v + n);
 	}

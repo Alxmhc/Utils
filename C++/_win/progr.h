@@ -1,6 +1,6 @@
 //Program path
 template<typename C>
-std::basic_string<C> get_ex_path(void)
+std::basic_string<C> get_ex_path()
 {
 	C path[MAX_PATH];
 	GetModuleFileName_(nullptr, path, MAX_PATH);
