@@ -3,29 +3,29 @@ namespace fl_pr
 	namespace F_jsonlz4
 	{
 		const uint_fast8_t offset = 12;
-		uint32_t read_size(byteReader &s)
+		bool read_size(byteReader &s, uint_fast32_t &fsz)
 		{
 			uint8_t hdr[8];
 			if(!s.readN(hdr, 8))
-				return 0;
+				return false;
 			if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
-				return 0;
+				return false;
 
 			uint8_t sz[4];
 			if(!s.readN(sz, 4))
-				return 0;
-			auto fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(sz);
-			return fsize;
+				return false;
+			fsz = bconv<4, endianness::LITTLE_ENDIAN>::pack(sz);
+			return true;
 		}
-		void Unpack(const char* f_in, const char* f_out)
+		bool Unpack(br_fstream &br, std::vector<uint8_t> &out)
 		{
-			br_fstream br(f_in);
-			auto size = read_size(br);
-			if(size == 0)
-				return;
-			auto data = convert::lz4::Decoder::Decode_block(br, size);
-			bw_fstream fl(f_out);
-			fl.write(data.data(), data.size());
+			uint_fast32_t fsize;
+			if( !read_size(br, fsize) )
+				return false;
+			out.reserve(fsize);
+			if( !convert::lz4::Decoder::Decode_block(br, out) )
+				return false;
+			return true;
 		}
 	}
 }
