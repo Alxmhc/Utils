@@ -5,30 +5,30 @@ namespace fl_pr
 		std::map<std::string, std::vector<uint8_t>> read(byteReader &s)
 		{
 			std::map<std::string, std::vector<uint8_t>> res;
-			convert::base64::Decoder d(convert::base64::dct_std);
-			std::string v;
+
+			std::vector<uint8_t> vt;
+			convert::base64::Decoder d(convert::base64::dct_std, bw_array(vt));
 			for(;;)
 			{
-				std::string st = s.read_string('\n');
+				auto st = s.read_string('\n');
 				if(st.length() == 0)
 					break;
-				if(is_b<char>(st, "-----"))
+				if(!is_b<char>(st, "-----"))
 				{
-					if(is_b<char>(st, "-----END "))
+					auto sz = st.length();
+					while(st[sz-1] == '=')
 					{
-						st = st.substr(9, st.length() - 14);
-						auto sz = v.length();
-						while(v[sz-1] == '=')
-						{
-							sz--;
-						}
-						auto vt = d.Convert(reinterpret_cast<const uint8_t*>(v.c_str()), sz);
-						v.clear();
-						res.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
+						sz--;
 					}
-					continue;
+					d.Update(reinterpret_cast<const uint8_t*>(st.c_str()), sz);
 				}
-				v += st;
+				else if(is_b<char>(st, "-----END "))
+				{
+					st = st.substr(9, st.length() - 14);
+					d.Final();
+					res.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
+					vt.clear();
+				}
 			}
 			return res;
 		}
