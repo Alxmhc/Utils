@@ -2,24 +2,6 @@ namespace fl_pr
 {
 	class F_zip
 	{
-		enum
-		{
-			cNO        =   0,
-			cDeflate   =   8,
-			cDeflate64 =   9,
-			cBZIP2     =  12,
-			cLZMA      =  14,
-			cPPMd      =  98
-		};
-		enum
-		{
-			eNO       =  0,
-			eZIP      =  1,
-			eAES128   =  2,
-			eAES192   =  3,
-			eAES256   =  4
-		};
-
 		struct inf
 		{
 			size_t Hpos;
@@ -37,7 +19,7 @@ namespace fl_pr
 		static bool read_file_hdr(byteReader &s, inf &r)
 		{
 			uint8_t h[26];
-			if(!s.readN(h, sizeof(h)))
+			if(!s.readN(h, 26))
 				return false;
 			r.Hpos = s.get_pos() - 26;
 			r.Hsize = 26;
@@ -51,14 +33,16 @@ namespace fl_pr
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
 			r.Hsize += szfn;
 			r.fname.resize(szfn);
-			s.readN(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn);
+			if( !s.readN(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn) )
+				return false;
 
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
 				r.Hsize += szex;
-				std::vector<uint8_t> ext(szex);
-				s.readN(ext.data(), szex);
+				std::vector<uint8_t> ext;
+				if( !s.readN(ext, szex) )
+					return false;
 				if(r.method == 99)
 				{
 					r.encryption = ext[8] + 1;
@@ -75,8 +59,11 @@ namespace fl_pr
 			key[2] = tbl[(key[2] ^ (key[1]>>24)) & 0xff] ^ (key[2] >> 8);
 		}
 
-		static void decryptZIP(const uint8_t *passw, size_t psz, std::vector<uint8_t> &res)
+		static bool decryptZIP(const uint8_t *passw, size_t psz, std::vector<uint8_t> &res)
 		{
+			if(res.size() <= 12)
+				return false;
+
 			uint32_t crcTbl[256];
 			hash::CRC32::InitTable(crcTbl, 0xedb88320);
 
@@ -95,37 +82,59 @@ namespace fl_pr
 				keyUpd(key, res[i], crcTbl);
 			}
 			res.erase(res.begin(), res.begin() + 12);
+			return true;
 		}
 
-		static std::vector<uint8_t> decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, const std::vector<uint8_t> &data)
+		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
 		{
 			if(data.size() <= ssz + 12)
-				return std::vector<uint8_t>();
-			std::vector<uint8_t> key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(passw, psz, data.data(), ssz, 1000, ssz*4 + 2);
+				return false;
+			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(passw, psz, data.data(), ssz, 1000, ssz*4 + 2);
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
-				return std::vector<uint8_t>();
-			std::vector<uint8_t> res(data.cbegin() + ssz + 2, data.cend() - 10);
-			{
-				hash::HMAC<hash::SHA1> h;
-				h.SetKey(key.data() + ssz*2, ssz*2);
-				h.Init();
-				h.Update(res.data(), res.size());
-				uint8_t hs[hash::SHA1::hash_size];
-				h.Final(hs);
-				if(std::memcmp(data.data() + data.size() - 10, hs, 10) != 0)
-					return std::vector<uint8_t>();
-			}
-			AESCTRDecryptLE(key.data(), ssz*2, res);
-			return res;
+				return false;
+
+			uint8_t hsh[10];
+			std::copy_n(data.end() - 10, 10, hsh);
+			data = std::vector<uint8_t>(data.begin() + ssz + 2, data.end() - 10);
+
+			hash::HMAC<hash::SHA1> h;
+			h.SetKey(key.data() + ssz*2, ssz*2);
+			h.Init();
+			h.Update(data.data(), data.size());
+			uint8_t hs[hash::SHA1::hash_size];
+			h.Final(hs);
+			if(std::memcmp(hsh, hs, 10) != 0)
+				return false;
+
+			AESCTRDecryptLE(key.data(), ssz*2, data);
+			return true;
 		}
 	public:
+		enum
+		{
+			cNO        =   0,
+			cDeflate   =   8,
+			cDeflate64 =   9,
+			cBZIP2     =  12,
+			cLZMA      =  14,
+			cPPMd      =  98
+		};
+		enum
+		{
+			eNO       =  0,
+			eZIP      =  1,
+			eAES128   =  2,
+			eAES192   =  3,
+			eAES256   =  4
+		};
+
 		static std::vector<inf> read_inf(byteReader &s)
 		{
 			std::vector<inf> res;
 			for(;;)
 			{
 				uint8_t hdr[4];
-				if(!s.readN(hdr, sizeof(hdr)))
+				if(!s.readN(hdr, 4))
 					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
 				{
@@ -142,18 +151,15 @@ namespace fl_pr
 			return res;
 		}
 
-		static std::vector<uint8_t> Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz)
+		static bool Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz, std::vector<uint8_t> &data)
 		{
 			s.set_pos(inf.Hpos + inf.Hsize, std::ios_base::beg);
-			std::vector<uint8_t> data(inf.Dsize);
-			s.readN(data.data(), inf.Dsize);
+			if( !s.readN(data, inf.Dsize) )
+				return false;
 			switch(inf.encryption)
 			{
 			case eZIP:
-				if(inf.Dsize <= 12)
-					break;
-				decryptZIP(passw, psz, data);
-				return data;
+				return decryptZIP(passw, psz, data);
 			case eAES128:
 				return decryptAES(passw, psz, 8, data);
 			case eAES192:
@@ -161,7 +167,7 @@ namespace fl_pr
 			case eAES256:
 				return decryptAES(passw, psz, 16, data);
 			}
-			return std::vector<uint8_t>();
+			return false;
 		}
 	};
 }

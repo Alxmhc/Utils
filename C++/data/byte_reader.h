@@ -22,22 +22,36 @@ public:
 
 	bool readN(uint8_t* d, size_t n)
 	{
-		if(n == 0)
-			return true;
 		if(pos + n > size)
 			return false;
-		readAll(d, n);
+		if(n != 0)
+		{
+			readAll(d, n);
+		}
 		return true;
 	}
-	bool readN_v(std::vector<uint8_t> &v, size_t n)
+	bool readN(std::vector<uint8_t> &v, size_t n)
 	{
-		if(n == 0)
-			return true;
 		if(pos + n > size)
 			return false;
-		const auto sz = v.size();
-		v.resize(sz + n);
-		readAll(v.data() + sz, n);
+		v.resize(n);
+		if(n != 0)
+		{
+			readAll(v.data(), n);
+		}
+		return true;
+	}
+
+	bool addN(std::vector<uint8_t> &v, size_t n)
+	{
+		if(pos + n > size)
+			return false;
+		if(n != 0)
+		{
+			const auto sz = v.size();
+			v.resize(sz + n);
+			readAll(v.data() + sz, n);
+		}
 		return true;
 	}
 };

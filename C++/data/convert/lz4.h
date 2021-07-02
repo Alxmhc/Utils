@@ -29,7 +29,7 @@ namespace convert
 					size_t size = b >> 4;
 					if(!get_size(br, size))
 						break;
-					if(!br.readN_v(out, size))
+					if(!br.addN(out, size))
 						break;
 					uint8_t o[2];
 					if(!br.readN(o, 2))

@@ -93,8 +93,7 @@ namespace fl_pr
 			const auto NHoffset = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 12);
 			s.set_pos(NHoffset, std::ios_base::cur);
 
-			hdr.resize(NHsize);
-			if(!s.readN(hdr.data(), NHsize))
+			if(!s.readN(hdr, NHsize))
 				return false;
 			hs.Update(hdr.data(), hdr.size());
 			hs.Final(hash);

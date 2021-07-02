@@ -17,11 +17,12 @@ namespace fl_pr
 			fsz = bconv<4, endianness::LITTLE_ENDIAN>::pack(sz);
 			return true;
 		}
-		bool Unpack(br_fstream &br, std::vector<uint8_t> &out)
+		bool Unpack(byteReader &br, std::vector<uint8_t> &out)
 		{
 			uint_fast32_t fsize;
 			if( !read_size(br, fsize) )
 				return false;
+			out.clear();
 			out.reserve(fsize);
 			if( !convert::lz4::Decoder::Decode_block(br, out) )
 				return false;

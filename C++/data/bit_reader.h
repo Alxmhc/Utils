@@ -13,10 +13,10 @@ public:
 		o = 0;
 		return r->readN(v, n);
 	}
-	bool readB_v(std::vector<uint8_t> &v, size_t n)
+	bool addB(std::vector<uint8_t> &v, size_t n)
 	{
 		o = 0;
-		return r->readN_v(v, n);
+		return r->addN(v, n);
 	}
 	void skipB(size_t n)
 	{

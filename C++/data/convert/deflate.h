@@ -94,7 +94,7 @@ namespace convert
 					return false;
 				brd.skipB(2);
 				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(sza);
-				return brd.readB_v(out, sz);
+				return brd.addB(out, sz);
 			}
 
 			static bool inflate_fixed(bitReaderL &brd, std::vector<uint8_t> &out)
