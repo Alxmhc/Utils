@@ -118,7 +118,7 @@ namespace convert
 				return true;
 			}
 
-			static void inflate_dynamic(bitReaderL &brd, std::vector<uint8_t> &out)
+			static bool inflate_dynamic(bitReaderL &brd, std::vector<uint8_t> &out)
 			{
 				const uint_fast16_t HLIT = brd.readBE(5) + 257;
 				const uint_fast8_t HDIST = brd.readBE(5) + 1;
@@ -140,22 +140,27 @@ namespace convert
 				huffmanTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
 				huffmanTree<uint_fast16_t> hdist(vcodes.data() + HLIT, HDIST);
 
-				uint_fast16_t c;
-				while( hlit.find(brd, c) )
+				for(;;)
 				{
+					uint_fast16_t c;
+					if( !hlit.find(brd, c) )
+						break;
 					if(c < 256)
 					{
 						out.push_back(c);
 						continue;
 					}
 					if(c == 256)
-						break;
+						return true;
 
-					uint_fast16_t sz = get_size(c & 0xff, brd);
-					hdist.find(brd, c);
-					uint_fast16_t dist = get_dist(c, brd);
-					LZ77_repeat(sz, dist, out);
+					auto sz = get_size(c & 0xff, brd);
+					if( !hdist.find(brd, c) )
+						break;
+					auto dist = get_dist(c, brd);
+					if( !LZ77_repeat(sz, dist, out) )
+						break;
 				}
+				return false;
 			}
 
 		public:
