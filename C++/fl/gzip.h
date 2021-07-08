@@ -24,14 +24,14 @@ namespace fl_pr
 			s.get(flg);
 			if(flg > 31)
 				return false;
-			s.set_pos(6, std::ios_base::cur);
+			s.skip(6);
 			if( (flg & 4) != 0 )
 			{
 				uint8_t t[2];
 				if(!s.readN(t, 2))
 					return false;
 				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(t);
-				s.set_pos(sz, std::ios_base::cur);
+				s.skip(sz);
 			}
 			if( (flg & 8) != 0 )
 			{
@@ -43,11 +43,11 @@ namespace fl_pr
 			}
 			if( (flg & 2) != 0 )
 			{
-				s.set_pos(2, std::ios_base::cur);
+				s.skip(2);
 			}
 
 			const auto st = s.get_pos();
-			s.set_pos(-8, std::ios_base::end);
+			s.set_pos(s.get_size() - 8);
 			const auto end = s.get_pos();
 			if(st >= end)
 				return false;

@@ -15,7 +15,8 @@ public:
 	{
 		return pos;
 	}
-	virtual void set_pos(int_fast64_t, std::ios_base::seekdir) = 0;
+	virtual void set_pos(size_t) = 0;
+	virtual void skip(size_t) = 0;
 
 	virtual bool get(uint8_t&) = 0;
 	virtual std::string read_string(char) = 0;
@@ -65,7 +66,7 @@ protected:
 		if(s.fail())
 			return;
 		s.seekg(0, std::ios_base::end);
-		size = s.tellg();
+		size = static_cast<size_t>(s.tellg());
 		s.seekg(0, std::ios_base::beg);
 	}
 
@@ -80,10 +81,16 @@ public:
 	{
 		Init();
 	}
-	void set_pos(int_fast64_t p, std::ios_base::seekdir t)
+
+	void set_pos(size_t p)
 	{
-		s.seekg(p, t);
-		pos = s.tellg();
+		s.seekg(p, std::ios_base::beg);
+		pos = p;
+	}
+	void skip(size_t p)
+	{
+		s.seekg(p, std::ios_base::cur);
+		pos += p;
 	}
 
 	bool get(uint8_t &b)
@@ -126,20 +133,13 @@ protected:
 public:
 	br_array(const uint8_t *v, size_t sz) : byteReader(sz), d(v) {}
 
-	void set_pos(int_fast64_t p, std::ios_base::seekdir t)
+	void set_pos(size_t p)
 	{
-		switch(t)
-		{
-		case std::ios_base::beg:
-			pos = p;
-			break;
-		case std::ios_base::cur:
-			pos += p;
-			break;
-		case std::ios_base::end:
-			pos = size + p;
-			break;
-		}
+		pos = p;
+	}
+	void skip(size_t p)
+	{
+		pos += p;
 	}
 
 	bool get(uint8_t &b)

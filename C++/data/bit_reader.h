@@ -21,7 +21,7 @@ public:
 	void skipB(size_t n)
 	{
 		o = 0;
-		r->set_pos(n, std::ios_base::cur);
+		r->skip(n);
 	}
 };
 

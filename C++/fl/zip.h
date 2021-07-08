@@ -143,7 +143,7 @@ namespace fl_pr
 						break;
 					r.isDir = (r.fname[r.fname.length() - 1] == '/');
 					res.push_back(r);
-					s.set_pos(r.Dsize, std::ios_base::cur);
+					s.skip(r.Dsize);
 				}
 				else
 					break;
@@ -153,7 +153,7 @@ namespace fl_pr
 
 		static bool Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz, std::vector<uint8_t> &data)
 		{
-			s.set_pos(inf.Hpos + inf.Hsize, std::ios_base::beg);
+			s.set_pos(inf.Hpos + inf.Hsize);
 			if( !s.readN(data, inf.Dsize) )
 				return false;
 			switch(inf.encryption)

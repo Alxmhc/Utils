@@ -164,33 +164,35 @@ namespace convert
 			}
 
 		public:
-			static std::vector<uint8_t> Convert(byteReader &br, size_t nsz = 0)
+			static bool Convert(byteReader &br, std::vector<uint8_t> &out)
 			{
+				out.clear();
 				bitReaderL brd(br);
-				std::vector<uint8_t> out;
-				out.reserve(nsz);
 				for(;;)
 				{
-					bool isFin = (brd.read1() == 1);
+					auto isFin = brd.read1();
 					uint_fast8_t type = brd.readBE(2);
 					switch(type)
 					{
 					case 0:
-						inflate_nocompr(brd, out);
+						if( !inflate_nocompr(brd, out) )
+							return false;
 						break;
 					case 1:
-						inflate_fixed(brd, out);
+						if( !inflate_fixed(brd, out) )
+							return false;
 						break;
 					case 2:
-						inflate_dynamic(brd, out);
+						if( !inflate_dynamic(brd, out) )
+							return false;
 						break;
 					default:
-						isFin = true;
+						return false;
 					}
-					if(isFin)
+					if(isFin != 0)
 						break;
 				}
-				return out;
+				return true;
 			}
 		};
 	}

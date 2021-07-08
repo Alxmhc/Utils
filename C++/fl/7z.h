@@ -89,9 +89,9 @@ namespace fl_pr
 			if(std::memcmp(hash, header + 8, hash::CRC32::hash_size) != 0)
 				return false;
 
-			const auto NHsize = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 20);
-			const auto NHoffset = bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 12);
-			s.set_pos(NHoffset, std::ios_base::cur);
+			const size_t NHsize = static_cast<size_t>( bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 20) );
+			const size_t NHoffset = static_cast<size_t>( bconv<8, endianness::LITTLE_ENDIAN>::pack(header + 12) );
+			s.skip(NHoffset);
 
 			if(!s.readN(hdr, NHsize))
 				return false;
