@@ -30,7 +30,7 @@ void AESCTREncrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data, v
 	}
 }
 
-static void incrBE(uint8_t *v, size_t sz)
+void incrBE(uint8_t *v, size_t sz)
 {
 	size_t i = sz;
 	for(;;)
@@ -41,7 +41,7 @@ static void incrBE(uint8_t *v, size_t sz)
 			break;
 	}
 }
-static void incrLE(uint8_t *v, size_t sz)
+void incrLE(uint8_t *v, size_t sz)
 {
 	for(size_t i = 0; i < sz; i++)
 	{

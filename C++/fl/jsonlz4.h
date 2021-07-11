@@ -24,9 +24,7 @@ namespace fl_pr
 				return false;
 			out.clear();
 			out.reserve(fsize);
-			if( !convert::lz4::Decoder::Decode_block(br, out) )
-				return false;
-			return true;
+			return convert::lz4::Decoder::Decode_block(br, out);
 		}
 	}
 }
