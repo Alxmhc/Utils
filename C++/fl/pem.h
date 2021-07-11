@@ -7,7 +7,8 @@ namespace fl_pr
 			std::map<std::string, std::vector<uint8_t>> res;
 
 			std::vector<uint8_t> vt;
-			convert::base64::Decoder d(convert::base64::dct_std, bw_array(vt));
+			bw_array bw(vt);
+			convert::base64::Decoder d(convert::base64::dct_std, bw);
 			for(;;)
 			{
 				auto st = s.read_string('\n');
