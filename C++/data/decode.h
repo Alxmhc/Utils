@@ -15,10 +15,10 @@ namespace decode
 			i += 2;
 			if(i + sz >= n)
 			{
-				bw.write(v + i, n - i);
+				bw.writeN(v + i, n - i);
 				break;
 			}
-			bw.write(v + i, sz);
+			bw.writeN(v + i, sz);
 			i += sz + 2;
 		}
 	}
