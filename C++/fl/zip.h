@@ -85,6 +85,32 @@ namespace fl_pr
 			return true;
 		}
 
+		class aes_iv
+		{
+		protected:
+			uint8_t iv[16];
+		public:
+			aes_iv()
+			{
+				std::fill_n(iv, 16, 0);
+			}
+
+			const uint8_t* data() const
+			{
+				return iv;
+			}
+
+			void incr()
+			{
+				for(size_t i = 0; i < 16; i++)
+				{
+					iv[i]++;
+					if(iv[i] != 0)
+						break;
+				}
+			}
+		};
+
 		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
 		{
 			if(data.size() <= ssz + 12)
@@ -106,7 +132,7 @@ namespace fl_pr
 			if(std::memcmp(hsh, hs, 10) != 0)
 				return false;
 
-			AESCTRDecryptLE(key.data(), ssz*2, data);
+			AESCTRDecrypt<aes_iv>(key.data(), ssz*2, data);
 			return true;
 		}
 	public:

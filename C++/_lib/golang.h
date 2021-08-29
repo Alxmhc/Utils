@@ -11,7 +11,7 @@ typedef uint64_t GoUint64;
 class GoString
 {
 	const char* p;
-	ptrdiff_t n;
+	const ptrdiff_t n;
 public:
 	GoString(const char* s) : p(s), n(strlen(s)) {}
 	GoString(const char* s, size_t k) : p(s), n(k) {}

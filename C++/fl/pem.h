@@ -8,7 +8,8 @@ namespace fl_pr
 
 			std::vector<uint8_t> vt;
 			bw_array bw(vt);
-			convert::base64::Decoder d(convert::base64::dct_std, bw);
+			convert::base64::Decoder d(convert::base64::dct_std);
+			d.Set(bw);
 			for(;;)
 			{
 				auto st = s.read_string('\n');
