@@ -45,9 +45,8 @@ namespace hash
 
 		void Final(uint8_t *r)
 		{
-			auto res = ~crc;
+			bconv<4, endianness::LITTLE_ENDIAN>::unpack(~crc,  r);
 			crc = 0xffffffff;
-			conv::unpack<endianness::LITTLE_ENDIAN>(res,  r);
 		}
 	};
 }
