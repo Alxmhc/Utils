@@ -1,7 +1,3 @@
-function $(id){
-	return document.getElementById(id);
-}
-
 function imgs(p){
 	return p.map(e => {
 		const im = new Image();
@@ -10,39 +6,11 @@ function imgs(p){
 	});
 }
 
-class sw{
-	constructor(on, off){
-		this._on = function(){on(this.o); this.is_on = true};
-		this._off = function(){off(this.o); this.is_on = false};
-		this.is_on = false;
-	}
-	on(){if(!this.is_on){this._on()}}
-	off(){if(this.is_on){this._off()}}
-	ch(){this.is_on ? this._off() : this._on()}
-	sw_other(o){
-		if(o !== this.o){
-			this.off();
-			this.o = o;
-			this._on();
-			return false;
-		}
-		if(this.is_on)
-			return true;
-		this._on();
-		return false;
-	}
-	sw_all(o){
-		if(this.sw_other(o))
-			this._off();
-	}
-}
-sw.cr = function(on, off, e){
-	const r = new sw(on, off);
-	r.o = e;
-	return r;
-}
-
 const $dom = {}
+
+$dom.get_el = function(id){
+	return document.getElementById(id);
+}
 
 $dom.add_el = function(e, el){
 	const s = document.createElement(el);
@@ -62,5 +30,25 @@ $dom.mk_select = function(e,d){
 		const o = $dom.add_el(e, 'option');
 		o.value = k;
 		o.text = d[k];
+	}
+}
+
+class dom_el{
+	constructor(id){
+		this.o = $dom.get_el(id);
+	}
+	crd(c){
+		return [c[0]-this.o.offsetLeft, c[1]-this.o.offsetTop];
+	}
+	get size(){
+		return [this.o.width, this.o.height];
+	}
+	resize(sz){
+		if(sz[0]){
+			this.o.width  = sz[0];
+		}
+		if(sz[1]){
+			this.o.height = sz[1];
+		}
 	}
 }

@@ -6,7 +6,7 @@ protected:
 
 	bitReader(byteReader &d) : r(&d), o(0) {}
 public:
-	virtual uint_fast8_t read1() = 0;
+	virtual bool read1(uint_fast8_t&) = 0;
 
 	bool readB(uint8_t *v, size_t n)
 	{
@@ -29,17 +29,19 @@ public:
 class bitReaderR : public bitReader
 {
 public:
-	uint_fast8_t read1()
+	bool read1(uint_fast8_t &c)
 	{
 		if(o != 0)
 		{
-			uint_fast8_t rs = b >> (7 - o);
+			c = (b >> (7 - o)) & 1;
 			o = (o + 1) & 7;
-			return rs & 1;
+			return true;
 		}
-		r->get(b);
+		if( !r->get(b) )
+			return false;
+		c = b >> 7;
 		o = 1;
-		return b >> 7;
+		return true;
 	}
 
 	bitReaderR(byteReader &d) : bitReader(d){}
@@ -49,7 +51,8 @@ public:
 		uint_fast32_t rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
-			auto c = read1();
+			uint_fast8_t c;
+			read1(c);
 			rs |= c << i;
 		}
 		return rs;
@@ -60,7 +63,8 @@ public:
 		uint_fast32_t rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
-			auto c = read1();
+			uint_fast8_t c;
+			read1(c);
 			rs = (rs<<1) | c;
 		}
 		return rs;
@@ -71,17 +75,19 @@ public:
 class bitReaderL : public bitReader
 {
 public:
-	uint_fast8_t read1()
+	bool read1(uint_fast8_t &c)
 	{
 		if(o != 0)
 		{
-			uint_fast8_t rs = b >> o;
+			c = (b >> o) & 1;
 			o = (o + 1) & 7;
-			return rs & 1;
+			return true;
 		}
-		r->get(b);
+		if( !r->get(b) )
+			return false;
+		c = b & 1;
 		o = 1;
-		return b & 1;
+		return true;
 	}
 
 	bitReaderL(byteReader &d) : bitReader(d){}
@@ -91,7 +97,8 @@ public:
 		uint_fast32_t rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
-			auto c = read1();
+			uint_fast8_t c;
+			read1(c);
 			rs = (rs<<1) | c;
 		}
 		return rs;
@@ -102,7 +109,8 @@ public:
 		uint_fast32_t rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
-			auto c = read1();
+			uint_fast8_t c;
+			read1(c);
 			rs |= c << i;
 		}
 		return rs;

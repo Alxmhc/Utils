@@ -9,14 +9,17 @@ namespace convert
 				uint_fast16_t s = brd.readLE(7);
 				if(s < 24)
 					return s + 256;
-				s = (s<<1) | brd.read1();
+				uint_fast8_t c;
+				brd.read1(c);
+				s = (s<<1) | c;
 				if(s < 200)
 				{
 					if(s < 192)
 						return s - 48;
 					return s + 88;
 				}
-				s = (s<<1) | brd.read1();
+				brd.read1(c);
+				s = (s<<1) | c;
 				return s - 256;
 			}
 
@@ -170,7 +173,8 @@ namespace convert
 				bitReaderL brd(br);
 				for(;;)
 				{
-					auto isFin = brd.read1();
+					uint_fast8_t isFin;
+					brd.read1(isFin);
 					uint_fast8_t type = brd.readBE(2);
 					switch(type)
 					{

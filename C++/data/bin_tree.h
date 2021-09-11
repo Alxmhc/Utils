@@ -54,7 +54,9 @@ public:
 		const binTree<T> *a = this;
 		for(;;)
 		{
-			const auto n = rd.read1();
+			uint_fast8_t n;
+			if( !rd.read1(n) )
+				break;
 			a = n == 0 ? a->left : a->right;
 			if(a == nullptr)
 				break;

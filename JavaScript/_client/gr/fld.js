@@ -1,21 +1,7 @@
-class fld_2d{
+class fld_2d extends dom_el{
 	constructor(id){
-		this.o = document.getElementById(id);
+		super(id);
 		this.c = this.o.getContext("2d");
-	}
-	crd(c){
-		return [c[0]-this.o.offsetLeft,c[1]-this.o.offsetTop];
-	}
-	get size(){
-		return [this.o.width, this.o.height];
-	}
-	resize(sz){
-		if(sz[0]){
-			this.o.width  = sz[0];
-		}
-		if(sz[1]){
-			this.o.height = sz[1];
-		}
 	}
 	clear(){
 		this.c.clearRect(0,0,this.o.width,this.o.height);
