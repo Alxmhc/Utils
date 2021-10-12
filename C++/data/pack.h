@@ -5,7 +5,7 @@ namespace endianness
 		LITTLE_ENDIAN,
 		BIG_ENDIAN
 	};
-	char get_endianness()
+	static char get_endianness()
 	{
 		const char a[4] = {1,2,3,4};
 		uint32_t t;

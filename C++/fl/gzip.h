@@ -12,7 +12,7 @@ namespace fl_pr
 
 		bool read_inf(byteReader &s, inf &res)
 		{
-			if(s.get_size() < 18)
+			if (s.get_size() < 18) //10 + 8
 				return false;
 			{
 				uint8_t hdr[3];
@@ -27,11 +27,11 @@ namespace fl_pr
 			s.skip(6);
 			if( (flg & 4) != 0 )
 			{
-				uint8_t t[2];
-				if(!s.readN(t, 2))
+				uint_fast16_t sz;
+				if (!s.readC_2<endianness::LITTLE_ENDIAN>(sz))
 					return false;
-				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(t);
-				s.skip(sz);
+				if (!s.skip(sz))
+					return false;
 			}
 			if( (flg & 8) != 0 )
 			{
@@ -54,10 +54,7 @@ namespace fl_pr
 			res.ppos = st;
 			res.psize = end - st;
 			s.readN(res.crc32, 4);
-
-			uint8_t fsz[4];
-			s.readN(fsz, 4);
-			res.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(fsz);
+			s.readC_4<endianness::LITTLE_ENDIAN>(res.fsize);
 			return true;
 		}
 	}

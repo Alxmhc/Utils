@@ -10,11 +10,8 @@ namespace fl_pr
 				return false;
 			if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
 				return false;
-
-			uint8_t sz[4];
-			if(!s.readN(sz, 4))
+			if (!s.readC_4<endianness::LITTLE_ENDIAN>(fsz))
 				return false;
-			fsz = bconv<4, endianness::LITTLE_ENDIAN>::pack(sz);
 			return true;
 		}
 		bool Unpack(byteReader &br, std::vector<uint8_t> &out)

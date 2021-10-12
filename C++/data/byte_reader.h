@@ -16,7 +16,7 @@ public:
 		return pos;
 	}
 	virtual void set_pos(size_t) = 0;
-	virtual void skip(size_t) = 0;
+	virtual bool skip(size_t) = 0;
 
 	virtual bool get(uint8_t&) = 0;
 	virtual std::string read_string(char) = 0;
@@ -55,6 +55,34 @@ public:
 		}
 		return true;
 	}
+
+	template<char E>
+	bool readC_2(uint_fast16_t &c)
+	{
+		uint8_t t[2];
+		if (!readN(t, 2))
+			return false;
+		c = bconv<2, E>::pack(t);
+		return true;
+	}
+	template<char E>
+	bool readC_4(uint_fast32_t &c)
+	{
+		uint8_t t[4];
+		if (!readN(t, 4))
+			return false;
+		c = bconv<4, E>::pack(t);
+		return true;
+	}
+	template<char E>
+	bool readC_8(uint_fast64_t &c)
+	{
+		uint8_t t[8];
+		if (!readN(t, 8))
+			return false;
+		c = bconv<8, E>::pack(t);
+		return true;
+	}
 };
 
 class br_stream : public byteReader
@@ -87,10 +115,13 @@ public:
 		s.seekg(p, std::ios_base::beg);
 		pos = p;
 	}
-	void skip(size_t p)
+	bool skip(size_t n)
 	{
-		s.seekg(p, std::ios_base::cur);
-		pos += p;
+		if (pos + n > size)
+			return false;
+		s.seekg(n, std::ios_base::cur);
+		pos += n;
+		return true;
 	}
 
 	bool get(uint8_t &b)
@@ -137,9 +168,12 @@ public:
 	{
 		pos = p;
 	}
-	void skip(size_t p)
+	bool skip(size_t n)
 	{
-		pos += p;
+		if (pos + n > size)
+			return false;
+		pos += n;
+		return true;
 	}
 
 	bool get(uint8_t &b)

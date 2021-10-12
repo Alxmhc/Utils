@@ -40,14 +40,14 @@ std::vector<uint8_t> PBKDF2(const uint8_t *passw, size_t psz, const uint8_t *sal
 	for(uint_fast32_t i = 1; i <= kl; i++)
 	{
 		uint8_t tmp[F::out_size], res[F::out_size];
-		uint8_t num[4] = {i>>24, i>>16, i>>8, i};
+		uint8_t num[4] = {(i>>24) & 0xff, (i>>16) & 0xff, (i>>8) & 0xff, i & 0xff};
 		fcr.Calc(salt, ssz, num, tmp);
 		std::copy_n(tmp, F::out_size, res);
 
 		for(size_t j = 1; j < c; j++)
 		{
 			fcr.Calc(tmp);
-			std::transform(res, res + F::out_size, tmp, res, std::bit_xor<uint8_t>());
+			std::transform(res, res + F::out_size, tmp, res, [](uint8_t a, uint8_t b) -> uint8_t {return a ^ b;});
 		}
 		key.insert(key.end(), res, res + F::out_size);
 	}

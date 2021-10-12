@@ -4,9 +4,35 @@ public:
 	virtual void writeN(const uint8_t*, size_t) = 0;
 	virtual void writeN(const char*, size_t) = 0;
 
+	void write(uint8_t c)
+	{
+		writeN(&c, 1);
+	}
 	void write(const std::string &s)
 	{
 		writeN(s.c_str(), s.length());
+	}
+
+	template<char E>
+	void writeC_2(uint_fast16_t c)
+	{
+		uint8_t t[2];
+		bconv<2, E>::unpack(c, t);
+		writeN(t, 2);
+	}
+	template<char E>
+	void writeC_4(uint_fast32_t c)
+	{
+		uint8_t t[4];
+		bconv<4, E>::unpack(c, t);
+		writeN(t, 4);
+	}
+	template<char E>
+	void writeC_8(uint_fast64_t c)
+	{
+		uint8_t t[8];
+		bconv<8, E>::unpack(c, t);
+		writeN(t, 8);
 	}
 };
 
