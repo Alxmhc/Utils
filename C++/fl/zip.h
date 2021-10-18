@@ -32,8 +32,7 @@ namespace fl_pr
 
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
 			r.Hsize += szfn;
-			r.fname.resize(szfn);
-			if( !s.readN(reinterpret_cast<uint8_t*>(&r.fname[0]), szfn) )
+			if( !s.readN(r.fname, szfn) )
 				return false;
 
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);

@@ -35,11 +35,13 @@ namespace fl_pr
 			}
 			if( (flg & 8) != 0 )
 			{
-				res.fname = s.read_string(0);
+				 if( !s.read_string(0, res.fname) )
+					 return false;
 			}
 			if( (flg & 16) != 0 )
 			{
-				res.comment = s.read_string(0);
+				 if( !s.read_string(0, res.comment) )
+					 return false;
 			}
 			if( (flg & 2) != 0 )
 			{
@@ -47,12 +49,13 @@ namespace fl_pr
 			}
 
 			const auto st = s.get_pos();
-			s.set_pos(s.get_size() - 8);
-			const auto end = s.get_pos();
-			if(st >= end)
+			const auto ef = s.get_size() - 8;
+			if(st > ef)
 				return false;
 			res.ppos = st;
-			res.psize = end - st;
+			res.psize = ef - st;
+
+			s.set_pos(ef);
 			s.readN(res.crc32, 4);
 			s.readC_4<endianness::LITTLE_ENDIAN>(res.fsize);
 			return true;

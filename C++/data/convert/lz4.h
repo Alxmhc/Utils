@@ -31,10 +31,9 @@ namespace convert
 						break;
 					if(!br.addN(out, size))
 						break;
-					uint8_t o[2];
-					if(!br.readN(o, 2))
+					uint_fast16_t offset;
+					if( !br.readC_2<endianness::LITTLE_ENDIAN>(offset) )
 						return true;
-					auto offset = bconv<2, endianness::LITTLE_ENDIAN>::pack(o);
 					size_t len = b & 0xf;
 					if(!get_size(br, len))
 						break;

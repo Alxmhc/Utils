@@ -1,11 +1,32 @@
 class byteReader
 {
+	bool find(uint8_t c, size_t &p)
+	{
+		bool fnd = false;
+		auto b = pos;
+		while(pos < size)
+		{
+			if(read1() == c)
+			{
+				fnd = true;
+				p = pos - 1;
+				break;
+			}
+		}
+		set_pos(b);
+		return fnd;
+	}
 protected:
 	size_t size;
 	size_t pos;
 	byteReader(size_t sz) : size(sz), pos(0) {}
 
+	virtual uint8_t read1() = 0;
 	virtual void readAll(uint8_t*, const size_t) = 0;
+	void readAll(char *s, const size_t n)
+	{
+		readAll(reinterpret_cast<uint8_t*>(s), n);
+	}
 public:
 	size_t get_size() const
 	{
@@ -18,8 +39,13 @@ public:
 	virtual void set_pos(size_t) = 0;
 	virtual bool skip(size_t) = 0;
 
-	virtual bool get(uint8_t&) = 0;
-	virtual std::string read_string(char) = 0;
+	bool get(uint8_t &c)
+	{
+		if(pos >= size)
+			return false;
+		c = read1();
+		return true;
+	}
 
 	bool readN(uint8_t* d, size_t n)
 	{
@@ -42,6 +68,17 @@ public:
 		}
 		return true;
 	}
+	bool readN(std::string &s, size_t n)
+	{
+		if(pos + n > size)
+			return false;
+		s.resize(n);
+		if(n != 0)
+		{
+			readAll(const_cast<char*>(s.data()), n);
+		}
+		return true;
+	}
 
 	bool addN(std::vector<uint8_t> &v, size_t n)
 	{
@@ -53,6 +90,19 @@ public:
 			v.resize(sz + n);
 			readAll(v.data() + sz, n);
 		}
+		return true;
+	}
+
+	bool read_string(uint8_t c, std::string &s)
+	{
+		size_t p;
+		if( !find(c, p) )
+		{
+			s.clear();
+			return false;
+		}
+		readN(s, p - pos);
+		skip(1);
 		return true;
 	}
 
@@ -98,7 +148,13 @@ protected:
 		s.seekg(0, std::ios_base::beg);
 	}
 
-	void readAll(uint8_t *v, const size_t n)
+	uint8_t read1() override
+	{
+		uint8_t r = static_cast<uint8_t>(s.get());
+		pos++;
+		return r;
+	}
+	void readAll(uint8_t *v, const size_t n) override
 	{
 		s.read(reinterpret_cast<char*>(v), n);
 		pos += n;
@@ -110,35 +166,18 @@ public:
 		Init();
 	}
 
-	void set_pos(size_t p)
+	void set_pos(size_t p) override
 	{
 		s.seekg(p, std::ios_base::beg);
 		pos = p;
 	}
-	bool skip(size_t n)
+	bool skip(size_t n) override
 	{
 		if (pos + n > size)
 			return false;
 		s.seekg(n, std::ios_base::cur);
 		pos += n;
 		return true;
-	}
-
-	bool get(uint8_t &b)
-	{
-		if(pos >= size)
-			return false;
-		b = static_cast<uint8_t>(s.get());
-		pos++;
-		return true;
-	}
-
-	std::string read_string(char e)
-	{
-		std::string r;
-		std::getline(s, r, e);
-		pos += r.length() + 1;
-		return r;
 	}
 };
 
@@ -156,7 +195,13 @@ class br_array : public byteReader
 {
 	const uint8_t *d;
 protected:
-	void readAll(uint8_t *v, const size_t n)
+	uint8_t read1() override
+	{
+		uint8_t r = d[pos];
+		pos++;
+		return r;
+	}
+	void readAll(uint8_t *v, const size_t n) override
 	{
 		std::copy_n(d + pos, n, v);
 		pos += n;
@@ -164,32 +209,15 @@ protected:
 public:
 	br_array(const uint8_t *v, size_t sz) : byteReader(sz), d(v) {}
 
-	void set_pos(size_t p)
+	void set_pos(size_t p) override
 	{
 		pos = p;
 	}
-	bool skip(size_t n)
+	bool skip(size_t n) override
 	{
 		if (pos + n > size)
 			return false;
 		pos += n;
 		return true;
-	}
-
-	bool get(uint8_t &b)
-	{
-		if(pos >= size)
-			return false;
-		b = d[pos];
-		pos++;
-		return true;
-	}
-
-	std::string read_string(char e)
-	{
-		const auto n = std::find(d + pos, d + size, e) - d;
-		std::string r(d + pos, d + n);
-		pos = n + 1;
-		return r;
 	}
 };

@@ -29,7 +29,7 @@ public:
 class bitReaderR : public bitReader
 {
 public:
-	bool read1(uint_fast8_t &c)
+	bool read1(uint_fast8_t &c) override
 	{
 		if(o != 0)
 		{
@@ -75,7 +75,7 @@ public:
 class bitReaderL : public bitReader
 {
 public:
-	bool read1(uint_fast8_t &c)
+	bool read1(uint_fast8_t &c) override
 	{
 		if(o != 0)
 		{
