@@ -39,8 +39,8 @@ std::vector<uint8_t> PBKDF2(const uint8_t *passw, size_t psz, const uint8_t *sal
 	F fcr(passw, psz);
 	for(uint_fast32_t i = 1; i <= kl; i++)
 	{
-		uint8_t tmp[F::out_size], res[F::out_size];
-		uint8_t num[4] = {(i>>24) & 0xff, (i>>16) & 0xff, (i>>8) & 0xff, i & 0xff};
+		uint8_t tmp[F::out_size], res[F::out_size], num[4];
+		bconv<4, endianness::BIG_ENDIAN>::unpack(i, num);
 		fcr.Calc(salt, ssz, num, tmp);
 		std::copy_n(tmp, F::out_size, res);
 
