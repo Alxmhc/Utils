@@ -5,10 +5,7 @@ class PBKDF2_HMAC
 public:
 	static const uint_fast8_t out_size = H::hash_size;
 
-	PBKDF2_HMAC(const uint8_t *passw, size_t sz)
-	{
-		h.SetKey(passw, sz);
-	}
+	PBKDF2_HMAC(const uint8_t *passw, size_t sz) : h(passw, sz) {}
 
 	void Calc(const uint8_t *salt, size_t ssize, const uint8_t *nm, uint8_t *res)
 	{

@@ -122,8 +122,7 @@ namespace fl_pr
 			std::copy_n(data.end() - 10, 10, hsh);
 			data = std::vector<uint8_t>(data.begin() + ssz + 2, data.end() - 10);
 
-			hash::HMAC<hash::SHA1> h;
-			h.SetKey(key.data() + ssz*2, ssz*2);
+			hash::HMAC<hash::SHA1> h(key.data() + ssz*2, ssz*2);
 			h.Init();
 			h.Update(data.data(), data.size());
 			uint8_t hs[hash::SHA1::hash_size];

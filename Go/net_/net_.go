@@ -19,15 +19,14 @@ type Ethernet_II struct {
 	Type   uint16
 }
 
-func ParseEthernet_II(data []byte) (*Ethernet_II, []byte) {
+func (p *Ethernet_II) Read(data []byte) byte {
 	if len(data) < 14 {
-		return nil, nil
+		return 0
 	}
-	var p Ethernet_II
 	copy(p.MACsrc[:], data[6:12])
 	copy(p.MACdst[:], data[:6])
 	p.Type = binary.BigEndian.Uint16(data[12:14])
-	return &p, data[14:]
+	return 14
 }
 
 type IPv4 struct {
@@ -37,20 +36,35 @@ type IPv4 struct {
 	Type  byte
 }
 
-func ParseIPv4(data []byte) (*IPv4, []byte) {
+func (p *IPv4) Read(data []byte) byte {
 	if len(data) < 20 {
-		return nil, nil
+		return 0
 	}
 	sz := (data[0] & 0x0f) << 2
 	if len(data) < int(sz) || sz < 20 {
-		return nil, nil
+		return 0
 	}
-	var p IPv4
 	copy(p.IPsrc[:], data[12:16])
 	copy(p.IPdst[:], data[16:20])
 	p.ID = binary.BigEndian.Uint16(data[4:6])
 	p.Type = data[9]
-	return &p, data[sz:]
+	return sz
+}
+
+type IPv6 struct {
+	IPsrc [16]byte
+	IPdst [16]byte
+	Type  byte
+}
+
+func (p *IPv6) Read(data []byte) byte {
+	if len(data) < 40 {
+		return 0
+	}
+	copy(p.IPsrc[:], data[8:24])
+	copy(p.IPdst[:], data[24:40])
+	p.Type = data[6]
+	return 40
 }
 
 type TCP struct {
@@ -61,21 +75,20 @@ type TCP struct {
 	f       byte
 }
 
-func ParseTCP(data []byte) (*TCP, []byte) {
+func (p *TCP) Read(data []byte) byte {
 	if len(data) < 13 {
-		return nil, nil
+		return 0
 	}
 	sz := (data[12] >> 4) << 2
 	if len(data) < int(sz) || sz < 20 {
-		return nil, nil
+		return 0
 	}
-	var p TCP
 	p.PortSrc = binary.BigEndian.Uint16(data[0:2])
 	p.PortDst = binary.BigEndian.Uint16(data[2:4])
 	p.Num = binary.BigEndian.Uint32(data[4:8])
 	p.NumAck = binary.BigEndian.Uint32(data[8:12])
 	p.f = data[13]
-	return &p, data[sz:]
+	return sz
 }
 
 func (p *TCP) ACK() bool {
@@ -99,12 +112,11 @@ type UDP struct {
 	PortDst uint16
 }
 
-func ParseUDP(data []byte) (*UDP, []byte) {
+func (p *UDP) Read(data []byte) byte {
 	if len(data) < 8 {
-		return nil, nil
+		return 0
 	}
-	var p UDP
 	p.PortSrc = binary.BigEndian.Uint16(data[0:2])
 	p.PortDst = binary.BigEndian.Uint16(data[2:4])
-	return &p, data[8:]
+	return 8
 }
