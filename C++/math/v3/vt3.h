@@ -11,21 +11,6 @@ public:
 		return vt3(-x, -y, -z);
 	}
 
-	vt3 operator+(const vt3 &a) const
-	{
-		return vt3(x+a.x, y+a.y, z+a.z);
-	}
-
-	vt3 operator-(const vt3 &a) const
-	{
-		return vt3(x-a.x, y-a.y, z-a.z);
-	}
-
-	vt3 operator*(long double k) const
-	{
-		return vt3(x*k, y*k, z*k);
-	}
-
 	const vt3& operator+=(const vt3 &a)
 	{
 		x += a.x;
@@ -33,7 +18,6 @@ public:
 		z += a.z;
 		return *this;
 	}
-
 	const vt3& operator-=(const vt3 &a)
 	{
 		x -= a.x;
@@ -41,7 +25,6 @@ public:
 		z -= a.z;
 		return *this;
 	}
-
 	const vt3& operator*=(long double k)
 	{
 		x *= k;

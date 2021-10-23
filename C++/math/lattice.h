@@ -47,7 +47,10 @@ namespace lattice
 					for(uint_fast32_t z=0; z<n3; z++)
 					{
 						r[k++] = vt3(x, y, z) - d;
-						if(x && y && z){r[k++] = vt3(x-0.5, y-0.5, z-0.5) - d;}
+						if(x && y && z)
+						{
+							r[k++] = vt3(x-0.5, y-0.5, z-0.5) - d;
+						}
 					}
 				}
 			}
@@ -75,9 +78,18 @@ namespace lattice
 					for(uint_fast32_t z=0; z<n3; z++)
 					{
 						r[k++] = vt3(x, y, z) - d;
-						if(x && y){r[k++] = vt3(x-0.5, y-0.5, z) - d;}
-						if(x && z){r[k++] = vt3(x-0.5, y, z-0.5) - d;}
-						if(y && z){r[k++] = vt3(x, y-0.5, z-0.5) - d;}
+						if(x && y)
+						{
+							r[k++] = vt3(x-0.5, y-0.5, z) - d;
+						}
+						if(x && z)
+						{
+							r[k++] = vt3(x-0.5, y, z-0.5) - d;
+						}
+						if(y && z)
+						{
+							r[k++] = vt3(x, y-0.5, z-0.5) - d;
+						}
 					}
 				}
 			}
