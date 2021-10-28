@@ -92,11 +92,13 @@ namespace convert
 
 			static bool inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
 			{
-				uint8_t sza[2];
-				if(!brd.readB(sza, 2))
+				uint_fast16_t sz, nsz;
+				if( !brd.readB_C2<endianness::LITTLE_ENDIAN>(sz) )
 					return false;
-				brd.skipB(2);
-				auto sz = bconv<2, endianness::LITTLE_ENDIAN>::pack(sza);
+				if( !brd.readB_C2<endianness::LITTLE_ENDIAN>(nsz) )
+					return false;
+				if(sz + nsz != 0xffff)
+					return false;
 				return brd.addB(out, sz);
 			}
 

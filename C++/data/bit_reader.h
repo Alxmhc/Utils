@@ -18,10 +18,29 @@ public:
 		o = 0;
 		return r->addN(v, n);
 	}
-	void skipB(size_t n)
+	bool skipB(size_t n)
 	{
 		o = 0;
-		r->skip(n);
+		return r->skip(n);
+	}
+
+	template<char E>
+	bool readB_C2(uint_fast16_t &c)
+	{
+		o = 0;
+		return r->readC_2<E>(c);
+	}
+	template<char E>
+	bool readB_C4(uint_fast32_t &c)
+	{
+		o = 0;
+		return r->readC_4<E>(c);
+	}
+	template<char E>
+	bool readB_C8(uint_fast64_t &c)
+	{
+		o = 0;
+		return r->readC_8<E>(c);
 	}
 };
 

@@ -2,6 +2,7 @@ package crypt
 
 import (
 	"crypto/hmac"
+	"encoding/binary"
 	"hash"
 )
 
@@ -46,8 +47,10 @@ func pbkdf2(passw, salt []byte, iter, klen int, prf k1Func) []byte {
 
 	key := make([]byte, kl*hLen)
 	offset := 0
+	var iv [4]byte
 	for b := 1; b <= kl; b++ {
-		tmp := prf.Calc0(salt, []byte{byte(b >> 24), byte(b >> 16), byte(b >> 8), byte(b)})
+		binary.BigEndian.PutUint32(iv[:], uint32(b))
+		tmp := prf.Calc0(salt, iv[:])
 		copy(key[offset:offset+hLen], tmp)
 		for n := 1; n < iter; n++ {
 			prf.Calc1(tmp)
