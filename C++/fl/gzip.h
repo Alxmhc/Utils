@@ -4,10 +4,16 @@ namespace fl_pr
 	{
 		struct inf
 		{
-			std::string fname, comment;
+			size_t hdr_pos;
+			size_t hdr_size;
+			size_t data_pos;
+			size_t data_size;
+
+			std::string fname;
 			uint_fast32_t fsize;
 			uint8_t crc32[4];
-			size_t psize, ppos;
+
+			std::string comment;
 		};
 
 		bool read_inf(byteReader &s, inf &res)
@@ -52,8 +58,10 @@ namespace fl_pr
 			const auto ef = s.get_size() - 8;
 			if(st > ef)
 				return false;
-			res.ppos = st;
-			res.psize = ef - st;
+			res.hdr_pos = 0;
+			res.hdr_size = st;
+			res.data_pos = res.hdr_size;
+			res.data_size = ef - st;
 
 			s.set_pos(ef);
 			s.readN(res.crc32, 4);

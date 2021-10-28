@@ -133,6 +133,22 @@ func decryptZIP(f io.ReaderAt, inf Inf, passw []byte) []byte {
 	return data[12:]
 }
 
+type vle struct {
+	data [16]byte
+}
+
+func (v *vle) Data() []byte {
+	return v.data[:]
+}
+func (v *vle) Incr() {
+	for i := 0; i < 16; i++ {
+		v.data[i]++
+		if v.data[i] != 0 {
+			break
+		}
+	}
+}
+
 func decryptAES(f io.ReaderAt, inf Inf, saltLen int, passw []byte) []byte {
 	r := io.NewSectionReader(f, int64(inf.Hpos)+int64(inf.Hsize), int64(inf.Dsize))
 	salt := make([]byte, saltLen)
@@ -160,8 +176,7 @@ func decryptAES(f io.ReaderAt, inf Inf, saltLen int, passw []byte) []byte {
 	if !bytes.Equal(eauth[:10], auth[:]) {
 		return nil
 	}
-
-	crypt.AESCTRDecryptLE(data, key[:keyLen])
+	crypt.AESctrDecrypt(data, key[:keyLen], &vle{})
 	return data
 }
 

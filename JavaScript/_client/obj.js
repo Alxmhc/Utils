@@ -6,6 +6,15 @@ function imgs(p){
 	});
 }
 
+imgs.fn = function(img, fn){
+	if(im.complete){
+		fn(img);
+	}
+	else {
+		im.addEventListener('load', () => fn(img), {once: true});
+	}
+}
+
 const $dom = {}
 
 $dom.get_el = function(id){

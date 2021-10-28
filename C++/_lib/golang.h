@@ -8,6 +8,18 @@ typedef uint16_t GoUint16;
 typedef uint32_t GoUint32;
 typedef uint64_t GoUint64;
 
+typedef GoInt64  GoInt;
+typedef GoUint64 GoUint;
+
+class GoSlice
+{
+	void *data;
+	GoInt len;
+	GoInt cap;
+public:
+	GoSlice(uint8_t *v, size_t n) : data(v), len(n), cap(n) {}
+};
+
 class GoString
 {
 	const char* p;

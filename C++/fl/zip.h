@@ -4,15 +4,17 @@ namespace fl_pr
 	{
 		struct inf
 		{
-			size_t Hpos;
-			uint_fast16_t Hsize;
+			size_t hdr_pos;
+			size_t hdr_size;
+			size_t data_pos;
+			size_t data_size;
 
-			uint_fast8_t encryption;
-			uint_fast16_t method;
-			uint8_t crc32[4];
-			uint_fast32_t Dsize;
-			uint_fast32_t fsize;
 			std::string fname;
+			uint_fast32_t fsize;
+			uint8_t crc32[4];
+
+			uint_fast16_t method;
+			uint_fast8_t encryption;
 			bool isDir;
 		};
 
@@ -21,33 +23,37 @@ namespace fl_pr
 			uint8_t h[26];
 			if(!s.readN(h, 26))
 				return false;
-			r.Hpos = s.get_pos() - 26;
-			r.Hsize = 26;
+			r.hdr_pos = s.get_pos() - 26;
+			r.hdr_size = 26;
 
 			r.encryption = h[2] & 1;
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
 			std::copy_n(h+10, 4, r.crc32);
-			r.Dsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
+			r.data_size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			r.Hsize += szfn;
+			r.hdr_size += szfn;
 			if( !s.readN(r.fname, szfn) )
 				return false;
+			r.isDir = (r.fname[r.fname.length() - 1] == '/');
 
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
-				r.Hsize += szex;
+				r.hdr_size += szex;
 				std::vector<uint8_t> ext;
 				if( !s.readN(ext, szex) )
 					return false;
 				if(r.method == 99)
 				{
+					if(szex < 11)
+						return false;
 					r.encryption = ext[8] + 1;
 					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 				}
 			}
+			r.data_pos = r.hdr_pos + r.hdr_size;
 			return true;
 		}
 
@@ -86,7 +92,6 @@ namespace fl_pr
 
 		class aes_iv
 		{
-		protected:
 			uint8_t iv[16];
 		public:
 			aes_iv()
@@ -165,9 +170,8 @@ namespace fl_pr
 					inf r;
 					if( !read_file_hdr(s, r) )
 						break;
-					r.isDir = (r.fname[r.fname.length() - 1] == '/');
 					res.push_back(r);
-					s.skip(r.Dsize);
+					s.skip(r.data_size);
 				}
 				else
 					break;
@@ -177,8 +181,8 @@ namespace fl_pr
 
 		static bool Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz, std::vector<uint8_t> &data)
 		{
-			s.set_pos(inf.Hpos + inf.Hsize);
-			if( !s.readN(data, inf.Dsize) )
+			s.set_pos(inf.data_pos);
+			if( !s.readN(data, inf.data_size) )
 				return false;
 			switch(inf.encryption)
 			{

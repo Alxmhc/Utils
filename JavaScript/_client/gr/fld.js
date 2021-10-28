@@ -7,11 +7,6 @@ class fld_2d extends dom_el{
 		this.c.clearRect(0,0,this.o.width,this.o.height);
 	}
 	draw(im, crd, sz){
-		if(im.complete){
-			this.c.drawImage(im, crd[0], crd[1], sz[0], sz[1]);
-		}
-		else{
-			im.addEventListener('load', () => this.c.drawImage(im, crd[0], crd[1], sz[0], sz[1]), {once: true});
-		}
+		imgs.fn(im, img => this.c.drawImage(img, crd[0], crd[1], sz[0], sz[1]));
 	}
 }
