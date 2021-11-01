@@ -20,7 +20,7 @@ class f_sqr extends fld_2d{
 	}
 	//cell from internal coordinates
 	crd_c(c){
-		return [Math.floor(c[0]/this.csz[0]), Math.floor(c[1]/this.csz[1])]
+		return [Math.floor(c[0]/this.csz[0]), Math.floor(c[1]/this.csz[1])];
 	}
 
 	del(cr){

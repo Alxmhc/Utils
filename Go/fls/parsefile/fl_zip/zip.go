@@ -31,13 +31,15 @@ const (
 type Inf struct {
 	Hpos  uint64
 	Hsize uint16
+	Dpos  uint64
+	Dsize uint32
 
-	Encryption byte
+	Fname string
+	Fsize uint32
+	CRC32 [4]byte
+
 	Method     uint16
-	CRC32      [4]byte
-	Dsize      uint32
-	Fsize      uint32
-	Fname      string
+	Encryption byte
 	IsDir      bool
 }
 
@@ -80,6 +82,7 @@ func readHdr(rs io.ReadSeeker) *Inf {
 			res.Method = binary.LittleEndian.Uint16(ext[9:11])
 		}
 	}
+	res.Dpos = res.Hpos + uint64(res.Hsize)
 	return &res
 }
 
@@ -112,25 +115,18 @@ func updKey(key []uint32, c byte) {
 	key[2] = crc32.IEEETable[byte(key[2]^(key[1]>>24))] ^ (key[2] >> 8)
 }
 
-func decryptZIP(f io.ReaderAt, inf Inf, passw []byte) []byte {
-	r := io.NewSectionReader(f, int64(inf.Hpos)+int64(inf.Hsize), int64(inf.Dsize))
-	data := make([]byte, inf.Dsize)
-	_, err := r.Read(data)
-	if err != nil {
-		return nil
-	}
-
+func decryptZIP(d []byte, passw []byte) []byte {
 	key := [3]uint32{0x12345678, 0x23456789, 0x34567890}
 	for _, c := range passw {
 		updKey(key[:], c)
 	}
 
-	for i := 0; i < len(data); i++ {
+	for i := 0; i < len(d); i++ {
 		tmp := key[2] | 2
-		data[i] ^= byte((tmp * (tmp ^ 1)) >> 8)
-		updKey(key[:], data[i])
+		d[i] ^= byte((tmp * (tmp ^ 1)) >> 8)
+		updKey(key[:], d[i])
 	}
-	return data[12:]
+	return d[12:]
 }
 
 type vle struct {
@@ -149,31 +145,23 @@ func (v *vle) Incr() {
 	}
 }
 
-func decryptAES(f io.ReaderAt, inf Inf, saltLen int, passw []byte) []byte {
-	r := io.NewSectionReader(f, int64(inf.Hpos)+int64(inf.Hsize), int64(inf.Dsize))
-	salt := make([]byte, saltLen)
-	r.Read(salt)
-	var psv [2]byte
-	r.Read(psv[:])
-
+func decryptAES(d []byte, passw []byte, saltLen int) []byte {
+	salt := d[:saltLen]
 	keyLen := saltLen * 2
 	key := crypt.PBKDF2HMAC(passw, salt, 1000, (keyLen*2)+2, sha1.New)
-	if !bytes.Equal(psv[:], key[keyLen*2:]) {
+
+	psv := d[saltLen : saltLen+2]
+	if !bytes.Equal(psv, key[keyLen*2:]) {
 		return nil
 	}
 
-	data := make([]byte, inf.Dsize-uint32(saltLen)-12)
-	_, err := r.Read(data)
-	if err != nil {
-		return nil
-	}
-
-	var auth [10]byte
-	r.Read(auth[:])
+	data := d[saltLen+2 : len(d)-10]
 	mac := hmac.New(sha1.New, key[keyLen:keyLen*2])
 	mac.Write(data)
 	eauth := mac.Sum(nil)
-	if !bytes.Equal(eauth[:10], auth[:]) {
+
+	auth := d[len(d)-10:]
+	if !bytes.Equal(eauth[:10], auth) {
 		return nil
 	}
 	crypt.AESctrDecrypt(data, key[:keyLen], &vle{})
@@ -181,15 +169,17 @@ func decryptAES(f io.ReaderAt, inf Inf, saltLen int, passw []byte) []byte {
 }
 
 func Decrypt(f io.ReaderAt, inf Inf, passw []byte) []byte {
+	data := make([]byte, inf.Dsize)
+	f.ReadAt(data, int64(inf.Dpos))
 	switch inf.Encryption {
 	case eZIP:
-		return decryptZIP(f, inf, passw)
+		return decryptZIP(data, passw)
 	case eAES128:
-		return decryptAES(f, inf, 8, passw)
+		return decryptAES(data, passw, 8)
 	case eAES192:
-		return decryptAES(f, inf, 12, passw)
+		return decryptAES(data, passw, 12)
 	case eAES256:
-		return decryptAES(f, inf, 16, passw)
+		return decryptAES(data, passw, 16)
 	}
 	return nil
 }
