@@ -1,17 +1,17 @@
-function imgs(p){
-	return p.map(e => {
-		const im = new Image();
-		im.src = e;
-		return im;
-	});
+const img = {}
+
+img.New = function(src){
+	const im = new Image();
+	im.src = src;
+	return im;
 }
 
-imgs.fn = function(img, fn){
+img.fn = function(im, fn){
 	if(im.complete){
-		fn(img);
+		fn(im);
 	}
 	else {
-		im.addEventListener('load', () => fn(img), {once: true});
+		im.addEventListener('load', () => fn(im), {once: true});
 	}
 }
 

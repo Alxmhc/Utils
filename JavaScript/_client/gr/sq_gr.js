@@ -29,9 +29,6 @@ class f_sqr extends fld_2d{
 	pct(cr,p){
 		this.draw(p, [this.csz[0]*cr[0], this.csz[1]*cr[1]], [this.csz[0], this.csz[1]]);
 	}
-	set_clr(c){
-		this.c.fillStyle = c;
-	}
 	fll(cr){
 		this.c.fillRect(this.csz[0]*cr[0], this.csz[1]*cr[1], this.csz[0], this.csz[1]);
 	}

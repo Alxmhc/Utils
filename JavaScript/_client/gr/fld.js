@@ -6,7 +6,10 @@ class fld_2d extends dom_el{
 	clear(){
 		this.c.clearRect(0,0,this.o.width,this.o.height);
 	}
+	set_clr(c){
+		this.c.fillStyle = c;
+	}
 	draw(im, crd, sz){
-		imgs.fn(im, img => this.c.drawImage(img, crd[0], crd[1], sz[0], sz[1]));
+		img.fn(im, p => this.c.drawImage(p, crd[0], crd[1], sz[0], sz[1]));
 	}
 }
