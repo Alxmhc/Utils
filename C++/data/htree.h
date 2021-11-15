@@ -3,7 +3,13 @@ class huffmanTree
 {
 	binTree<T> t;
 public:
+	huffmanTree(){}
 	huffmanTree(T *m, T n)
+	{
+		Set(m, n);
+	}
+
+	void Set(T *m, T n)
 	{
 		typedef std::pair<uint_fast16_t, uint_fast16_t> pr;
 		std::vector<pr> tmp(n);

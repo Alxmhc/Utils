@@ -51,21 +51,19 @@ namespace convert
 				return dist;
 			}
 
-			static std::vector<uint_fast16_t> decode(const huffmanTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd)
+			static bool decode(const huffmanTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd, std::vector<uint_fast16_t> &vcodes)
 			{
-				std::vector<uint_fast16_t> res(ncode);
+				vcodes.resize(ncode);
+				std::fill(vcodes.begin(), vcodes.end(), 0);
 				uint_fast16_t n = 0, o = 0;
 				while(n < ncode)
 				{
 					uint_fast8_t tmp;
 					if( !codes.find(brd, tmp) )
-					{
-						res.clear();
-						break;
-					}
+						return false;
 					if(tmp < 16)
 					{
-						res[n] = tmp;
+						vcodes[n] = tmp;
 						o = tmp;
 						n++;
 						continue;
@@ -73,7 +71,9 @@ namespace convert
 					if(tmp == 16)
 					{
 						uint_fast8_t k = brd.readBE(2) + 3;
-						std::fill(res.begin() + n, res.begin() + n + k, o);
+						if(n + k > ncode)
+							return false;
+						std::fill(vcodes.begin() + n, vcodes.begin() + n + k, o);
 						n += k;
 						continue;
 					}
@@ -87,7 +87,7 @@ namespace convert
 						n += brd.readBE(7) + 11;
 					}
 				}
-				return res;
+				return true;
 			}
 
 			static bool inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
@@ -141,7 +141,9 @@ namespace convert
 				}
 				huffmanTree<uint_fast8_t> codes(clen, csz);
 
-				auto vcodes = decode(codes, HLIT + HDIST, brd);
+				std::vector<uint_fast16_t> vcodes;
+				if( !decode(codes, HLIT + HDIST, brd, vcodes) )
+					return false;
 				huffmanTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
 				huffmanTree<uint_fast16_t> hdist(vcodes.data() + HLIT, HDIST);
 
