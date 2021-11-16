@@ -1,7 +1,7 @@
 package fl_zip
 
 import (
-	"_/crypt"
+	_crypt "_/crypt"
 
 	"bytes"
 	"crypto/hmac"
@@ -148,7 +148,7 @@ func (v *vle) Incr() {
 func decryptAES(d []byte, passw []byte, saltLen int) []byte {
 	salt := d[:saltLen]
 	keyLen := saltLen * 2
-	key := crypt.PBKDF2HMAC(passw, salt, 1000, (keyLen*2)+2, sha1.New)
+	key := _crypt.PBKDF2HMAC(passw, salt, 1000, (keyLen*2)+2, sha1.New)
 
 	psv := d[saltLen : saltLen+2]
 	if !bytes.Equal(psv, key[keyLen*2:]) {
@@ -164,7 +164,7 @@ func decryptAES(d []byte, passw []byte, saltLen int) []byte {
 	if !bytes.Equal(eauth[:10], auth) {
 		return nil
 	}
-	crypt.AESctrDecrypt(data, key[:keyLen], &vle{})
+	_crypt.AESctrDecrypt(data, key[:keyLen], &vle{})
 	return data
 }
 

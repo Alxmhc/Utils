@@ -9,7 +9,7 @@ type IV interface {
 	Incr()
 }
 
-func AESctrEncrypt(data []byte, key []byte, v IV) {
+func AESctrEncrypt(data, key []byte, v IV) {
 	block, _ := aes.NewCipher(key[:])
 	bs := block.BlockSize()
 
@@ -33,6 +33,6 @@ func AESctrEncrypt(data []byte, key []byte, v IV) {
 	}
 }
 
-func AESctrDecrypt(data []byte, key []byte, v IV) {
+func AESctrDecrypt(data, key []byte, v IV) {
 	AESctrEncrypt(data, key, v)
 }
