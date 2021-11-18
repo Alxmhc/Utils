@@ -4,14 +4,14 @@ class huffmanTree
 	binTree<T> t;
 public:
 	huffmanTree(){}
-	huffmanTree(T *m, T n)
+	huffmanTree(uint_fast8_t *m, T n)
 	{
 		Set(m, n);
 	}
 
-	void Set(T *m, T n)
+	void Set(uint_fast8_t *m, T n)
 	{
-		typedef std::pair<uint_fast16_t, uint_fast16_t> pr;
+		typedef std::pair<T, uint_fast8_t> pr;
 		std::vector<pr> tmp(n);
 		T sz = 0;
 		for(T i = 0; i < n; ++i)
@@ -24,9 +24,11 @@ public:
 		}
 		std::sort(tmp.begin(), tmp.begin() + sz, [](const pr &a, const pr &b){return a.second == b.second ? a.first < b.first : a.second < b.second;});
 
-		for(T i = 0, k = 0, p = 0; i < sz; ++i)
+		uint_fast32_t k = 0;
+		uint_fast8_t p = 0;
+		for(T i = 0; i < sz; ++i)
 		{
-			const T s = tmp[i].second;
+			const uint_fast8_t s = tmp[i].second;
 			if(p != s)
 			{
 				k <<= s - p;
