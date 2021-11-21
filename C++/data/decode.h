@@ -1,26 +1,40 @@
+template<typename T>
+bool find1(const T* v, const size_t sz, const T e, size_t &p)
+{
+	for(p = 0; p < sz; p++)
+	{
+		if(v[p] == e)
+			return true;
+	}
+	return false;
+}
+
 namespace decode
 {
-	void unchunk(const uint8_t *v, const size_t n, byteWriter &bw)
+	bool unchunk(const uint8_t *v, const size_t n, byteWriter &bw)
 	{
 		size_t i = 0;
-		while(i < n)
+		const uint8_t f('\n');
+		for(;;)
 		{
+			size_t p;
+			if( !find1(v + i, n - i, f, p) )
+				break;
+
 			auto sz = strtoul(reinterpret_cast<const char*>(v + i), nullptr, 16);
 			if(sz == 0)
+				return true;
+
+			i += p + 1;
+			if(i + sz > n)
 				break;
-			while(v[i] != '\r' && i < n)
-			{
-				i++;
-			}
-			i += 2;
-			if(i + sz >= n)
-			{
-				bw.writeN(v + i, n - i);
-				break;
-			}
 			bw.writeN(v + i, sz);
-			i += sz + 2;
+			i += sz;
+			if( !find1(v + i, n - i, f, p) || p > 2 )
+				break;
+			i += p + 1;
 		}
+		return false;
 	}
 
 	std::vector<uint8_t> URL(const std::string &s)

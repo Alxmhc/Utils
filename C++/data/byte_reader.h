@@ -1,21 +1,5 @@
 class byteReader
 {
-	bool find(uint8_t c, size_t &p)
-	{
-		bool fnd = false;
-		auto b = pos;
-		while(pos < size)
-		{
-			if(read1() == c)
-			{
-				fnd = true;
-				p = pos - 1;
-				break;
-			}
-		}
-		set_pos(b);
-		return fnd;
-	}
 protected:
 	size_t size;
 	size_t pos;
@@ -93,19 +77,6 @@ public:
 		return true;
 	}
 
-	bool read_string(uint8_t c, std::string &s)
-	{
-		size_t p;
-		if( !find(c, p) )
-		{
-			s.clear();
-			return false;
-		}
-		readN(s, p - pos);
-		skip(1);
-		return true;
-	}
-
 	template<char E>
 	bool readC_2(uint_fast16_t &c)
 	{
@@ -131,6 +102,18 @@ public:
 		if (!readN(t, 8))
 			return false;
 		c = bconv<8, E>::pack(t);
+		return true;
+	}
+
+	virtual bool find1(uint8_t, size_t&) = 0;
+
+	bool read_string(uint8_t c, std::string &s)
+	{
+		size_t p;
+		if( !find1(c, p) )
+			return false;
+		readN(s, p - pos);
+		skip(1);
 		return true;
 	}
 };
@@ -179,6 +162,20 @@ public:
 		pos += n;
 		return true;
 	}
+
+	bool find1(uint8_t c, size_t &p) override
+	{
+		for(p = pos; p < size; p++)
+		{
+			if(s.get() == c)
+			{
+				s.seekg(pos, std::ios_base::beg);
+				return true;
+			}
+		}
+		s.seekg(pos, std::ios_base::beg);
+		return false;
+	}
 };
 
 class br_fstream : public br_stream
@@ -219,5 +216,15 @@ public:
 			return false;
 		pos += n;
 		return true;
+	}
+
+	bool find1(uint8_t c, size_t &p) override
+	{
+		for(p = pos; p < size; p++)
+		{
+			if(d[p] == c)
+				return true;
+		}
+		return false;
 	}
 };

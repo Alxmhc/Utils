@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -57,7 +58,7 @@ func (e entrie) getResp() *http.Response {
 	if rs.Status == 0 {
 		return nil
 	}
-	res := &http.Response{Proto: "HTTP/1.1", ProtoMajor: 1, ProtoMinor: 1, Header: make(http.Header, 0)}
+	res := &http.Response{Proto: "HTTP/1.1", ProtoMajor: 1, ProtoMinor: 1, Header: make(http.Header)}
 	res.StatusCode = rs.Status
 	res.Status = rs.StatusText
 
@@ -93,9 +94,15 @@ type har struct {
 }
 
 func Parse(fname string) []http.Request {
-	fl, _ := ioutil.ReadFile(fname)
+	fl, err := os.Open(fname)
+	if err != nil {
+		return nil
+	}
 	var data har
-	json.Unmarshal([]byte(fl), &data)
+	err = json.NewDecoder(fl).Decode(&data)
+	if err != nil {
+		return nil
+	}
 	var res []http.Request
 	for _, entrie := range data.Log.Entries {
 		req := entrie.getReq()
