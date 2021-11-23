@@ -4,6 +4,9 @@ class SHA256{
 		this.st = new Uint32Array(8);
 		this.init();
 	}
+	get hsize(){
+		return 32;
+	}
 	init(){
 		this.st.set([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
 		this.size = 0;

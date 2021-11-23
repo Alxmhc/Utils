@@ -4,6 +4,9 @@ class SHA1{
 		this.st = new Uint32Array(5);
 		this.init();
 	}
+	get hsize(){
+		return 20;
+	}
 	init(){
 		this.st.set([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0]);
 		this.size = 0;
@@ -18,23 +21,27 @@ class SHA1{
 	Transform(x){
 		let wt = this.st.slice();
 		let w = new Uint32Array(80);
-		for(let i=0; i<16; i++){
-			w[i] = x[i];
-
-			SHA1.rotate1(wt, x[i]);
-		}
-		for(let i = 16; i<w.length; i++){
-			w[i] = rotl(w[i-3]^w[i-8]^w[i-14]^w[i-16], 1);
-
-			if(i<20){
-				SHA1.rotate1(wt, w[i]);
-			}else if(i<40){
-				SHA1.rotate2(wt, w[i]);
-			}else if(i<60){
-				SHA1.rotate3(wt, w[i]);
-			}else{
-				SHA1.rotate4(wt, w[i]);
+		w.set(x);
+		for(let i = 0; i < 80; i++){
+			if(i > 15){
+				w[i] = rotl(w[i-3]^w[i-8]^w[i-14]^w[i-16], 1);
 			}
+			let t = w[i] + rotl(wt[0],5) + wt[4];
+
+			if(i < 20){
+				t += ((wt[1] & wt[2])|(~wt[1] & wt[3])) + 0x5a827999;
+			}else if(i < 40){
+				t += (wt[1] ^ wt[2] ^ wt[3]) + 0x6ed9eba1;
+			}else if(i < 60){
+				t += ((wt[1] & wt[2])|(wt[3] & (wt[1]|wt[2]))) + 0x8f1bbcdc;
+			}else{
+				t += (wt[1] ^ wt[2] ^ wt[3]) + 0xca62c1d6;
+			}
+			wt[4] = wt[3];
+			wt[3] = wt[2];
+			wt[2] = rotl(wt[1], 30);
+			wt[1] = wt[0];
+			wt[0] = t;
 		}
 
 		this.st[0] += wt[0];
@@ -55,8 +62,8 @@ class SHA1{
 			this.Transform(x);
 			x.fill(0);
 		}
-		x[14] = this.size>>>29;
-		x[15] = this.size<<3;
+		x[14] = this.size >>> 29;
+		x[15] = this.size << 3;
 		this.Transform(x);
 
 		const r = conv.unpack_be(this.st);
@@ -64,28 +71,4 @@ class SHA1{
 		this.init();
 		return r;
 	}
-}
-SHA1.rotate = function(wt, t){
-	t += rotl(wt[0],5)+wt[4];
-	wt[4] = wt[3];
-	wt[3] = wt[2];
-	wt[2] = rotl(wt[1], 30);
-	wt[1] = wt[0];
-	wt[0] = t;
-}
-SHA1.rotate1 = function(wt, t){
-	t += ((wt[1] & wt[2])|(~wt[1] & wt[3]))+0x5a827999;
-	SHA1.rotate(wt,t);
-}
-SHA1.rotate2 = function(wt, t){
-	t += (wt[1]^wt[2]^wt[3])+0x6ed9eba1;
-	SHA1.rotate(wt, t);
-}
-SHA1.rotate3 = function(wt, t){
-	t += ((wt[1] & wt[2])|(wt[3] & (wt[1]|wt[2])))+0x8f1bbcdc;
-	SHA1.rotate(wt, t);
-}
-SHA1.rotate4 = function(wt, t){
-	t += (wt[1]^wt[2]^wt[3])+0xca62c1d6;
-	SHA1.rotate(wt, t);
 }

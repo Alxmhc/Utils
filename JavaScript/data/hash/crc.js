@@ -1,8 +1,11 @@
 //rfc1952
-class crc32{
+class CRC32{
 	constructor(){
 		this.crc = 0xffffffff;
-		this.tbl = crc32.getTable(0xedb88320);
+		this.tbl = CRC32.getTable(0xedb88320);
+	}
+	get hsize(){
+		return 4;
 	}
 	Update(v){
 		for(let i = 0; i < v.length; i++){
@@ -10,12 +13,12 @@ class crc32{
 		}
 	}
 	Final(){
-		const res = this.crc ^ 0xffffffff;
+		const r = conv.unpack_le([this.crc ^ 0xffffffff]);
 		this.crc = 0xffffffff;
-		return res >>> 0;
+		return r;
 	}
 }
-crc32.getTable = function(I){
+CRC32.getTable = function(I){
 	let tbl = new Uint32Array(256);
 	for(let n = 0; n < 256; n++){
 		let c = n;
