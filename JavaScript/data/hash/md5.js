@@ -4,6 +4,9 @@ class MD5{
 		this.st = new Uint32Array(4);
 		this.init();
 	}
+	get bsize(){
+		return 64;
+	}
 	get hsize(){
 		return 16;
 	}

@@ -4,6 +4,9 @@ class SHA1{
 		this.st = new Uint32Array(5);
 		this.init();
 	}
+	get bsize(){
+		return 64;
+	}
 	get hsize(){
 		return 20;
 	}
