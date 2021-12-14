@@ -1,14 +1,14 @@
 class AES{
-	constructor(key){
+	constructor(k){
 		for(let i = 0; i < 256; i++){
-			AES.Mul[i] = i < 0x80 ? (i << 1) : (i << 1) ^ 0x1b;
+			AES.Mul[i] = i < 0x80 ? (i << 1) ^ i : (i << 1) ^ i ^ 0x1b;
 		}
 		
-		const ksz = key.length;
-		this.enc = new Uint8Array((ksz + 28) << 2);
-		this.enc.set(key);
-		for(let i = ksz; i < this.enc.length; i += 4){
-			let t = this.enc.slice(i - 4, i);
+		const ksz = k.length;
+		this.key = new Uint8Array((ksz + 28) << 2);
+		this.key.set(k);
+		for(let i = ksz; i < this.key.length; i += 4){
+			let t = this.key.slice(i - 4, i);
 			const o = i % ksz;
 			if(o == 0){
 				const x = t[0];
@@ -22,29 +22,29 @@ class AES{
 				t[2] = AES.Sbox[t[2]];
 				t[3] = AES.Sbox[t[3]];
 			}
-			this.enc[i]   = t[0] ^ this.enc[i-ksz];
-			this.enc[i+1] = t[1] ^ this.enc[i+1-ksz];
-			this.enc[i+2] = t[2] ^ this.enc[i+2-ksz];
-			this.enc[i+3] = t[3] ^ this.enc[i+3-ksz];
+			this.key[i]   = t[0] ^ this.key[i-ksz];
+			this.key[i+1] = t[1] ^ this.key[i+1-ksz];
+			this.key[i+2] = t[2] ^ this.key[i+2-ksz];
+			this.key[i+3] = t[3] ^ this.key[i+3-ksz];
 		}
 	}
 
 	Encrypt(r){
 		for(let n=0; n<16; n++){
-			r[n] ^= this.enc[n];
+			r[n] ^= this.key[n];
 		}
 		let i = 16;
-		for(; i < this.enc.length - 16; i += 16)
+		for(; i < this.key.length - 16; i += 16)
 		{
 			AES.SubShift(r);
 			AES.Mix(r);
 			for(let n=0; n<16; n++){
-				r[n] ^= this.enc[n + i];
+				r[n] ^= this.key[n + i];
 			}
 		}
 		AES.SubShift(r);
 		for(let n=0; n<16; n++){
-			r[n] ^= this.enc[n + i];
+			r[n] ^= this.key[n + i];
 		}
 	}
 };
@@ -61,11 +61,10 @@ AES.SubShift = function(r){
 AES.Mix = function(r){
 	for(let i = 0; i < 16; i += 4){
 		const d = Uint8Array.from([r[i]^r[i+1], r[i+1]^r[i+2], r[i+2]^r[i+3], r[i+3]^r[i]]);
-		const t = d[0] ^ d[2];
-		r[i]   ^= t ^ AES.Mul[d[0]];
-		r[i+1] ^= t ^ AES.Mul[d[1]];
-		r[i+2] ^= t ^ AES.Mul[d[2]];
-		r[i+3] ^= t ^ AES.Mul[d[3]];
+		r[i]   ^= d[2] ^ AES.Mul[d[0]];
+		r[i+1] ^= d[3] ^ AES.Mul[d[1]];
+		r[i+2] ^= d[0] ^ AES.Mul[d[2]];
+		r[i+3] ^= d[1] ^ AES.Mul[d[3]];
 	}
 }
 

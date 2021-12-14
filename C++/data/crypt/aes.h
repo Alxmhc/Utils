@@ -4,9 +4,9 @@ class AES
 	static const uint8_t Sbox[256];
 	static const uint8_t Mul[256];
 
-	std::vector<uint8_t> enc;
+	std::vector<uint8_t> key;
 
-	static void SubShift(uint8_t r[16])
+	static void SubShift(uint8_t *r)
 	{
 		const uint8_t t[16] = {
 		Sbox[r[0]], Sbox[r[5]], Sbox[r[10]], Sbox[r[15]],
@@ -17,7 +17,7 @@ class AES
 		std::copy_n(t, 16, r);
 	}
 
-	static void Mix(uint8_t r[16])
+	static void Mix(uint8_t *r)
 	{
 		for(uint_fast8_t i = 0; i < 16; i += 4)
 		{
@@ -31,13 +31,13 @@ class AES
 	}
 
 public:
-	AES(const uint8_t *k, size_t ksz) : enc((ksz + 28) << 2)
+	AES(const uint8_t *k, size_t ksz) : key((ksz + 28) << 2)
 	{
-		std::copy_n(k, ksz, enc.begin());
-		for(size_t i = ksz; i < enc.size(); i += 4)
+		std::copy_n(k, ksz, key.begin());
+		for(size_t i = ksz; i < key.size(); i += 4)
 		{
 			uint8_t t[4];
-			memcpy(t, enc.data() + i - 4, 4);
+			std::copy_n(key.data() + i - 4, 4, t);
 			const size_t o = i % ksz;
 			if(o == 0)
 			{
@@ -54,33 +54,33 @@ public:
 				t[2] = Sbox[t[2]];
 				t[3] = Sbox[t[3]];
 			}
-			enc[i]   = t[0] ^ enc[i-ksz];
-			enc[i+1] = t[1] ^ enc[i+1-ksz];
-			enc[i+2] = t[2] ^ enc[i+2-ksz];
-			enc[i+3] = t[3] ^ enc[i+3-ksz];
+			key[i]   = t[0] ^ key[i-ksz];
+			key[i+1] = t[1] ^ key[i+1-ksz];
+			key[i+2] = t[2] ^ key[i+2-ksz];
+			key[i+3] = t[3] ^ key[i+3-ksz];
 		}
 	}
 
-	void Encrypt(uint8_t r[16]) const
+	void Encrypt(uint8_t *r) const
 	{
 		for(uint_fast8_t n = 0; n < 16; n++)
 		{
-			r[n] ^= enc[n];
+			r[n] ^= key[n];
 		}
 		size_t i = 16;
-		for(; i < enc.size() - 16; i += 16)
+		for(; i < key.size() - 16; i += 16)
 		{
 			SubShift(r);
 			Mix(r);
 			for(uint_fast8_t n = 0; n < 16; n++)
 			{
-				r[n] ^= enc[n + i];
+				r[n] ^= key[n + i];
 			}
 		}
 		SubShift(r);
 		for(uint_fast8_t n = 0; n < 16; n++)
 		{
-			r[n] ^= enc[n + i];
+			r[n] ^= key[n + i];
 		}
 	}
 };
