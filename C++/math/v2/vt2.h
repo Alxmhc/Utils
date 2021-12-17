@@ -29,14 +29,26 @@ public:
 		y *= k;
 		return *this;
 	}
-
-	long double operator*(const vt2 &a) const
+	const vt2& operator*=(const vt2 &k)
 	{
-		return x*a.x + y*a.y;
+		x *= k.x;
+		y *= k.y;
+		return *this;
+	}
+	vt2 operator*(const vt2 &a) const
+	{
+		auto t = *this;
+		t *= a;
+		return t;
 	}
 };
 
+long double dot(const vt2 &a, const vt2 &b)
+{
+	return a.x*b.x + a.y*b.y;
+}
+
 long double abs(const vt2 &a)
 {
-	return sqrt(a*a);
+	return sqrt(dot(a,a));
 }

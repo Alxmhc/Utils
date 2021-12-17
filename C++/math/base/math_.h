@@ -1,5 +1,10 @@
 const long double pi = 3.1415926535897932384626;
 
+long double dot(long double a, long double b)
+{
+	return a*b;
+}
+
 template<typename T>
 T operator+(const T &a, const T &b){T r(a); r += b; return r;}
 

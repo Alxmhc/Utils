@@ -9,7 +9,7 @@ public:
 	{
 		n = vt3::pr(b-a, c-a);
 		n /= abs(n);
-		p = a*n;
+		p = dot(a, n);
 		if(p < 0)
 		{
 			n = -n;
@@ -25,6 +25,6 @@ public:
 private:
 	long double dst_(const vt3 &k) const
 	{
-		return n*k - p;
+		return dot(n, k) - p;
 	}
 };

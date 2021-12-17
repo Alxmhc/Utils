@@ -59,13 +59,13 @@ T avr(const std::vector<T> &v)
 }
 
 template<typename T>
-long double operator*(const std::vector<T> &a, const std::vector<T> &b)
+long double dot(const std::vector<T> &a, const std::vector<T> &b)
 {
 	long double s = 0.0;
 	for(auto n = a.size(); n > 0;)
 	{
 		--n;
-		s += a[n] * b[n];
+		s += dot(a[n], b[n]);
 	}
 	return s;
 }

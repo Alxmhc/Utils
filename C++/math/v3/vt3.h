@@ -32,22 +32,35 @@ public:
 		z *= k;
 		return *this;
 	}
-
-	long double operator*(const vt3 &a) const
+	const vt3& operator*=(const vt3 &k)
 	{
-		return x*a.x + y*a.y + z*a.z;
+		x *= k.x;
+		y *= k.y;
+		z *= k.z;
+		return *this;
+	}
+	vt3 operator*(const vt3 &a) const
+	{
+		auto t = *this;
+		t *= a;
+		return t;
 	}
 
 	static vt3 pr(const vt3 &a, const vt3 &b)
 	{
-		long double x = a.y*b.z - a.z*b.y;
-		long double y = a.z*b.x - a.x*b.z;
-		long double z = a.x*b.y - a.y*b.x;
+		const auto x = a.y*b.z - a.z*b.y;
+		const auto y = a.z*b.x - a.x*b.z;
+		const auto z = a.x*b.y - a.y*b.x;
 		return vt3(x, y, z);
 	}
 };
 
+long double dot(const vt3 &a, const vt3 &b)
+{
+	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
 long double abs(const vt3 &a)
 {
-	return sqrt(a*a);
+	return sqrt(dot(a,a));
 }
