@@ -6,9 +6,9 @@ public:
 	cr_sph(long double s, long double a, long double b) : r(s), t(a), f(b) {}
 	cr_sph(const vt3 &v) : r(abs(v)), t(acos(v.z/r)), f(atan2(v.y, v.x)) {}
 
-	operator vt3() const
+	vt3 v() const
 	{
-		long double a = r*sin(t);
+		const long double a = r*sin(t);
 		return vt3(a*cos(f), a*sin(f), r*cos(t));
 	}
 };

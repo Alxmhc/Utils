@@ -39,12 +39,6 @@ public:
 		z *= k.z;
 		return *this;
 	}
-	vt3 operator*(const vt3 &a) const
-	{
-		auto t = *this;
-		t *= a;
-		return t;
-	}
 
 	static vt3 pr(const vt3 &a, const vt3 &b)
 	{

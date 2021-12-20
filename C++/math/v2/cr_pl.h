@@ -6,16 +6,17 @@ public:
 	cr_pl(long double s, long double a) : r(s), f(a) {}
 	cr_pl(const vt2 &v) : r(abs(v)), f(atan2(v.y, v.x)) {}
 
-	operator vt2() const
+	vt2 v() const
 	{
 		return vt2(r*cos(f), r*sin(f));
 	}
 
-	cr_pl operator+(const cr_pl &t) const
+	const cr_pl& operator+=(const cr_pl &t)
 	{
-		vt2 a = vt2(*this);
-		vt2 b = vt2(t);
-		return cr_pl(a + b);
+		vt2 a = v();
+		a += t.v();
+		*this = a;
+		return *this;
 	}
 };
 

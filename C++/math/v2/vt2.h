@@ -35,12 +35,6 @@ public:
 		y *= k.y;
 		return *this;
 	}
-	vt2 operator*(const vt2 &a) const
-	{
-		auto t = *this;
-		t *= a;
-		return t;
-	}
 };
 
 long double dot(const vt2 &a, const vt2 &b)
