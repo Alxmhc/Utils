@@ -117,7 +117,7 @@ namespace fl_pr
 
 		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
 		{
-			if(data.size() <= ssz + 12)
+			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
 			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(passw, psz, data.data(), ssz, 1000, ssz*4 + 2);
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])

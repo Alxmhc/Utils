@@ -105,16 +105,36 @@ public:
 		return true;
 	}
 
-	virtual bool find1(uint8_t, size_t&) = 0;
+	bool find1(uint8_t c, size_t &p)
+	{
+		const auto b = pos;
+		while(pos < size)
+		{
+			if(read1() == c)
+			{
+				p = pos - 1;
+				set_pos(b);
+				return true;
+			}
+		}
+		set_pos(b);
+		return false;
+	}
 
 	bool read_string(uint8_t c, std::string &s)
 	{
-		size_t p;
-		if( !find1(c, p) )
-			return false;
-		readN(s, p - pos);
-		skip(1);
-		return true;
+		s.clear();
+		const auto p = pos;
+		while(pos < size)
+		{
+			const auto t = read1();
+			if(t == c)
+				return true;
+			s.push_back(t);
+		}
+		s.clear();
+		set_pos(p);
+		return false;
 	}
 };
 
@@ -162,20 +182,6 @@ public:
 		pos += n;
 		return true;
 	}
-
-	bool find1(uint8_t c, size_t &p) override
-	{
-		for(p = pos; p < size; p++)
-		{
-			if(s.get() == c)
-			{
-				s.seekg(pos, std::ios_base::beg);
-				return true;
-			}
-		}
-		s.seekg(pos, std::ios_base::beg);
-		return false;
-	}
 };
 
 class br_fstream : public br_stream
@@ -216,15 +222,5 @@ public:
 			return false;
 		pos += n;
 		return true;
-	}
-
-	bool find1(uint8_t c, size_t &p) override
-	{
-		for(p = pos; p < size; p++)
-		{
-			if(d[p] == c)
-				return true;
-		}
-		return false;
 	}
 };
