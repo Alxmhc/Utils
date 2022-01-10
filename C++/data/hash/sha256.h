@@ -53,6 +53,13 @@ namespace hash
 			st[7] += wt[7];
 		}
 
+	public:
+		void process_block(const uint8_t *v)
+		{
+			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);
+			Transform();
+		}
+
 		void Init()
 		{
 			st[0] = 0x6a09e667;
@@ -63,33 +70,13 @@ namespace hash
 			st[5] = 0x9b05688c;
 			st[6] = 0x1f83d9ab;
 			st[7] = 0x5be0cd19;
-
 			size = 0;
 		}
-
-		void Clear()
-		{
-			buf.clear();
-			memset(x, 0, sizeof(x));
-		}
-	public:
-		void process_block(const uint8_t *v)
-		{
-			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);
-			Transform();
-		}
-
-		SHA256()
-		{
-			Init();
-		}
-
 		void Update(const uint8_t *v, const size_t n)
 		{
 			buf.process(v, n, *this);
 			size += n;
 		}
-
 		void Final(uint8_t *r)
 		{
 			buf.push(0x80, *this);
@@ -107,13 +94,12 @@ namespace hash
 			{
 				memset(x, 0, sizeof(x));
 			}
+			buf.clear();
 			x[14] = static_cast<uint32_t>(size>>29);
 			x[15] = static_cast<uint32_t>(size<<3);
 			Transform();
+			memset(x, 0, sizeof(x));
 			conv::unpack<endianness::BIG_ENDIAN>(st, 8, r);
-
-			Clear();
-			Init();
 		}
 	};
 

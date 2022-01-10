@@ -15,8 +15,9 @@ namespace hash
 			std::fill(ko, ko + H::block_size, 0x5c);
 			if(ksize > H::block_size)
 			{
-				uint8_t tmp[H::hash_size];
+				hash.Init();
 				hash.Update(key, ksize);
+				uint8_t tmp[H::hash_size];
 				hash.Final(tmp);
 				for(uint_fast16_t i = 0; i < H::hash_size; ++i)
 				{
@@ -36,6 +37,7 @@ namespace hash
 
 		void Init()
 		{
+			hash.Init();
 			hash.Update(ki, H::block_size);
 		}
 		void Update(const uint8_t *data, size_t dsize)
@@ -45,6 +47,7 @@ namespace hash
 		void Final(uint8_t *res)
 		{
 			hash.Final(res);
+			hash.Init();
 			hash.Update(ko, H::block_size);
 			hash.Update(res, H::hash_size);
 			hash.Final(res);

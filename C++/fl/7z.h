@@ -82,9 +82,9 @@ namespace fl_pr
 				return false;
 
 			hash::CRC32 hs;
-			uint8_t hash[hash::CRC32::hash_size];
-
+			hs.Init();
 			hs.Update(header + 12, 20);
+			uint8_t hash[hash::CRC32::hash_size];
 			hs.Final(hash);
 			if(std::memcmp(hash, header + 8, hash::CRC32::hash_size) != 0)
 				return false;
@@ -95,6 +95,7 @@ namespace fl_pr
 
 			if(!s.readN(hdr, NHsize))
 				return false;
+			hs.Init();
 			hs.Update(hdr.data(), hdr.size());
 			hs.Final(hash);
 			if(std::memcmp(hash, header + 28, hash::CRC32::hash_size) != 0)

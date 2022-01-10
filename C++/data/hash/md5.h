@@ -110,21 +110,6 @@ namespace hash
 			st[3] += d;
 		}
 
-		void Init()
-		{
-			st[0] = 0x67452301;
-			st[1] = 0xefcdab89;
-			st[2] = 0x98badcfe;
-			st[3] = 0x10325476;
-
-			size = 0;
-		}
-
-		void Clear()
-		{
-			buf.clear();
-			memset(x, 0, sizeof(x));
-		}
 	public:
 		void process_block(const uint8_t *v)
 		{
@@ -132,17 +117,19 @@ namespace hash
 			Transform();
 		}
 
-		MD5()
+		void Init()
 		{
-			Init();
+			st[0] = 0x67452301;
+			st[1] = 0xefcdab89;
+			st[2] = 0x98badcfe;
+			st[3] = 0x10325476;
+			size = 0;
 		}
-
 		void Update(const uint8_t *v, const size_t n)
 		{
 			buf.process(v, n, *this);
 			size += n;
 		}
-
 		void Final(uint8_t *r)
 		{
 			buf.push(0x80, *this);
@@ -160,13 +147,12 @@ namespace hash
 			{
 				memset(x, 0, sizeof(x));
 			}
+			buf.clear();
 			x[14] = static_cast<uint32_t>(size<<3);
 			x[15] = static_cast<uint32_t>(size>>29);
 			Transform();
+			memset(x, 0, sizeof(x));
 			conv::unpack<endianness::LITTLE_ENDIAN>(st, 4, r);
-
-			Clear();
-			Init();
 		}
 	};
 }

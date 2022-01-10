@@ -3,6 +3,8 @@ namespace hash
 	//rfc 1952
 	class CRC32
 	{
+		uint32_t tbl[256];
+		uint32_t crc;
 	public:
 		static const uint_fast8_t hash_size = 4;
 
@@ -26,15 +28,16 @@ namespace hash
 				tbl[n] = c;
 			} while(n != 0);
 		}
-	private:
-		uint32_t tbl[256];
-		uint32_t crc;
-	public:
-		CRC32() : crc(0xffffffff)
+
+		CRC32()
 		{
 			InitTable(tbl, 0xedb88320);
 		}
 
+		void Init()
+		{
+			crc = 0xffffffff;
+		}
 		void Update(const uint8_t *v, const size_t n)
 		{
 			for(size_t i = 0; i < n; i++)
@@ -42,11 +45,9 @@ namespace hash
 				crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
 			}
 		}
-
 		void Final(uint8_t *r)
 		{
 			bconv<4, endianness::LITTLE_ENDIAN>::unpack(~crc,  r);
-			crc = 0xffffffff;
 		}
 	};
 }

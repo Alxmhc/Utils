@@ -18,7 +18,7 @@ namespace hash
 
 			for(uint_fast8_t i = 0; i < 80; i++)
 			{
-				uint_fast8_t j = i & 0x0f;
+				const uint_fast8_t j = i & 0x0f;
 				if(i > 15)
 				{
 					x[j] = rotl(x[(j+13)&0x0f]^x[(j+8)&0x0f]^x[(j+2)&0x0f]^x[j], 1);
@@ -54,22 +54,6 @@ namespace hash
 			st[4] += wt[4];
 		}
 
-		void Init()
-		{
-			st[0] = 0x67452301;
-			st[1] = 0xefcdab89;
-			st[2] = 0x98badcfe;
-			st[3] = 0x10325476;
-			st[4] = 0xc3d2e1f0;
-
-			size = 0;
-		}
-
-		void Clear()
-		{
-			buf.clear();
-			memset(x, 0, sizeof(x));
-		}
 	public:
 		void process_block(const uint8_t *v)
 		{
@@ -77,17 +61,20 @@ namespace hash
 			Transform();
 		}
 
-		SHA1()
+		void Init()
 		{
-			Init();
+			st[0] = 0x67452301;
+			st[1] = 0xefcdab89;
+			st[2] = 0x98badcfe;
+			st[3] = 0x10325476;
+			st[4] = 0xc3d2e1f0;
+			size = 0;
 		}
-
 		void Update(const uint8_t *v, const size_t n)
 		{
 			buf.process(v, n, *this);
 			size += n;
 		}
-
 		void Final(uint8_t *r)
 		{
 			buf.push(0x80, *this);
@@ -105,13 +92,12 @@ namespace hash
 			{
 				memset(x, 0, sizeof(x));
 			}
+			buf.clear();
 			x[14] = static_cast<uint32_t>(size>>29);
 			x[15] = static_cast<uint32_t>(size<<3);
 			Transform();
+			memset(x, 0, sizeof(x));
 			conv::unpack<endianness::BIG_ENDIAN>(st, 5, r);
-
-			Clear();
-			Init();
 		}
 	};
 }
