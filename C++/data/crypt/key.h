@@ -36,17 +36,22 @@ std::vector<uint8_t> PBKDF2(const uint8_t *passw, size_t psz, const uint8_t *sal
 	F fcr(passw, psz);
 	for(uint_fast32_t i = 1; i <= kl; i++)
 	{
-		uint8_t tmp[F::out_size], res[F::out_size], num[4];
-		bconv<4, endianness::BIG_ENDIAN>::unpack(i, num);
-		fcr.Calc(salt, ssz, num, tmp);
-		std::copy_n(tmp, F::out_size, res);
-
+		uint8_t tmp[F::out_size];
+		{
+			uint8_t num[4];
+			bconv<4, endianness::BIG_ENDIAN>::unpack(i, num);
+			fcr.Calc(salt, ssz, num, tmp);
+		}
+		const size_t b = key.size();
+		key.insert(key.end(), tmp, tmp + F::out_size);
 		for(size_t j = 1; j < c; j++)
 		{
 			fcr.Calc(tmp);
-			std::transform(res, res + F::out_size, tmp, res, [](uint8_t a, uint8_t b) -> uint8_t {return a ^ b;});
+			for(uint_fast8_t k = 0; k < F::out_size; k++)
+			{
+				key[b + k] ^= tmp[k];
+			}
 		}
-		key.insert(key.end(), res, res + F::out_size);
 	}
 	key.resize(ksz);
 	return key;
