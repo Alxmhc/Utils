@@ -1,7 +1,13 @@
 class AES{
 	constructor(k){
 		for(let i = 0; i < 256; i++){
-			AES.Mul[i] = i < 0x80 ? (i << 1) ^ i : (i << 1) ^ i ^ 0x1b;
+			AES.Mul3[i] = AES.mul(i, 0x3);
+			AES.Mul9[i] = AES.mul(i, 0x9);
+			AES.Mulb[i] = AES.mul(i, 0xb);
+			AES.Muld[i] = AES.mul(i, 0xd);
+			AES.Mule[i] = AES.mul(i, 0xe);
+
+			AES.SboxI[AES.Sbox[i]] = i;
 		}
 		
 		const ksz = k.length;
@@ -38,16 +44,49 @@ class AES{
 		{
 			AES.SubShift(r);
 			AES.Mix(r);
-			for(let n=0; n<16; n++){
+			for(let n = 0; n < 16; n++){
 				r[n] ^= this.key[n + i];
 			}
 		}
 		AES.SubShift(r);
-		for(let n=0; n<16; n++){
+		for(let n = 0; n < 16; n++){
 			r[n] ^= this.key[n + i];
 		}
 	}
+	Decrypt(r){
+		let i = this.key.length - 16;
+		for(let n = 0; n < 16; n++)
+		{
+			r[n] ^= this.key[n + i];
+		}
+		i -= 16;
+		AES.SubShiftI(r);
+		for(; i > 0; i -= 16)
+		{
+			for(let n = 0; n < 16; n++)
+			{
+				r[n] ^= this.key[n + i];
+			}
+			AES.MixI(r);
+			AES.SubShiftI(r);
+		}
+		for(let n = 0; n < 16; n++)
+		{
+			r[n] ^= this.key[n];
+		}
+	}	
 };
+
+AES.mul = function(a,b){
+	for(let r = 0;;b >>= 1){
+		if(b&1){
+			r ^= a;
+			if(b == 1)
+				return r;
+		}
+		a = a&0x80 ? (a<<1)^0x1b : a<<1;
+	}
+}
 
 AES.SubShift = function(r){
 	r.set([
@@ -57,14 +96,31 @@ AES.SubShift = function(r){
 		AES.Sbox[r[12]], AES.Sbox[r[1]],  AES.Sbox[r[6]],  AES.Sbox[r[11]]
 	]);
 }
+AES.SubShiftI = function(r){
+	r.set([
+		AES.SboxI[r[0]],  AES.SboxI[r[13]], AES.SboxI[r[10]], AES.SboxI[r[7]],
+		AES.SboxI[r[4]],  AES.SboxI[r[1]],  AES.SboxI[r[14]], AES.SboxI[r[11]],
+		AES.SboxI[r[8]],  AES.SboxI[r[5]],  AES.SboxI[r[2]],  AES.SboxI[r[15]],
+		AES.SboxI[r[12]], AES.SboxI[r[9]],  AES.SboxI[r[6]],  AES.SboxI[r[3]]
+	]);
+}
 
 AES.Mix = function(r){
 	for(let i = 0; i < 16; i += 4){
 		const d = Uint8Array.from([r[i]^r[i+1], r[i+1]^r[i+2], r[i+2]^r[i+3], r[i+3]^r[i]]);
-		r[i]   ^= d[2] ^ AES.Mul[d[0]];
-		r[i+1] ^= d[3] ^ AES.Mul[d[1]];
-		r[i+2] ^= d[0] ^ AES.Mul[d[2]];
-		r[i+3] ^= d[1] ^ AES.Mul[d[3]];
+		r[i]   ^= d[2] ^ AES.Mul3[d[0]];
+		r[i+1] ^= d[3] ^ AES.Mul3[d[1]];
+		r[i+2] ^= d[0] ^ AES.Mul3[d[2]];
+		r[i+3] ^= d[1] ^ AES.Mul3[d[3]];
+	}
+}
+AES.MixI = function(r){
+	for(let i = 0; i < 16; i += 4){
+		const d = r.slice(i, i + 4);
+		r[i]   = AES.Mule[d[0]] ^ AES.Mulb[d[1]] ^ AES.Muld[d[2]] ^ AES.Mul9[d[3]];
+		r[i+1] = AES.Mul9[d[0]] ^ AES.Mule[d[1]] ^ AES.Mulb[d[2]] ^ AES.Muld[d[3]];
+		r[i+2] = AES.Muld[d[0]] ^ AES.Mul9[d[1]] ^ AES.Mule[d[2]] ^ AES.Mulb[d[3]];
+		r[i+3] = AES.Mulb[d[0]] ^ AES.Muld[d[1]] ^ AES.Mul9[d[2]] ^ AES.Mule[d[3]];
 	}
 }
 
@@ -86,11 +142,16 @@ AES.Sbox = Uint8Array.from([
 	0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
 	0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ]);
-
-AES.Mul = new Uint8Array(256);
+AES.SboxI = new Uint8Array(256);
 
 AES.Rcon = Uint8Array.from([
 	0x00, 0x01, 0x02, 0x04,
 	0x08, 0x10, 0x20, 0x40,
 	0x80, 0x1b, 0x36, 0x6c
 ]);
+
+AES.Mul3 = new Uint8Array(256);
+AES.Mul9 =  new Uint8Array(256);
+AES.Mulb =  new Uint8Array(256);
+AES.Muld =  new Uint8Array(256);
+AES.Mule =  new Uint8Array(256);
