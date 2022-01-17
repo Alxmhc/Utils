@@ -2,33 +2,23 @@ template<class IV>
 void AESCTREncrypt(const uint8_t *key, size_t ksz, std::vector<uint8_t> &data)
 {
 	AES enc(key, ksz);
-
-	uint8_t tmp[16];
 	IV v;
 
 	size_t offset = 0;
-	while(offset < data.size() - 16)
+	while(offset + 16 < data.size())
 	{
 		v.incr();
-		memcpy(tmp, v.data(), 16);
+		uint8_t tmp[16];
+		std::copy_n(v.data(), 16, tmp);
 		enc.Encrypt(tmp);
-		for(uint_fast8_t i = 0; i < 16; i++)
-		{
-			data[i+offset] ^= tmp[i];
-		}
+		std::transform(tmp, tmp + 16, data.begin() + offset, data.begin() + offset, [](uint8_t a, uint8_t b){return a ^ b;});
 		offset += 16;
 	}
-	size_t o = data.size() - offset;
-	if(o != 0)
-	{
-		v.incr();
-		memcpy(tmp, v.data(), 16);
-		enc.Encrypt(tmp);
-		for(uint_fast8_t i = 0; i < o; i++)
-		{
-			data[i+offset] ^= tmp[i];
-		}
-	}
+	v.incr();
+	uint8_t tmp[16];
+	std::copy_n(v.data(), 16, tmp);
+	enc.Encrypt(tmp);
+	std::transform(tmp, tmp + data.size() - offset, data.begin() + offset, data.begin() + offset, [](uint8_t a, uint8_t b){return a ^ b;});
 }
 
 template<class IV>

@@ -88,49 +88,31 @@ public:
 
 	void Encrypt(uint8_t *r) const
 	{
-		for(uint_fast8_t n = 0; n < 16; n++)
-		{
-			r[n] ^= key[n];
-		}
+		std::transform(r, r + 16, key.cbegin(), r, [](uint8_t a, uint8_t b){return a ^ b;});
 		size_t i = 16;
 		for(; i < key.size() - 16; i += 16)
 		{
 			SubShift(r);
 			Mix(r);
-			for(uint_fast8_t n = 0; n < 16; n++)
-			{
-				r[n] ^= key[n + i];
-			}
+			std::transform(r, r + 16, key.cbegin() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 		}
 		SubShift(r);
-		for(uint_fast8_t n = 0; n < 16; n++)
-		{
-			r[n] ^= key[n + i];
-		}
+		std::transform(r, r + 16, key.cbegin() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 	}
 
 	void Decrypt(uint8_t *r) const
 	{
 		size_t i = key.size() - 16;
-		for(uint_fast8_t n = 0; n < 16; n++)
-		{
-			r[n] ^= key[n + i];
-		}
+		std::transform(r, r + 16, key.cbegin() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 		i -= 16;
 		SubShiftI(r);
 		for(; i > 0; i -= 16)
 		{
-			for(uint_fast8_t n = 0; n < 16; n++)
-			{
-				r[n] ^= key[n + i];
-			}
+			std::transform(r, r + 16, key.cbegin() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 			MixI(r);
 			SubShiftI(r);
 		}
-		for(uint_fast8_t n = 0; n < 16; n++)
-		{
-			r[n] ^= key[n];
-		}
+		std::transform(r, r + 16, key.cbegin(), r, [](uint8_t a, uint8_t b){return a ^ b;});
 	}
 };
 
