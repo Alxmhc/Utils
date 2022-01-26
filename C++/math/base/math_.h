@@ -25,17 +25,17 @@ T operator-(const T &a, const T &b)
 	r -= b;
 	return r;
 }
-template<typename T1, typename T2>
-T1 operator*(const T1 &a, const T2 &k)
+template<typename T>
+T operator*(const T &a, long double k)
 {
-	T1 r(a);
+	T r(a);
 	r *= k;
 	return r;
 }
-template<typename T1, typename T2>
-T1 operator/(const T1 &a, const T2 &k)
+template<typename T>
+T operator/(const T &a, long double k)
 {
-	T1 r(a);
-	r /= k;
+	T r(a);
+	r *= (1.0/k);
 	return r;
 }

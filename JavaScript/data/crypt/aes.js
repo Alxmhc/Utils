@@ -36,7 +36,7 @@ class AES{
 	}
 
 	Encrypt(r){
-		for(let n=0; n<16; n++){
+		for(let n = 0; n < 16; n++){
 			r[n] ^= this.key[n];
 		}
 		let i = 16;
@@ -74,7 +74,7 @@ class AES{
 		{
 			r[n] ^= this.key[n];
 		}
-	}	
+	}
 };
 
 AES.mul = function(a,b){
@@ -151,7 +151,7 @@ AES.Rcon = Uint8Array.from([
 ]);
 
 AES.Mul3 = new Uint8Array(256);
-AES.Mul9 =  new Uint8Array(256);
-AES.Mulb =  new Uint8Array(256);
-AES.Muld =  new Uint8Array(256);
-AES.Mule =  new Uint8Array(256);
+AES.Mul9 = new Uint8Array(256);
+AES.Mulb = new Uint8Array(256);
+AES.Muld = new Uint8Array(256);
+AES.Mule = new Uint8Array(256);

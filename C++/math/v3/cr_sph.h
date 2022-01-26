@@ -8,7 +8,7 @@ public:
 
 	vt3 v() const
 	{
-		const long double a = r*sin(t);
+		const long double a = r * sin(t);
 		return vt3(a*cos(f), a*sin(f), r*cos(t));
 	}
 };
