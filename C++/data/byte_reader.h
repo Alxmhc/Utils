@@ -35,10 +35,7 @@ public:
 	{
 		if(pos + n > size)
 			return false;
-		if(n != 0)
-		{
-			readAll(d, n);
-		}
+		readAll(d, n);
 		return true;
 	}
 	bool readN(std::vector<uint8_t> &v, size_t n)
@@ -46,10 +43,7 @@ public:
 		if(pos + n > size)
 			return false;
 		v.resize(n);
-		if(n != 0)
-		{
-			readAll(v.data(), n);
-		}
+		readAll(v.data(), n);
 		return true;
 	}
 	bool readN(std::string &s, size_t n)
@@ -57,11 +51,18 @@ public:
 		if(pos + n > size)
 			return false;
 		s.resize(n);
-		if(n != 0)
-		{
-			readAll(const_cast<char*>(s.data()), n);
-		}
+		readAll(const_cast<char*>(s.data()), n);
 		return true;
+	}
+
+	size_t readMx(uint8_t* d, size_t n)
+	{
+		if(pos + n > size)
+		{
+			n = size - pos;
+		}
+		readAll(d, n);
+		return n;
 	}
 
 	bool addN(std::vector<uint8_t> &v, size_t n)
@@ -159,6 +160,8 @@ protected:
 	}
 	void readAll(uint8_t *v, const size_t n) override
 	{
+		if(n == 0)
+			return;
 		s.read(reinterpret_cast<char*>(v), n);
 		pos += n;
 	}
@@ -206,6 +209,8 @@ protected:
 	}
 	void readAll(uint8_t *v, const size_t n) override
 	{
+		if(n == 0)
+			return;
 		std::copy_n(d + pos, n, v);
 		pos += n;
 	}

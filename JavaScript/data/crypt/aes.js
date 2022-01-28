@@ -1,11 +1,58 @@
 class AES{
+	static #mul(a,b){
+		for(let r = 0;;b >>= 1){
+			if(b&1){
+				r ^= a;
+				if(b == 1)
+					return r;
+			}
+			a = a&0x80 ? (a<<1)^0x1b : a<<1;
+		}
+	}
+
+	static #SubShift(r){
+		r.set([
+			AES.Sbox[r[0]],  AES.Sbox[r[5]],  AES.Sbox[r[10]], AES.Sbox[r[15]],
+			AES.Sbox[r[4]],  AES.Sbox[r[9]],  AES.Sbox[r[14]], AES.Sbox[r[3]],
+			AES.Sbox[r[8]],  AES.Sbox[r[13]], AES.Sbox[r[2]],  AES.Sbox[r[7]],
+			AES.Sbox[r[12]], AES.Sbox[r[1]],  AES.Sbox[r[6]],  AES.Sbox[r[11]]
+		]);
+	}
+	static #SubShiftI(r){
+		r.set([
+			AES.SboxI[r[0]],  AES.SboxI[r[13]], AES.SboxI[r[10]], AES.SboxI[r[7]],
+			AES.SboxI[r[4]],  AES.SboxI[r[1]],  AES.SboxI[r[14]], AES.SboxI[r[11]],
+			AES.SboxI[r[8]],  AES.SboxI[r[5]],  AES.SboxI[r[2]],  AES.SboxI[r[15]],
+			AES.SboxI[r[12]], AES.SboxI[r[9]],  AES.SboxI[r[6]],  AES.SboxI[r[3]]
+		]);
+	}
+
+	static #Mix(r){
+		for(let i = 0; i < 16; i += 4){
+			const d = Uint8Array.from([r[i]^r[i+1], r[i+1]^r[i+2], r[i+2]^r[i+3], r[i+3]^r[i]]);
+			r[i]   ^= d[2] ^ AES.Mul3[d[0]];
+			r[i+1] ^= d[3] ^ AES.Mul3[d[1]];
+			r[i+2] ^= d[0] ^ AES.Mul3[d[2]];
+			r[i+3] ^= d[1] ^ AES.Mul3[d[3]];
+		}
+	}
+	static #MixI(r){
+		for(let i = 0; i < 16; i += 4){
+			const d = r.slice(i, i + 4);
+			r[i]   = AES.Mule[d[0]] ^ AES.Mulb[d[1]] ^ AES.Muld[d[2]] ^ AES.Mul9[d[3]];
+			r[i+1] = AES.Mul9[d[0]] ^ AES.Mule[d[1]] ^ AES.Mulb[d[2]] ^ AES.Muld[d[3]];
+			r[i+2] = AES.Muld[d[0]] ^ AES.Mul9[d[1]] ^ AES.Mule[d[2]] ^ AES.Mulb[d[3]];
+			r[i+3] = AES.Mulb[d[0]] ^ AES.Muld[d[1]] ^ AES.Mul9[d[2]] ^ AES.Mule[d[3]];
+		}
+	}
+	
 	constructor(k){
 		for(let i = 0; i < 256; i++){
-			AES.Mul3[i] = AES.mul(i, 0x3);
-			AES.Mul9[i] = AES.mul(i, 0x9);
-			AES.Mulb[i] = AES.mul(i, 0xb);
-			AES.Muld[i] = AES.mul(i, 0xd);
-			AES.Mule[i] = AES.mul(i, 0xe);
+			AES.Mul3[i] = AES.#mul(i, 0x3);
+			AES.Mul9[i] = AES.#mul(i, 0x9);
+			AES.Mulb[i] = AES.#mul(i, 0xb);
+			AES.Muld[i] = AES.#mul(i, 0xd);
+			AES.Mule[i] = AES.#mul(i, 0xe);
 
 			AES.SboxI[AES.Sbox[i]] = i;
 		}
@@ -42,13 +89,13 @@ class AES{
 		let i = 16;
 		for(; i < this.key.length - 16; i += 16)
 		{
-			AES.SubShift(r);
-			AES.Mix(r);
+			AES.#SubShift(r);
+			AES.#Mix(r);
 			for(let n = 0; n < 16; n++){
 				r[n] ^= this.key[n + i];
 			}
 		}
-		AES.SubShift(r);
+		AES.#SubShift(r);
 		for(let n = 0; n < 16; n++){
 			r[n] ^= this.key[n + i];
 		}
@@ -60,15 +107,15 @@ class AES{
 			r[n] ^= this.key[n + i];
 		}
 		i -= 16;
-		AES.SubShiftI(r);
+		AES.#SubShiftI(r);
 		for(; i > 0; i -= 16)
 		{
 			for(let n = 0; n < 16; n++)
 			{
 				r[n] ^= this.key[n + i];
 			}
-			AES.MixI(r);
-			AES.SubShiftI(r);
+			AES.#MixI(r);
+			AES.#SubShiftI(r);
 		}
 		for(let n = 0; n < 16; n++)
 		{
@@ -76,53 +123,6 @@ class AES{
 		}
 	}
 };
-
-AES.mul = function(a,b){
-	for(let r = 0;;b >>= 1){
-		if(b&1){
-			r ^= a;
-			if(b == 1)
-				return r;
-		}
-		a = a&0x80 ? (a<<1)^0x1b : a<<1;
-	}
-}
-
-AES.SubShift = function(r){
-	r.set([
-		AES.Sbox[r[0]],  AES.Sbox[r[5]],  AES.Sbox[r[10]], AES.Sbox[r[15]],
-		AES.Sbox[r[4]],  AES.Sbox[r[9]],  AES.Sbox[r[14]], AES.Sbox[r[3]],
-		AES.Sbox[r[8]],  AES.Sbox[r[13]], AES.Sbox[r[2]],  AES.Sbox[r[7]],
-		AES.Sbox[r[12]], AES.Sbox[r[1]],  AES.Sbox[r[6]],  AES.Sbox[r[11]]
-	]);
-}
-AES.SubShiftI = function(r){
-	r.set([
-		AES.SboxI[r[0]],  AES.SboxI[r[13]], AES.SboxI[r[10]], AES.SboxI[r[7]],
-		AES.SboxI[r[4]],  AES.SboxI[r[1]],  AES.SboxI[r[14]], AES.SboxI[r[11]],
-		AES.SboxI[r[8]],  AES.SboxI[r[5]],  AES.SboxI[r[2]],  AES.SboxI[r[15]],
-		AES.SboxI[r[12]], AES.SboxI[r[9]],  AES.SboxI[r[6]],  AES.SboxI[r[3]]
-	]);
-}
-
-AES.Mix = function(r){
-	for(let i = 0; i < 16; i += 4){
-		const d = Uint8Array.from([r[i]^r[i+1], r[i+1]^r[i+2], r[i+2]^r[i+3], r[i+3]^r[i]]);
-		r[i]   ^= d[2] ^ AES.Mul3[d[0]];
-		r[i+1] ^= d[3] ^ AES.Mul3[d[1]];
-		r[i+2] ^= d[0] ^ AES.Mul3[d[2]];
-		r[i+3] ^= d[1] ^ AES.Mul3[d[3]];
-	}
-}
-AES.MixI = function(r){
-	for(let i = 0; i < 16; i += 4){
-		const d = r.slice(i, i + 4);
-		r[i]   = AES.Mule[d[0]] ^ AES.Mulb[d[1]] ^ AES.Muld[d[2]] ^ AES.Mul9[d[3]];
-		r[i+1] = AES.Mul9[d[0]] ^ AES.Mule[d[1]] ^ AES.Mulb[d[2]] ^ AES.Muld[d[3]];
-		r[i+2] = AES.Muld[d[0]] ^ AES.Mul9[d[1]] ^ AES.Mule[d[2]] ^ AES.Mulb[d[3]];
-		r[i+3] = AES.Mulb[d[0]] ^ AES.Muld[d[1]] ^ AES.Mul9[d[2]] ^ AES.Mule[d[3]];
-	}
-}
 
 AES.Sbox = Uint8Array.from([
 	0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,

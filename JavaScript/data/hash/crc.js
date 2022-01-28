@@ -1,21 +1,22 @@
 //rfc1952
 class CRC32{
 	constructor(){
-		this.crc = 0xffffffff;
 		this.tbl = CRC32.getTable(0xedb88320);
 	}
 	get hsize(){
 		return 4;
 	}
+
+	Init(){
+		this.crc = 0xffffffff;
+	}
 	Update(v){
 		for(let i = 0; i < v.length; i++){
-			this.crc = this.tbl[(this.crc & 0xff) ^ v[i]] ^ (this.crc >>> 8);
+			this.crc = this.tbl[(this.crc ^ v[i]) & 0xff] ^ (this.crc >>> 8);
 		}
 	}
 	Final(){
-		const r = conv.unpack_le([this.crc ^ 0xffffffff]);
-		this.crc = 0xffffffff;
-		return r;
+		return conv.unpack4LE(this.crc ^ 0xffffffff);
 	}
 }
 CRC32.getTable = function(I){

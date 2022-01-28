@@ -12,6 +12,7 @@ class HMAC{
 		this.ki.fill(0x36);
 		this.ko.fill(0x5c);
 		if(key.length > this.h.bsize){
+			this.h.Init();
 			this.h.Update(key);
 			key = this.h.Final();
 		}
@@ -20,7 +21,9 @@ class HMAC{
 			this.ko[i] ^= key[i];
 		}		
 	}
+
 	Init(){
+		this.h.Init();
 		this.h.Update(this.ki);
 	}
 	Update(v){
@@ -28,9 +31,9 @@ class HMAC{
 	}
 	Final(){
 		let r = this.h.Final();
+		this.h.Init();
 		this.h.Update(this.ko);
 		this.h.Update(r);
-		r = this.h.Final();
-		return r;
+		return this.h.Final();
 	}
 }

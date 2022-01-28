@@ -2,7 +2,6 @@ class SHA256{
 	constructor(){
 		this.b = new rbuf(64);
 		this.st = new Uint32Array(8);
-		this.init();
 	}
 	get bsize(){
 		return 64;
@@ -10,15 +9,8 @@ class SHA256{
 	get hsize(){
 		return 32;
 	}
-	init(){
-		this.st.set([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
-		this.size = 0;
-	}
-	clear(){
-		this.b.clear();
-	}
 	process_block(buf){
-		const x = conv.pack_be(buf);
+		const x = conv.pack4_be(buf);
 		this.Transform(x);
 	}
 	Transform(x){
@@ -46,6 +38,11 @@ class SHA256{
 		this.st[6] += wt[6];
 		this.st[7] += wt[7];
 	}
+
+	Init(){
+		this.st.set([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
+		this.size = 0;
+	}
 	Update(v){
 		this.size += v.length;
 		this.b.process(v, this);
@@ -53,19 +50,16 @@ class SHA256{
 	Final(){
 		this.b.push(0x80);
 		this.b.nul();
-		let x = conv.pack_be(this.b.buf);
+		let x = conv.pack4_be(this.b.buf);
 		if(this.b.sz_e() < 8){
 			this.Transform(x);
 			x.fill(0);
 		}
-		x[14] = this.size>>>29;
-		x[15] = this.size<<3;
+		this.b.clear();
+		x[14] = this.size >>> 29;
+		x[15] = this.size << 3;
 		this.Transform(x);
-
-		const r = conv.unpack_be(this.st);
-		this.clear();
-		this.init();
-		return r;
+		return conv.unpack4_be(this.st);
 	}
 }
 SHA256.K = new Uint32Array([
