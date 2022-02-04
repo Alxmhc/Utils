@@ -2,21 +2,22 @@ namespace convert
 {
 	namespace hex
 	{
-		const char *dct_l = "0123456789abcdef";
-		const char *dct_u = "0123456789ABCDEF";
-
-		std::string Encode(const uint8_t *v, const size_t n, const char *d)
+		class Encoder : public byteWriter
 		{
-			std::string out;
-			out.reserve(n<<1);
+			byteWriter *bw;
+			const char *dict;
+		public:
+			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? "0123456789ABCDEF" : "0123456789abcdef") {}
 
-			for(size_t i = 0; i < n; i++)
+			void writeN(const uint8_t* v, size_t n) override
 			{
-				out.push_back(d[v[i]>>4]);
-				out.push_back(d[v[i]&0x0f]);
+				for(size_t i = 0; i < n; i++)
+				{
+					bw->write(dict[v[i]>>4]);
+					bw->write(dict[v[i]&0x0f]);
+				}
 			}
-			return out;
-		}
+		};
 
 		std::vector<uint8_t> Decode(const char *s, const size_t n)
 		{

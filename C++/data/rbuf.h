@@ -37,6 +37,29 @@ public:
 	}
 
 	template<class C>
+	size_t process(byteReader &br, C &cl)
+	{
+		size_t size = 0;
+		if(offset != 0)
+		{
+			size = br.readMx(d + offset, sz - offset);
+			offset += size;
+			if(offset != sz)
+				return size;
+			cl.process_block(d);
+		}
+		for(;;)
+		{
+			offset = br.readMx(d, sz);
+			size += offset;
+			if(offset != sz)
+				break;
+			cl.process_block(d);
+		}
+		return size;
+	}
+
+	template<class C>
 	void push(uint8_t c, C &cl)
 	{
 		d[offset] = c;
