@@ -9,7 +9,7 @@ namespace convert
 		public:
 			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? "0123456789ABCDEF" : "0123456789abcdef") {}
 
-			void writeN(const uint8_t* v, size_t n) override
+			void writeN(const uint8_t* v, size_t n)
 			{
 				for(size_t i = 0; i < n; i++)
 				{

@@ -152,13 +152,13 @@ protected:
 		s.seekg(0, std::ios_base::beg);
 	}
 
-	uint8_t read1() override
+	uint8_t read1()
 	{
 		uint8_t r = static_cast<uint8_t>(s.get());
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t *v, const size_t n) override
+	void readAll(uint8_t *v, const size_t n)
 	{
 		if(n == 0)
 			return;
@@ -172,12 +172,12 @@ public:
 		Init();
 	}
 
-	void set_pos(size_t p) override
+	void set_pos(size_t p)
 	{
 		s.seekg(p, std::ios_base::beg);
 		pos = p;
 	}
-	bool skip(size_t n) override
+	bool skip(size_t n)
 	{
 		if (pos + n > size)
 			return false;
@@ -201,13 +201,13 @@ class br_array : public byteReader
 {
 	const uint8_t *d;
 protected:
-	uint8_t read1() override
+	uint8_t read1()
 	{
 		uint8_t r = d[pos];
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t *v, const size_t n) override
+	void readAll(uint8_t *v, const size_t n)
 	{
 		if(n == 0)
 			return;
@@ -217,11 +217,11 @@ protected:
 public:
 	br_array(const uint8_t *v, size_t sz) : byteReader(sz), d(v) {}
 
-	void set_pos(size_t p) override
+	void set_pos(size_t p)
 	{
 		pos = p;
 	}
-	bool skip(size_t n) override
+	bool skip(size_t n)
 	{
 		if (pos + n > size)
 			return false;

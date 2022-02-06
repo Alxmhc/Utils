@@ -37,6 +37,10 @@ public:
 		bconv<8, E>::unpack(c, t);
 		writeN(t, 8);
 	}
+
+	virtual void Fin()
+	{
+	}
 };
 
 class bw_stream : public byteWriter
@@ -45,9 +49,14 @@ class bw_stream : public byteWriter
 public:
 	bw_stream(std::ostream &d) : s(d) {}
 
-	void writeN(const uint8_t* v, size_t n) override
+	void writeN(const uint8_t* v, size_t n)
 	{
 		s.write(reinterpret_cast<const char*>(v), n);
+	}
+
+	void Fin()
+	{
+		s.flush();
 	}
 };
 
@@ -65,8 +74,44 @@ class bw_array : public byteWriter
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
-	void writeN(const uint8_t* v, size_t n) override
+	void writeN(const uint8_t* v, size_t n)
 	{
 		d.insert(d.end(), v, v + n);
+	}
+};
+
+template<size_t SZ>
+class byteWriterBuf : public byteWriter
+{
+	uint8_t buf[SZ];
+	size_t offset;
+protected:
+	virtual void process(const uint8_t*) = 0;
+public:
+	static const size_t bsize = SZ;
+
+	byteWriterBuf() : offset(0) {}
+
+	void writeN(const uint8_t* v, size_t n)
+	{
+		if(n + offset < SZ)
+		{
+			std::copy_n(v, n, buf + offset);
+			offset += n;
+			return;
+		}
+		size_t part = 0;
+		if(offset != 0)
+		{
+			part = SZ - offset;
+			std::copy_n(v, part, buf + offset);
+			process(buf);
+		}
+		for (; part + SZ <= n; part += SZ)
+		{
+			process(v + part);
+		}
+		offset = n - part;
+		std::copy_n(v + part, offset, buf);
 	}
 };
