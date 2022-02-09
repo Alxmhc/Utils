@@ -8,8 +8,7 @@ namespace fl_pr
 
 			std::vector<uint8_t> vt;
 			bw_array bw(vt);
-			convert::base64::Decoder d(convert::base64::dct_std);
-			d.Set(bw);
+			convert::base64::Decoder d(bw);
 
 			std::string st;
 			for(;;)
@@ -28,12 +27,12 @@ namespace fl_pr
 					{
 						sz--;
 					}
-					d.Update(reinterpret_cast<const uint8_t*>(st.c_str()), sz);
+					d.writeN(reinterpret_cast<const uint8_t*>(st.c_str()), sz);
 				}
 				else if(is_b<char>(st, "-----END "))
 				{
 					st = st.substr(9, st.find('-', 9) - 9);
-					d.Final();
+					d.Fin();
 					res.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
 					vt.clear();
 				}

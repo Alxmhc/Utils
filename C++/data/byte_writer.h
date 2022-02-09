@@ -83,9 +83,9 @@ public:
 template<size_t SZ>
 class byteWriterBuf : public byteWriter
 {
+protected:
 	uint8_t buf[SZ];
 	size_t offset;
-protected:
 	virtual void process(const uint8_t*) = 0;
 public:
 	static const size_t bsize = SZ;
