@@ -38,6 +38,37 @@ public:
 		writeN(t, 8);
 	}
 
+	template<char E>
+	void writeC_2(const uint_fast16_t *c, size_t n)
+	{
+		uint8_t t[2];
+		for(size_t i = 0; i < n; i++)
+		{
+			bconv<2, E>::unpack(c[i], t);
+			writeN(t, 2);
+		}
+	}
+	template<char E>
+	void writeC_4(const uint_fast32_t *c, size_t n)
+	{
+		uint8_t t[4];
+		for(size_t i = 0; i < n; i++)
+		{
+			bconv<4, E>::unpack(c[i], t);
+			writeN(t, 4);
+		}
+	}
+	template<char E>
+	void writeC_8(const uint_fast64_t *c, size_t n)
+	{
+		uint8_t t[8];
+		for(size_t i = 0; i < n; i++)
+		{
+			bconv<8, E>::unpack(c[i], t);
+			writeN(t, 8);
+		}
+	}
+
 	virtual void Fin()
 	{
 	}

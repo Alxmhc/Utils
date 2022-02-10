@@ -49,10 +49,10 @@ namespace convert
 		public:
 			void process(const uint8_t *v)
 			{
-				uint8_t c1 = de[v[0]];
-				uint8_t c2 = de[v[1]];
-				uint8_t c3 = de[v[2]];
-				uint8_t c4 = de[v[3]];
+				const uint8_t c1 = de[v[0]];
+				const uint8_t c2 = de[v[1]];
+				const uint8_t c3 = de[v[2]];
+				const uint8_t c4 = de[v[3]];
 				uint8_t r[3];
 				r[0] = (c1 << 2) + ((c2 & 0x30) >> 4);
 				r[1] = ((c2 & 0x0f) << 4) + ((c3 & 0x3c) >> 2);
@@ -78,12 +78,12 @@ namespace convert
 				const uint8_t c1 = de[buf[0]];
 				const uint8_t c2 = de[buf[1]];
 				uint8_t c = (c1 << 2) + ((c2 & 0x30) >> 4);
-				bw->writeN(&c, 1);
+				bw->write(c);
 				if(offset == 3)
 				{
 					const uint8_t c3 = de[buf[2]];
 					c = ((c2 & 0xf) << 4) + ((c3 & 0x3c) >> 2);
-					bw->writeN(&c, 1);
+					bw->write(c);
 				}
 				offset = 0;
 				bw->Fin();
