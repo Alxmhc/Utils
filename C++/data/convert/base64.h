@@ -22,29 +22,29 @@ namespace convert
 
 			void Fin()
 			{
-				if(offset == 0)
+				if(size() == 0)
 					return;
 				uint8_t c[3];
-				c[0] = en[buf[0]>>2];
-				if(offset == 1)
+				c[0] = en[data()[0]>>2];
+				if(size() == 1)
 				{
-					c[1] = en[(buf[0] & 0x03) << 4];
+					c[1] = en[(data()[0] & 0x03) << 4];
 					bw->writeN(c, 2);
 				}
 				else
 				{
-					c[1] = en[((buf[0] & 0x03) << 4) + (buf[1] >> 4)];
-					c[2] = en[(buf[1] & 0x0f) << 2];
+					c[1] = en[((data()[0] & 0x03) << 4) + (data()[1] >> 4)];
+					c[2] = en[(data()[1] & 0x0f) << 2];
 					bw->writeN(c, 3);
 				}
-				offset = 0;
+				reset();
 				bw->Fin();
 			}
 		};
 
 		class Decoder : public byteWriterBuf<4>
 		{
-			std::array<uint8_t, 256> de;
+			uint8_t de[256];
 			byteWriter *bw;
 		public:
 			void process(const uint8_t *v)
@@ -62,7 +62,7 @@ namespace convert
 
 			Decoder(byteWriter &b) : bw(&b)
 			{
-				de.fill(-1);
+				std::fill_n(de, 256, -1);
 				uint8_t sz = 64;
 				while(sz != 0)
 				{
@@ -73,19 +73,19 @@ namespace convert
 
 			void Fin()
 			{
-				if(offset < 2)
+				if(size() < 2)
 					return;
-				const uint8_t c1 = de[buf[0]];
-				const uint8_t c2 = de[buf[1]];
+				const uint8_t c1 = de[data()[0]];
+				const uint8_t c2 = de[data()[1]];
 				uint8_t c = (c1 << 2) + ((c2 & 0x30) >> 4);
 				bw->write(c);
-				if(offset == 3)
+				if(size() == 3)
 				{
-					const uint8_t c3 = de[buf[2]];
+					const uint8_t c3 = de[data()[2]];
 					c = ((c2 & 0xf) << 4) + ((c3 & 0x3c) >> 2);
 					bw->write(c);
 				}
-				offset = 0;
+				reset();
 				bw->Fin();
 			}
 		};

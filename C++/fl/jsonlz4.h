@@ -10,7 +10,7 @@ namespace fl_pr
 				return false;
 			if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
 				return false;
-			if (!s.readC_4<endianness::LITTLE_ENDIAN>(fsz))
+			if (!s.readC<4, endianness::LITTLE_ENDIAN>(fsz))
 				return false;
 			return true;
 		}

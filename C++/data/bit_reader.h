@@ -24,23 +24,11 @@ public:
 		return r->skip(n);
 	}
 
-	template<char E>
-	bool readB_C2(uint_fast16_t &c)
+	template<unsigned char SZ, char E>
+	bool readB_C(typename UINT_<SZ>::uint_ &c)
 	{
 		o = 0;
-		return r->readC_2<E>(c);
-	}
-	template<char E>
-	bool readB_C4(uint_fast32_t &c)
-	{
-		o = 0;
-		return r->readC_4<E>(c);
-	}
-	template<char E>
-	bool readB_C8(uint_fast64_t &c)
-	{
-		o = 0;
-		return r->readC_8<E>(c);
+		return r->readC<SZ, E>(c);
 	}
 };
 

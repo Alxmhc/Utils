@@ -34,7 +34,7 @@ namespace fl_pr
 			if( (flg & 4) != 0 )
 			{
 				uint_fast16_t sz;
-				if (!s.readC_2<endianness::LITTLE_ENDIAN>(sz))
+				if (!s.readC<2, endianness::LITTLE_ENDIAN>(sz))
 					return false;
 				if (!s.skip(sz))
 					return false;
@@ -65,7 +65,7 @@ namespace fl_pr
 
 			s.set_pos(ef);
 			s.readN(res.crc32, 4);
-			s.readC_4<endianness::LITTLE_ENDIAN>(res.fsize);
+			s.readC<4, endianness::LITTLE_ENDIAN>(res.fsize);
 			return true;
 		}
 	}

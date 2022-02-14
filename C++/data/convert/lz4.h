@@ -32,7 +32,7 @@ namespace convert
 					if(!br.addN(out, size))
 						break;
 					uint_fast16_t offset;
-					if( !br.readC_2<endianness::LITTLE_ENDIAN>(offset) )
+					if( !br.readC<2, endianness::LITTLE_ENDIAN>(offset) )
 						return true;
 					size_t len = b & 0xf;
 					if(!get_size(br, len))

@@ -93,9 +93,9 @@ namespace convert
 			static bool inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
 			{
 				uint_fast16_t sz, nsz;
-				if( !brd.readB_C2<endianness::LITTLE_ENDIAN>(sz) )
+				if( !brd.readB_C<2, endianness::LITTLE_ENDIAN>(sz) )
 					return false;
-				if( !brd.readB_C2<endianness::LITTLE_ENDIAN>(nsz) )
+				if( !brd.readB_C<2, endianness::LITTLE_ENDIAN>(nsz) )
 					return false;
 				if(sz + nsz != 0xffff)
 					return false;

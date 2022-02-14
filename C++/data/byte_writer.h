@@ -16,56 +16,21 @@ public:
 		writeN(s.c_str(), s.length());
 	}
 
-	template<char E>
-	void writeC_2(uint_fast16_t c)
+	template<unsigned char SZ, char E>
+	void writeC(typename UINT_<SZ>::uint_ c)
 	{
-		uint8_t t[2];
-		bconv<2, E>::unpack(c, t);
-		writeN(t, 2);
+		uint8_t t[SZ];
+		bconv<SZ, E>::unpack(c, t);
+		writeN(t, SZ);
 	}
-	template<char E>
-	void writeC_4(uint_fast32_t c)
+	template<unsigned char SZ, char E>
+	void writeC(typename UINT_<SZ>::uint_ const *c, size_t n)
 	{
-		uint8_t t[4];
-		bconv<4, E>::unpack(c, t);
-		writeN(t, 4);
-	}
-	template<char E>
-	void writeC_8(uint_fast64_t c)
-	{
-		uint8_t t[8];
-		bconv<8, E>::unpack(c, t);
-		writeN(t, 8);
-	}
-
-	template<char E>
-	void writeC_2(const uint_fast16_t *c, size_t n)
-	{
-		uint8_t t[2];
+		uint8_t t[SZ];
 		for(size_t i = 0; i < n; i++)
 		{
-			bconv<2, E>::unpack(c[i], t);
-			writeN(t, 2);
-		}
-	}
-	template<char E>
-	void writeC_4(const uint_fast32_t *c, size_t n)
-	{
-		uint8_t t[4];
-		for(size_t i = 0; i < n; i++)
-		{
-			bconv<4, E>::unpack(c[i], t);
-			writeN(t, 4);
-		}
-	}
-	template<char E>
-	void writeC_8(const uint_fast64_t *c, size_t n)
-	{
-		uint8_t t[8];
-		for(size_t i = 0; i < n; i++)
-		{
-			bconv<8, E>::unpack(c[i], t);
-			writeN(t, 8);
+			bconv<SZ, E>::unpack(c[i], t);
+			writeN(t, SZ);
 		}
 	}
 
@@ -114,14 +79,34 @@ public:
 template<size_t SZ>
 class byteWriterBuf : public byteWriter
 {
-protected:
-	uint8_t buf[SZ];
 	size_t offset;
+	uint8_t buf[SZ];
+protected:
 	virtual void process(const uint8_t*) = 0;
 public:
 	static const size_t bsize = SZ;
 
 	byteWriterBuf() : offset(0) {}
+
+	size_t size() const
+	{
+		return offset;
+	}
+
+	const uint8_t* data() const
+	{
+		return buf;
+	}
+
+	void reset()
+	{
+		offset = 0;
+	}
+
+	void nul()
+	{
+		std::fill(buf + offset, buf + SZ, 0);
+	}
 
 	void writeN(const uint8_t* v, size_t n)
 	{

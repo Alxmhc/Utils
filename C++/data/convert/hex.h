@@ -38,6 +38,7 @@ namespace convert
 
 			void Fin()
 			{
+				reset();
 				bw->Fin();
 			}
 		};

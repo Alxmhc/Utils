@@ -78,31 +78,13 @@ public:
 		return true;
 	}
 
-	template<char E>
-	bool readC_2(uint_fast16_t &c)
+	template<unsigned char SZ, char E>
+	bool readC(typename UINT_<SZ>::uint_ &c)
 	{
-		uint8_t t[2];
-		if (!readN(t, 2))
+		uint8_t t[SZ];
+		if (!readN(t, SZ))
 			return false;
-		c = bconv<2, E>::pack(t);
-		return true;
-	}
-	template<char E>
-	bool readC_4(uint_fast32_t &c)
-	{
-		uint8_t t[4];
-		if (!readN(t, 4))
-			return false;
-		c = bconv<4, E>::pack(t);
-		return true;
-	}
-	template<char E>
-	bool readC_8(uint_fast64_t &c)
-	{
-		uint8_t t[8];
-		if (!readN(t, 8))
-			return false;
-		c = bconv<8, E>::pack(t);
+		c = bconv<SZ, E>::pack(t);
 		return true;
 	}
 

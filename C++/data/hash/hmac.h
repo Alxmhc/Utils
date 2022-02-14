@@ -2,13 +2,11 @@ namespace hash
 {
 	//rfc 2104
 	template<class H>
-	class HMAC
+	class HMAC : public HASH<H::hash_size>
 	{
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];
 	public:
-		static const uint_fast8_t hash_size = H::hash_size;
-
 		HMAC(const uint8_t *key, size_t ksize)
 		{
 			std::fill(ki, ki + H::block_size, 0x36);
@@ -40,7 +38,7 @@ namespace hash
 			hash.Init();
 			hash.Update(ki, H::block_size);
 		}
-		void Update(const uint8_t *data, size_t dsize)
+		void Update(const uint8_t *data, const size_t dsize)
 		{
 			hash.Update(data, dsize);
 		}

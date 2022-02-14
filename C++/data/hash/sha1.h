@@ -1,9 +1,8 @@
 namespace hash
 {
-	class SHA1
+	class SHA1 : public HASH<20>
 	{
 	public:
-		static const uint_fast8_t hash_size = 20;
 		static const uint_fast8_t block_size = 64;
 	private:
 		uint64_t size;
@@ -57,7 +56,7 @@ namespace hash
 	public:
 		void process_block(const uint8_t *v)
 		{
-			conv::pack<endianness::BIG_ENDIAN>(v, buf.sz, x);
+			conv::pack<4, endianness::BIG_ENDIAN>(v, buf.sz, x);
 			Transform();
 		}
 
@@ -81,7 +80,7 @@ namespace hash
 			if(buf.size() != 0)
 			{
 				buf.nul();
-				conv::pack<endianness::BIG_ENDIAN>(buf.data(), buf.sz, x);
+				conv::pack<4, endianness::BIG_ENDIAN>(buf.data(), buf.sz, x);
 				if(buf.sz_e() < 8)
 				{
 					Transform();
@@ -97,7 +96,7 @@ namespace hash
 			x[15] = static_cast<uint32_t>(size<<3);
 			Transform();
 			memset(x, 0, sizeof(x));
-			conv::unpack<endianness::BIG_ENDIAN>(st, 5, r);
+			conv::unpack<4, endianness::BIG_ENDIAN>(st, 5, r);
 		}
 	};
 }

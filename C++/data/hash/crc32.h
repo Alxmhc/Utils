@@ -1,13 +1,11 @@
 namespace hash
 {
 	//rfc 1952
-	class CRC32
+	class CRC32 : public HASH<4>
 	{
 		uint32_t tbl[256];
 		uint32_t crc;
 	public:
-		static const uint_fast8_t hash_size = 4;
-
 		static void InitTable(uint32_t *tbl, const uint_fast32_t I)
 		{
 			uint8_t n = 0;
