@@ -5,104 +5,112 @@ namespace hash
 	public:
 		static const uint_fast8_t block_size = 64;
 	private:
-		uint64_t size;
-		uint32_t st[hash_size >> 2];
-		rbuf<block_size> buf;
-		uint32_t x[block_size >> 2];
-
-		static const uint32_t K[64];
-
-		void Transform()
+		class tbf : public byteWriterBuf<block_size>
 		{
-			uint32_t wt[8];
-			std::copy(st, st+8, wt);
-
-			for(uint_fast8_t i = 0; i < 64; i++)
+			void Transform()
 			{
-				uint_fast8_t j = i & 0x0f;
-				if(i > 15)
+				uint32_t wt[8];
+				std::copy(st, st+8, wt);
+
+				for(uint_fast8_t i = 0; i < 64; i++)
 				{
-					x[j] += x[(j+9)&0x0f];
-					uint32_t tmp = x[(j+1)&0x0f];
-					x[j] += rotr(tmp, 7) ^ rotr(tmp, 18) ^ (tmp>>3);
-					tmp = x[(j+14)&0x0f];
-					x[j] += rotr(tmp, 17) ^ rotr(tmp, 19) ^ (tmp>>10);
+					uint_fast8_t j = i & 0x0f;
+					if(i > 15)
+					{
+						x[j] += x[(j+9)&0x0f];
+						uint32_t tmp = x[(j+1)&0x0f];
+						x[j] += rotr(tmp, 7) ^ rotr(tmp, 18) ^ (tmp>>3);
+						tmp = x[(j+14)&0x0f];
+						x[j] += rotr(tmp, 17) ^ rotr(tmp, 19) ^ (tmp>>10);
+					}
+					uint32_t t = x[j] + K[i] + wt[7];
+					t += rotr(wt[4], 6) ^ rotr(wt[4], 11) ^ rotr(wt[4], 25);
+					t += (wt[4] & wt[5]) ^ (~wt[4] & wt[6]);
+					uint32_t tmp = rotr(wt[0], 2) ^ rotr(wt[0], 13) ^ rotr(wt[0], 22);
+					tmp += (wt[0] & wt[1]) | (wt[2] & (wt[0]|wt[1]));
+					wt[7] = wt[6];
+					wt[6] = wt[5];
+					wt[5] = wt[4];
+					wt[4] = wt[3] + t;
+					wt[3] = wt[2];
+					wt[2] = wt[1];
+					wt[1] = wt[0];
+					wt[0] = t + tmp;
 				}
-				uint32_t t = x[j] + K[i] + wt[7];
-				t += rotr(wt[4], 6) ^ rotr(wt[4], 11) ^ rotr(wt[4], 25);
-				t += (wt[4] & wt[5]) ^ (~wt[4] & wt[6]);
-				uint32_t tmp = rotr(wt[0], 2) ^ rotr(wt[0], 13) ^ rotr(wt[0], 22);
-				tmp += (wt[0] & wt[1]) | (wt[2] & (wt[0]|wt[1]));
-				wt[7] = wt[6];
-				wt[6] = wt[5];
-				wt[5] = wt[4];
-				wt[4] = wt[3] + t;
-				wt[3] = wt[2];
-				wt[2] = wt[1];
-				wt[1] = wt[0];
-				wt[0] = t + tmp;
+				st[0] += wt[0];
+				st[1] += wt[1];
+				st[2] += wt[2];
+				st[3] += wt[3];
+				st[4] += wt[4];
+				st[5] += wt[5];
+				st[6] += wt[6];
+				st[7] += wt[7];
 			}
-			st[0] += wt[0];
-			st[1] += wt[1];
-			st[2] += wt[2];
-			st[3] += wt[3];
-			st[4] += wt[4];
-			st[5] += wt[5];
-			st[6] += wt[6];
-			st[7] += wt[7];
-		}
+			
+			static const uint32_t K[64];
+			std::array<uint32_t, (block_size >> 2)> x;
 
+			void process(const uint8_t *v)
+			{
+				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x.data());
+				Transform();
+			}
+		public:
+			uint32_t st[hash_size >> 2];
+			uint64_t sz;
+
+			void Fin()
+			{
+				write(0x80);
+				nul();
+				if(size() != 0)
+				{
+					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x.data());
+					if(bsize - size() < 8)
+					{
+						Transform();
+						x.fill(0);
+					}
+					reset();
+					nul();
+				}
+				else
+				{
+					x.fill(0);
+				}
+				x[14] = static_cast<uint32_t>(sz>>29);
+				x[15] = static_cast<uint32_t>(sz<<3);
+				Transform();
+				x.fill(0);
+			}
+		};
+		tbf buf;
 	public:
-		void process_block(const uint8_t *v)
-		{
-			conv::pack<4, endianness::BIG_ENDIAN>(v, buf.sz, x);
-			Transform();
-		}
-
 		void Init()
 		{
-			st[0] = 0x6a09e667;
-			st[1] = 0xbb67ae85;
-			st[2] = 0x3c6ef372;
-			st[3] = 0xa54ff53a;
-			st[4] = 0x510e527f;
-			st[5] = 0x9b05688c;
-			st[6] = 0x1f83d9ab;
-			st[7] = 0x5be0cd19;
-			size = 0;
+			buf.st[0] = 0x6a09e667;
+			buf.st[1] = 0xbb67ae85;
+			buf.st[2] = 0x3c6ef372;
+			buf.st[3] = 0xa54ff53a;
+			buf.st[4] = 0x510e527f;
+			buf.st[5] = 0x9b05688c;
+			buf.st[6] = 0x1f83d9ab;
+			buf.st[7] = 0x5be0cd19;
+			buf.sz = 0;
 		}
 		void Update(const uint8_t *v, const size_t n)
 		{
-			buf.process(v, n, *this);
-			size += n;
+			buf.writeN(v, n);
+			buf.sz += n;
 		}
 		void Final(uint8_t *r)
 		{
-			buf.push(0x80, *this);
-			if(buf.size() != 0)
-			{
-				buf.nul();
-				conv::pack<4, endianness::BIG_ENDIAN>(buf.data(), buf.sz, x);
-				if(buf.sz_e() < 8)
-				{
-					Transform();
-					memset(x, 0, sizeof(x));
-				}
-			}
-			else
-			{
-				memset(x, 0, sizeof(x));
-			}
-			buf.clear();
-			x[14] = static_cast<uint32_t>(size>>29);
-			x[15] = static_cast<uint32_t>(size<<3);
-			Transform();
-			memset(x, 0, sizeof(x));
-			conv::unpack<4, endianness::BIG_ENDIAN>(st, 8, r);
+			buf.Fin();
+			conv::unpack<4, endianness::BIG_ENDIAN>(buf.st, 8, r);
 		}
 	};
 
-	const uint32_t SHA256::K[64] = {
+	const uint32_t SHA256::tbf::K[64] = {
 		0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 		0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 		0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
