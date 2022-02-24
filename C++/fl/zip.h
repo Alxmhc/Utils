@@ -64,9 +64,9 @@ namespace fl_pr
 			key[2] = tbl[(key[2] ^ (key[1]>>24)) & 0xff] ^ (key[2] >> 8);
 		}
 
-		static bool decryptZIP(const uint8_t *passw, size_t psz, std::vector<uint8_t> &res)
+		static bool decryptZIP(const uint8_t *passw, size_t psz, std::vector<uint8_t> &data, byteWriter &bw)
 		{
-			if(res.size() <= 12)
+			if(data.size() <= 12)
 				return false;
 
 			uint32_t crcTbl[256];
@@ -78,44 +78,45 @@ namespace fl_pr
 				keyUpd(key, passw[i], crcTbl);
 			}
 
-			for(size_t i = 0; i < res.size(); i++)
+			for(size_t i = 0; i < data.size(); i++)
 			{
 				uint32_t tmp = key[2] | 2;
 				tmp = (tmp * (tmp ^ 1)) >> 8;
-				res[i] ^= tmp & 0xff;
+				data[i] ^= tmp & 0xff;
 
-				keyUpd(key, res[i], crcTbl);
+				keyUpd(key, data[i], crcTbl);
 			}
-			res.erase(res.begin(), res.begin() + 12);
+			bw.writeN(data.data() + 12, data.size() - 12);
+			bw.Fin();
 			return true;
 		}
 
-		class aes_iv
+		class iv_aes
 		{
-			uint8_t iv[16];
+			uint8_t v[AES::block_size];
 		public:
-			aes_iv()
+			iv_aes()
 			{
-				std::fill_n(iv, 16, 0);
+				std::fill_n(v, AES::block_size, 0);
 			}
 
 			const uint8_t* data() const
 			{
-				return iv;
+				return v;
 			}
 
 			void incr()
 			{
-				for(size_t i = 0; i < 16; i++)
+				for(size_t i = 0; i < AES::block_size; i++)
 				{
-					iv[i]++;
-					if(iv[i] != 0)
+					v[i]++;
+					if(v[i] != 0)
 						break;
 				}
 			}
 		};
 
-		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
+		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data, byteWriter &bw)
 		{
 			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
@@ -135,7 +136,9 @@ namespace fl_pr
 			if(std::memcmp(hsh, hs, 10) != 0)
 				return false;
 
-			AESCTRDecrypt<aes_iv>(key.data(), ssz*2, data);
+			CR_CTR<AES, iv_aes> cr(key.data(), ssz*2, bw);
+			cr.writeN(data.data(), data.size());
+			cr.Fin();
 			return true;
 		}
 	public:
@@ -179,21 +182,22 @@ namespace fl_pr
 			return res;
 		}
 
-		static bool Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz, std::vector<uint8_t> &data)
+		static bool Decrypt(byteReader &s, const inf &inf, const uint8_t *passw, size_t psz, byteWriter &bw)
 		{
 			s.set_pos(inf.data_pos);
+			std::vector<uint8_t> data;
 			if( !s.readN(data, inf.data_size) )
 				return false;
 			switch(inf.encryption)
 			{
 			case eZIP:
-				return decryptZIP(passw, psz, data);
+				return decryptZIP(passw, psz, data, bw);
 			case eAES128:
-				return decryptAES(passw, psz, 8, data);
+				return decryptAES(passw, psz, 8, data, bw);
 			case eAES192:
-				return decryptAES(passw, psz, 12, data);
+				return decryptAES(passw, psz, 12, data, bw);
 			case eAES256:
-				return decryptAES(passw, psz, 16, data);
+				return decryptAES(passw, psz, 16, data, bw);
 			}
 			return false;
 		}

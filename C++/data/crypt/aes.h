@@ -56,6 +56,8 @@ class AES
 	}
 
 public:
+	static const uint_fast8_t block_size = 16;
+
 	AES(const uint8_t *k, size_t ksz) : key((ksz + 28) << 2)
 	{
 		std::copy_n(k, ksz, key.begin());
