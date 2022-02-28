@@ -2,7 +2,7 @@ template<class C, class IV>
 class CR_CTR : public byteWriterBuf<C::block_size>
 {
 	IV c;
-	C cr;
+	const C *cr;
 	byteWriter *bw;
 
 	void upd(const uint8_t *v, size_t sz = bsize)
@@ -10,7 +10,7 @@ class CR_CTR : public byteWriterBuf<C::block_size>
 		c.incr();
 		uint8_t tmp[bsize];
 		std::copy_n(c.data(), bsize, tmp);
-		cr.Encrypt(tmp);
+		cr->process(tmp);
 		std::transform(v, v + sz, tmp, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
 		bw->writeN(tmp, sz);
 	}
@@ -20,7 +20,7 @@ class CR_CTR : public byteWriterBuf<C::block_size>
 		upd(v);
 	}
 public:
-	CR_CTR(const uint8_t *key, size_t ksz, byteWriter &b) : cr(key, ksz), bw(&b) {}
+	CR_CTR(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
 
 	void Fin()
 	{

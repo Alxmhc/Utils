@@ -136,7 +136,8 @@ namespace fl_pr
 			if(std::memcmp(hsh, hs, 10) != 0)
 				return false;
 
-			CR_CTR<AES, iv_aes> cr(key.data(), ssz*2, bw);
+			AES a(key.data(), ssz*2);
+			CR_CTR<AES::en, iv_aes> cr(a.Enc, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			return true;
