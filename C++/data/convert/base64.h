@@ -22,22 +22,23 @@ namespace convert
 
 			void Fin()
 			{
-				if(size() == 0)
-					return;
-				uint8_t c[3];
-				c[0] = en[data()[0]>>2];
-				if(size() == 1)
+				if(size() != 0)
 				{
-					c[1] = en[(data()[0] & 0x03) << 4];
-					bw->writeN(c, 2);
+					uint8_t c[3];
+					c[0] = en[data()[0]>>2];
+					if(size() == 1)
+					{
+						c[1] = en[(data()[0] & 0x03) << 4];
+						bw->writeN(c, 2);
+					}
+					else
+					{
+						c[1] = en[((data()[0] & 0x03) << 4) + (data()[1] >> 4)];
+						c[2] = en[(data()[1] & 0x0f) << 2];
+						bw->writeN(c, 3);
+					}
+					reset();
 				}
-				else
-				{
-					c[1] = en[((data()[0] & 0x03) << 4) + (data()[1] >> 4)];
-					c[2] = en[(data()[1] & 0x0f) << 2];
-					bw->writeN(c, 3);
-				}
-				reset();
 				bw->Fin();
 			}
 		};
@@ -73,19 +74,20 @@ namespace convert
 
 			void Fin()
 			{
-				if(size() < 2)
-					return;
-				const uint8_t c1 = de[data()[0]];
-				const uint8_t c2 = de[data()[1]];
-				uint8_t c = (c1 << 2) + ((c2 & 0x30) >> 4);
-				bw->write(c);
-				if(size() == 3)
+				if(size() != 0)
 				{
-					const uint8_t c3 = de[data()[2]];
-					c = ((c2 & 0xf) << 4) + ((c3 & 0x3c) >> 2);
+					const uint8_t c1 = de[data()[0]];
+					const uint8_t c2 = de[data()[1]];
+					uint8_t c = (c1 << 2) + ((c2 & 0x30) >> 4);
 					bw->write(c);
+					if(size() == 3)
+					{
+						const uint8_t c3 = de[data()[2]];
+						c = ((c2 & 0xf) << 4) + ((c3 & 0x3c) >> 2);
+						bw->write(c);
+					}
+					reset();
 				}
-				reset();
 				bw->Fin();
 			}
 		};

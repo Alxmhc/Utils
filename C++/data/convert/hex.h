@@ -34,7 +34,7 @@ namespace convert
 				bw->write(c);
 			}
 		public:
-			Decoder(byteWriter &b) : byteWriterBuf<2>(), bw(&b) {}
+			Decoder(byteWriter &b) : bw(&b) {}
 
 			void Fin()
 			{

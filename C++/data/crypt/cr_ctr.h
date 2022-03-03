@@ -5,7 +5,7 @@ class CR_CTR : public byteWriterBuf<C::block_size>
 	const C *cr;
 	byteWriter *bw;
 
-	void upd(const uint8_t *v, size_t sz = bsize)
+	void upd(const uint8_t *v, size_t sz)
 	{
 		c.incr();
 		uint8_t tmp[bsize];
@@ -17,7 +17,7 @@ class CR_CTR : public byteWriterBuf<C::block_size>
 
 	void process(const uint8_t *v)
 	{
-		upd(v);
+		upd(v, bsize);
 	}
 public:
 	CR_CTR(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
