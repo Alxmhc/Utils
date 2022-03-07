@@ -24,7 +24,7 @@ namespace convert
 			}
 		};
 
-		class Decoder : public byteWriterBuf<2>
+		class Decoder : public byteWriterBuf
 		{
 			byteWriter *bw;
 			void process(const uint8_t *v)
@@ -34,7 +34,7 @@ namespace convert
 				bw->write(c);
 			}
 		public:
-			Decoder(byteWriter &b) : bw(&b) {}
+			Decoder(byteWriter &b) : byteWriterBuf(2), bw(&b) {}
 
 			void Fin()
 			{

@@ -39,29 +39,22 @@ public:
 	}
 };
 
-class bw_stream : public byteWriter
-{
-	std::ostream &s;
-public:
-	bw_stream(std::ostream &d) : s(d) {}
-
-	void writeN(const uint8_t* v, size_t n)
-	{
-		s.write(reinterpret_cast<const char*>(v), n);
-	}
-
-	void Fin()
-	{
-		s.flush();
-	}
-};
-
-class bw_fstream : public bw_stream
+class bw_fstream : public byteWriter
 {
 	std::ofstream fst;
 public:
 	template<typename C>
-	bw_fstream(const C *fl) : bw_stream(fst), fst(fl, std::ios_base::binary) {}
+	bw_fstream(const C *fl) : fst(fl, std::ios_base::binary) {}
+
+	void writeN(const uint8_t* v, size_t n)
+	{
+		fst.write(reinterpret_cast<const char*>(v), n);
+	}
+
+	void Fin()
+	{
+		fst.flush();
+	}
 };
 
 class bw_array : public byteWriter
@@ -76,58 +69,56 @@ public:
 	}
 };
 
-template<size_t SZ>
 class byteWriterBuf : public byteWriter
 {
+	std::vector<uint8_t> buf;
 	size_t offset;
-	uint8_t buf[SZ];
 protected:
 	virtual void process(const uint8_t*) = 0;
-public:
-	static const size_t bsize = SZ;
-
-	byteWriterBuf() : offset(0) {}
-
+	size_t bsize() const
+	{
+		return buf.size();
+	}
 	size_t size() const
 	{
 		return offset;
 	}
-
 	const uint8_t* data() const
 	{
-		return buf;
+		return buf.data();
 	}
 
 	void reset()
 	{
 		offset = 0;
 	}
-
 	void nul()
 	{
-		std::fill(buf + offset, buf + SZ, 0);
+		std::fill(buf.begin() + offset, buf.end(), 0);
 	}
+public:
+	byteWriterBuf(size_t sz) : buf(sz), offset(0) {}
 
 	void writeN(const uint8_t* v, size_t n)
 	{
-		if(n + offset < SZ)
+		if(n + offset < buf.size())
 		{
-			std::copy_n(v, n, buf + offset);
+			std::copy_n(v, n, buf.begin() + offset);
 			offset += n;
 			return;
 		}
 		size_t part = 0;
 		if(offset != 0)
 		{
-			part = SZ - offset;
-			std::copy_n(v, part, buf + offset);
-			process(buf);
+			part = buf.size() - offset;
+			std::copy_n(v, part, buf.begin() + offset);
+			process(buf.data());
 		}
-		for (; part + SZ <= n; part += SZ)
+		for (; part + buf.size() <= n; part += buf.size())
 		{
 			process(v + part);
 		}
 		offset = n - part;
-		std::copy_n(v + part, offset, buf);
+		std::copy_n(v + part, offset, buf.begin());
 	}
 };

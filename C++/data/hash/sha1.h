@@ -5,7 +5,7 @@ namespace hash
 	public:
 		static const uint_fast8_t block_size = 64;
 	private:
-		class tbf : public byteWriterBuf<block_size>
+		class tbf : public byteWriterBuf
 		{
 			void Transform()
 			{
@@ -54,12 +54,14 @@ namespace hash
 
 			void process(const uint8_t *v)
 			{
-				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize(), x.data());
 				Transform();
 			}
 		public:
 			uint32_t st[hash_size >> 2];
 			uint64_t sz;
+
+			tbf() : byteWriterBuf(block_size) {}
 
 			void Fin()
 			{
@@ -67,8 +69,8 @@ namespace hash
 				nul();
 				if(size() != 0)
 				{
-					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x.data());
-					if(bsize - size() < 8)
+					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize(), x.data());
+					if(bsize() - size() < 8)
 					{
 						Transform();
 						x.fill(0);

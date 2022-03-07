@@ -121,22 +121,23 @@ public:
 	}
 };
 
-class br_stream : public byteReader
+class br_fstream : public byteReader
 {
-	std::istream &s;
-protected:
-	void Init()
-	{
-		if(s.fail())
-			return;
-		s.seekg(0, std::ios_base::end);
-		size = static_cast<size_t>(s.tellg());
-		s.seekg(0, std::ios_base::beg);
-	}
+	std::ifstream fst;
 
+	bool init()
+	{
+		if(fst.fail())
+			return false;;
+		fst.seekg(0, std::ios_base::end);
+		size = static_cast<size_t>(fst.tellg());
+		fst.seekg(0, std::ios_base::beg);
+		return true;
+	}
+protected:
 	uint8_t read1()
 	{
-		uint8_t r = static_cast<uint8_t>(s.get());
+		uint8_t r = static_cast<uint8_t>(fst.get());
 		pos++;
 		return r;
 	}
@@ -144,38 +145,34 @@ protected:
 	{
 		if(n == 0)
 			return;
-		s.read(reinterpret_cast<char*>(v), n);
+		fst.read(reinterpret_cast<char*>(v), n);
 		pos += n;
 	}
 public:
-	br_stream(std::istream &d, size_t sz) : byteReader(sz), s(d) {}
-	br_stream(std::istream &d) : byteReader(0), s(d)
+	br_fstream() : byteReader(0) {}
+	br_fstream(const char *fl) : byteReader(0), fst(fl, std::ios_base::binary)
 	{
-		Init();
+		init();
+	}
+	bool open(const char *fl)
+	{
+		pos = 0;
+		fst.open(fl, std::ios_base::binary);
+		return init();
 	}
 
 	void set_pos(size_t p)
 	{
-		s.seekg(p, std::ios_base::beg);
+		fst.seekg(p, std::ios_base::beg);
 		pos = p;
 	}
 	bool skip(size_t n)
 	{
 		if (pos + n > size)
 			return false;
-		s.seekg(n, std::ios_base::cur);
+		fst.seekg(n, std::ios_base::cur);
 		pos += n;
 		return true;
-	}
-};
-
-class br_fstream : public br_stream
-{
-	std::ifstream fst;
-public:
-	br_fstream(const char *fl) : br_stream(fst, 0), fst(fl, std::ios_base::binary)
-	{
-		Init();
 	}
 };
 

@@ -4,7 +4,7 @@ namespace convert
 	{
 		const char* en = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-		class Encoder : public byteWriterBuf<3>
+		class Encoder : public byteWriterBuf
 		{
 			byteWriter *bw;
 			void process(const uint8_t *v)
@@ -18,7 +18,7 @@ namespace convert
 				bw->writeN(r, 4);
 			}
 		public:
-			Encoder(byteWriter &b) : bw(&b) {}
+			Encoder(byteWriter &b) : byteWriterBuf(3), bw(&b) {}
 
 			void Fin()
 			{
@@ -43,7 +43,7 @@ namespace convert
 			}
 		};
 
-		class Decoder : public byteWriterBuf<4>
+		class Decoder : public byteWriterBuf
 		{
 			uint8_t de[256];
 			byteWriter *bw;
@@ -61,7 +61,7 @@ namespace convert
 				bw->writeN(r, 3);
 			}
 
-			Decoder(byteWriter &b) : bw(&b)
+			Decoder(byteWriter &b) : byteWriterBuf(4), bw(&b)
 			{
 				std::fill_n(de, 256, -1);
 				uint8_t sz = 64;
