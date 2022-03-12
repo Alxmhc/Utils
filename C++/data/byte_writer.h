@@ -77,6 +77,8 @@ class byteWriterBuf : public byteWriter
 protected:
 	virtual void process(const uint8_t*) = 0;
 
+	static const size_t bsize = SZ;
+
 	byteWriterBuf() : offset(0) {}
 
 	size_t size() const
@@ -99,8 +101,6 @@ protected:
 		std::fill(buf + offset, buf + SZ, 0);
 	}
 public:
-	static const size_t bsize = SZ;
-
 	void writeN(const uint8_t* v, size_t n)
 	{
 		if(n + offset < SZ)
