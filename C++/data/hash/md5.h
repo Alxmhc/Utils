@@ -1,11 +1,8 @@
 namespace hash
 {
-	class MD5 : public HASH<16>
+	class MD5 : public HASH<16, 64>
 	{
-	public:
-		static const uint_fast8_t block_size = 64;
-	private:
-		class tbf : public byteWriterBuf
+		class tbf : public byteWriterBuf<block_size>
 		{
 			static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
 			{
@@ -106,18 +103,16 @@ namespace hash
 				st[3] += d;
 			}
 
-			std::array<uint32_t, (block_size >> 2)> x;
+			std::array<uint32_t, (bsize >> 2)> x;
 
 			void process(const uint8_t *v)
 			{
-				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize(), x.data());
+				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
 				Transform();
 			}
 		public:
 			uint32_t st[hash_size >> 2];
 			uint64_t sz;
-
-			tbf() : byteWriterBuf(block_size) {}
 
 			void Fin()
 			{
@@ -125,8 +120,8 @@ namespace hash
 				nul();
 				if(size() != 0)
 				{
-					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize(), x.data());
-					if(bsize() - size() < 8)
+					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					if(bsize - size() < 8)
 					{
 						Transform();
 						x.fill(0);

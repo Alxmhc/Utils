@@ -1,5 +1,5 @@
 template<class C, class IV>
-class CR_CTR : public byteWriterBuf
+class CR_CTR : public byteWriterBuf<C::block_size>
 {
 	IV c;
 	const C *cr;
@@ -8,18 +8,19 @@ class CR_CTR : public byteWriterBuf
 	void upd(const uint8_t *v, size_t sz)
 	{
 		c.incr();
-		std::vector<uint8_t> tmp(c.data(), c.data() + bsize());
-		cr->process(tmp.data());
-		std::transform(v, v + sz, tmp.begin(), tmp.begin(), [](uint8_t a, uint8_t b){return a ^ b;});
-		bw->writeN(tmp.data(), sz);
+		uint8_t tmp[C::block_size];
+		std::copy_n(c.data(), C::block_size, tmp);
+		cr->process(tmp);
+		std::transform(v, v + sz, tmp, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
+		bw->writeN(tmp, sz);
 	}
 
 	void process(const uint8_t *v)
 	{
-		upd(v, bsize());
+		upd(v, C::block_size);
 	}
 public:
-	CR_CTR(const C &c, byteWriter &b) : byteWriterBuf(C::block_size), cr(&c), bw(&b) {}
+	CR_CTR(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
 
 	void Fin()
 	{

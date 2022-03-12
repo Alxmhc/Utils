@@ -69,56 +69,58 @@ public:
 	}
 };
 
+template<size_t SZ>
 class byteWriterBuf : public byteWriter
 {
-	std::vector<uint8_t> buf;
 	size_t offset;
+	uint8_t buf[SZ];
 protected:
 	virtual void process(const uint8_t*) = 0;
-	size_t bsize() const
-	{
-		return buf.size();
-	}
+
+	byteWriterBuf() : offset(0) {}
+
 	size_t size() const
 	{
 		return offset;
 	}
+
 	const uint8_t* data() const
 	{
-		return buf.data();
+		return buf;
 	}
 
 	void reset()
 	{
 		offset = 0;
 	}
+
 	void nul()
 	{
-		std::fill(buf.begin() + offset, buf.end(), 0);
+		std::fill(buf + offset, buf + SZ, 0);
 	}
 public:
-	byteWriterBuf(size_t sz) : buf(sz), offset(0) {}
+	static const size_t bsize = SZ;
 
 	void writeN(const uint8_t* v, size_t n)
 	{
-		if(n + offset < buf.size())
+		if(n + offset < SZ)
 		{
-			std::copy_n(v, n, buf.begin() + offset);
+			std::copy_n(v, n, buf + offset);
 			offset += n;
 			return;
 		}
 		size_t part = 0;
 		if(offset != 0)
 		{
-			part = buf.size() - offset;
-			std::copy_n(v, part, buf.begin() + offset);
-			process(buf.data());
+			part = SZ - offset;
+			std::copy_n(v, part, buf + offset);
+			process(buf);
 		}
-		for (; part + buf.size() <= n; part += buf.size())
+		for (; part + SZ <= n; part += SZ)
 		{
 			process(v + part);
 		}
 		offset = n - part;
-		std::copy_n(v + part, offset, buf.begin());
+		std::copy_n(v + part, offset, buf);
 	}
 };

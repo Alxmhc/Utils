@@ -2,7 +2,7 @@ namespace hash
 {
 	//rfc 2104
 	template<class H>
-	class HMAC : public HASH<H::hash_size>
+	class HMAC : public HASH<H::hash_size, H::block_size>
 	{
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];

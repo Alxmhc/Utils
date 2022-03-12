@@ -171,7 +171,7 @@ namespace fl_pr
 			return true;
 		}
 	public:
-		enum 
+		enum
 		{
 			cNO        =   0,
 			cDeflate   =   8,

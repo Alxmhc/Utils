@@ -1,7 +1,7 @@
 namespace hash
 {
 	//rfc 1952
-	class CRC32 : public HASH<4>
+	class CRC32 : public HASH<4, 1>
 	{
 		uint32_t tbl[256];
 		uint32_t crc;
