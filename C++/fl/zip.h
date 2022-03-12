@@ -189,11 +189,13 @@ namespace fl_pr
 			eAES256   =  4
 		};
 
-		void open(const char* fl)
+		bool open(const char* fl)
 		{
 			f_inf.clear();
-			br.open(fl);
+			if( !br.open(fl) )
+				return false;
 			read_inf();
+			return true;
 		}
 
 		bool getData(size_t n, byteWriter &bw)
