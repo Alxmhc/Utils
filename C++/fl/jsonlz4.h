@@ -23,6 +23,7 @@ namespace fl_pr
 			std::vector<uint8_t> data;
 			br.readN(data, br.get_size() - 12);
 			bw.writeN(data.data(), data.size());
+			bw.Fin();
 			return true;
 		}
 	};

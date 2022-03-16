@@ -163,7 +163,7 @@ namespace fl_pr
 			return true;
 		}
 
-		bool getData(size_t n, std::vector<uint8_t> &data)
+		bool read(size_t n, std::vector<uint8_t> &data)
 		{
 			br.set_pos(f_inf[n].data_pos);
 			if( !br.readN(data, f_inf[n].data_size) )
@@ -201,16 +201,17 @@ namespace fl_pr
 		bool getData(size_t n, byteWriter &bw)
 		{
 			std::vector<uint8_t> data;
-			if(!getData(n, data))
+			if(!read(n, data))
 				return false;
 			bw.writeN(data.data(), data.size());
+			bw.Fin();
 			return true;
 		}
 
 		bool getDataK(size_t n, const uint8_t *passw, size_t psz, byteWriter &bw)
 		{
 			std::vector<uint8_t> data;
-			if(!getData(n, data))
+			if(!read(n, data))
 				return false;
 			switch(f_inf[n].encryption)
 			{

@@ -81,6 +81,7 @@ namespace fl_pr
 			if( !br.readN(data, f_inf.data_size) )
 				return false;
 			bw.writeN(data.data(), data.size());
+			bw.Fin();
 			return true;
 		}
 	};
