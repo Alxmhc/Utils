@@ -1,10 +1,14 @@
 namespace fl_pr
 {
-	namespace F_pem
+	class F_pem
 	{
-		std::map<std::string, std::vector<uint8_t>> read(byteReader &s)
+		std::map<std::string, std::vector<uint8_t>> data;
+	public:
+		bool open(const char* fl)
 		{
-			std::map<std::string, std::vector<uint8_t>> res;
+			br_fstream br;
+			if( !br.open(fl) )
+				return false;
 
 			std::vector<uint8_t> vt;
 			bw_array bw(vt);
@@ -13,7 +17,7 @@ namespace fl_pr
 			std::string st;
 			for(;;)
 			{
-				s.read_string('\n', st);
+				br.read_string('\n', st);
 				if(st.length() == 0)
 					break;
 				if(st[st.length()-1] == '\r')
@@ -33,11 +37,11 @@ namespace fl_pr
 				{
 					st = st.substr(9, st.find('-', 9) - 9);
 					d.Fin();
-					res.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
+					data.insert(std::pair<std::string, std::vector<uint8_t>>(st, vt));
 					vt.clear();
 				}
 			}
-			return res;
+			return true;
 		}
-	}
+	};
 }

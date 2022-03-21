@@ -4,30 +4,27 @@ namespace fl_pr
 	{
 		struct inf
 		{
-			size_t hdr_pos;
-			size_t hdr_size;
 			size_t data_pos;
 			size_t data_size;
 
 			std::string fname;
 			uint_fast32_t fsize;
+			bool isDir;
 			uint8_t crc32[4];
 
 			uint_fast16_t method;
 			uint_fast8_t encryption;
-			bool isDir;
 		};
 
 		br_fstream br;
 		std::vector<inf> f_inf;
 
-		bool read_file_hdr(inf &r)
+		bool read_hdr(inf &r)
 		{
 			uint8_t h[26];
 			if(!br.readN(h, 26))
 				return false;
-			r.hdr_pos = br.get_pos() - 26;
-			r.hdr_size = 26;
+			r.data_pos = br.get_pos();
 
 			r.encryption = h[2] & 1;
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
@@ -36,7 +33,7 @@ namespace fl_pr
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
 			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			r.hdr_size += szfn;
+			r.data_pos += szfn;
 			if( !br.readN(r.fname, szfn) )
 				return false;
 			r.isDir = (r.fname[r.fname.length() - 1] == '/');
@@ -44,7 +41,7 @@ namespace fl_pr
 			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
-				r.hdr_size += szex;
+				r.data_pos += szex;
 				std::vector<uint8_t> ext;
 				if( !br.readN(ext, szex) )
 					return false;
@@ -56,36 +53,16 @@ namespace fl_pr
 					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 				}
 			}
-			r.data_pos = r.hdr_pos + r.hdr_size;
 			return true;
 		}
-		void read_inf()
-		{
-			for(;;)
-			{
-				uint8_t hdr[4];
-				if(!br.readN(hdr, 4))
-					break;
-				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
-				{
-					inf r;
-					if( !read_file_hdr(r) )
-						break;
-					f_inf.push_back(r);
-					br.skip(r.data_size);
-				}
-				else
-					break;
-			}
-		}
 
-		static void keyUpd(uint32_t *key, uint8_t c, const uint32_t *tbl)
+		static void keyUpd(uint32_t* key, uint8_t c, const uint32_t* tbl)
 		{
 			key[0] = tbl[(key[0] & 0xff) ^ c] ^ (key[0] >> 8);
 			key[1] = ( key[1] + (key[0] & 0xff) ) * 0x8088405 + 1;
 			key[2] = tbl[(key[2] ^ (key[1]>>24)) & 0xff] ^ (key[2] >> 8);
 		}
-		static bool decryptZIP(const uint8_t *passw, size_t psz, std::vector<uint8_t> &data, byteWriter &bw)
+		static bool decryptZIP(const uint8_t* passw, size_t psz, std::vector<uint8_t> &data)
 		{
 			if(data.size() <= 12)
 				return false;
@@ -107,8 +84,7 @@ namespace fl_pr
 
 				keyUpd(key, data[i], crcTbl);
 			}
-			bw.writeN(data.data() + 12, data.size() - 12);
-			bw.Fin();
+			data.erase(data.begin(), data.begin() + 12);
 			return true;
 		}
 
@@ -136,7 +112,7 @@ namespace fl_pr
 				}
 			}
 		};
-		static bool decryptAES(const uint8_t *passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data, byteWriter &bw)
+		static bool decryptAES(const uint8_t* passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
 		{
 			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
@@ -156,20 +132,24 @@ namespace fl_pr
 			if(std::memcmp(hsh, hs, 10) != 0)
 				return false;
 
+			std::vector<uint8_t> res;
+			res.reserve(data.size());
+			bw_array bw(res);
 			AES a(key.data(), ssz*2);
 			CR_CTR<AES::en, iv_aes> cr(a.Enc, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
+			data = res;
 			return true;
 		}
-
-		bool read(size_t n, std::vector<uint8_t> &data)
+		enum
 		{
-			br.set_pos(f_inf[n].data_pos);
-			if( !br.readN(data, f_inf[n].data_size) )
-				return false;
-			return true;
-		}
+			eNO       =  0,
+			eZIP      =  1,
+			eAES128   =  2,
+			eAES192   =  3,
+			eAES256   =  4
+		};
 	public:
 		enum
 		{
@@ -180,52 +160,66 @@ namespace fl_pr
 			cLZMA      =  14,
 			cPPMd      =  98
 		};
-		enum
-		{
-			eNO       =  0,
-			eZIP      =  1,
-			eAES128   =  2,
-			eAES192   =  3,
-			eAES256   =  4
-		};
 
 		bool open(const char* fl)
 		{
 			f_inf.clear();
 			if( !br.open(fl) )
 				return false;
-			read_inf();
+			for(;;)
+			{
+				uint8_t hdr[4];
+				if(!br.readN(hdr, 4))
+					break;
+				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
+				{
+					inf r;
+					if( !read_hdr(r) )
+						break;
+					f_inf.push_back(r);
+					br.skip(r.data_size);
+				}
+				else
+					break;
+			}
 			return true;
 		}
 
-		bool getData(size_t n, byteWriter &bw)
+		bool getData(size_t n, std::vector<uint8_t> &data)
 		{
-			std::vector<uint8_t> data;
-			if(!read(n, data))
+			br.set_pos(f_inf[n].data_pos);
+			if( !br.readN(data, f_inf[n].data_size) )
 				return false;
-			bw.writeN(data.data(), data.size());
-			bw.Fin();
 			return true;
 		}
 
-		bool getDataK(size_t n, const uint8_t *passw, size_t psz, byteWriter &bw)
+		bool getDataK(size_t n, const uint8_t* passw, size_t psz, std::vector<uint8_t> &data)
 		{
-			std::vector<uint8_t> data;
-			if(!read(n, data))
+			if( !getData(n, data) )
 				return false;
 			switch(f_inf[n].encryption)
 			{
 			case eZIP:
-				return decryptZIP(passw, psz, data, bw);
+				return decryptZIP(passw, psz, data);
 			case eAES128:
-				return decryptAES(passw, psz, 8, data, bw);
+				return decryptAES(passw, psz, 8, data);
 			case eAES192:
-				return decryptAES(passw, psz, 12, data, bw);
+				return decryptAES(passw, psz, 12, data);
 			case eAES256:
-				return decryptAES(passw, psz, 16, data, bw);
+				return decryptAES(passw, psz, 16, data);
 			default:
 				return false;
 			}
+		}
+
+		std::vector<std::string> names() const
+		{
+			std::vector<std::string> res(f_inf.size());
+			for(size_t i = 0; i < f_inf.size(); i++)
+			{
+				res[i] = f_inf[i].fname;
+			}
+			return res;
 		}
 	};
 }

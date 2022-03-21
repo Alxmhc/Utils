@@ -17,13 +17,11 @@ namespace fl_pr
 			fsz = bconv<4, endianness::LITTLE_ENDIAN>::pack(hdr + 8);
 			return true;
 		}
-		bool getData(byteWriter &bw)
+		bool getData(std::vector<uint8_t> &data)
 		{
 			br.set_pos(12);
-			std::vector<uint8_t> data;
-			br.readN(data, br.get_size() - 12);
-			bw.writeN(data.data(), data.size());
-			bw.Fin();
+			if( !br.readN(data, br.get_size() - 12) )
+				return false;
 			return true;
 		}
 	};
