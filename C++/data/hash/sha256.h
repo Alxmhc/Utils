@@ -11,7 +11,7 @@ namespace hash
 
 				for(uint_fast8_t i = 0; i < 64; i++)
 				{
-					uint_fast8_t j = i & 0x0f;
+					const uint_fast8_t j = i & 0x0f;
 					if(i > 15)
 					{
 						x[j] += x[(j+9)&0x0f];

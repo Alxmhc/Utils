@@ -18,30 +18,27 @@ namespace fl_pr
 
 		br_fstream br;
 		std::vector<inf> f_inf;
+		std::vector<uint8_t> psw;
 
 		bool read_hdr(inf &r)
 		{
 			uint8_t h[26];
 			if(!br.readN(h, 26))
 				return false;
-			r.data_pos = br.get_pos();
-
 			r.encryption = h[2] & 1;
 			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
 			std::copy_n(h+10, 4, r.crc32);
 			r.data_size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
-			uint_fast16_t szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			r.data_pos += szfn;
+			const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
 			if( !br.readN(r.fname, szfn) )
 				return false;
 			r.isDir = (r.fname[r.fname.length() - 1] == '/');
 
-			uint_fast16_t szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
+			const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
-				r.data_pos += szex;
 				std::vector<uint8_t> ext;
 				if( !br.readN(ext, szex) )
 					return false;
@@ -53,6 +50,7 @@ namespace fl_pr
 					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 				}
 			}
+			r.data_pos = br.get_pos();
 			return true;
 		}
 
@@ -62,8 +60,11 @@ namespace fl_pr
 			key[1] = ( key[1] + (key[0] & 0xff) ) * 0x8088405 + 1;
 			key[2] = tbl[(key[2] ^ (key[1]>>24)) & 0xff] ^ (key[2] >> 8);
 		}
-		static bool decryptZIP(const uint8_t* passw, size_t psz, std::vector<uint8_t> &data)
+		bool decryptZIP(std::vector<uint8_t> &data) const
 		{
+			if(psw.size() == 0)
+				return false;
+
 			if(data.size() <= 12)
 				return false;
 
@@ -71,9 +72,9 @@ namespace fl_pr
 			hash::CRC32::InitTable(crcTbl, 0xedb88320);
 
 			uint32_t key[3] = {0x12345678, 0x23456789, 0x34567890};
-			for(size_t i = 0; i < psz; i++)
+			for(size_t i = 0; i < psw.size(); i++)
 			{
-				keyUpd(key, passw[i], crcTbl);
+				keyUpd(key, psw[i], crcTbl);
 			}
 
 			for(size_t i = 0; i < data.size(); i++)
@@ -112,11 +113,14 @@ namespace fl_pr
 				}
 			}
 		};
-		static bool decryptAES(const uint8_t* passw, size_t psz, uint_fast8_t ssz, std::vector<uint8_t> &data)
+		bool decryptAES(uint_fast8_t ssz, std::vector<uint8_t> &data) const
 		{
+			if(psw.size() == 0)
+				return false;
+
 			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
-			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(passw, psz, data.data(), ssz, 1000, ssz*4 + 2);
+			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(psw.data(), psw.size(), data.data(), ssz, 1000, ssz*4 + 2);
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
 				return false;
 
@@ -176,40 +180,14 @@ namespace fl_pr
 					inf r;
 					if( !read_hdr(r) )
 						break;
+					if( !br.skip(r.data_size) )
+						break;
 					f_inf.push_back(r);
-					br.skip(r.data_size);
 				}
 				else
 					break;
 			}
 			return true;
-		}
-
-		bool getData(size_t n, std::vector<uint8_t> &data)
-		{
-			br.set_pos(f_inf[n].data_pos);
-			if( !br.readN(data, f_inf[n].data_size) )
-				return false;
-			return true;
-		}
-
-		bool getDataK(size_t n, const uint8_t* passw, size_t psz, std::vector<uint8_t> &data)
-		{
-			if( !getData(n, data) )
-				return false;
-			switch(f_inf[n].encryption)
-			{
-			case eZIP:
-				return decryptZIP(passw, psz, data);
-			case eAES128:
-				return decryptAES(passw, psz, 8, data);
-			case eAES192:
-				return decryptAES(passw, psz, 12, data);
-			case eAES256:
-				return decryptAES(passw, psz, 16, data);
-			default:
-				return false;
-			}
 		}
 
 		std::vector<std::string> names() const
@@ -220,6 +198,32 @@ namespace fl_pr
 				res[i] = f_inf[i].fname;
 			}
 			return res;
+		}
+
+		void set_psw(const uint8_t* passw, size_t psz)
+		{
+			psw.assign(passw, passw + psz);
+		}
+
+		bool getData(size_t n, std::vector<uint8_t> &data)
+		{
+			br.set_pos(f_inf[n].data_pos);
+			br.readN(data, f_inf[n].data_size);
+			switch(f_inf[n].encryption)
+			{
+			case eNO:
+				return true;
+			case eZIP:
+				return decryptZIP(data);
+			case eAES128:
+				return decryptAES(8, data);
+			case eAES192:
+				return decryptAES(12, data);
+			case eAES256:
+				return decryptAES(16, data);
+			default:
+				return false;
+			}
 		}
 	};
 }
