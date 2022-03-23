@@ -24,5 +24,15 @@ namespace fl_pr
 				return false;
 			return true;
 		}
+
+		bool Extract(std::vector<uint8_t> &data)
+		{
+			std::vector<uint8_t> tmp;
+			if( !getData(tmp) )
+				return false;
+			if( !compr::lz4::Decode(tmp.data(), tmp.size(), data) )
+				return false;
+			return true;
+		}
 	};
 }

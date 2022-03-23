@@ -20,7 +20,7 @@ namespace fl_pr
 		std::vector<inf> f_inf;
 		std::vector<uint8_t> psw;
 
-		bool read_hdr(inf &r)
+		bool read_inf(inf &r)
 		{
 			uint8_t h[26];
 			if(!br.readN(h, 26))
@@ -154,7 +154,7 @@ namespace fl_pr
 			eAES192   =  3,
 			eAES256   =  4
 		};
-	public:
+
 		enum
 		{
 			cNO        =   0,
@@ -164,7 +164,7 @@ namespace fl_pr
 			cLZMA      =  14,
 			cPPMd      =  98
 		};
-
+	public:
 		bool open(const char* fl)
 		{
 			f_inf.clear();
@@ -178,7 +178,7 @@ namespace fl_pr
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
 				{
 					inf r;
-					if( !read_hdr(r) )
+					if( !read_inf(r) )
 						break;
 					if( !br.skip(r.data_size) )
 						break;
@@ -221,6 +221,27 @@ namespace fl_pr
 				return decryptAES(12, data);
 			case eAES256:
 				return decryptAES(16, data);
+			default:
+				return false;
+			}
+		}
+
+		bool Extract(size_t n, std::vector<uint8_t> &data)
+		{
+			if( !getData(n, data) )
+				return false;
+			switch(f_inf[n].method)
+			{
+			case cNO:
+				return true;
+			case cDeflate:
+				{
+				std::vector<uint8_t> tmp;
+				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
+					return false;
+				data = tmp;
+				return true;
+				}
 			default:
 				return false;
 			}

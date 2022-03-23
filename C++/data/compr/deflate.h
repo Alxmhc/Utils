@@ -1,4 +1,4 @@
-namespace convert
+namespace compr
 {
 	class deflate
 	{

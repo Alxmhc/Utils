@@ -16,11 +16,9 @@ namespace fl_pr
 
 		br_fstream br;
 		inf f_inf;
-	public:
-		bool open(const char* fl)
+
+		bool read_inf(inf &r)
 		{
-			if( !br.open(fl) )
-				return false;
 			uint8_t flg;
 			{
 				uint8_t hdr[4];
@@ -69,6 +67,14 @@ namespace fl_pr
 			br.readC<4, endianness::LITTLE_ENDIAN>(f_inf.fsize);
 			return true;
 		}
+	public:
+		bool open(const char* fl)
+		{
+			if( !br.open(fl) )
+				return false;
+			if( !read_inf(f_inf) )
+				return false;
+		}
 
 		bool getData(std::vector<uint8_t> &data)
 		{
@@ -81,6 +87,16 @@ namespace fl_pr
 		std::string name() const
 		{
 			return f_inf.fname;
+		}
+
+		bool Extract(size_t n, std::vector<uint8_t> &data)
+		{
+			std::vector<uint8_t> tmp;
+			if( !getData(tmp) )
+				return false;
+			if( !compr::deflate::Decode(tmp.data(), tmp.size(), data) )
+				return false;
+			return true;
 		}
 	};
 }
