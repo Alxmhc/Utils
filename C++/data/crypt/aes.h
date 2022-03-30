@@ -2,7 +2,10 @@ class AES
 {
 	std::vector<uint8_t> key;
 
-	static std::vector<uint8_t> getKey(const uint8_t *k, size_t ksz)
+	static const uint8_t Rcon[12];
+	static const uint8_t Sbox[256];
+
+	static std::vector<uint8_t> getKey(const uint8_t *k, uint_fast8_t ksz)
 	{
 		std::vector<uint8_t> key((ksz + 28) << 2);
 		std::copy_n(k, ksz, key.begin());
@@ -33,13 +36,6 @@ class AES
 		}
 		return key;
 	}
-
-	static const uint8_t Rcon[12];
-	static const uint8_t Sbox[256];
-public:
-	static const uint_fast8_t block_size = 16;
-
-	AES(const uint8_t *k, size_t ksz) : key(getKey(k, ksz)), Enc(key.data(), key.size()), Dec(key.data(), key.size()) {}
 
 	class en
 	{
@@ -138,9 +134,13 @@ public:
 			std::transform(r, r + 16, key, r, [](uint8_t a, uint8_t b){return a ^ b;});
 		}
 	};
+public:
+	static const uint_fast8_t block_size = 16;
 
 	en Enc;
 	de Dec;
+
+	AES(const uint8_t *k, uint_fast8_t ksz) : key(getKey(k, ksz)), Enc(key.data(), key.size()), Dec(key.data(), key.size()) {}
 };
 
 const uint8_t AES::Rcon[12] = {

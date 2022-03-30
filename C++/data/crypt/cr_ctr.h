@@ -10,7 +10,7 @@ class CR_CTR : public byteWriterBuf<C::block_size>
 		c.incr();
 		uint8_t tmp[C::block_size];
 		std::copy_n(c.data(), C::block_size, tmp);
-		cr->process(tmp);
+		cr->Enc.process(tmp);
 		std::transform(v, v + sz, tmp, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
 		bw->writeN(tmp, sz);
 	}

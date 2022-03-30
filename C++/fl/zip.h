@@ -97,12 +97,10 @@ namespace fl_pr
 			{
 				std::fill_n(v, AES::block_size, 0);
 			}
-
 			const uint8_t* data() const
 			{
 				return v;
 			}
-
 			void incr()
 			{
 				for(size_t i = 0; i < AES::block_size; i++)
@@ -140,7 +138,7 @@ namespace fl_pr
 			res.reserve(data.size());
 			bw_array bw(res);
 			AES a(key.data(), ssz*2);
-			CR_CTR<AES::en, iv_aes> cr(a.Enc, bw);
+			CR_CTR<AES, iv_aes> cr(a, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;
