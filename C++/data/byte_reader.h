@@ -121,61 +121,6 @@ public:
 	}
 };
 
-class br_fstream : public byteReader
-{
-	std::ifstream fst;
-
-	bool init()
-	{
-		if(fst.fail())
-			return false;;
-		fst.seekg(0, std::ios_base::end);
-		size = static_cast<size_t>(fst.tellg());
-		fst.seekg(0, std::ios_base::beg);
-		return true;
-	}
-protected:
-	uint8_t read1()
-	{
-		uint8_t r = static_cast<uint8_t>(fst.get());
-		pos++;
-		return r;
-	}
-	void readAll(uint8_t *v, const size_t n)
-	{
-		if(n == 0)
-			return;
-		fst.read(reinterpret_cast<char*>(v), n);
-		pos += n;
-	}
-public:
-	br_fstream() : byteReader(0) {}
-	br_fstream(const char *fl) : byteReader(0), fst(fl, std::ios_base::binary)
-	{
-		init();
-	}
-	bool open(const char *fl)
-	{
-		pos = 0;
-		fst.open(fl, std::ios_base::binary);
-		return init();
-	}
-
-	void set_pos(size_t p)
-	{
-		fst.seekg(p, std::ios_base::beg);
-		pos = p;
-	}
-	bool skip(size_t n)
-	{
-		if (pos + n > size)
-			return false;
-		fst.seekg(n, std::ios_base::cur);
-		pos += n;
-		return true;
-	}
-};
-
 class br_array : public byteReader
 {
 	const uint8_t *d;

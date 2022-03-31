@@ -96,6 +96,7 @@ namespace fl_pr
 			iv_aes()
 			{
 				std::fill_n(v, AES::block_size, 0);
+				v[0] = 1;
 			}
 			const uint8_t* data() const
 			{
@@ -138,7 +139,7 @@ namespace fl_pr
 			res.reserve(data.size());
 			bw_array bw(res);
 			AES a(key.data(), ssz*2);
-			CR_CTR<AES, iv_aes> cr(a, bw);
+			CR_CTR::Dec<AES, iv_aes> cr(a, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;

@@ -39,24 +39,6 @@ public:
 	}
 };
 
-class bw_fstream : public byteWriter
-{
-	std::ofstream fst;
-public:
-	template<typename C>
-	bw_fstream(const C *fl) : fst(fl, std::ios_base::binary) {}
-
-	void writeN(const uint8_t* v, size_t n)
-	{
-		fst.write(reinterpret_cast<const char*>(v), n);
-	}
-
-	void Fin()
-	{
-		fst.flush();
-	}
-};
-
 class bw_array : public byteWriter
 {
 	std::vector<uint8_t> &d;

@@ -17,8 +17,10 @@ namespace compr
 			}
 		}
 	public:
-		static bool Decode(byteReader &br, std::vector<uint8_t> &out)
+		static bool Decode(const uint8_t* v, size_t sz, std::vector<uint8_t> &out)
 		{
+			out.clear();
+			br_array br(v, sz);
 			for(;;)
 			{
 				uint8_t b;
@@ -39,12 +41,6 @@ namespace compr
 					break;
 			}
 			return false;
-		}
-
-		static bool Decode(const uint8_t* v, size_t sz, std::vector<uint8_t> &out)
-		{
-			br_array br(v, sz);
-			return Decode(br, out);
 		}
 	};
 }
