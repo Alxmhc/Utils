@@ -1,7 +1,7 @@
 namespace CR_CTR
 {
 	template<class C, class IV>
-	class Enc : public byteWriterBuf<C::block_size>
+	class Encoder : public byteWriterBuf<C::block_size>
 	{
 		IV c;
 		const C *cr;
@@ -22,7 +22,7 @@ namespace CR_CTR
 			upd(v, C::block_size);
 		}
 	public:
-		Enc(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
+		Encoder(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
 
 		void Fin()
 		{
@@ -36,9 +36,9 @@ namespace CR_CTR
 	};
 
 	template<class C, class IV>
-	class Dec : public Enc<C, IV>
+	class Decoder : public Encoder<C, IV>
 	{
 	public:
-		Dec(const C &c, byteWriter &b) : Enc<C, IV>(c, b) {}
+		Decoder(const C &c, byteWriter &b) : Encoder<C, IV>(c, b) {}
 	};
 }

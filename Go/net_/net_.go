@@ -3,14 +3,14 @@ package net_
 import "encoding/binary"
 
 const (
-	E_IPv4 uint16 = 0x0800
-	E_IPv6 uint16 = 0x86dd
-	E_ARP  uint16 = 0x0806
+	ETH_IPv4 uint16 = 0x0800
+	ETH_IPv6 uint16 = 0x86dd
+	ETH_ARP  uint16 = 0x0806
 
-	E_TCP    byte = 6
-	E_UDP    byte = 17
-	E_IGMP   byte = 2
-	E_ICMPv6 byte = 58
+	IP_TCP    byte = 6
+	IP_UDP    byte = 17
+	IP_IGMP   byte = 2
+	IP_ICMPv6 byte = 58
 )
 
 type Ethernet_II struct {

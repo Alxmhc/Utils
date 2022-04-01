@@ -55,7 +55,7 @@ public:
 		for(;;)
 		{
 			uint_fast8_t n;
-			if( !rd.read1(n) )
+			if( !rd.get(n) )
 				break;
 			a = n == 0 ? a->left : a->right;
 			if(a == nullptr)

@@ -139,7 +139,7 @@ namespace fl_pr
 			res.reserve(data.size());
 			bw_array bw(res);
 			AES a(key.data(), ssz*2);
-			CR_CTR::Dec<AES, iv_aes> cr(a, bw);
+			CR_CTR::Decoder<AES, iv_aes> cr(a, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;
@@ -236,6 +236,7 @@ namespace fl_pr
 			case cDeflate:
 				{
 				std::vector<uint8_t> tmp;
+				tmp.reserve(f_inf[n].fsize);
 				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
 					return false;
 				data = tmp;

@@ -30,6 +30,7 @@ namespace fl_pr
 			std::vector<uint8_t> tmp;
 			if( !getData(tmp) )
 				return false;
+			data.reserve(fsz);
 			if( !compr::lz4::Decode(tmp.data(), tmp.size(), data) )
 				return false;
 			return true;

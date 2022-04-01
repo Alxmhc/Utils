@@ -6,7 +6,7 @@ protected:
 
 	bitReader(byteReader &d) : r(&d), o(0) {}
 public:
-	virtual bool read1(uint_fast8_t&) = 0;
+	virtual bool get(uint_fast8_t&) = 0;
 
 	bool readB(uint8_t *v, size_t n)
 	{
@@ -36,7 +36,7 @@ public:
 class bitReaderR : public bitReader
 {
 public:
-	bool read1(uint_fast8_t &c)
+	bool get(uint_fast8_t &c)
 	{
 		if(o != 0)
 		{
@@ -53,28 +53,36 @@ public:
 
 	bitReaderR(byteReader &d) : bitReader(d){}
 
-	uint_fast32_t readLE(uint_fast8_t n)
+	template<typename T>
+	bool readLE(uint_fast8_t n, T &rs)
 	{
-		uint_fast32_t rs = 0;
+		if(n > (sizeof(T)<<3))
+			return false;
+		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
-			read1(c);
+			if( !get(c) )
+				return false;
 			rs |= c << i;
 		}
-		return rs;
+		return true;
 	}
 
-	uint_fast32_t readBE(uint_fast8_t n)
+	template<typename T>
+	bool readBE(uint_fast8_t n, T &rs)
 	{
-		uint_fast32_t rs = 0;
+		if(n > (sizeof(T)<<3))
+			return false;
+		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
-			read1(c);
+			if( !get(c) )
+				return false;
 			rs = (rs<<1) | c;
 		}
-		return rs;
+		return true;
 	}
 };
 
@@ -82,7 +90,7 @@ public:
 class bitReaderL : public bitReader
 {
 public:
-	bool read1(uint_fast8_t &c)
+	bool get(uint_fast8_t &c)
 	{
 		if(o != 0)
 		{
@@ -99,27 +107,35 @@ public:
 
 	bitReaderL(byteReader &d) : bitReader(d){}
 
-	uint_fast32_t readLE(uint_fast8_t n)
+	template<typename T>
+	bool readLE(uint_fast8_t n, T &rs)
 	{
-		uint_fast32_t rs = 0;
+		if(n > (sizeof(T)<<3))
+			return false;
+		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
-			read1(c);
+			if( !get(c) )
+				return false;
 			rs = (rs<<1) | c;
 		}
-		return rs;
+		return true;
 	}
 
-	uint_fast32_t readBE(uint_fast8_t n)
+	template<typename T>
+	bool readBE(uint_fast8_t n, T &rs)
 	{
-		uint_fast32_t rs = 0;
+		if(n > (sizeof(T)<<3))
+			return false;
+		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
-			read1(c);
+			if( !get(c) )
+				return false;
 			rs |= c << i;
 		}
-		return rs;
+		return true;
 	}
 };

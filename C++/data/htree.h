@@ -11,30 +11,30 @@ public:
 
 	void Set(uint_fast8_t *m, T n)
 	{
-		typedef std::pair<T, uint_fast8_t> pr;
+		typedef std::pair<uint_fast8_t, T> pr;
 		std::vector<pr> tmp(n);
 		T sz = 0;
 		for(T i = 0; i < n; ++i)
 		{
 			if(m[i] == 0)
 				continue;
-			tmp[sz].first = i;
-			tmp[sz].second = m[i];
+			tmp[sz].first = m[i];
+			tmp[sz].second = i;
 			sz++;
 		}
-		std::sort(tmp.begin(), tmp.begin() + sz, [](const pr &a, const pr &b){return a.second == b.second ? a.first < b.first : a.second < b.second;});
+		std::sort(tmp.begin(), tmp.begin() + sz);
 
 		uint_fast32_t k = 0;
 		uint_fast8_t p = 0;
 		for(T i = 0; i < sz; ++i)
 		{
-			const uint_fast8_t s = tmp[i].second;
+			const uint_fast8_t s = tmp[i].first;
 			if(p != s)
 			{
 				k <<= s - p;
 				p = s;
 			}
-			t.add(k, s, tmp[i].first);
+			t.add(k, s, tmp[i].second);
 			k++;
 		}
 	}

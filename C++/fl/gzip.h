@@ -89,11 +89,12 @@ namespace fl_pr
 			return f_inf.fname;
 		}
 
-		bool Extract(size_t n, std::vector<uint8_t> &data)
+		bool Extract(std::vector<uint8_t> &data)
 		{
 			std::vector<uint8_t> tmp;
 			if( !getData(tmp) )
 				return false;
+			data.reserve(f_inf.fsize);
 			if( !compr::deflate::Decode(tmp.data(), tmp.size(), data) )
 				return false;
 			return true;
