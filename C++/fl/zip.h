@@ -91,12 +91,12 @@ namespace fl_pr
 
 		class iv_aes
 		{
-			uint8_t v[AES::block_size];
+			uint8_t v[16];
 		public:
 			iv_aes()
 			{
-				std::fill_n(v, AES::block_size, 0);
-				v[0] = 1;
+				static const uint8_t iv[16] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+				std::copy(iv, iv + 16, v);
 			}
 			const uint8_t* data() const
 			{
@@ -104,11 +104,14 @@ namespace fl_pr
 			}
 			void incr()
 			{
-				for(size_t i = 0; i < AES::block_size; i++)
+				for(uint_fast8_t i = 0; i < 16; i++)
 				{
-					v[i]++;
-					if(v[i] != 0)
+					if(v[i] != 255)
+					{
+						v[i]++;
 						break;
+					}
+					v[i] = 0;
 				}
 			}
 		};

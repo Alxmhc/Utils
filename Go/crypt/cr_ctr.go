@@ -1,23 +1,23 @@
 package crypt
 
 import (
-	"crypto/aes"
+	"crypto/cipher"
 )
 
 type IV interface {
+	Init()
 	Data() []byte
 	Incr()
 }
 
-func AESctrEncrypt(data, key []byte, v IV) {
-	block, _ := aes.NewCipher(key[:])
-	bs := block.BlockSize()
-
+func CR_CTR_Encrypt(cr cipher.Block, v IV, data []byte) {
+	v.Init()
+	bs := cr.BlockSize()
 	tmp := make([]byte, bs)
 	offset := 0
 	for offset <= len(data)-bs {
+		cr.Encrypt(tmp[:], v.Data())
 		v.Incr()
-		block.Encrypt(tmp[:], v.Data())
 		for i := 0; i < bs; i++ {
 			data[offset+i] ^= tmp[i]
 		}
@@ -25,14 +25,14 @@ func AESctrEncrypt(data, key []byte, v IV) {
 	}
 	bs = len(data) - offset
 	if bs != 0 {
+		cr.Encrypt(tmp[:], v.Data())
 		v.Incr()
-		block.Encrypt(tmp[:], v.Data())
 		for i := 0; i < bs; i++ {
 			data[offset+i] ^= tmp[i]
 		}
 	}
 }
 
-func AESctrDecrypt(data, key []byte, v IV) {
-	AESctrEncrypt(data, key, v)
+func CR_CTR_Decrypt(cr cipher.Block, v IV, data []byte) {
+	CR_CTR_Encrypt(cr, v, data)
 }
