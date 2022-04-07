@@ -7,7 +7,7 @@ namespace convert
 		class Encoder : public byteWriterBuf<3>
 		{
 			byteWriter *bw;
-			void process(const uint8_t *v)
+			void process(const uint8_t* v)
 			{
 				uint_fast32_t t = (v[0] << 16) | (v[1] << 8) | v[2];
 				uint8_t r[4];
@@ -48,7 +48,7 @@ namespace convert
 			uint8_t de[256];
 			byteWriter *bw;
 		public:
-			void process(const uint8_t *v)
+			void process(const uint8_t* v)
 			{
 				const uint8_t c1 = de[v[0]];
 				const uint8_t c2 = de[v[1]];

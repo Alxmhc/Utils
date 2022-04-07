@@ -33,21 +33,21 @@ public:
 	}
 
 	template<typename T>
-	void set(const T& val, const char* name)
+	void set(const T &val, const char* name)
 	{
 		set(val);
 		lua_setglobal(s, name);
 	}
 
-	void get(lua_Integer& val, int ind)
+	void get(lua_Integer &val, int ind)
 	{
 		val = lua_tointeger(s, ind);
 	}
-	void get(lua_Number& val, int ind)
+	void get(lua_Number &val, int ind)
 	{
 		val = lua_tonumber(s, ind);
 	}
-	void get(std::string& val, int ind)
+	void get(std::string &val, int ind)
 	{
 		val = lua_tostring(s, ind);
 	}
@@ -60,7 +60,7 @@ private:
 	{
 		lua_pushnumber(s, val);
 	}
-	void set(const std::string& val)
+	void set(const std::string &val)
 	{
 		lua_pushstring(s, val.c_str());
 	}

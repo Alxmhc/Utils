@@ -47,7 +47,7 @@ namespace hash
 			static const uint32_t K[64];
 			std::array<uint32_t, (bsize >> 2)> x;
 
-			void process(const uint8_t *v)
+			void process(const uint8_t* v)
 			{
 				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x.data());
 				Transform();
@@ -95,12 +95,12 @@ namespace hash
 			buf.st[7] = 0x5be0cd19;
 			buf.sz = 0;
 		}
-		void Update(const uint8_t *v, const size_t n)
+		void Update(const uint8_t* v, const size_t n)
 		{
 			buf.writeN(v, n);
 			buf.sz += n;
 		}
-		void Final(uint8_t *r)
+		void Final(uint8_t* r)
 		{
 			buf.Fin();
 			conv::unpack<4, endianness::BIG_ENDIAN>(buf.st, 8, r);

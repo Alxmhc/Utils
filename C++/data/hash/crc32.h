@@ -36,14 +36,14 @@ namespace hash
 		{
 			crc = 0xffffffff;
 		}
-		void Update(const uint8_t *v, const size_t n)
+		void Update(const uint8_t* v, const size_t n)
 		{
 			for(size_t i = 0; i < n; i++)
 			{
 				crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
 			}
 		}
-		void Final(uint8_t *r)
+		void Final(uint8_t* r)
 		{
 			bconv<4, endianness::LITTLE_ENDIAN>::unpack(~crc,  r);
 		}

@@ -17,7 +17,7 @@ class GoSlice
 	GoInt len;
 	GoInt cap;
 public:
-	GoSlice(uint8_t *v, size_t n) : data(v), len(n), cap(n) {}
+	GoSlice(uint8_t* v, size_t n) : data(v), len(n), cap(n) {}
 };
 
 class GoString

@@ -7,7 +7,7 @@ namespace CR_CTR
 		const C *cr;
 		byteWriter *bw;
 
-		void upd(const uint8_t *v, size_t sz)
+		void upd(const uint8_t* v, size_t sz)
 		{
 			uint8_t tmp[C::block_size];
 			std::copy_n(c.data(), C::block_size, tmp);
@@ -17,7 +17,7 @@ namespace CR_CTR
 			bw->writeN(tmp, sz);
 		}
 
-		void process(const uint8_t *v)
+		void process(const uint8_t* v)
 		{
 			upd(v, C::block_size);
 		}

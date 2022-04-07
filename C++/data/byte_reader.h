@@ -123,7 +123,7 @@ public:
 
 class br_array : public byteReader
 {
-	const uint8_t *d;
+	const uint8_t* d;
 protected:
 	uint8_t read1()
 	{
@@ -131,7 +131,7 @@ protected:
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t *v, const size_t n)
+	void readAll(uint8_t* v, const size_t n)
 	{
 		if(n == 0)
 			return;
@@ -139,7 +139,7 @@ protected:
 		pos += n;
 	}
 public:
-	br_array(const uint8_t *v, size_t sz) : byteReader(sz), d(v) {}
+	br_array(const uint8_t* v, size_t sz) : byteReader(sz), d(v) {}
 
 	void set_pos(size_t p)
 	{

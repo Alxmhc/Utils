@@ -5,9 +5,9 @@ class PBKDF2_HMAC
 public:
 	static const uint_fast8_t out_size = H::hash_size;
 
-	PBKDF2_HMAC(const uint8_t *passw, size_t sz) : h(passw, sz) {}
+	PBKDF2_HMAC(const uint8_t* passw, size_t sz) : h(passw, sz) {}
 
-	void Calc(const uint8_t *salt, size_t ssize, const uint8_t *nm, uint8_t *res)
+	void Calc(const uint8_t* salt, size_t ssize, const uint8_t* nm, uint8_t* res)
 	{
 		h.Init();
 		h.Update(salt, ssize);
@@ -15,7 +15,7 @@ public:
 		h.Final(res);
 	}
 
-	void Calc(uint8_t *res)
+	void Calc(uint8_t* res)
 	{
 		h.Init();
 		h.Update(res, H::hash_size);
@@ -25,7 +25,7 @@ public:
 
 //rfc 2898
 template<class F>
-std::vector<uint8_t> PBKDF2(const uint8_t *passw, size_t psz, const uint8_t *salt, size_t ssz, size_t c, size_t ksz)
+std::vector<uint8_t> PBKDF2(const uint8_t* passw, size_t psz, const uint8_t* salt, size_t ssz, size_t c, size_t ksz)
 {
 	std::vector<uint8_t> key;
 	if(ksz == 0)

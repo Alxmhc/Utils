@@ -7,7 +7,7 @@ namespace hash
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];
 	public:
-		HMAC(const uint8_t *key, size_t ksize)
+		HMAC(const uint8_t* key, size_t ksize)
 		{
 			std::fill(ki, ki + H::block_size, 0x36);
 			std::fill(ko, ko + H::block_size, 0x5c);
@@ -38,11 +38,11 @@ namespace hash
 			hash.Init();
 			hash.Update(ki, H::block_size);
 		}
-		void Update(const uint8_t *data, const size_t dsize)
+		void Update(const uint8_t* data, const size_t dsize)
 		{
 			hash.Update(data, dsize);
 		}
-		void Final(uint8_t *res)
+		void Final(uint8_t* res)
 		{
 			hash.Final(res);
 			hash.Init();

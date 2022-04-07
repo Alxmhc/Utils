@@ -8,7 +8,7 @@ protected:
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t *v, const size_t n)
+	void readAll(uint8_t* v, const size_t n)
 	{
 		if(n == 0)
 			return;

@@ -8,7 +8,7 @@ protected:
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 
-	bool readB(uint8_t *v, size_t n)
+	bool readB(uint8_t* v, size_t n)
 	{
 		o = 0;
 		return r->readN(v, n);

@@ -11,7 +11,7 @@ bool find1(const T* v, const size_t sz, const T e, size_t &p)
 
 namespace decode
 {
-	bool unchunk(const uint8_t *v, const size_t n, byteWriter &bw)
+	bool unchunk(const uint8_t* v, const size_t n, byteWriter &bw)
 	{
 		size_t i = 0;
 		const uint8_t f('\n');

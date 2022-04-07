@@ -17,7 +17,7 @@ namespace fl_pr
 		br_fstream br;
 		inf f_inf;
 
-		bool read_inf(inf &r)
+		bool read_inf()
 		{
 			uint8_t flg;
 			{
@@ -72,8 +72,9 @@ namespace fl_pr
 		{
 			if( !br.open(fl) )
 				return false;
-			if( !read_inf(f_inf) )
+			if( !read_inf() )
 				return false;
+			return true;
 		}
 
 		bool getData(std::vector<uint8_t> &data)
