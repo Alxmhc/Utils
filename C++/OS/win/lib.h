@@ -8,7 +8,7 @@ public:
 		free();
 	}
 
-	bool load(const char *pth)
+	bool load(const char* pth)
 	{
 		inst = LoadLibrary_(pth);
 		return inst != nullptr;
@@ -22,7 +22,7 @@ public:
 		}
 	}
 
-	void* get_addr(const char *fname) const
+	void* get_addr(const char* fname) const
 	{
 		return GetProcAddress(inst, fname);
 	}

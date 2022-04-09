@@ -1,6 +1,6 @@
 class sq3
 {
-	sqlite3 *db;
+	sqlite3* db;
 public:
 	sq3() : db(nullptr) {}
 	~sq3()
@@ -8,7 +8,7 @@ public:
 		Close();
 	}
 
-	bool Open(const char *fl)
+	bool Open(const char* fl)
 	{
 		return sqlite3_open(fl, &db) == 0;
 	}
@@ -20,7 +20,7 @@ public:
 
 	bool Exec(const char* rq)
 	{
-		char *err = nullptr;
+		char* err = nullptr;
 		auto res = sqlite3_exec(db, rq, nullptr, 0, &err);
 		return res == SQLITE_OK;
 	}

@@ -1,7 +1,8 @@
 template<typename T>
 class binTree
 {
-	binTree *left, *right;
+	binTree* left;
+	binTree* right;
 	T val;
 	bool fin;
 
@@ -23,7 +24,7 @@ public:
 	void add(uint_fast32_t n, uint_fast8_t nbit, T c)
 	{
 		uint_fast32_t f = 1 << (nbit - 1);
-		binTree<T> *a = this;
+		binTree<T>* a = this;
 		while(f != 0)
 		{
 			const auto c = n & f;
@@ -51,7 +52,7 @@ public:
 
 	bool find(bitReader &rd, T &c) const
 	{
-		const binTree<T> *a = this;
+		const binTree<T>* a = this;
 		for(;;)
 		{
 			uint_fast8_t n;

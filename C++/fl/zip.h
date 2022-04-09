@@ -64,7 +64,6 @@ namespace fl_pr
 		{
 			if(psw.size() == 0)
 				return false;
-
 			if(data.size() <= 12)
 				return false;
 
@@ -119,9 +118,9 @@ namespace fl_pr
 		{
 			if(psw.size() == 0)
 				return false;
-
 			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
+
 			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(psw.data(), psw.size(), data.data(), ssz, 1000, ssz*4 + 2);
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
 				return false;
@@ -148,6 +147,7 @@ namespace fl_pr
 			data = res;
 			return true;
 		}
+
 		enum
 		{
 			eNO       =  0,
@@ -156,7 +156,6 @@ namespace fl_pr
 			eAES192   =  3,
 			eAES256   =  4
 		};
-
 		enum
 		{
 			cNO        =   0,
@@ -190,6 +189,11 @@ namespace fl_pr
 					break;
 			}
 			return true;
+		}
+
+		size_t sz() const
+		{
+			return f_inf.size();
 		}
 
 		std::vector<std::string> names() const

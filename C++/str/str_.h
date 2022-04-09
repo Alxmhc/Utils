@@ -17,6 +17,6 @@ bool is_e(const std::basic_string<C> &s, const std::basic_string<C> &f)
 }
 
 template<typename C>
-bool is_b(const std::basic_string<C> &s, const C *f){return is_b(s, std::basic_string<C>(f));}
+bool is_b(const std::basic_string<C> &s, const C* f){return is_b(s, std::basic_string<C>(f));}
 template<typename C>
-bool is_e(const std::basic_string<C> &s, const C *f){return is_e(s, std::basic_string<C>(f));}
+bool is_e(const std::basic_string<C> &s, const C* f){return is_e(s, std::basic_string<C>(f));}

@@ -4,8 +4,8 @@ namespace convert
 	{
 		class Encoder : public byteWriter
 		{
-			byteWriter *bw;
-			const char *dict;
+			byteWriter* bw;
+			const char* dict;
 		public:
 			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? "0123456789ABCDEF" : "0123456789abcdef") {}
 
@@ -26,7 +26,7 @@ namespace convert
 
 		class Decoder : public byteWriterBuf<2>
 		{
-			byteWriter *bw;
+			byteWriter* bw;
 			void process(const uint8_t* v)
 			{
 				const char t[3] = {v[0],v[1],0};

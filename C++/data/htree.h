@@ -4,12 +4,12 @@ class huffmanTree
 	binTree<T> t;
 public:
 	huffmanTree(){}
-	huffmanTree(uint_fast8_t *m, T n)
+	huffmanTree(uint_fast8_t* m, T n)
 	{
 		Set(m, n);
 	}
 
-	void Set(uint_fast8_t *m, T n)
+	void Set(uint_fast8_t* m, T n)
 	{
 		typedef std::pair<uint_fast8_t, T> pr;
 		std::vector<pr> tmp(n);

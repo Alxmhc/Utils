@@ -1,6 +1,6 @@
 class scr_Lua
 {
-	lua_State *s;
+	lua_State* s;
 public:
 	scr_Lua()
 	{

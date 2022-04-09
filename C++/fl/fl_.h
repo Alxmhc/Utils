@@ -17,7 +17,7 @@ protected:
 	}
 public:
 	br_fstream() : byteReader(0) {}
-	bool open(const char *fl)
+	bool open(const char* fl)
 	{
 		fst.open(fl, std::ios_base::binary | std::ios_base::ate);
 		if(fst.fail())
@@ -48,7 +48,7 @@ class bw_fstream : public byteWriter
 	std::ofstream fst;
 public:
 	template<typename C>
-	bw_fstream(const C *fl) : fst(fl, std::ios_base::binary) {}
+	bw_fstream(const C* fl) : fst(fl, std::ios_base::binary) {}
 
 	void writeN(const uint8_t* v, size_t n)
 	{

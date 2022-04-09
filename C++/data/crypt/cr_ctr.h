@@ -4,8 +4,8 @@ namespace CR_CTR
 	class Encoder : public byteWriterBuf<C::block_size>
 	{
 		IV c;
-		const C *cr;
-		byteWriter *bw;
+		const C* cr;
+		byteWriter* bw;
 
 		void upd(const uint8_t* v, size_t sz)
 		{

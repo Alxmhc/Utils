@@ -1,6 +1,6 @@
 namespace reg
 {
-	bool read(HKEY key, const char *path, const char *name, DWORD &val)
+	bool read(HKEY key, const char* path, const char* name, DWORD &val)
 	{
 		if(RegOpenKeyExA(key, path, 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
 			return false;
@@ -9,7 +9,7 @@ namespace reg
 		return t == ERROR_SUCCESS;
 	}
 
-	bool read(HKEY key, const char *path, const char *name, std::string &val)
+	bool read(HKEY key, const char* path, const char* name, std::string &val)
 	{
 		if(RegOpenKeyExA(key, path, 0, KEY_QUERY_VALUE, &key) != ERROR_SUCCESS)
 			return false;

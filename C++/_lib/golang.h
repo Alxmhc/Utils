@@ -13,7 +13,7 @@ typedef GoUint64 GoUint;
 
 class GoSlice
 {
-	void *data;
+	void* data;
 	GoInt len;
 	GoInt cap;
 public:

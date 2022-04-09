@@ -6,7 +6,7 @@ namespace hash
 		uint32_t tbl[256];
 		uint32_t crc;
 	public:
-		static void InitTable(uint32_t *tbl, const uint_fast32_t I)
+		static void InitTable(uint32_t* tbl, const uint_fast32_t I)
 		{
 			uint8_t n = 0;
 			do {

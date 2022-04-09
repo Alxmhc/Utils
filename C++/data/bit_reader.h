@@ -1,7 +1,7 @@
 class bitReader
 {
 protected:
-	byteReader *r;
+	byteReader* r;
 	uint_fast8_t o, b;
 
 	bitReader(byteReader &d) : r(&d), o(0) {}
@@ -56,9 +56,11 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
+		rs = 0;
+		if(n == 0)
+			return true;
 		if(n > (sizeof(T)<<3))
 			return false;
-		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -72,9 +74,11 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
+		rs = 0;
+		if(n == 0)
+			return true;
 		if(n > (sizeof(T)<<3))
 			return false;
-		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -110,9 +114,11 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
+		rs = 0;
+		if(n == 0)
+			return true;
 		if(n > (sizeof(T)<<3))
 			return false;
-		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -126,9 +132,11 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
+		rs = 0;
+		if(n == 0)
+			return true;
 		if(n > (sizeof(T)<<3))
 			return false;
-		rs = 0;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;

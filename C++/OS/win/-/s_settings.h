@@ -37,7 +37,7 @@ std::basic_string<C> get_computername()
 }
 
 template<typename C>
-bool Account_Sid(const PSID SID, std::basic_string<C> &Name, std::basic_string<C> &Domain, PSID_NAME_USE u, const C *sysName = nullptr)
+bool Account_Sid(const PSID SID, std::basic_string<C> &Name, std::basic_string<C> &Domain, PSID_NAME_USE u, const C* sysName = nullptr)
 {
 	DWORD szn = 0, szd = 0;
 	LookupAccountSid_(sysName, SID, nullptr, &szn, nullptr, &szd, u);
