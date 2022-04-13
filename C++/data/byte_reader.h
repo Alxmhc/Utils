@@ -20,6 +20,10 @@ public:
 	{
 		return pos;
 	}
+	size_t get_rsize() const
+	{
+		return size - pos;
+	}
 	virtual void set_pos(size_t) = 0;
 	virtual bool skip(size_t) = 0;
 

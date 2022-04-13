@@ -20,7 +20,7 @@ namespace fl_pr
 		bool getData(std::vector<uint8_t> &data)
 		{
 			br.set_pos(12);
-			if( !br.readN(data, br.get_size() - 12) )
+			if( !br.readN(data, br.get_rsize()) )
 				return false;
 			return true;
 		}
