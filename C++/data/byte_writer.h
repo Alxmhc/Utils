@@ -87,8 +87,11 @@ public:
 	{
 		if(n + offset < SZ)
 		{
-			std::copy_n(v, n, buf + offset);
-			offset += n;
+			if(n != 0)
+			{
+				std::copy_n(v, n, buf + offset);
+				offset += n;
+			}
 			return;
 		}
 		size_t part = 0;

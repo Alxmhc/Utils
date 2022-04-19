@@ -2,26 +2,52 @@ namespace fl_pr
 {
 	class F_zip
 	{
-		struct inf
+		br_fstream br;
+
+		enum
+		{
+			eNO       =  0,
+			eZIP      =  1,
+			eAES128   =  2,
+			eAES192   =  3,
+			eAES256   =  4
+		};
+		enum
+		{
+			cNO        =   0,
+			cDeflate   =   8,
+			cDeflate64 =   9,
+			cBZIP2     =  12,
+			cLZMA      =  14,
+			cWavPack   =  97,
+			cPPMd      =  98
+		};
+
+		struct infF
 		{
 			size_t data_pos;
 			size_t data_size;
+			std::string name;
 
-			std::string fname;
 			uint_fast32_t fsize;
-			bool isDir;
 			uint8_t crc32[4];
 
 			uint_fast16_t method;
-			uint_fast8_t encryption;
+			uint_fast8_t  encryption;
 		};
+		std::vector<infF> infFs;
 
-		br_fstream br;
-		std::vector<inf> f_inf;
 		std::vector<uint8_t> psw;
 
-		bool read_inf(inf &r)
+		bool read_inf(infF &r)
 		{
+			{
+				uint8_t hdr[4];
+				if(!br.readN(hdr, 4))
+					return false;
+				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
+					return false;
+			}
 			uint8_t h[26];
 			if(!br.readN(h, 26))
 				return false;
@@ -32,9 +58,8 @@ namespace fl_pr
 			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
 			const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			if( !br.readN(r.fname, szfn) )
+			if( !br.readN(r.name, szfn) )
 				return false;
-			r.isDir = (r.fname[r.fname.length() - 1] == '/');
 
 			const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
@@ -51,6 +76,8 @@ namespace fl_pr
 				}
 			}
 			r.data_pos = br.get_pos();
+			if( !br.skip(r.data_size) )
+				return false;
 			return true;
 		}
 
@@ -148,61 +175,39 @@ namespace fl_pr
 			return true;
 		}
 
-		enum
+		void getData(size_t n, std::vector<uint8_t> &data)
 		{
-			eNO       =  0,
-			eZIP      =  1,
-			eAES128   =  2,
-			eAES192   =  3,
-			eAES256   =  4
-		};
-		enum
-		{
-			cNO        =   0,
-			cDeflate   =   8,
-			cDeflate64 =   9,
-			cBZIP2     =  12,
-			cLZMA      =  14,
-			cWavPack   =  97,
-			cPPMd      =  98
-		};
+			br.set_pos(infFs[n].data_pos);
+			br.readN(data, infFs[n].data_size);
+		}
 	public:
 		bool open(const char* fl)
 		{
-			f_inf.clear();
+			infFs.clear();
 			if( !br.open(fl) )
 				return false;
 			for(;;)
 			{
-				uint8_t hdr[4];
-				if(!br.readN(hdr, 4))
+				infF r;
+				if( !read_inf(r) )
 					break;
-				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) == 0)
-				{
-					inf r;
-					if( !read_inf(r) )
-						break;
-					if( !br.skip(r.data_size) )
-						break;
-					f_inf.push_back(r);
-				}
-				else
-					break;
+				infFs.push_back(r);
 			}
 			return true;
 		}
 
 		size_t sz() const
 		{
-			return f_inf.size();
+			return infFs.size();
 		}
 
 		std::vector<std::string> names() const
 		{
-			std::vector<std::string> res(f_inf.size());
-			for(size_t i = 0; i < f_inf.size(); i++)
+			const size_t sz = infFs.size();
+			std::vector<std::string> res(sz);
+			for(size_t i = 0; i < sz; i++)
 			{
-				res[i] = f_inf[i].fname;
+				res[i] = infFs[i].name;
 			}
 			return res;
 		}
@@ -212,39 +217,45 @@ namespace fl_pr
 			psw.assign(passw, passw + psz);
 		}
 
-		bool getData(size_t n, std::vector<uint8_t> &data)
+		bool GetData(size_t n, std::vector<uint8_t> &data)
 		{
-			br.set_pos(f_inf[n].data_pos);
-			br.readN(data, f_inf[n].data_size);
-			switch(f_inf[n].encryption)
+			if(infFs[n].fsize == 0)
+			{
+				data.clear();
+				return true;
+			}
+			getData(n, data);
+			switch(infFs[n].encryption)
 			{
 			case eNO:
-				return true;
+				break;
 			case eZIP:
-				return decryptZIP(data);
+				if( !decryptZIP(data) )
+					return false;
+				break;
 			case eAES128:
-				return decryptAES(8, data);
+				if( !decryptAES(8, data) )
+					return false;
+				break;
 			case eAES192:
-				return decryptAES(12, data);
+				if( !decryptAES(12, data) )
+					return false;
+				break;
 			case eAES256:
-				return decryptAES(16, data);
+				if( !decryptAES(16, data) )
+					return false;
+				break;
 			default:
 				return false;
 			}
-		}
-
-		bool Extract(size_t n, std::vector<uint8_t> &data)
-		{
-			if( !getData(n, data) )
-				return false;
-			switch(f_inf[n].method)
+			switch(infFs[n].method)
 			{
 			case cNO:
 				return true;
 			case cDeflate:
 				{
 				std::vector<uint8_t> tmp;
-				tmp.reserve(f_inf[n].fsize);
+				tmp.reserve(infFs[n].fsize);
 				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
 					return false;
 				data = tmp;

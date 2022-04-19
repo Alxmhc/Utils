@@ -2,19 +2,19 @@ namespace fl_pr
 {
 	class F_gzip
 	{
+		br_fstream br;
+
 		struct inf
 		{
 			size_t data_pos;
 			size_t data_size;
+			std::string name;
 
-			std::string fname;
 			uint_fast32_t fsize;
 			uint8_t crc32[4];
 
 			std::string comment;
 		};
-
-		br_fstream br;
 		inf f_inf;
 
 		bool read_inf()
@@ -42,7 +42,7 @@ namespace fl_pr
 			}
 			if( (flg & 8) != 0 )
 			{
-				 if( !br.read_string(0, f_inf.fname) )
+				 if( !br.read_string(0, f_inf.name) )
 					 return false;
 			}
 			if( (flg & 16) != 0 )
@@ -67,6 +67,12 @@ namespace fl_pr
 			br.readC<4, endianness::LITTLE_ENDIAN>(f_inf.fsize);
 			return true;
 		}
+
+		void getData(std::vector<uint8_t> &data)
+		{
+			br.set_pos(f_inf.data_pos);
+			br.readN(data, f_inf.data_size);
+		}
 	public:
 		bool open(const char* fl)
 		{
@@ -77,24 +83,15 @@ namespace fl_pr
 			return true;
 		}
 
-		bool getData(std::vector<uint8_t> &data)
-		{
-			br.set_pos(f_inf.data_pos);
-			if( !br.readN(data, f_inf.data_size) )
-				return false;
-			return true;
-		}
-
 		std::string name() const
 		{
-			return f_inf.fname;
+			return f_inf.name;
 		}
 
-		bool Extract(std::vector<uint8_t> &data)
+		bool GetData(std::vector<uint8_t> &data)
 		{
 			std::vector<uint8_t> tmp;
-			if( !getData(tmp) )
-				return false;
+			getData(tmp);
 			data.reserve(f_inf.fsize);
 			if( !compr::deflate::Decode(tmp.data(), tmp.size(), data) )
 				return false;
