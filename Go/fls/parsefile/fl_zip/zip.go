@@ -33,12 +33,11 @@ const (
 )
 
 type inf struct {
-	Dpos  uint64
+	Dpos  int64
 	Dsize uint32
 
 	Fname string
 	Fsize uint32
-	IsDir bool
 	CRC32 [4]byte
 
 	Method     uint16
@@ -51,43 +50,57 @@ type Fl struct {
 	psw   []byte
 }
 
-func readInf(rs io.ReadSeeker) *inf {
-	hdr := make([]byte, 26)
-	_, err := rs.Read(hdr)
-	if err != nil {
-		return nil
-	}
-	var res inf
-	res.Encryption = hdr[2] & 1
-	res.Method = binary.LittleEndian.Uint16(hdr[4:6])
-	copy(res.CRC32[:], hdr[10:14])
-	res.Dsize = binary.LittleEndian.Uint32(hdr[14:18])
-	res.Fsize = binary.LittleEndian.Uint32(hdr[18:22])
-
-	szfn := binary.LittleEndian.Uint16(hdr[22:24])
-	fns := make([]byte, szfn)
-	_, err = rs.Read(fns)
-	if err != nil {
-		return nil
-	}
-	res.Fname = string(fns)
-	res.IsDir = (res.Fname[len(res.Fname)-1] == '/')
-
-	szex := binary.LittleEndian.Uint16(hdr[24:26])
-	if szex != 0 {
-		ext := make([]byte, szex)
-		_, err = rs.Read(ext)
-		if err != nil {
-			return nil
+func (s *Fl) readInf() {
+	sz, _ := s.rd.Seek(0, io.SeekEnd)
+	s.rd.Seek(0, io.SeekStart)
+	for {
+		h := make([]byte, 4)
+		n, _ := s.rd.Read(h)
+		if n != 4 {
+			break
 		}
-		if res.Method == 99 {
-			res.Encryption = ext[8] + 1
-			res.Method = binary.LittleEndian.Uint16(ext[9:11])
+		if !bytes.Equal(h, []byte{0x50, 0x4b, 0x03, 0x04}) {
+			break
 		}
+		hdr := make([]byte, 26)
+		n, _ = s.rd.Read(hdr)
+		if n != 26 {
+			break
+		}
+		var res inf
+		res.Encryption = hdr[2] & 1
+		res.Method = binary.LittleEndian.Uint16(hdr[4:6])
+		copy(res.CRC32[:], hdr[10:14])
+		res.Dsize = binary.LittleEndian.Uint32(hdr[14:18])
+		res.Fsize = binary.LittleEndian.Uint32(hdr[18:22])
+
+		szfn := binary.LittleEndian.Uint16(hdr[22:24])
+		fns := make([]byte, szfn)
+		n, _ = s.rd.Read(fns)
+		if uint16(n) != szfn {
+			break
+		}
+		res.Fname = string(fns)
+
+		szex := binary.LittleEndian.Uint16(hdr[24:26])
+		if szex != 0 {
+			ext := make([]byte, szex)
+			n, _ = s.rd.Read(ext)
+			if uint16(n) != szex {
+				break
+			}
+			if res.Method == 99 {
+				res.Encryption = ext[8] + 1
+				res.Method = binary.LittleEndian.Uint16(ext[9:11])
+			}
+		}
+		res.Dpos, _ = s.rd.Seek(0, io.SeekCurrent)
+		n64, _ := s.rd.Seek(int64(res.Dsize), io.SeekCurrent)
+		if sz < n64 {
+			break
+		}
+		s.F_inf = append(s.F_inf, res)
 	}
-	dpos, _ := rs.Seek(0, io.SeekCurrent)
-	res.Dpos = uint64(dpos)
-	return &res
 }
 
 func updKey(key []uint32, c byte) {
@@ -162,30 +175,13 @@ func (s *Fl) decryptAES(d []byte, saltLen int) []byte {
 	return data
 }
 
-func (s *Fl) Open(pth string) error {
+func (s *Fl) Open(pth string) {
 	var err error
 	s.rd, err = os.Open(pth)
 	if err != nil {
-		return err
+		return
 	}
-	hdr := make([]byte, 4)
-	for {
-		_, err = s.rd.Read(hdr)
-		if err != nil {
-			break
-		}
-		if bytes.Equal(hdr, []byte{0x50, 0x4b, 0x03, 0x04}) {
-			inf := readInf(s.rd)
-			if inf == nil {
-				break
-			}
-			s.F_inf = append(s.F_inf, *inf)
-			s.rd.Seek(int64(inf.Dsize), io.SeekCurrent)
-		} else {
-			break
-		}
-	}
-	return err
+	s.readInf()
 }
 
 func (s *Fl) Fnames() []string {
@@ -203,32 +199,33 @@ func (s *Fl) SetPsw(passw []byte) {
 
 func (s *Fl) getData(n uint) []byte {
 	data := make([]byte, s.F_inf[n].Dsize)
-	s.rd.Seek(int64(s.F_inf[n].Dpos), io.SeekStart)
+	s.rd.Seek(s.F_inf[n].Dpos, io.SeekStart)
 	s.rd.Read(data)
-	switch s.F_inf[n].Encryption {
-	case eNO:
-		return data
-	case eZIP:
-		return s.decryptZIP(data)
-	case eAES128:
-		return s.decryptAES(data, 8)
-	case eAES192:
-		return s.decryptAES(data, 12)
-	case eAES256:
-		return s.decryptAES(data, 16)
-	}
-	return nil
+	return data
 }
 
-func (s *Fl) Extract(n uint) []byte {
+func (s *Fl) GetData(n uint) []byte {
 	data := s.getData(n)
+	switch s.F_inf[n].Encryption {
+	case eNO:
+	case eZIP:
+		data = s.decryptZIP(data)
+	case eAES128:
+		data = s.decryptAES(data, 8)
+	case eAES192:
+		data = s.decryptAES(data, 12)
+	case eAES256:
+		data = s.decryptAES(data, 16)
+	default:
+		data = nil
+	}
 	switch s.F_inf[n].Method {
 	case cNO:
-		return data
 	case cDeflate:
 		rd := flate.NewReader(bytes.NewReader(data))
-		res, _ := ioutil.ReadAll(rd)
-		return res
+		data, _ = ioutil.ReadAll(rd)
+	default:
+		data = nil
 	}
-	return nil
+	return data
 }

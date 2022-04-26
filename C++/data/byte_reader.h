@@ -7,10 +7,6 @@ protected:
 
 	virtual uint8_t read1() = 0;
 	virtual void readAll(uint8_t*, const size_t) = 0;
-	void readAll(char* s, const size_t n)
-	{
-		readAll(reinterpret_cast<uint8_t*>(s), n);
-	}
 public:
 	size_t get_size() const
 	{
@@ -55,7 +51,8 @@ public:
 		if(pos + n > size)
 			return false;
 		s.resize(n);
-		readAll(const_cast<char*>(s.data()), n);
+		char* t = const_cast<char*>(s.data());
+		readAll(reinterpret_cast<uint8_t*>(t), n);
 		return true;
 	}
 

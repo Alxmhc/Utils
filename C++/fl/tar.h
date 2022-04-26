@@ -20,30 +20,34 @@ namespace fl_pr
 		};
 		std::vector<infF> infFs;
 
-		bool read_inf(infF &r)
+		void read_inf()
 		{
-			br.read_string('\0', r.name);
-			if(r.name.length() == 0)
-				return false;
-			br.skip(123 - r.name.length());
-			uint8_t sz[12];
-			if( !br.readN(sz, 12) )
-				return false;
-			r.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
-			if( !br.skip(20) )
-				return false;
-			if( !br.get(r.type) )
-				return false;
-			if( !br.skip(355) )
-				return false;
-			r.data_pos = br.get_pos();
-			if(r.data_size != 0)
+			for(;;)
 			{
-				const size_t bsize = ((r.data_size + 0x1ff)>>9)<<9;
-				if( !br.skip(bsize) )
-					return false;
+				infF r;
+				br.read_string('\0', r.name);
+				if(r.name.length() == 0)
+					break;
+				br.skip(123 - r.name.length());
+				uint8_t sz[12];
+				if( !br.readN(sz, 12) )
+					break;
+				r.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
+				if( !br.skip(20) )
+					break;
+				if( !br.get(r.type) )
+					break;
+				if( !br.skip(355) )
+					break;
+				r.data_pos = br.get_pos();
+				if(r.data_size != 0)
+				{
+					const size_t bsize = ((r.data_size + 0x1ff)>>9)<<9;
+					if( !br.skip(bsize) )
+						break;
+				}
+				infFs.push_back(r);
 			}
-			return true;
 		}
 
 		void getData(size_t n, std::vector<uint8_t> &data)
@@ -57,13 +61,7 @@ namespace fl_pr
 			infFs.clear();
 			if( !br.open(fl) )
 				return false;
-			for(;;)
-			{
-				infF r;
-				if( !read_inf(r) )
-					break;
-				infFs.push_back(r);
-			}
+			read_inf();
 			return true;
 		}
 

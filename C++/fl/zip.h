@@ -39,46 +39,48 @@ namespace fl_pr
 
 		std::vector<uint8_t> psw;
 
-		bool read_inf(infF &r)
+		void read_inf()
 		{
+			for(;;)
 			{
 				uint8_t hdr[4];
 				if(!br.readN(hdr, 4))
-					return false;
+					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
-					return false;
-			}
-			uint8_t h[26];
-			if(!br.readN(h, 26))
-				return false;
-			r.encryption = h[2] & 1;
-			r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
-			std::copy_n(h+10, 4, r.crc32);
-			r.data_size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
-			r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
+					break;
+				uint8_t h[26];
+				if(!br.readN(h, 26))
+					break;
+				infF r;
+				r.encryption = h[2] & 1;
+				r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
+				std::copy_n(h+10, 4, r.crc32);
+				r.data_size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
+				r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
-			const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			if( !br.readN(r.name, szfn) )
-				return false;
+				const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
+				if( !br.readN(r.name, szfn) )
+					break;
 
-			const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
-			if(szex != 0)
-			{
-				std::vector<uint8_t> ext;
-				if( !br.readN(ext, szex) )
-					return false;
-				if(r.method == 99)
+				const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
+				if(szex != 0)
 				{
-					if(szex < 11)
-						return false;
-					r.encryption = ext[8] + 1;
-					r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
+					std::vector<uint8_t> ext;
+					if( !br.readN(ext, szex) )
+						break;
+					if(r.method == 99)
+					{
+						if(szex < 11)
+							break;
+						r.encryption = ext[8] + 1;
+						r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
+					}
 				}
+				r.data_pos = br.get_pos();
+				if( !br.skip(r.data_size) )
+					break;
+				infFs.push_back(r);
 			}
-			r.data_pos = br.get_pos();
-			if( !br.skip(r.data_size) )
-				return false;
-			return true;
 		}
 
 		static void keyUpd(uint32_t* key, uint8_t c, const uint32_t* tbl)
@@ -186,13 +188,7 @@ namespace fl_pr
 			infFs.clear();
 			if( !br.open(fl) )
 				return false;
-			for(;;)
-			{
-				infF r;
-				if( !read_inf(r) )
-					break;
-				infFs.push_back(r);
-			}
+			read_inf();
 			return true;
 		}
 
