@@ -42,6 +42,7 @@ public:
 class bw_array : public byteWriter
 {
 	std::vector<uint8_t> &d;
+	void operator=(const bw_array&);
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 

@@ -2,7 +2,7 @@ namespace compr
 {
 	class lz4
 	{
-		static bool get_size(byteReader &br, size_t &sz)
+		static bool get_size(br_array &br, size_t &sz)
 		{
 			if(sz != 15)
 				return true;
