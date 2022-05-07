@@ -66,7 +66,7 @@ public:
 			uint_fast8_t c;
 			if( !get(c) )
 				return false;
-			rs |= c << i;
+			rs |= static_cast<T>(c) << i;
 		}
 		return true;
 	}
@@ -142,7 +142,7 @@ public:
 			uint_fast8_t c;
 			if( !get(c) )
 				return false;
-			rs |= c << i;
+			rs |= static_cast<T>(c) << i;
 		}
 		return true;
 	}

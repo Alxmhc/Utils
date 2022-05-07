@@ -168,10 +168,15 @@ namespace compr
 			const uint_fast8_t csz = 19;
 			static const uint_fast8_t co[csz] = {16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15};
 			uint_fast8_t clen[csz] = {};
-			for(uint_fast8_t i = 0; i < HCLEN; i++)
 			{
-				if( !brd.readBE(3, clen[co[i]]) )
+				uint_fast64_t h;
+				if( !brd.readBE(3*HCLEN, h) )
 					return false;
+				for(uint_fast8_t i = 0; h != 0; i++)
+				{
+					clen[co[i]] = h & 7;
+					h >>= 3;
+				}
 			}
 			huffmanTree<uint_fast8_t> codes(clen, csz);
 
