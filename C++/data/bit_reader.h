@@ -38,16 +38,15 @@ class bitReaderR : public bitReader
 public:
 	bool get(uint_fast8_t &c)
 	{
-		if(o != 0)
+		if(o == 0)
 		{
-			c = (b >> (7 - o)) & 1;
-			o = (o + 1) & 7;
-			return true;
+			if( !r->get(b) )
+				return false;
+			b = bitRevT[b];
 		}
-		if( !r->get(b) )
-			return false;
-		c = b >> 7;
-		o = 1;
+		c = b & 1;
+		b >>= 1;
+		o = (o + 1) & 7;
 		return true;
 	}
 
@@ -96,16 +95,14 @@ class bitReaderL : public bitReader
 public:
 	bool get(uint_fast8_t &c)
 	{
-		if(o != 0)
+		if(o == 0)
 		{
-			c = (b >> o) & 1;
-			o = (o + 1) & 7;
-			return true;
+			if( !r->get(b) )
+				return false;
 		}
-		if( !r->get(b) )
-			return false;
 		c = b & 1;
-		o = 1;
+		b >>= 1;
+		o = (o + 1) & 7;
 		return true;
 	}
 
