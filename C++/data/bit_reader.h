@@ -43,10 +43,11 @@ public:
 			if( !r->get(b) )
 				return false;
 			b = bitRevT[b];
+			o = 8;
 		}
+		o--;
 		c = b & 1;
 		b >>= 1;
-		o = (o + 1) & 7;
 		return true;
 	}
 
@@ -99,10 +100,11 @@ public:
 		{
 			if( !r->get(b) )
 				return false;
+			o = 8;
 		}
+		o--;
 		c = b & 1;
 		b >>= 1;
-		o = (o + 1) & 7;
 		return true;
 	}
 
