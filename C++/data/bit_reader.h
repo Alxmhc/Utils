@@ -45,8 +45,8 @@ public:
 			b = bitRevT[b];
 			o = 8;
 		}
-		o--;
 		c = b & 1;
+		o--;
 		b >>= 1;
 		return true;
 	}
@@ -56,11 +56,11 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
+		if(n > (sizeof(T)<<3))
+			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
-		if(n > (sizeof(T)<<3))
-			return false;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -74,11 +74,11 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
+		if(n > (sizeof(T)<<3))
+			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
-		if(n > (sizeof(T)<<3))
-			return false;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -102,8 +102,8 @@ public:
 				return false;
 			o = 8;
 		}
-		o--;
 		c = b & 1;
+		o--;
 		b >>= 1;
 		return true;
 	}
@@ -113,11 +113,11 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
+		if(n > (sizeof(T)<<3))
+			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
-		if(n > (sizeof(T)<<3))
-			return false;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
@@ -131,11 +131,11 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
+		if(n > (sizeof(T)<<3))
+			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
-		if(n > (sizeof(T)<<3))
-			return false;
 		for(uint_fast8_t i = 0; i < n; ++i)
 		{
 			uint_fast8_t c;
