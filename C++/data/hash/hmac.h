@@ -11,24 +11,24 @@ namespace hash
 		{
 			std::fill(ki, ki + H::block_size, 0x36);
 			std::fill(ko, ko + H::block_size, 0x5c);
-			if(ksize > H::block_size)
+			if(ksize <= H::block_size)
+			{
+				for(uint_fast8_t i = 0; i < ksize; ++i)
+				{
+					ki[i] ^= key[i];
+					ko[i] ^= key[i];
+				}
+			}
+			else
 			{
 				hash.Init();
 				hash.Update(key, ksize);
 				uint8_t tmp[H::hash_size];
 				hash.Final(tmp);
-				for(uint_fast16_t i = 0; i < H::hash_size; ++i)
+				for(uint_fast8_t i = 0; i < H::hash_size; ++i)
 				{
 					ki[i] ^= tmp[i];
 					ko[i] ^= tmp[i];
-				}
-			}
-			else
-			{
-				for(uint_fast16_t i = 0; i < ksize; ++i)
-				{
-					ki[i] ^= key[i];
-					ko[i] ^= key[i];
 				}
 			}
 		}

@@ -249,6 +249,7 @@ namespace fl_pr
 			case cNO:
 				return true;
 			case cDeflate:
+			case cDeflate64:
 				{
 				std::vector<uint8_t> tmp;
 				tmp.reserve(infFs[n].fsize);

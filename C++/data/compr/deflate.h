@@ -67,7 +67,7 @@ namespace compr
 			return true;
 		}
 
-		static bool decode(const huffmanTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd, std::vector<uint_fast8_t> &vcodes)
+		static bool decode(const binTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd, std::vector<uint_fast8_t> &vcodes)
 		{
 			vcodes.resize(ncode);
 			uint_fast16_t n = 0;
@@ -178,13 +178,13 @@ namespace compr
 					h >>= 3;
 				}
 			}
-			huffmanTree<uint_fast8_t> codes(clen, csz);
 
+			binTree<uint_fast8_t> codes = makeHTree(clen, csz);
 			std::vector<uint_fast8_t> vcodes;
 			if( !decode(codes, HLIT + HDIST, brd, vcodes) )
 				return false;
-			huffmanTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
-			huffmanTree<uint_fast8_t> hdist(vcodes.data() + HLIT, HDIST);
+			binTree<uint_fast16_t> hlit = makeHTree(vcodes.data(), HLIT);
+			binTree<uint_fast8_t> hdist = makeHTree(vcodes.data() + HLIT, HDIST);
 
 			for(;;)
 			{
