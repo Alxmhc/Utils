@@ -47,7 +47,7 @@ namespace hash
 				st[4] += wt[4];
 			}
 			
-			std::array<uint32_t, (bsize >> 2)> x;
+			std::array<uint32_t, 16> x;
 
 			void process(const uint8_t* v)
 			{
@@ -55,8 +55,8 @@ namespace hash
 				Transform();
 			}
 		public:
-			uint32_t st[hash_size >> 2];
-			uint64_t sz;
+			uint32_t st[5];
+			uint_fast64_t sz;
 
 			void Fin()
 			{
