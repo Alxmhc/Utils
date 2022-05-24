@@ -1,9 +1,9 @@
 class byteReader
 {
 protected:
-	size_t size;
 	size_t pos;
-	byteReader(size_t sz) : size(sz), pos(0) {}
+	size_t size;
+	byteReader() : pos(0) {}
 
 	virtual uint8_t read1() = 0;
 	virtual void readAll(uint8_t*, const size_t) = 0;
@@ -140,7 +140,10 @@ protected:
 		pos += n;
 	}
 public:
-	br_array(const uint8_t* v, size_t sz) : byteReader(sz), d(v) {}
+	br_array(const uint8_t* v, size_t sz) : d(v)
+	{
+		size = sz;
+	}
 
 	void set_pos(size_t p)
 	{

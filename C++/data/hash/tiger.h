@@ -61,6 +61,10 @@ namespace hash
 				st[2] = c + st[2];
 			}
 
+			static const uint64_t t1[256];
+			static const uint64_t t2[256];
+			static const uint64_t t3[256];
+			static const uint64_t t4[256];
 			std::array<uint64_t, 8> x;
 
 			void process(const uint8_t* v)
@@ -105,27 +109,19 @@ namespace hash
 			buf.st[2] = 0xf096a5b4c3b2e187;
 			buf.sz = 0;
 		}
-
-		void Final(uint8_t* r)
-		{
-			buf.Fin();
-			conv::unpack<8, endianness::LITTLE_ENDIAN>(buf.st, 3, r);
-		}
-
 		void Update(const uint8_t* v, const size_t n)
 		{
 			buf.writeN(v, n);
 			buf.sz += n;
 		}
-
-	protected:
-		static const uint64_t t1[256];
-		static const uint64_t t2[256];
-		static const uint64_t t3[256];
-		static const uint64_t t4[256];
+		void Final(uint8_t* r)
+		{
+			buf.Fin();
+			conv::unpack<8, endianness::LITTLE_ENDIAN>(buf.st, 3, r);
+		}
 	};
 
-	const uint64_t Tiger::t1[256] =
+	const uint64_t Tiger::tbf::t1[256] =
 	{
 		0x02aab17cf7e90c5e, 0xac424b03e243a8ec, 0x72cd5be30dd5fcd3, 0x6d019b93f6f97f3a,
 		0xcd9978ffd21f9193, 0x7573a1c9708029e2, 0xb164326b922a83c3, 0x46883eee04915870,
@@ -192,7 +188,7 @@ namespace hash
 		0x1f1a412891bc038e, 0xd6e2e71d82e56648, 0x74036c3a497732b7, 0x89b67ed96361f5ab,
 		0xffed95d8f1ea02a2, 0xe72b3bd61464d43d, 0xa6300f170bdc4820, 0xebc18760ed78a77a
 	};
-	const uint64_t Tiger::t2[256] =
+	const uint64_t Tiger::tbf::t2[256] =
 	{
 		0xe6a6be5a05a12138, 0xb5a122a5b4f87c98, 0x563c6089140b6990, 0x4c46cb2e391f5dd5,
 		0xd932addbc9b79434, 0x08ea70e42015aff5, 0xd765a6673e478cf1, 0xc4fb757eab278d99,
@@ -259,7 +255,7 @@ namespace hash
 		0x5dc9645506e55444, 0x50de418f317de40a, 0x388cb31a69dde259, 0x2db4a83455820a86,
 		0x9010a91e84711ae9, 0x4df7f0b7b1498371, 0xd62a2eabc0977179, 0x22fac097aa8d5c0e
 	};
-	const uint64_t Tiger::t3[256] =
+	const uint64_t Tiger::tbf::t3[256] =
 	{
 		0xf49fcc2ff1daf39b, 0x487fd5c66ff29281, 0xe8a30667fcdca83f, 0x2c9b4be3d2fcce63,
 		0xda3ff74b93fbbbc2, 0x2fa165d2fe70ba66, 0xa103e279970e93d4, 0xbecdec77b0e45e71,
@@ -326,7 +322,7 @@ namespace hash
 		0x6f31238275655982, 0x5ae488713e45cf05, 0xbf619f9954c21157, 0xeabac46040a8eae9,
 		0x454c6fe9f2c0c1cd, 0x419cf6496412691c, 0xd3dc3bef265b0f70, 0x6d0e60f5c3578a9e
 	};
-	const uint64_t Tiger::t4[256] =
+	const uint64_t Tiger::tbf::t4[256] =
 	{
 		0x5b0e608526323c55, 0x1a46c1a9fa1b59f5, 0xa9e245a17c4c8ffa, 0x65ca5159db2955d7,
 		0x05db0a76ce35afc2, 0x81eac77ea9113d45, 0x528ef88ab6ac0a0d, 0xa09ea253597be3ff,
