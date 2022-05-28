@@ -5,6 +5,11 @@ namespace hash
 	{
 		uint32_t tbl[256];
 		uint32_t crc;
+
+		void Init()
+		{
+			crc = 0xffffffff;
+		}
 	public:
 		static void InitTable(uint32_t* tbl, const uint_fast32_t I)
 		{
@@ -30,11 +35,7 @@ namespace hash
 		CRC32()
 		{
 			InitTable(tbl, 0xedb88320);
-		}
-
-		void Init()
-		{
-			crc = 0xffffffff;
+			Init();
 		}
 		void Update(const uint8_t* v, const size_t n)
 		{
@@ -46,6 +47,7 @@ namespace hash
 		void Final(uint8_t* r)
 		{
 			bconv<4, endianness::LITTLE_ENDIAN>::unpack(~crc,  r);
+			Init();
 		}
 	};
 }

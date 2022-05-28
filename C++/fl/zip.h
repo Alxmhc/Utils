@@ -159,7 +159,6 @@ namespace fl_pr
 			data = std::vector<uint8_t>(data.begin() + ssz + 2, data.end() - 10);
 
 			hash::HMAC<hash::SHA1> h(key.data() + ssz*2, ssz*2);
-			h.Init();
 			h.Update(data.data(), data.size());
 			uint8_t hs[hash::SHA1::hash_size];
 			h.Final(hs);
@@ -174,6 +173,56 @@ namespace fl_pr
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;
+			return true;
+		}
+
+		bool Decrypt(const infF &inf, std::vector<uint8_t> &data)
+		{
+			switch(inf.encryption)
+			{
+			case eNO:
+				break;
+			case eZIP:
+				if( !decryptZIP(data) )
+					return false;
+				break;
+			case eAES128:
+				if( !decryptAES(8, data) )
+					return false;
+				break;
+			case eAES192:
+				if( !decryptAES(12, data) )
+					return false;
+				break;
+			case eAES256:
+				if( !decryptAES(16, data) )
+					return false;
+				break;
+			default:
+				return false;
+			}
+			return true;
+		}
+
+		bool Decompress(const infF &inf, std::vector<uint8_t> &data)
+		{
+			switch(inf.method)
+			{
+			case cNO:
+				break;
+			case cDeflate:
+			case cDeflate64:
+				{
+				std::vector<uint8_t> tmp;
+				tmp.reserve(inf.fsize);
+				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
+					return false;
+				data = tmp;
+				break;
+				}
+			default:
+				return false;
+			}
 			return true;
 		}
 
@@ -221,46 +270,11 @@ namespace fl_pr
 				return true;
 			}
 			getData(n, data);
-			switch(infFs[n].encryption)
-			{
-			case eNO:
-				break;
-			case eZIP:
-				if( !decryptZIP(data) )
-					return false;
-				break;
-			case eAES128:
-				if( !decryptAES(8, data) )
-					return false;
-				break;
-			case eAES192:
-				if( !decryptAES(12, data) )
-					return false;
-				break;
-			case eAES256:
-				if( !decryptAES(16, data) )
-					return false;
-				break;
-			default:
+			if( !Decrypt(infFs[n], data) )
 				return false;
-			}
-			switch(infFs[n].method)
-			{
-			case cNO:
-				return true;
-			case cDeflate:
-			case cDeflate64:
-				{
-				std::vector<uint8_t> tmp;
-				tmp.reserve(infFs[n].fsize);
-				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
-					return false;
-				data = tmp;
-				return true;
-				}
-			default:
+			if( !Decompress(infFs[n], data) )
 				return false;
-			}
+			return true;
 		}
 	};
 }

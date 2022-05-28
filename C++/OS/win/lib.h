@@ -10,7 +10,7 @@ public:
 
 	bool load(const char* pth)
 	{
-		inst = LoadLibrary_(pth);
+		inst = LoadLibraryA(pth);
 		return inst != nullptr;
 	}
 	void free()

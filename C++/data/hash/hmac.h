@@ -6,6 +6,11 @@ namespace hash
 	{
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];
+
+		void Init()
+		{
+			hash.Update(ki, H::block_size);
+		}
 	public:
 		HMAC(const uint8_t* key, size_t ksize)
 		{
@@ -21,7 +26,6 @@ namespace hash
 			}
 			else
 			{
-				hash.Init();
 				hash.Update(key, ksize);
 				uint8_t tmp[H::hash_size];
 				hash.Final(tmp);
@@ -31,12 +35,7 @@ namespace hash
 					ko[i] ^= tmp[i];
 				}
 			}
-		}
-
-		void Init()
-		{
-			hash.Init();
-			hash.Update(ki, H::block_size);
+			Init();
 		}
 		void Update(const uint8_t* data, const size_t dsize)
 		{
@@ -45,10 +44,10 @@ namespace hash
 		void Final(uint8_t* res)
 		{
 			hash.Final(res);
-			hash.Init();
 			hash.Update(ko, H::block_size);
 			hash.Update(res, H::hash_size);
 			hash.Final(res);
+			Init();
 		}
 	};
 }

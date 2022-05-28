@@ -140,7 +140,7 @@ namespace hash
 			}
 		};
 		tbf buf;
-	public:
+
 		void Init()
 		{
 			buf.st[0] = 0x67452301;
@@ -148,6 +148,11 @@ namespace hash
 			buf.st[2] = 0x98badcfe;
 			buf.st[3] = 0x10325476;
 			buf.sz = 0;
+		}
+	public:
+		MD5()
+		{
+			Init();
 		}
 		void Update(const uint8_t* v, const size_t n)
 		{
@@ -158,6 +163,7 @@ namespace hash
 		{
 			buf.Fin();
 			conv::unpack<4, endianness::LITTLE_ENDIAN>(buf.st, 4, r);
+			Init();
 		}
 	};
 }

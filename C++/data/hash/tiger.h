@@ -101,13 +101,18 @@ namespace hash
 			}
 		};
 		tbf buf;
-	public:
+
 		void Init()
 		{
 			buf.st[0] = 0x0123456789abcdef;
 			buf.st[1] = 0xfedcba9876543210;
 			buf.st[2] = 0xf096a5b4c3b2e187;
 			buf.sz = 0;
+		}
+	public:
+		Tiger()
+		{
+			Init();
 		}
 		void Update(const uint8_t* v, const size_t n)
 		{
@@ -118,6 +123,7 @@ namespace hash
 		{
 			buf.Fin();
 			conv::unpack<8, endianness::LITTLE_ENDIAN>(buf.st, 3, r);
+			Init();
 		}
 	};
 

@@ -46,7 +46,7 @@ namespace hash
 				st[3] += wt[3];
 				st[4] += wt[4];
 			}
-			
+
 			std::array<uint32_t, 16> x;
 
 			void process(const uint8_t* v)
@@ -84,7 +84,7 @@ namespace hash
 			}
 		};
 		tbf buf;
-	public:
+
 		void Init()
 		{
 			buf.st[0] = 0x67452301;
@@ -93,6 +93,11 @@ namespace hash
 			buf.st[3] = 0x10325476;
 			buf.st[4] = 0xc3d2e1f0;
 			buf.sz = 0;
+		}
+	public:
+		SHA1()
+		{
+			Init();
 		}
 		void Update(const uint8_t* v, const size_t n)
 		{
@@ -103,6 +108,7 @@ namespace hash
 		{
 			buf.Fin();
 			conv::unpack<4, endianness::BIG_ENDIAN>(buf.st, 5, r);
+			Init();
 		}
 	};
 }

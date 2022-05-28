@@ -1,5 +1,3 @@
-#include <windows.h>
-
 template<typename S> struct WIN32_FIND_DATA_{};
 template<> struct WIN32_FIND_DATA_<char>{typedef WIN32_FIND_DATAA T;};
 template<> struct WIN32_FIND_DATA_<std::string>{typedef WIN32_FIND_DATAA T;};

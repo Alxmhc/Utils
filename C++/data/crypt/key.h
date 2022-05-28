@@ -9,7 +9,6 @@ public:
 
 	void Calc(const uint8_t* salt, size_t ssize, const uint8_t* nm, uint8_t* res)
 	{
-		h.Init();
 		h.Update(salt, ssize);
 		h.Update(nm, 4);
 		h.Final(res);
@@ -17,7 +16,6 @@ public:
 
 	void Calc(uint8_t* res)
 	{
-		h.Init();
 		h.Update(res, H::hash_size);
 		h.Final(res);
 	}
