@@ -23,7 +23,7 @@ class fl_s
 	{
 		S n = d;
 		n.push_back('*');
-		WIN32_FIND_DATA_<S>::T ffd;
+		typename WIN32_FIND_DATA_<S>::T ffd;
 		HANDLE hf = FindFirstFile_(n.c_str(), &ffd);
 		if (hf == INVALID_HANDLE_VALUE)
 			return;
