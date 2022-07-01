@@ -18,12 +18,17 @@ protected:
 public:
 	bool open(const char* fl)
 	{
+		fst.close();
 		fst.open(fl, std::ios_base::binary | std::ios_base::ate);
 		if(fst.fail())
 			return false;
 		size = static_cast<size_t>(fst.tellg());
 		fst.seekg(0, std::ios_base::beg);
 		return true;
+	}
+	void close()
+	{
+		fst.close();
 	}
 
 	void set_pos(size_t p)

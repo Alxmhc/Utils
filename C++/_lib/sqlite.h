@@ -18,10 +18,10 @@ public:
 		db = nullptr;
 	}
 
-	bool Exec(const char* rq)
+	bool Exec(const char* rq, int (*cb)(void*,int,char**,char**) = nullptr)
 	{
 		char* err = nullptr;
-		auto res = sqlite3_exec(db, rq, nullptr, 0, &err);
+		auto res = sqlite3_exec(db, rq, cb, nullptr, &err);
 		return res == SQLITE_OK;
 	}
 };

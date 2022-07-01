@@ -7,6 +7,12 @@ std::set<T> operator&(const std::set<T> &a, const std::set<T> &b)
 }
 
 template<typename T>
+void operator|=(std::set<T> &a, const std::set<T> &b)
+{
+	a.insert(b.cbegin(), b.cend());
+}
+
+template<typename T>
 std::set<T> operator|(const std::set<T> &a, const std::set<T> &b)
 {
 	std::set<T> res;

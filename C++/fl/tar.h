@@ -64,6 +64,10 @@ namespace fl_pr
 			read_inf();
 			return true;
 		}
+		void close()
+		{
+			br.close();
+		}
 
 		size_t sz() const
 		{

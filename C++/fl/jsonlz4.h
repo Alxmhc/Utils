@@ -40,6 +40,10 @@ namespace fl_pr
 				return false;
 			return true;
 		}
+		void close()
+		{
+			br.close();
+		}
 
 		bool GetData(std::vector<uint8_t> &data)
 		{

@@ -82,6 +82,10 @@ namespace fl_pr
 				return false;
 			return true;
 		}
+		void close()
+		{
+			br.close();
+		}
 
 		std::string name() const
 		{
