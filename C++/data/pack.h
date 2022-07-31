@@ -24,6 +24,60 @@ template<> struct UINT_<1>{typedef  uint_fast8_t uint_;};
 template<> struct UINT_<2>{typedef uint_fast16_t uint_;};
 template<> struct UINT_<4>{typedef uint_fast32_t uint_;};
 template<> struct UINT_<8>{typedef uint_fast64_t uint_;};
+template<> struct UINT_<16>
+{
+	class uint_
+	{
+		static const uint_fast8_t hsz = 64;
+		typedef uint64_t htype;
+		htype h, l;
+	public:
+		uint_(htype ln = 0, htype hn = 0) : h(ln), l(hn) {}
+
+		const uint_& operator=(const uint_ &c)
+		{
+			l = c.l;
+			h = c.h;
+			return *this;
+		}
+		const uint_& operator=(htype c)
+		{
+			l = c;
+			h = 0;
+			return *this;
+		}
+
+		void unpack(htype &cl, htype &ch)
+		{
+			cl = l;
+			ch = h;
+		}
+
+		const uint_& operator+=(htype c)
+		{
+			l += c;
+			if(l < c)
+			{
+				h++;
+			}
+			return *this;
+		}
+		const uint_& operator<<=(uint_fast8_t n)
+		{
+			if(n < hsz)
+			{
+				h = (h<<n)|(l>>(hsz-n));
+				l <<= n;
+			}
+			else
+			{
+				h = n < 2*hsz ? l<<(n-hsz) : 0;
+				l = 0;
+			}
+			return *this;
+		}
+	};
+};
 
 template <unsigned char sz, char E>
 struct bconv{};

@@ -56,6 +56,18 @@ namespace hash
 			uint32_t st[8];
 			uint_fast64_t sz;
 
+			void Init()
+			{
+				st[0] = 0x6a09e667;
+				st[1] = 0xbb67ae85;
+				st[2] = 0x3c6ef372;
+				st[3] = 0xa54ff53a;
+				st[4] = 0x510e527f;
+				st[5] = 0x9b05688c;
+				st[6] = 0x1f83d9ab;
+				st[7] = 0x5be0cd19;
+				sz = 0;
+			}
 			void Fin()
 			{
 				write(0x80);
@@ -82,23 +94,10 @@ namespace hash
 			}
 		};
 		tbf buf;
-
-		void Init()
-		{
-			buf.st[0] = 0x6a09e667;
-			buf.st[1] = 0xbb67ae85;
-			buf.st[2] = 0x3c6ef372;
-			buf.st[3] = 0xa54ff53a;
-			buf.st[4] = 0x510e527f;
-			buf.st[5] = 0x9b05688c;
-			buf.st[6] = 0x1f83d9ab;
-			buf.st[7] = 0x5be0cd19;
-			buf.sz = 0;
-		}
 	public:
 		SHA256()
 		{
-			Init();
+			buf.Init();
 		}
 		void Update(const uint8_t* v, const size_t n)
 		{
@@ -109,7 +108,7 @@ namespace hash
 		{
 			buf.Fin();
 			conv::unpack<4, endianness::BIG_ENDIAN>(buf.st, 8, r);
-			Init();
+			buf.Init();
 		}
 	};
 
