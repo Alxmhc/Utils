@@ -32,7 +32,7 @@ template<> struct UINT_<16>
 		typedef uint64_t htype;
 		htype h, l;
 	public:
-		uint_(htype ln = 0, htype hn = 0) : h(ln), l(hn) {}
+		uint_(htype ln = 0, htype hn = 0) : l(ln), h(hn) {}
 
 		const uint_& operator=(const uint_ &c)
 		{

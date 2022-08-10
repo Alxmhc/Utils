@@ -4,6 +4,25 @@ namespace hash
 	{
 		class tbf : public byteWriterBuf<block_size>
 		{
+			static uint32_t f(uint32_t a, uint32_t b)
+			{
+				uint32_t t = rotr(a, 7) ^ rotr(a, 18) ^ (a>>3);
+				t += rotr(b, 17) ^ rotr(b, 19) ^ (b>>10);
+				return t;
+			}
+			static uint32_t fn0(const uint32_t* wt)
+			{
+				uint32_t t = wt[7];
+				t += rotr(wt[4], 6) ^ rotr(wt[4], 11) ^ rotr(wt[4], 25);
+				t += (wt[4] & wt[5]) ^ (~wt[4] & wt[6]);
+				return t;
+			}
+			static uint32_t fn1(const uint32_t* wt)
+			{
+				uint32_t t = rotr(wt[0], 2) ^ rotr(wt[0], 13) ^ rotr(wt[0], 22);
+				t += (wt[0] & wt[2]) | (wt[3] & (wt[0]|wt[2]));
+				return t;
+			}
 			void Transform()
 			{
 				uint32_t wt[8];
@@ -14,17 +33,9 @@ namespace hash
 					const uint_fast8_t j = i & 0x0f;
 					if(i > 15)
 					{
-						x[j] += x[(j+9)&0x0f];
-						uint32_t tmp = x[(j+1)&0x0f];
-						x[j] += rotr(tmp, 7) ^ rotr(tmp, 18) ^ (tmp>>3);
-						tmp = x[(j+14)&0x0f];
-						x[j] += rotr(tmp, 17) ^ rotr(tmp, 19) ^ (tmp>>10);
+						x[j] += x[(j+9)&0x0f] + f(x[(j+1)&0x0f], x[(j+14)&0x0f]);
 					}
-					uint32_t t = x[j] + K[i] + wt[7];
-					t += rotr(wt[4], 6) ^ rotr(wt[4], 11) ^ rotr(wt[4], 25);
-					t += (wt[4] & wt[5]) ^ (~wt[4] & wt[6]);
-					uint32_t tmp = rotr(wt[0], 2) ^ rotr(wt[0], 13) ^ rotr(wt[0], 22);
-					tmp += (wt[0] & wt[1]) | (wt[2] & (wt[0]|wt[1]));
+					auto t = x[j] + K[i] + fn0(wt);
 					wt[7] = wt[6];
 					wt[6] = wt[5];
 					wt[5] = wt[4];
@@ -32,7 +43,7 @@ namespace hash
 					wt[3] = wt[2];
 					wt[2] = wt[1];
 					wt[1] = wt[0];
-					wt[0] = t + tmp;
+					wt[0] = t + fn1(wt);
 				}
 				st[0] += wt[0];
 				st[1] += wt[1];
