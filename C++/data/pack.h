@@ -62,6 +62,33 @@ template<> struct UINT_<16>
 			}
 			return *this;
 		}
+
+		const uint_& operator|=(const uint_& c)
+		{
+			l |= c.l;
+			h |= c.h;
+			return *this;
+		}
+		const uint_& operator^=(const uint_& c)
+		{
+			l ^= c.l;
+			h ^= c.h;
+			return *this;
+		}
+		const uint_& operator>>=(uint_fast8_t n)
+		{
+			if(n < hsz)
+			{
+				l = (l>>n)|(h<<(hsz-n));
+				h >>= n;
+			}
+			else
+			{
+				l = n < 2*hsz ? h>>(n-hsz) : 0;
+				h = 0;
+			}
+			return *this;
+		}
 		const uint_& operator<<=(uint_fast8_t n)
 		{
 			if(n < hsz)
@@ -75,6 +102,23 @@ template<> struct UINT_<16>
 				l = 0;
 			}
 			return *this;
+		}
+
+		uint_ operator|(const uint_& c)
+		{
+			uint_ r(*this);
+			return r |= c;
+		}
+
+		uint_ operator>>(uint_fast8_t n)
+		{
+			uint_ r(*this);
+			return r >>= n;
+		}
+		uint_ operator<<(uint_fast8_t n)
+		{
+			uint_ r(*this);
+			return r <<= n;
 		}
 	};
 };

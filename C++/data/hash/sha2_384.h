@@ -60,7 +60,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::BIG_ENDIAN>(v, block_size, x.data());
+				conv::pack<8, endianness::BIG_ENDIAN>(v, bsize, x.data());
 				Transform();
 			}
 		public:
