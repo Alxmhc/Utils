@@ -5,42 +5,9 @@ class AES
 	static const uint8_t Rcon[12];
 	static const uint8_t Sbox[256];
 
-	static std::vector<uint8_t> getKey(const uint8_t* k, uint_fast8_t ksz)
-	{
-		std::vector<uint8_t> key((ksz + 28) << 2);
-		std::copy_n(k, ksz, key.begin());
-		for(size_t i = ksz; i < key.size(); i += 4)
-		{
-			uint8_t t[4];
-			std::copy_n(key.data() + i - 4, 4, t);
-			const size_t o = i % ksz;
-			if(o == 0)
-			{
-				uint8_t x = t[0];
-				t[0] = Sbox[t[1]] ^ Rcon[i/ksz];
-				t[1] = Sbox[t[2]];
-				t[2] = Sbox[t[3]];
-				t[3] = Sbox[x];
-			}
-			else if((ksz > 24) && (o == 16))
-			{
-				t[0] = Sbox[t[0]];
-				t[1] = Sbox[t[1]];
-				t[2] = Sbox[t[2]];
-				t[3] = Sbox[t[3]];
-			}
-			key[i]   = t[0] ^ key[i-ksz];
-			key[i+1] = t[1] ^ key[i+1-ksz];
-			key[i+2] = t[2] ^ key[i+2-ksz];
-			key[i+3] = t[3] ^ key[i+3-ksz];
-		}
-		return key;
-	}
-
 	class en
 	{
-		const uint8_t* key;
-		const size_t ksz;
+		const std::vector<uint8_t>* key;
 
 		static const uint8_t Mul3[256];
 
@@ -66,27 +33,26 @@ class AES
 		}
 	public:
 		static const uint_fast8_t block_size = 16;
-		en(const uint8_t* k, size_t sz) : key(k), ksz(sz) {}
+		en(const std::vector<uint8_t> &k) : key(&k) {}
 
 		void process(uint8_t* r) const
 		{
-			std::transform(r, r + 16, key, r, [](uint8_t a, uint8_t b){return a ^ b;});
+			std::transform(r, r + 16, key->data(), r, [](uint8_t a, uint8_t b){return a ^ b;});
 			size_t i = 16;
-			for(; i < ksz - 16; i += 16)
+			for(; i < key->size() - 16; i += 16)
 			{
 				SubShift(r);
 				Mix(r);
-				std::transform(r, r + 16, key + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+				std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 			}
 			SubShift(r);
-			std::transform(r, r + 16, key + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+			std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 		}
 	};
 
 	class de
 	{
-		const uint8_t* key;
-		const size_t ksz;
+		const std::vector<uint8_t>* key;
 
 		static const uint8_t SboxI[256];
 		static const uint8_t Mul9[256];
@@ -117,21 +83,21 @@ class AES
 		}
 	public:
 		static const uint_fast8_t block_size = 16;
-		de(const uint8_t* k, size_t sz) : key(k), ksz(sz) {}
+		de(const std::vector<uint8_t> &k) : key(&k) {}
 
 		void process(uint8_t* r) const
 		{
-			size_t i = ksz - 16;
-			std::transform(r, r + 16, key + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+			size_t i = key->size() - 16;
+			std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 			i -= 16;
 			SubShiftI(r);
 			for(; i > 0; i -= 16)
 			{
-				std::transform(r, r + 16, key + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+				std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 				MixI(r);
 				SubShiftI(r);
 			}
-			std::transform(r, r + 16, key, r, [](uint8_t a, uint8_t b){return a ^ b;});
+			std::transform(r, r + 16, key->data(), r, [](uint8_t a, uint8_t b){return a ^ b;});
 		}
 	};
 public:
@@ -140,7 +106,36 @@ public:
 	en Enc;
 	de Dec;
 
-	AES(const uint8_t* k, uint_fast8_t ksz) : key(getKey(k, ksz)), Enc(key.data(), key.size()), Dec(key.data(), key.size()) {}
+	AES(const uint8_t* k, uint_fast8_t ksz) : Enc(key), Dec(key)
+	{
+		key.resize((ksz + 28) << 2);
+		std::copy_n(k, ksz, key.begin());
+		for(size_t i = ksz; i < key.size(); i += 4)
+		{
+			uint8_t t[4];
+			std::copy_n(key.data() + i - 4, 4, t);
+			const size_t o = i % ksz;
+			if(o == 0)
+			{
+				uint8_t x = t[0];
+				t[0] = Sbox[t[1]] ^ Rcon[i/ksz];
+				t[1] = Sbox[t[2]];
+				t[2] = Sbox[t[3]];
+				t[3] = Sbox[x];
+			}
+			else if((ksz > 24) && (o == 16))
+			{
+				t[0] = Sbox[t[0]];
+				t[1] = Sbox[t[1]];
+				t[2] = Sbox[t[2]];
+				t[3] = Sbox[t[3]];
+			}
+			key[i]   = t[0] ^ key[i-ksz];
+			key[i+1] = t[1] ^ key[i+1-ksz];
+			key[i+2] = t[2] ^ key[i+2-ksz];
+			key[i+3] = t[3] ^ key[i+3-ksz];
+		}
+	}
 };
 
 const uint8_t AES::Rcon[12] = {

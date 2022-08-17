@@ -99,7 +99,8 @@ namespace hash
 					x.fill(0);
 				}
 				sz <<= 3;
-				sz.unpack(x[15], x[14]);
+				x[14] = sz.getH();
+				x[15] = sz.getL();
 				Transform();
 				x.fill(0);
 			}
