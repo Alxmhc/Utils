@@ -1,28 +1,49 @@
+struct iv_ctr
+{
+	static void incr(uint8_t* v, const uint_fast8_t sz)
+	{
+		uint_fast8_t i = sz;
+		while(i != 0)
+		{
+			i--;
+			if(v[i] != 255)
+			{
+				v[i]++;
+				break;
+			}
+			v[i] = 0;
+		}
+	}
+};
+
 namespace CR_CTR
 {
-	template<class C, class IV>
-	class Encoder : public byteWriterBuf<C::block_size>
+	template<class CR, class INCR>
+	class Encoder : public byteWriterBuf<CR::block_size>
 	{
-		IV c;
-		const C* cr;
+		const CR* cr;
+		uint8_t iv[CR::block_size];
 		byteWriter* bw;
 
 		void upd(const uint8_t* v, size_t sz)
 		{
-			uint8_t tmp[C::block_size];
-			std::copy_n(c.data(), C::block_size, tmp);
+			uint8_t tmp[CR::block_size];
+			std::copy_n(iv, CR::block_size, tmp);
 			cr->Enc.process(tmp);
 			std::transform(v, v + sz, tmp, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
 			bw->writeN(tmp, sz);
-			c.incr();
+			INCR::incr(iv, CR::block_size);
 		}
 
 		void process(const uint8_t* v)
 		{
-			upd(v, C::block_size);
+			upd(v, CR::block_size);
 		}
 	public:
-		Encoder(const C &c, byteWriter &b) : cr(&c), bw(&b) {}
+		Encoder(const CR &c, const uint8_t* v, byteWriter &b) : cr(&c), bw(&b)
+		{
+			std::copy_n(v, CR::block_size, iv);
+		}
 
 		void Fin()
 		{
@@ -35,10 +56,10 @@ namespace CR_CTR
 		}
 	};
 
-	template<class C, class IV>
-	class Decoder : public Encoder<C, IV>
+	template<class CR, class INCR>
+	class Decoder : public Encoder<CR, INCR>
 	{
 	public:
-		Decoder(const C &c, byteWriter &b) : Encoder<C, IV>(c, b) {}
+		Decoder(const CR &c, const uint8_t* v, byteWriter &b) : Encoder<CR, INCR>(c, v, b) {}
 	};
 }

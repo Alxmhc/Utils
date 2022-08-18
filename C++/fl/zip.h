@@ -117,22 +117,11 @@ namespace fl_pr
 			return true;
 		}
 
-		class iv_aes
+		struct iv_zip
 		{
-			uint8_t v[16];
-		public:
-			iv_aes()
+			static void incr(uint8_t* v, const uint_fast8_t sz)
 			{
-				static const uint8_t iv[16] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-				std::copy(iv, iv + 16, v);
-			}
-			const uint8_t* data() const
-			{
-				return v;
-			}
-			void incr()
-			{
-				for(uint_fast8_t i = 0; i < 16; i++)
+				for(uint_fast8_t i = 0; i < sz; i++)
 				{
 					if(v[i] != 255)
 					{
@@ -169,7 +158,8 @@ namespace fl_pr
 			res.reserve(data.size());
 			bw_array bw(res);
 			AES a(key.data(), ssz*2);
-			CR_CTR::Decoder<AES, iv_aes> cr(a, bw);
+			const uint8_t iv[AES::block_size] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+			CR_CTR::Decoder<AES, iv_zip> cr(a, iv, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;

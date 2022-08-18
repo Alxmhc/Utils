@@ -1,3 +1,15 @@
+template <typename B>
+B rotl(B x, unsigned char d)
+{
+	return (x<<d) | (x>>((sizeof(B)<<3)-d));
+}
+
+template <typename B>
+B rotr(B x, unsigned char d)
+{
+	return (x>>d) | (x<<((sizeof(B)<<3)-d));
+}
+
 const long double pi = 3.1415926535897932384626;
 
 long double dot(long double a, long double b)

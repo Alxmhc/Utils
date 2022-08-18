@@ -57,24 +57,21 @@ class ARIA
 		Av(vo, v);
 		return bconv<16, endianness::BIG_ENDIAN>::pack(v);
 	}
-	static UINT_<16>::uint_ FE(const UINT_<16>::uint_ &c)
-	{
-		return A(SL(c));
-	}
 
 	static void Process(const std::vector<UINT_<16>::uint_> &key, uint8_t* r)
 	{
 		auto P = bconv<16, endianness::BIG_ENDIAN>::pack(r);
-		const uint_fast8_t n = key.size() - 2;
+		const uint_fast8_t n = static_cast<uint_fast8_t>(key.size() - 1);
 		uint_fast8_t i = 0;
 		for(;;)
 		{
 			P = FO(P ^ key[i++]);
+			P = SL(P ^ key[i++]);
 			if(i == n)
 				break;
-			P = FE(P ^ key[i++]);
+			P = A(P);
 		}
-		P = SL(P ^ key[i]) ^ key[i+1];
+		P ^= key[i];
 		bconv<16, endianness::BIG_ENDIAN>::unpack(P, r);
 	}
 
@@ -129,7 +126,7 @@ public:
 		UINT_<16>::uint_ W[4];
 		W[0] = KL;
 		W[1] = FO(W[0] ^ CK[(n+0)%3]) ^ KR;
-		W[2] = FE(W[1] ^ CK[(n+1)%3]) ^ W[0];
+		W[2] = A(SL(W[1] ^ CK[(n+1)%3])) ^ W[0];
 		W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
 
 		keyEnc.resize(nr + 1);
