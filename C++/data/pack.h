@@ -30,7 +30,7 @@ template<> struct UINT_<16>
 	{
 		static const uint_fast8_t hsz = 64;
 		typedef uint64_t htype;
-		htype h, l;
+		htype l, h;
 	public:
 		uint_(htype ln = 0, htype hn = 0) : l(ln), h(hn) {}
 
