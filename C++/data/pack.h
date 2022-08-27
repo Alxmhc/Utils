@@ -200,10 +200,20 @@ struct bconv<8, endianness::LITTLE_ENDIAN>
 		UINT_<8>::uint_ r = bconv<4, endianness::LITTLE_ENDIAN>::pack(a + 4);
 		return (r<<32) | bconv<4, endianness::LITTLE_ENDIAN>::pack(a);
 	}
+	static UINT_<8>::uint_ pack(const uint32_t* a)
+	{
+		UINT_<8>::uint_ r = a[1];
+		return (r<<32) | a[0];
+	}
 	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
 	{
 		bconv<4, endianness::LITTLE_ENDIAN>::unpack(c & 0xffffffff, a);
 		bconv<4, endianness::LITTLE_ENDIAN>::unpack((c >> 32) & 0xffffffff, a + 4);
+	}
+	static void unpack(UINT_<8>::uint_ c, uint32_t* a)
+	{
+		a[0] = c & 0xffffffff;
+		a[1] = (c >> 32) & 0xffffffff;
 	}
 };
 template<>
@@ -214,10 +224,20 @@ struct bconv<8, endianness::BIG_ENDIAN>
 		UINT_<8>::uint_ r = bconv<4, endianness::BIG_ENDIAN>::pack(a);
 		return (r<<32) | bconv<4, endianness::BIG_ENDIAN>::pack(a + 4);
 	}
+	static UINT_<8>::uint_ pack(const uint32_t* a)
+	{
+		UINT_<8>::uint_ r = a[0];
+		return (r<<32) | a[1];
+	}
 	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
 	{
 		bconv<4, endianness::BIG_ENDIAN>::unpack((c >> 32) & 0xffffffff, a);
 		bconv<4, endianness::BIG_ENDIAN>::unpack(c & 0xffffffff, a + 4);
+	}
+	static void unpack(UINT_<8>::uint_ c, uint32_t* a)
+	{
+		a[0] = (c >> 32) & 0xffffffff;
+		a[1] = c & 0xffffffff;
 	}
 };
 
