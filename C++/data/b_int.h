@@ -251,7 +251,7 @@ public:
 			n[i++] >>= c;
 			if(i == n.size())
 				break;
-			n[i-1] |= n[1] << (32 - c);
+			n[i-1] |= n[i] << (32 - c);
 		}
 		del0();
 		return *this;
@@ -309,6 +309,7 @@ public:
 
 	static b_int pw_m(b_int a, num b, b_int c)
 	{
+		a %= c;
 		b_int r(1);
 		while(b)
 		{

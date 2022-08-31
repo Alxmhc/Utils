@@ -22,6 +22,7 @@ public:
 		fst.open(fl, std::ios_base::binary | std::ios_base::ate);
 		if(fst.fail())
 			return false;
+		pos = 0;
 		size = static_cast<size_t>(fst.tellg());
 		fst.seekg(0, std::ios_base::beg);
 		return true;
