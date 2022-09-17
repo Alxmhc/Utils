@@ -108,7 +108,6 @@ public:
 	bool read_string(uint8_t c, std::string &s)
 	{
 		s.clear();
-		const auto p = pos;
 		while(pos < size)
 		{
 			const auto t = read1();
@@ -116,8 +115,6 @@ public:
 				return true;
 			s.push_back(t);
 		}
-		s.clear();
-		set_pos(p);
 		return false;
 	}
 };

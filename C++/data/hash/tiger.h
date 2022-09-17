@@ -86,9 +86,9 @@ namespace hash
 			void Fin()
 			{
 				write(0x01);
-				nul();
 				if(size() != 0)
 				{
+					fill_e(0);
 					conv::pack<8, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
 					if(bsize - size() < 8)
 					{
@@ -96,7 +96,6 @@ namespace hash
 						x.fill(0);
 					}
 					reset();
-					nul();
 				}
 				else
 				{

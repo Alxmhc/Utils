@@ -79,9 +79,16 @@ protected:
 		offset = 0;
 	}
 
-	void nul()
+	void fill_e(uint8_t c)
 	{
-		std::fill(buf + offset, buf + SZ, 0);
+		std::fill(buf + offset, buf + SZ, c);
+	}
+
+	void fill_ef(uint8_t c)
+	{
+		std::fill(buf + offset, buf + SZ, c);
+		process(buf);
+		offset = 0;
 	}
 public:
 	void writeN(const uint8_t* v, size_t n)

@@ -4,22 +4,22 @@ namespace hash
 	{
 		class tbf : public byteWriterBuf<block_size>
 		{
-			static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
+			static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint_fast8_t s, uint32_t ac)
 			{
 				uint32_t t = (b&c)|(~b&d);
 				a = rotl(a + t + x + ac, s) + b;
 			}
-			static void GG(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
+			static void GG(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint_fast8_t s, uint32_t ac)
 			{
 				uint32_t t = (b&d)|(c&~d);
 				a = rotl(a + t + x + ac, s) + b;
 			}
-			static void HH(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
+			static void HH(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint_fast8_t s, uint32_t ac)
 			{
 				uint32_t t = b^c^d;
 				a = rotl(a + t + x + ac, s) + b;
 			}
-			static void II(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint8_t s, uint32_t ac)
+			static void II(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint_fast8_t s, uint32_t ac)
 			{
 				uint32_t t = c^(b|~d);
 				a = rotl(a + t + x + ac, s) + b;
@@ -125,9 +125,9 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				nul();
 				if(size() != 0)
 				{
+					fill_e(0);
 					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
 					if(bsize - size() < 8)
 					{
@@ -135,7 +135,6 @@ namespace hash
 						x.fill(0);
 					}
 					reset();
-					nul();
 				}
 				else
 				{

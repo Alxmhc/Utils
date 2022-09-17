@@ -25,7 +25,7 @@ namespace fl_pr
 			for(;;)
 			{
 				infF r;
-				br.read_string('\0', r.name);
+				br.read_string(0, r.name);
 				if(r.name.length() == 0)
 					break;
 				br.skip(123 - r.name.length());
