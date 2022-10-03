@@ -157,9 +157,9 @@ namespace fl_pr
 			std::vector<uint8_t> res;
 			res.reserve(data.size());
 			bw_array bw(res);
-			AES a(key.data(), ssz*2);
-			const uint8_t iv[AES::block_size] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-			CR_CTR::Decoder<AES, iv_zip> cr(a, iv, bw);
+			crypt::AES a(key.data(), ssz*2);
+			const uint8_t iv[] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+			CR_CTR::Decoder<crypt::AES, iv_zip> cr(a, iv, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
 			data = res;
