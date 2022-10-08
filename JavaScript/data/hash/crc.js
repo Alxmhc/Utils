@@ -1,14 +1,13 @@
 //rfc1952
 class CRC32{
+	get hsize(){return 4;}
+	get bsize(){return 1;}
+	#Init(){
+		this.crc = 0xffffffff;
+	}
 	constructor(){
 		this.tbl = CRC32.getTable(0xedb88320);
-	}
-	get hsize(){
-		return 4;
-	}
-
-	Init(){
-		this.crc = 0xffffffff;
+		this.#Init();
 	}
 	Update(v){
 		for(let i = 0; i < v.length; i++){
@@ -16,9 +15,12 @@ class CRC32{
 		}
 	}
 	Final(){
-		return conv.unpack4LE(this.crc ^ 0xffffffff);
+		const res = conv.unpack4LE(this.crc ^ 0xffffffff);
+		this.#Init();
+		return res;
 	}
 }
+
 CRC32.getTable = function(I){
 	let tbl = new Uint32Array(256);
 	for(let n = 0; n < 256; n++){

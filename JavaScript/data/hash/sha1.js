@@ -1,14 +1,4 @@
 class SHA1{
-	constructor(){
-		this.b = new rbuf(64);
-		this.st = new Uint32Array(5);
-	}
-	get bsize(){
-		return 64;
-	}
-	get hsize(){
-		return 20;
-	}
 	process_block(buf){
 		const x = conv.pack4_be(buf);
 		this.Transform(x);
@@ -46,9 +36,16 @@ class SHA1{
 		this.st[4] += wt[4];
 	}
 
-	Init(){
+	get bsize(){return 64;}
+	get hsize(){return 20;}
+	#Init(){
 		this.st.set([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0]);
 		this.size = 0;
+	}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(5);
+		this.#Init();
 	}
 	Update(v){
 		this.size += v.length;
@@ -66,6 +63,8 @@ class SHA1{
 		x[14] = this.size >>> 29;
 		x[15] = this.size << 3;
 		this.Transform(x);
-		return conv.unpack4_be(this.st);
+		const res = conv.unpack4_be(this.st);
+		this.#Init();
+		return res;
 	}
 }

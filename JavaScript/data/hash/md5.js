@@ -1,14 +1,4 @@
 class MD5{
-	constructor(){
-		this.b = new rbuf(64);
-		this.st = new Uint32Array(4);
-	}
-	get bsize(){
-		return 64;
-	}
-	get hsize(){
-		return 16;
-	}
 	process_block(buf){
 		const x = conv.pack4_le(buf);
 		this.Transform(x);
@@ -90,9 +80,16 @@ class MD5{
 		this.st[3] += d;
 	}
 
-	Init(){
+	get bsize(){return 64;}
+	get hsize(){return 16;}
+	#Init(){
 		this.st.set([0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]);
 		this.size = 0;
+	}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(4);
+		this.#Init();
 	}
 	Update(v){
 		this.size += v.length;
@@ -110,9 +107,12 @@ class MD5{
 		x[14] = this.size << 3;
 		x[15] = this.size >>> 29;
 		this.Transform(x);
-		return conv.unpack4_le(this.st);
+		const res = conv.unpack4_le(this.st);
+		this.#Init();
+		return res;
 	}
 }
+
 MD5.FF = function(a,b,c,d,x,s,ac){
 	return rotl(a + ((b&c)|(~b&d)) + x + ac, s) + b;
 }

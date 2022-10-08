@@ -1,14 +1,4 @@
 class SHA256{
-	constructor(){
-		this.b = new rbuf(64);
-		this.st = new Uint32Array(8);
-	}
-	get bsize(){
-		return 64;
-	}
-	get hsize(){
-		return 32;
-	}
 	process_block(buf){
 		const x = conv.pack4_be(buf);
 		this.Transform(x);
@@ -39,9 +29,16 @@ class SHA256{
 		this.st[7] += wt[7];
 	}
 
-	Init(){
+	get bsize(){return 64;}
+	get hsize(){return 32;}
+	#Init(){
 		this.st.set([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
 		this.size = 0;
+	}
+	constructor(){
+		this.b = new rbuf(64);
+		this.st = new Uint32Array(8);
+		this.#Init();
 	}
 	Update(v){
 		this.size += v.length;
@@ -59,9 +56,12 @@ class SHA256{
 		x[14] = this.size >>> 29;
 		x[15] = this.size << 3;
 		this.Transform(x);
-		return conv.unpack4_be(this.st);
+		const res = conv.unpack4_be(this.st);
+		this.#Init();
+		return res;
 	}
 }
+
 SHA256.K = new Uint32Array([
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
