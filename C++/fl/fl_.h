@@ -64,3 +64,21 @@ public:
 		fst.flush();
 	}
 };
+
+namespace fl_pr
+{
+	template<class C>
+	class flr : public C
+	{
+		br_fstream f;
+	public:
+		bool open(const char* fl)
+		{
+			if( !f.open(fl) )
+				return false;
+			if( !read(&f) )
+				return false;
+			return true;
+		}
+	};
+}

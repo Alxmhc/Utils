@@ -2,7 +2,7 @@ namespace fl_pr
 {
 	class F_tar
 	{
-		br_fstream br;
+		byteReader* br;
 
 		enum
 		{
@@ -22,28 +22,29 @@ namespace fl_pr
 
 		void read_inf()
 		{
+			infFs.clear();
 			for(;;)
 			{
 				infF r;
-				br.read_string(0, r.name);
+				br->read_string(0, r.name);
 				if(r.name.length() == 0)
 					break;
-				br.skip(123 - r.name.length());
+				br->skip(123 - r.name.length());
 				uint8_t sz[12];
-				if( !br.readN(sz, 12) )
+				if( !br->readN(sz, 12) )
 					break;
 				r.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
-				if( !br.skip(20) )
+				if( !br->skip(20) )
 					break;
-				if( !br.get(r.type) )
+				if( !br->get(r.type) )
 					break;
-				if( !br.skip(355) )
+				if( !br->skip(355) )
 					break;
-				r.data_pos = br.get_pos();
+				r.data_pos = br->get_pos();
 				if(r.data_size != 0)
 				{
 					const size_t bsize = ((r.data_size + 0x1ff)>>9)<<9;
-					if( !br.skip(bsize) )
+					if( !br->skip(bsize) )
 						break;
 				}
 				infFs.push_back(r);
@@ -52,21 +53,15 @@ namespace fl_pr
 
 		void getData(size_t n, std::vector<uint8_t> &data)
 		{
-			br.set_pos(infFs[n].data_pos);
-			br.readN(data, infFs[n].data_size);
+			br->set_pos(infFs[n].data_pos);
+			br->readN(data, infFs[n].data_size);
 		}
 	public:
-		bool open(const char* fl)
+		bool read(byteReader* r)
 		{
-			infFs.clear();
-			if( !br.open(fl) )
-				return false;
+			br = r;
 			read_inf();
 			return true;
-		}
-		void close()
-		{
-			br.close();
 		}
 
 		size_t sz() const

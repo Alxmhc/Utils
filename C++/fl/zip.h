@@ -2,7 +2,7 @@ namespace fl_pr
 {
 	class F_zip
 	{
-		br_fstream br;
+		byteReader* br;
 
 		enum
 		{
@@ -41,15 +41,16 @@ namespace fl_pr
 
 		void read_inf()
 		{
+			infFs.clear();
 			for(;;)
 			{
 				uint8_t hdr[4];
-				if(!br.readN(hdr, 4))
+				if(!br->readN(hdr, 4))
 					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
 					break;
 				uint8_t h[26];
-				if(!br.readN(h, 26))
+				if(!br->readN(h, 26))
 					break;
 				infF r;
 				r.encryption = h[2] & 1;
@@ -59,14 +60,14 @@ namespace fl_pr
 				r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
 				const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
-				if( !br.readN(r.name, szfn) )
+				if( !br->readN(r.name, szfn) )
 					break;
 
 				const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
 				if(szex != 0)
 				{
 					std::vector<uint8_t> ext;
-					if( !br.readN(ext, szex) )
+					if( !br->readN(ext, szex) )
 						break;
 					if(r.method == 99)
 					{
@@ -76,8 +77,8 @@ namespace fl_pr
 						r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 					}
 				}
-				r.data_pos = br.get_pos();
-				if( !br.skip(r.data_size) )
+				r.data_pos = br->get_pos();
+				if( !br->skip(r.data_size) )
 					break;
 				infFs.push_back(r);
 			}
@@ -218,21 +219,15 @@ namespace fl_pr
 
 		void getData(size_t n, std::vector<uint8_t> &data)
 		{
-			br.set_pos(infFs[n].data_pos);
-			br.readN(data, infFs[n].data_size);
+			br->set_pos(infFs[n].data_pos);
+			br->readN(data, infFs[n].data_size);
 		}
 	public:
-		bool open(const char* fl)
+		bool read(byteReader* r)
 		{
-			infFs.clear();
-			if( !br.open(fl) )
-				return false;
+			br = r;
 			read_inf();
 			return true;
-		}
-		void close()
-		{
-			br.close();
 		}
 
 		size_t sz() const
