@@ -141,6 +141,12 @@ public:
 	{
 		size = sz;
 	}
+	void open(const uint8_t* v, size_t sz)
+	{
+		d = v;
+		pos = 0;
+		size = sz;
+	}
 
 	void set_pos(size_t p)
 	{

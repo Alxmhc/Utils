@@ -2,34 +2,14 @@ class b_int
 {
 	typedef uint32_t num;
 	typedef uint64_t num2;
-	
-	num n2[2];
-	void mul_p(num a, num b, num c = 0)
-	{
-		num2 t = a;
-		t *= b;
-		t += c;
-		bconv<8, endianness::LITTLE_ENDIAN>::unpack(t, n2);
-	}
+	static const uint_fast8_t BSZ = 32;
 
 	std::vector<num> n;
 
-	void del0()
-	{
-		const auto sz = n.size();
-		size_t i = sz;
-		while(i != 1 && n[i-1] == 0)
-		{
-			i--;
-		}
-		if(i != sz)
-		{
-			n.resize(i);
-		}
-	}
-
 	signed char compare(const b_int &a) const
 	{
+		if(this == &a)
+			return 0;
 		auto sz = n.size();
 		if(a.n.size() != sz)
 			return sz > a.n.size() ? 1 : -1;
@@ -43,8 +23,7 @@ class b_int
 
 	const b_int& operator-=(const b_int &c)
 	{
-		if(this == &c
-		|| compare(c) == 0)
+		if(this == &c)
 		{
 			*this = 0;
 			return *this;
@@ -77,11 +56,20 @@ class b_int
 			n[i]--;
 			i++;
 		}
-		del0();
+		const auto sz = n.size();
+		i = sz;
+		while(i != 1 && n[i-1] == 0)
+		{
+			i--;
+		}
+		if(i != sz)
+		{
+			n.resize(i);
+		}
 		return *this;
 	}
 public:
-	b_int(num c = 0) : n(1, c) {}
+	explicit b_int(num c = 0) : n(1, c) {}
 
 	const b_int& operator=(num a)
 	{
@@ -133,7 +121,19 @@ public:
 	}
 	bool operator!=(num a) const
 	{
-		return (n.size() != 1) || (n[0] != a);
+		return !operator==(a);
+	}
+	bool operator>(const b_int &c)
+	{
+		return compare(c) > 0;
+	}
+	bool operator<(const b_int &c)
+	{
+		return compare(c) < 0;
+	}
+	bool operator==(const b_int &c)
+	{
+		return compare(c) == 0;
 	}
 
 	const b_int& operator+=(const b_int &c)
@@ -147,7 +147,7 @@ public:
 			n.resize(csz);
 		}
 
-		std::size_t i = 0;
+		size_t i = 0;
 		bool d = false;
 		for(; i < csz; i++)
 		{
@@ -157,24 +157,19 @@ public:
 				d = (n[i] == 0);
 			}
 			n[i] += c.n[i];
-			d |= (n[i] < c.n[i]);
+			d = d || (n[i] < c.n[i]);
 		}
 
 		if(d)
 		{
-			const auto sz = n.size();
-			for(; i < sz; ++i)
+			for(; i < n.size(); ++i)
 			{
 				n[i]++;
 				if(n[i] != 0)
-					break;
+					return *this;
 			}
-			if(i == sz)
-			{
-				n.push_back(1);
-			}
+			n.push_back(1);
 		}
-
 		return *this;
 	}
 
@@ -197,7 +192,11 @@ public:
 		num d = 0;
 		for(const auto sz = n.size(); i < sz; i++)
 		{
-			mul_p(n[i], a, d);
+			num2 t = n[i];
+			t *= a;
+			t += d;
+			num n2[2];
+			bconv<8, endianness::LITTLE_ENDIAN>::unpack(t, n2);
 			n[i] = n2[0];
 			d = n2[1];
 		}
@@ -206,12 +205,6 @@ public:
 			n.push_back(d);
 		}
 		return *this;
-	}
-
-	b_int operator*(num a) const
-	{
-		b_int t(*this);
-		return t *= a;
 	}
 
 	const b_int& operator*=(const b_int &c)
@@ -240,36 +233,52 @@ public:
 
 	const b_int& operator>>=(size_t c)
 	{
-		auto k = c >> 5;
+		const auto k = c / BSZ;
 		if(k != 0)
 		{
+			if(k >= n.size())
+			{
+				*this = 0;
+				return *this;
+			}
 			n.erase(n.begin(), n.begin() + k);
-			c &= 0x1f;
+			c %= BSZ;
 		}
+		if(c == 0)
+			return *this;
+
+		const auto sz = n.size();
 		for(size_t i = 0;;)
 		{
-			n[i++] >>= c;
-			if(i == n.size())
+			n[i] >>= c;
+			i++;
+			if(i == sz)
 				break;
-			n[i-1] |= n[i] << (32 - c);
+			n[i-1] |= n[i] << (BSZ - c);
 		}
-		del0();
+		if(sz > 1 && n[sz-1] == 0)
+		{
+			n.resize(sz-1);
+		}
 		return *this;
 	}
 
 	const b_int& operator<<=(size_t c)
 	{
-		auto k = c >> 5;
+		const auto k = c / BSZ;
 		if(k != 0)
 		{
 			std::vector<num> tmp(k);
 			n.insert(n.begin(), tmp.cbegin(), tmp.cend());
-			c &= 0x1f;
+			c %= BSZ;
 		}
+		if(c == 0)
+			return *this;
+
 		num d = 0;
 		for(size_t i = 0; i < n.size(); i++)
 		{
-			const auto t = n[i] >> (32 - c);
+			const auto t = n[i] >> (BSZ - c);
 			n[i] = (n[i]<<c) | d;
 			d = t;
 		}
@@ -282,48 +291,54 @@ public:
 
 	const b_int& operator%=(const b_int &c)
 	{
-		if( compare(c) < 0 )
+		auto k = compare(c);
+		if( k <= 0 )
+		{
+			if(k == 0)
+			{
+				*this = 0;
+			}
 			return *this;
+		}
 
 		b_int tmp(c);
-		for(size_t i = c.n.size(); i < n.size() - 1; i++)
+
+		auto d = n.size() - c.n.size();
+		if(d != 0)
 		{
-			tmp.n.insert(tmp.n.begin(), 0);
+			if(n.back() < c.n.back())
+			{
+				d--;
+			}
+			if(d != 0)
+			{
+				std::vector<num> v(d);
+				tmp.n.insert(tmp.n.begin(), v.cbegin(), v.cend());
+			}
 		}
-		while(compare(tmp) > 0)
+
+		while(compare(tmp) >= 0)
 		{
 			tmp <<= 1;
 		}
+		tmp >>= 1;
 
-		while( c.compare(tmp) <= 0 )
+		for(;;)
 		{
-			if(compare(tmp) >= 0)
+			k = compare(tmp);
+			if(k >= 0)
 			{
+				if(k == 0)
+				{
+					*this = 0;
+					break;
+				}
 				operator-=(tmp);
 			}
+			if(tmp.compare(c) == 0)
+				break;
 			tmp >>= 1;
 		}
-
 		return *this;
-	}
-
-	static b_int pw_m(b_int a, num b, b_int c)
-	{
-		a %= c;
-		b_int r(1);
-		while(b)
-		{
-			if(b & 1)
-			{
-				r *= a;
-				r %= c;
-			}
-			a *= a;
-			a %= c;
-			if(a == 1)
-				break;
-			b >>= 1;
-		}
-		return r;
 	}
 };
