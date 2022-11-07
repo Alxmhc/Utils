@@ -302,26 +302,37 @@ public:
 		}
 
 		b_int tmp(c);
-
-		auto d = n.size() - c.n.size();
-		if(d != 0)
 		{
-			if(n.back() < c.n.back())
-			{
-				d--;
-			}
+			const auto d = n.size() - c.n.size();
 			if(d != 0)
 			{
 				std::vector<num> v(d);
 				tmp.n.insert(tmp.n.begin(), v.cbegin(), v.cend());
 			}
 		}
-
-		while(compare(tmp) >= 0)
 		{
-			tmp <<= 1;
+			int d = 0;
+			const auto nb = n.back();
+			num2 cb = tmp.n.back();
+			while(cb < nb)
+			{
+				cb <<= 1;
+				d++;
+			}
+			while(cb >= nb)
+			{
+				cb >>= 1;
+				d--;
+			}
+			if(d < 0)
+			{
+				tmp >>= (-d);
+			}
+			else if(d > 0)
+			{
+				tmp <<= d;
+			}
 		}
-		tmp >>= 1;
 
 		for(;;)
 		{
