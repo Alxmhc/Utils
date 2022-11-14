@@ -89,14 +89,14 @@ public:
 		return true;
 	}
 
-	bool find1(uint8_t c, size_t &p)
+	bool find(uint8_t c, size_t &p)
 	{
 		const auto b = pos;
 		while(pos < size)
 		{
 			if(read1() == c)
 			{
-				p = pos - 1;
+				p = pos - b - 1;
 				set_pos(b);
 				return true;
 			}
@@ -107,15 +107,12 @@ public:
 
 	bool read_string(uint8_t c, std::string &s)
 	{
-		s.clear();
-		while(pos < size)
-		{
-			const auto t = read1();
-			if(t == c)
-				return true;
-			s.push_back(t);
-		}
-		return false;
+		size_t p;
+		if( !find(c, p) )
+			return false;
+		readN(s, p);
+		skip(1);
+		return true;
 	}
 };
 

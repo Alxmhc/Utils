@@ -77,7 +77,7 @@ public:
 		return *this;
 	}
 
-	void fromB(const uint8_t *v, size_t k)
+	void fromB(const uint8_t* v, size_t k)
 	{
 		n = std::vector<num>((k+3)>>2);
 		size_t i = 0;
@@ -319,7 +319,7 @@ public:
 				cb <<= 1;
 				d++;
 			}
-			while(cb >= nb)
+			while(cb > nb)
 			{
 				cb >>= 1;
 				d--;
