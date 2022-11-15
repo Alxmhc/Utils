@@ -18,7 +18,6 @@ protected:
 public:
 	bool open(const char* fl)
 	{
-		fst.close();
 		fst.open(fl, std::ios_base::binary | std::ios_base::ate);
 		if(fst.fail())
 			return false;

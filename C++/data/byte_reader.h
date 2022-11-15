@@ -89,29 +89,68 @@ public:
 		return true;
 	}
 
-	bool find(uint8_t c, size_t &p)
+	size_t find(uint8_t c)
 	{
+		size_t res = size;
+
 		const auto b = pos;
 		while(pos < size)
 		{
 			if(read1() == c)
 			{
-				p = pos - b - 1;
-				set_pos(b);
-				return true;
+				res = pos - 1 - b;
+				break;
 			}
 		}
 		set_pos(b);
-		return false;
+		return res;
+	}
+
+	size_t find(const uint8_t* v, size_t k)
+	{
+		size_t res = size;
+		if(k > size)
+			return res;
+
+		const auto b = pos;
+		for(size_t i = pos; i < size - k; i++)
+		{
+			size_t j = 0;
+			for(; j < k; j++)
+			{
+				if(read1() != v[j])
+					break;
+			}
+			if(j == 0)
+				continue;
+			if(j == k)
+			{
+				res = pos - k - b;
+				break;
+			}
+			set_pos(i+1);
+		}
+		set_pos(b);
+		return res;
 	}
 
 	bool read_string(uint8_t c, std::string &s)
 	{
-		size_t p;
-		if( !find(c, p) )
+		const size_t p = find(c);
+		if(p == size)
 			return false;
 		readN(s, p);
 		skip(1);
+		return true;
+	}
+
+	bool read_string(const uint8_t* v, size_t k, std::string &s)
+	{
+		const size_t p = find(v, k);
+		if(p == size)
+			return false;
+		readN(s, p);
+		skip(k);
 		return true;
 	}
 };
