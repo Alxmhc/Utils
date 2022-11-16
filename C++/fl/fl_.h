@@ -33,8 +33,11 @@ public:
 
 	void set_pos(size_t p)
 	{
-		fst.seekg(p, std::ios_base::beg);
-		pos = p;
+		if(p != pos)
+		{
+			fst.seekg(p, std::ios_base::beg);
+			pos = p;
+		}
 	}
 	bool skip(size_t n)
 	{

@@ -1,6 +1,7 @@
 namespace endianness
 {
-	enum {
+	enum
+	{
 		UNKNOWN,
 		LITTLE_ENDIAN,
 		BIG_ENDIAN
