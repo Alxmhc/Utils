@@ -207,6 +207,12 @@ public:
 		return *this;
 	}
 
+	b_int operator*(num k) const
+	{
+		b_int r(*this);
+		return r *= k;
+	}
+
 	const b_int& operator*=(const b_int &c)
 	{
 		b_int res;

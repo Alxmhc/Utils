@@ -22,29 +22,36 @@ public:
 		return fl;
 	}
 
-	hdr_type get_hdr()
+	static hdr_type parse_hdr(const char* s, size_t sz)
 	{
-		br->set_pos(p1 + 2);
-		std::string h;
-		br->readN(h, p2 - p1);
+		const char* rn = "\r\n";
+		const char* d = ": ";
+
+		const char* e = s + sz;
 		hdr_type hdr;
-		size_t p = 0;
 		for(;;)
 		{
-			const auto p1 = h.find("\r\n", p);
-			std::string tmp = h.substr(p, p1 - p);
-			p = tmp.find(": ");
-			if(p == std::string::npos)
+			const auto p = std::search(s, e, rn, rn + 2);
+			const auto f = std::search(s, p, d, d + 2);
+			if(f == p)
 			{
 				hdr.clear();
 				break;
 			}
-			hdr[tmp.substr(0, p)].push_back( tmp.substr(p+2) );
-			p = p1 + 2;
-			if(p == h.length())
+			hdr[std::string(s, f)].push_back(std::string(f + 2, p));
+			s = p + 2;
+			if(s == e)
 				break;
 		}
 		return hdr;
+	}
+
+	hdr_type get_hdr()
+	{
+		std::string h;
+		br->set_pos(p1 + 2);
+		br->readN(h, p2 - p1);
+		return parse_hdr(h.c_str(), h.length());
 	}
 
 	std::vector<uint8_t> get_body()
