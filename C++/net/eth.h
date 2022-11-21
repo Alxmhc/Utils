@@ -100,7 +100,7 @@ namespace net
 			return true;
 		}
 
-		bool check_type(ftype t)
+		bool check_type(uint_fast8_t t)
 		{
 			return (flag & t) != 0;
 		}

@@ -38,7 +38,9 @@ public:
 				hdr.clear();
 				break;
 			}
-			hdr[std::string(s, f)].push_back(std::string(f + 2, p));
+			std::string k(s, f);
+			std::transform(k.begin(), k.end(), k.begin(), tolower);
+			hdr[k].push_back(std::string(f + 2, p));
 			s = p + 2;
 			if(s == e)
 				break;
