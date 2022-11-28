@@ -1,3 +1,29 @@
+namespace URL
+{
+	std::vector<uint8_t> Decode(const char* s, size_t sz)
+	{
+		std::vector<uint8_t> r;
+		r.reserve(sz);
+		char t[3] = {};
+		for(size_t i = 0; i < sz;)
+		{
+			if(s[i] != '%')
+			{
+				r.push_back(s[i]);
+				i++;
+				continue;
+			}
+			t[0] = s[i+1];
+			t[1] = s[i+2];
+			i += 3;
+			uint8_t c = static_cast<uint8_t>(strtoul(t, nullptr, 16));
+			r.push_back(c);
+		}
+		r.shrink_to_fit();
+		return r;
+	}
+}
+
 class HTTP_
 {
 	byteReader* br;
