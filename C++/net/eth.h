@@ -4,6 +4,7 @@ namespace net
 	{
 		static const uint_fast16_t IPv4 = 0x0800;
 		static const uint_fast16_t IPv6 = 0x86dd;
+		static const uint_fast16_t  ARP = 0x0806;
 
 		uint8_t  src[6];
 		uint8_t  dst[6];
@@ -23,8 +24,10 @@ namespace net
 
 	struct IPv4
 	{
-		static const uint_fast8_t TCP = 0x06;
-		static const uint_fast8_t UDP = 0x11;
+		static const uint_fast8_t  TCP = 0x06;
+		static const uint_fast8_t  UDP = 0x11;
+		static const uint_fast8_t ICMP = 0x01;
+		static const uint_fast8_t  HIP = 0x8b;
 
 		uint8_t src[4];
 		uint8_t dst[4];
@@ -49,7 +52,8 @@ namespace net
 
 	struct IPv6
 	{
-		static const uint_fast8_t UDP = 0x11;
+		static const uint_fast8_t    UDP = 0x11;
+		static const uint_fast8_t ICMPv6 = 0x3a;
 
 		uint8_t src[16];
 		uint8_t dst[16];
