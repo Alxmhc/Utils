@@ -3,23 +3,8 @@ class fl_s
 	static bool is_n(const std::string &s){return s == "." || s == "..";}
 	static bool is_n(const std::wstring &s){return s == L"." || s == L"..";}
 
-	template<typename C>
-	static std::vector<std::basic_string<C>> dir_ex(const C* d, bool (*filter)(const std::basic_string<C>&), int depth, bool is_dir)
-	{
-		std::basic_string<C> p(d);
-		std::replace(p.begin(), p.end(), '\\', '/');
-		if(p.back() != '/')
-		{
-			p.push_back('/');
-		}
-		std::vector<std::basic_string<C>> r;
-		_dir_ex(p, r, filter, depth, is_dir);
-		r.shrink_to_fit();
-		return r;
-	}
-
 	template<typename S>
-	static void _dir_ex(const S &d, std::vector<S> &r, bool (*filter)(const S&), int depth, bool is_dir)
+	static void dir_ex(const S &d, std::vector<S> &r, bool (*filter)(const S&), int depth, bool is_dir)
 	{
 		S n = d;
 		n.push_back('*');
@@ -41,7 +26,7 @@ class fl_s
 				if(depth != 0)
 				{
 					pth.push_back('/');
-					_dir_ex(pth, r, filter, depth - 1, is_dir);
+					dir_ex(pth, r, filter, depth - 1, is_dir);
 				}
 			}
 			else if(!is_dir && filter(pth))
@@ -56,12 +41,51 @@ public:
 	template<typename C>
 	static std::vector<std::basic_string<C>> dir_files(const C* d, bool (*filter)(const std::basic_string<C>&), int depth = -1)
 	{
-		return dir_ex(d, filter, depth, false);
+		std::basic_string<C> p(d);
+		if(p.back() != '/')
+		{
+			p.push_back('/');
+		}
+		std::vector<std::basic_string<C>> r;
+		dir_ex(p, r, filter, depth, false);
+		return r;
 	}
 
 	template<typename C>
 	static std::vector<std::basic_string<C>> dir_folders(const C* d, bool (*filter)(const std::basic_string<C>&), int depth = -1)
 	{
-		return dir_ex(d, filter, depth, true);
+		std::basic_string<C> p(d);
+		if(p.back() != '/')
+		{
+			p.push_back('/');
+		}
+		std::vector<std::basic_string<C>> r;
+		dir_ex(p, r, filter, depth, true);
+		return r;
 	}
 };
+
+bool create_dir(const char* pth)
+{
+	return CreateDirectoryA(pth, NULL) == TRUE;
+}
+bool create_dir(const wchar_t* pth)
+{
+	return CreateDirectoryW(pth, NULL) == TRUE;
+}
+
+template<typename C>
+bool create_dirs(const C* pth)
+{
+	std::basic_string<C> t(pth);
+	for(size_t i = 0; i < t.length(); i++)
+	{
+		if(t[i] =='/' || t[i] == '\\')
+		{
+			t[i] = 0;
+			create_dir(t.c_str());
+			t[i] = '/';
+		}
+	}
+	return create_dir(pth);
+}

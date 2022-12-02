@@ -31,15 +31,6 @@ BOOL DeleteFile_(LPCWSTR filename)
 	return DeleteFileW(filename);
 }
 
-BOOL CreateDirectory_(LPCSTR path, LPSECURITY_ATTRIBUTES attr)
-{
-	return CreateDirectoryA(path, attr);
-}
-BOOL CreateDirectory_(LPCWSTR path, LPSECURITY_ATTRIBUTES attr)
-{
-	return CreateDirectoryW(path, attr);
-}
-
 BOOL MoveFileEx_(LPCSTR old_path, LPCSTR new_path, DWORD flags)
 {
 	return MoveFileExA(old_path, new_path, flags);
