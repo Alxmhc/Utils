@@ -27,66 +27,74 @@ namespace URL
 class HTTP_
 {
 	byteReader* br;
-	size_t p1;
-	size_t p2;
+	
+	std::string fln;
+	std::map<std::string, std::vector<std::string>> hdr;
+	size_t dpos;
 public:
-	typedef std::map<std::string, std::vector<std::string>> hdr_type;
-
 	bool read(byteReader* b)
 	{
 		br = b;
-		p1 = br->find(bytes("\r\n"), 2);
-		p2 = br->find(bytes("\r\n\r\n"), 4);
+		hdr.clear();
+
+		dpos = br->find(bytes("\r\n\r\n"), 4);
+		if(dpos == br->get_size())
+			return false;
+		dpos += 4;
+
+		std::string h;
+		br->readN(h, dpos - 2);
+		size_t p = h.find("\r\n");
+		fln = h.substr(0, p);
+		p += 2;
+
+		while(p < h.length())
+		{
+			auto e = h.find("\r\n", p);
+			auto str = h.substr(p, e - p);
+			p = e + 2;
+
+			e = str.find(": ");
+			if(e == std::string::npos)
+				return false;
+			std::string k = str.substr(0, e);
+			std::transform(k.begin(), k.end(), k.begin(), tolower);
+			hdr[k].push_back(str.substr(e + 2));
+		}
 		return true;
 	}
 
-	std::string get_fl()
+	std::vector<uint8_t> GetData()
 	{
-		br->set_pos(0);
-		std::string fl;
-		br->readN(fl, p1);
-		return fl;
-	}
-
-	static hdr_type parse_hdr(const char* s, size_t sz)
-	{
-		const char* rn = "\r\n";
-		const char* d = ": ";
-
-		const char* e = s + sz;
-		hdr_type hdr;
-		for(;;)
-		{
-			const auto p = std::search(s, e, rn, rn + 2);
-			const auto f = std::search(s, p, d, d + 2);
-			if(f == p)
-			{
-				hdr.clear();
-				break;
-			}
-			std::string k(s, f);
-			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			hdr[k].push_back(std::string(f + 2, p));
-			s = p + 2;
-			if(s == e)
-				break;
-		}
-		return hdr;
-	}
-
-	hdr_type get_hdr()
-	{
-		std::string h;
-		br->set_pos(p1 + 2);
-		br->readN(h, p2 - p1);
-		return parse_hdr(h.c_str(), h.length());
-	}
-
-	std::vector<uint8_t> get_body()
-	{
-		br->set_pos(p2 + 4);
+		br->set_pos(dpos);
 		std::vector<uint8_t> res;
 		br->readN(res, br->get_rsize());
+
+		auto k = hdr.find("transfer-encoding");
+		if(k != hdr.end())
+		{
+			if(k->second[0] == "chunked")
+			{
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				decode::unchunk(res.data(), res.size(), bw);
+				res = tmp;
+			}
+		}
+		k = hdr.find("content-encoding");
+		if(k != hdr.end())
+		{
+			if(k->second[0] == "gzip")
+			{
+				br_array br(res.data(), res.size());
+				fl_pr::F_gzip gz;
+				gz.read(&br);
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				gz.GetData(tmp);
+				res = tmp;
+			}
+		}
 		return res;
 	}
 };
