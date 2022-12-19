@@ -24,51 +24,55 @@ namespace URL
 	}
 }
 
-class HTTP_
+class HTTP_ : public cont_1
 {
-	byteReader* br;
-	
 	std::string fln;
 	std::map<std::string, std::vector<std::string>> hdr;
-	size_t dpos;
 public:
 	bool read(byteReader* b)
 	{
 		br = b;
 		hdr.clear();
 
-		dpos = br->find(bytes("\r\n\r\n"), 4);
-		if(dpos == br->get_size())
+		data_pos = br->find(bytes("\r\n\r\n"), 4);
+		if(data_pos == br->get_size())
 			return false;
-		dpos += 4;
+		data_pos += 4;
+		data_size = br->get_size() - data_pos;
 
 		std::string h;
-		br->readN(h, dpos - 2);
-		size_t p = h.find("\r\n");
-		fln = h.substr(0, p);
-		p += 2;
+		br->readN(h, data_pos - 2);
+		const char* sb = h.c_str();
+		const char* se = sb + h.length();
 
-		while(p < h.length())
+		const char* rn = "\r\n";
 		{
-			auto e = h.find("\r\n", p);
-			auto str = h.substr(p, e - p);
-			p = e + 2;
+			const auto p = std::search(sb, se, rn, rn + 2);
+			fln.assign(sb, p);
+			sb = p + 2;
+		}
 
-			e = str.find(": ");
-			if(e == std::string::npos)
+		const char* d = ": ";
+		while(sb != se)
+		{
+			const auto p = std::search(sb, se, rn, rn + 2);
+			const auto f = std::search(sb, p, d, d + 2);
+			if(f == p)
+			{
+				hdr.clear();
 				return false;
-			std::string k = str.substr(0, e);
+			}
+			std::string k(sb, f);
 			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			hdr[k].push_back(str.substr(e + 2));
+			hdr[k].push_back(std::string(f + 2, p));
+			sb = p + 2;
 		}
 		return true;
 	}
 
-	std::vector<uint8_t> GetData()
+	bool GetData(std::vector<uint8_t> &data)
 	{
-		br->set_pos(dpos);
-		std::vector<uint8_t> res;
-		br->readN(res, br->get_rsize());
+		getData(data);
 
 		auto k = hdr.find("transfer-encoding");
 		if(k != hdr.end())
@@ -77,8 +81,9 @@ public:
 			{
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
-				decode::unchunk(res.data(), res.size(), bw);
-				res = tmp;
+				if( !decode::unchunk(data.data(), data.size(), bw) )
+					return false;
+				data = std::move(tmp);
 			}
 		}
 		k = hdr.find("content-encoding");
@@ -86,15 +91,15 @@ public:
 		{
 			if(k->second[0] == "gzip")
 			{
-				br_array br(res.data(), res.size());
+				br_array br(data.data(), data.size());
 				fl_pr::F_gzip gz;
 				gz.read(&br);
 				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				gz.GetData(tmp);
-				res = tmp;
+				if( !gz.GetData(tmp) )
+					return false;
+				data = std::move(tmp);
 			}
 		}
-		return res;
+		return true;
 	}
 };

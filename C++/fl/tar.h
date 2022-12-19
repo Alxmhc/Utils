@@ -1,9 +1,7 @@
 namespace fl_pr
 {
-	class F_tar
+	class F_tar : public cont_n
 	{
-		byteReader* br;
-
 		enum
 		{
 			tFile = 0,
@@ -12,72 +10,50 @@ namespace fl_pr
 
 		struct infF
 		{
-			size_t data_pos;
-			size_t data_size;
-			std::string name;
-
+			std::string fname;
 			uint8_t type;
 		};
 		std::vector<infF> infFs;
-
-		void read_inf()
+	public:
+		bool read(byteReader* r)
 		{
+			br = r;
+
 			infFs.clear();
 			for(;;)
 			{
 				infF r;
-				br->read_string(0, r.name);
-				if(r.name.length() == 0)
+				br->read_string(0, r.fname);
+				if(r.fname.length() == 0)
 					break;
-				br->skip(123 - r.name.length());
+				br->skip(123 - r.fname.length());
 				uint8_t sz[12];
 				if( !br->readN(sz, 12) )
 					break;
-				r.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
+				inf_1 inf;
+				inf.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
 				if( !br->skip(20) )
 					break;
 				if( !br->get(r.type) )
 					break;
 				if( !br->skip(355) )
 					break;
-				r.data_pos = br->get_pos();
-				if(r.data_size != 0)
+				inf.data_pos = br->get_pos();
+				if(inf.data_size != 0)
 				{
-					const size_t bsize = ((r.data_size + 0x1ff)>>9)<<9;
+					const size_t bsize = ((inf.data_size + 0x1ff)>>9)<<9;
 					if( !br->skip(bsize) )
 						break;
 				}
+				inf_n.push_back(inf);
 				infFs.push_back(r);
 			}
-		}
-
-		void getData(size_t n, std::vector<uint8_t> &data)
-		{
-			br->set_pos(infFs[n].data_pos);
-			br->readN(data, infFs[n].data_size);
-		}
-	public:
-		bool read(byteReader* r)
-		{
-			br = r;
-			read_inf();
 			return true;
 		}
 
-		size_t sz() const
+		std::string name(size_t n) const
 		{
-			return infFs.size();
-		}
-
-		std::vector<std::string> names() const
-		{
-			const size_t sz = infFs.size();
-			std::vector<std::string> res(sz);
-			for(size_t i = 0; i < sz; i++)
-			{
-				res[i] = infFs[i].name;
-			}
-			return res;
+			return infFs[n].fname;
 		}
 
 		bool GetData(size_t n, std::vector<uint8_t> &data)

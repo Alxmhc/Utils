@@ -1,42 +1,21 @@
 namespace fl_pr
 {
-	class F_jsonlz4
+	class F_jsonlz4 : public cont_1
 	{
-		byteReader* br;
-
-		struct inf
+		uint_fast32_t fsize;
+	public:
+		bool read(byteReader* r)
 		{
-			size_t data_pos;
-			size_t data_size;
+			br = r;
 
-			uint_fast32_t fsize;
-		};
-		inf f_inf;
-
-		bool read_inf()
-		{
 			uint8_t hdr[12];
 			if(!br->readN(hdr, 12))
 				return false;
 			if(std::memcmp(hdr, "\x6d\x6f\x7a\x4c\x7a\x34\x30\x00", 8) != 0)
 				return false;
-			f_inf.data_pos = 12;
-			f_inf.data_size = br->get_rsize();
-			f_inf.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(hdr + 8);
-			return true;
-		}
-
-		void getData(std::vector<uint8_t> &data)
-		{
-			br->set_pos(f_inf.data_pos);
-			br->readN(data, f_inf.data_size);
-		}
-	public:
-		bool read(byteReader* r)
-		{
-			br = r;
-			if( !read_inf() )
-				return false;
+			data_pos = 12;
+			data_size = br->get_rsize();
+			fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(hdr + 8);
 			return true;
 		}
 
@@ -44,7 +23,7 @@ namespace fl_pr
 		{
 			std::vector<uint8_t> tmp;
 			getData(tmp);
-			data.reserve(f_inf.fsize);
+			data.reserve(fsize);
 			if( !compr::lz4::Decode(tmp.data(), tmp.size(), data) )
 				return false;
 			return true;
