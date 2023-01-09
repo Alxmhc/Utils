@@ -1,5 +1,32 @@
 namespace fl_s
 {
+	bool create_dir(const char* pth)
+	{
+		return CreateDirectoryA(pth, NULL) == TRUE;
+	}
+	bool create_dir(const wchar_t* pth)
+	{
+		return CreateDirectoryW(pth, NULL) == TRUE;
+	}
+
+	bool del_file(const char* filename)
+	{
+		return DeleteFileA(filename) == TRUE;
+	}
+	bool del_file(const wchar_t* filename)
+	{
+		return DeleteFileW(filename) == TRUE;
+	}
+
+	bool del_dir(const char* dirname)
+	{
+		return RemoveDirectoryA(dirname) == TRUE;
+	}
+	bool del_dir(const wchar_t* dirname)
+	{
+		return RemoveDirectoryW(dirname) == TRUE;
+	}
+
 	class list
 	{
 		template<typename S> struct WIN32_FIND_DATA_{};
@@ -37,14 +64,8 @@ namespace fl_s
 			do {
 				if(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					if(ffd.cFileName[0] == '.')
-					{
-						if(ffd.cFileName[1] == 0)
-							continue;
-						if(ffd.cFileName[2] == 0
-						&& ffd.cFileName[1] == '.')
-							continue;
-					}
+					if( excl_dir(ffd.cFileName) )
+						continue;
 					pth = d + ffd.cFileName;
 					if(is_dir && filter(pth))
 					{
@@ -69,6 +90,16 @@ namespace fl_s
 		}
 	public:
 		template<typename C>
+		static bool excl_dir(const C* name)
+		{
+			if(name[0] != '.')
+				return false;
+			if(name[1] == 0)
+				return true;
+			return (name[2] == 0 && name[1] == '.');
+		}
+
+		template<typename C>
 		static std::vector<std::basic_string<C>> dir_files(const C* d, bool (*filter)(const std::basic_string<C>&), int depth = -1)
 		{
 			std::basic_string<C> p(d);
@@ -88,33 +119,6 @@ namespace fl_s
 			return r;
 		}
 	};
-
-	bool del_file(const char* filename)
-	{
-		return DeleteFileA(filename) == TRUE;
-	}
-	bool del_file(const wchar_t* filename)
-	{
-		return DeleteFileW(filename) == TRUE;
-	}
-
-	bool del_dir(const char* dirname)
-	{
-		return RemoveDirectoryA(dirname) == TRUE;
-	}
-	bool del_dir(const wchar_t* dirname)
-	{
-		return RemoveDirectoryW(dirname) == TRUE;
-	}
-
-	bool create_dir(const char* pth)
-	{
-		return CreateDirectoryA(pth, NULL) == TRUE;
-	}
-	bool create_dir(const wchar_t* pth)
-	{
-		return CreateDirectoryW(pth, NULL) == TRUE;
-	}
 
 	template<typename C>
 	bool create_dirs(const C* pth)

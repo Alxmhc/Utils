@@ -77,7 +77,7 @@ public:
 		auto k = hdr.find("transfer-encoding");
 		if(k != hdr.end())
 		{
-			if(k->second[0] == "chunked")
+			if(k->second.back() == "chunked")
 			{
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
@@ -89,11 +89,12 @@ public:
 		k = hdr.find("content-encoding");
 		if(k != hdr.end())
 		{
-			if(k->second[0] == "gzip")
+			if(k->second.back() == "gzip")
 			{
 				br_array br(data.data(), data.size());
 				fl_pr::F_gzip gz;
-				gz.read(&br);
+				if( !gz.read(&br) )
+					return false;
 				std::vector<uint8_t> tmp;
 				if( !gz.GetData(tmp) )
 					return false;

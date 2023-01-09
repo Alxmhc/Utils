@@ -47,12 +47,11 @@ namespace fl_pr
 				br->skip(2);
 			}
 
-			const auto st = br->get_pos();
+			data_pos = br->get_pos();
 			const auto ef = br->get_size() - 8;
-			if(st > ef)
+			if(data_pos > ef)
 				return false;
-			data_pos = st;
-			data_size = ef - st;
+			data_size = ef - data_pos;
 
 			br->set_pos(ef);
 			br->readN(crc32, 4);
