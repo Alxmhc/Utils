@@ -2,137 +2,234 @@ namespace fl_s
 {
 	bool create_dir(const char* pth)
 	{
-		return CreateDirectoryA(pth, NULL) == TRUE;
+		const auto inf = GetFileAttributesA(pth);
+		if(inf == INVALID_FILE_ATTRIBUTES)
+			return CreateDirectoryA(pth, nullptr) == TRUE;
+		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
 	}
 	bool create_dir(const wchar_t* pth)
 	{
-		return CreateDirectoryW(pth, NULL) == TRUE;
+		const auto inf = GetFileAttributesW(pth);
+		if(inf == INVALID_FILE_ATTRIBUTES)
+			return CreateDirectoryW(pth, nullptr) == TRUE;
+		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
 	}
 
-	bool del_file(const char* filename)
+	bool del_file(const char* pth)
 	{
-		return DeleteFileA(filename) == TRUE;
+		return DeleteFileA(pth) == TRUE;
 	}
-	bool del_file(const wchar_t* filename)
+	bool del_file(const wchar_t* pth)
 	{
-		return DeleteFileW(filename) == TRUE;
+		return DeleteFileW(pth) == TRUE;
 	}
 
-	bool del_dir(const char* dirname)
+	bool del_dir(const char* pth)
 	{
-		return RemoveDirectoryA(dirname) == TRUE;
+		return RemoveDirectoryA(pth) == TRUE;
 	}
-	bool del_dir(const wchar_t* dirname)
+	bool del_dir(const wchar_t* pth)
 	{
-		return RemoveDirectoryW(dirname) == TRUE;
+		return RemoveDirectoryW(pth) == TRUE;
 	}
+
+	template<typename S>
+	struct WIN32_FIND_DATA_{};
+
+	template<>
+	struct WIN32_FIND_DATA_<std::string>
+	{
+		WIN32_FIND_DATAA fd;
+		HANDLE FirstFile(LPCSTR filename)
+		{
+			return FindFirstFileA(filename, &fd);
+		}
+		bool NextFile(HANDLE hf)
+		{
+			return FindNextFileA(hf, &fd) == TRUE;
+		}
+	};
+
+	template<>
+	struct WIN32_FIND_DATA_<std::wstring>
+	{
+		WIN32_FIND_DATAW fd;
+		HANDLE FirstFile(LPCWSTR filename)
+		{
+			return FindFirstFileW(filename, &fd);
+		}
+		bool NextFile(HANDLE hf)
+		{
+			return FindNextFileW(hf, &fd) == TRUE;
+		}
+	};
 
 	class list
 	{
-		template<typename S> struct WIN32_FIND_DATA_{};
-		template<> struct WIN32_FIND_DATA_<char>{typedef WIN32_FIND_DATAA T;};
-		template<> struct WIN32_FIND_DATA_<std::string>{typedef WIN32_FIND_DATAA T;};
-		template<> struct WIN32_FIND_DATA_<wchar_t>{typedef WIN32_FIND_DATAW T;};
-		template<> struct WIN32_FIND_DATA_<std::wstring>{typedef WIN32_FIND_DATAW T;};
+		template<typename S>
+		class dInf
+		{
+			HANDLE hf;
+			WIN32_FIND_DATA_<S> ffd;
+			bool isFin;
+		public:
+			dInf(S pth)
+			{
+				pth.push_back('*');
+				hf = ffd.FirstFile(pth.c_str());
+				isFin = (hf == INVALID_HANDLE_VALUE);
+			}
+			~dInf()
+			{
+				FindClose(hf);
+			}
 
-		static HANDLE FindFirstFile_(LPCSTR filename, LPWIN32_FIND_DATAA ffd)
+			S nxt()
+			{
+				S res;
+				if(isFin)
+					return res;
+				res = ffd.fd.cFileName;
+				if(ffd.fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+				{
+					res.push_back('/');
+				}
+				isFin = !ffd.NextFile(hf);
+				return res;
+			}
+		};
+
+		template<typename S>
+		static bool excl_dir(const S &name)
 		{
-			return FindFirstFileA(filename, ffd);
-		}
-		static HANDLE FindFirstFile_(LPCWSTR filename, LPWIN32_FIND_DATAW ffd)
-		{
-			return FindFirstFileW(filename, ffd);
-		}
-		static bool FindNextFile_(HANDLE hff, LPWIN32_FIND_DATAA ffd)
-		{
-			return FindNextFileA(hff, ffd) == TRUE;
-		}
-		static bool FindNextFile_(HANDLE hff, LPWIN32_FIND_DATAW ffd)
-		{
-			return FindNextFileW(hff, ffd) == TRUE;
+			if(name[0] != '.')
+				return false;
+			if(name[1] == '/')
+				return true;
+			return (name[2] == '/' && name[1] == '.');
 		}
 
 		template<typename S>
 		static void dir_ex(const S &d, std::vector<S> &r, bool (*filter)(const S&), int depth, bool is_dir)
 		{
-			S pth = d;
-			pth.push_back('*');
-			typename WIN32_FIND_DATA_<S>::T ffd;
-			HANDLE hf = FindFirstFile_(pth.c_str(), &ffd);
-			if (hf == INVALID_HANDLE_VALUE)
-				return;
-			do {
-				if(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			dInf<S> cl(d);
+			for(;;)
+			{
+				const auto name = cl.nxt();
+				if(name.empty())
+					break;
+				if(name.back() == '/')
 				{
-					if( excl_dir(ffd.cFileName) )
+					if( excl_dir(name) )
 						continue;
-					pth = d + ffd.cFileName;
+					const auto pth = d + name;
 					if(is_dir && filter(pth))
 					{
 						r.push_back(pth);
 					}
 					if(depth != 0)
 					{
-						pth.push_back('/');
 						dir_ex(pth, r, filter, depth - 1, is_dir);
 					}
 				}
 				else if(!is_dir)
 				{
-					pth = d + ffd.cFileName;
+					const auto pth = d + name;
 					if(filter(pth))
 					{
 						r.push_back(pth);
 					}
 				}
-			} while ( FindNextFile_(hf, &ffd) );
-			FindClose(hf);
+			}
 		}
 	public:
-		template<typename C>
-		static bool excl_dir(const C* name)
+		template<typename S>
+		static std::vector<S> dir_files(const S &pth, bool (*filter)(const S&), int depth = -1)
 		{
-			if(name[0] != '.')
-				return false;
-			if(name[1] == 0)
-				return true;
-			return (name[2] == 0 && name[1] == '.');
-		}
-
-		template<typename C>
-		static std::vector<std::basic_string<C>> dir_files(const C* d, bool (*filter)(const std::basic_string<C>&), int depth = -1)
-		{
-			std::basic_string<C> p(d);
-			p.push_back('/');
-			std::vector<std::basic_string<C>> r;
-			dir_ex(p, r, filter, depth, false);
+			std::vector<S> r;
+			dir_ex(pth, r, filter, depth, false);
 			return r;
 		}
 
-		template<typename C>
-		static std::vector<std::basic_string<C>> dir_folders(const C* d, bool (*filter)(const std::basic_string<C>&), int depth = -1)
+		template<typename S>
+		static std::vector<S> dir_folders(const S &pth, bool (*filter)(const S&), int depth = -1)
 		{
-			std::basic_string<C> p(d);
-			p.push_back('/');
-			std::vector<std::basic_string<C>> r;
-			dir_ex(p, r, filter, depth, true);
+			std::vector<S> r;
+			dir_ex(pth, r, filter, depth, true);
 			return r;
+		}
+
+		template<typename S>
+		static void del_dirs(const S &pth)
+		{
+			dInf<S> cl(pth);
+			for(;;)
+			{
+				const auto name = cl.nxt();
+				if(name.empty())
+					break;
+				if(name.back() == '/')
+				{
+					if( excl_dir(name) )
+						continue;
+					del_dirs(pth + name);
+				}
+				else
+				{
+					del_file((pth + name).c_str());
+				}
+			}
+			del_dir(pth.c_str());
 		}
 	};
 
 	template<typename C>
+	static std::vector<std::basic_string<C>> dir_files(const C* pth, bool (*filter)(const std::basic_string<C>&), int depth = -1)
+	{
+		std::basic_string<C> p(pth);
+		if(p.back() != '/')
+		{
+			p.push_back('/');
+		}
+		return list::dir_files(p, filter, depth);
+	}
+
+	template<typename C>
+	static std::vector<std::basic_string<C>> dir_folders(const C* pth, bool (*filter)(const std::basic_string<C>&), int depth = -1)
+	{
+		std::basic_string<C> p(pth);
+		if(p.back() != '/')
+		{
+			p.push_back('/');
+		}
+		return list::dir_folders(p, filter, depth);
+	}
+
+	template<typename C>
 	bool create_dirs(const C* pth)
 	{
-		std::basic_string<C> t(pth);
-		for(size_t i = 0; i < t.length(); i++)
+		std::basic_string<C> p(pth);
+		for(size_t i = 0; i < p.length() - 1; i++)
 		{
-			if(t[i] == '/' || t[i] == '\\')
+			if(p[i] == '/' || p[i] == '\\')
 			{
-				t[i] = 0;
-				create_dir(t.c_str());
-				t[i] = '/';
+				p[i] = 0;
+				if( !create_dir(p.c_str()) )
+					return false;
+				p[i] = '/';
 			}
 		}
 		return create_dir(pth);
+	}
+
+	template<typename C>
+	void del_dirs(const C* pth)
+	{
+		std::basic_string<C> p(pth);
+		if(p.back() != '/')
+		{
+			p.push_back('/');
+		}
+		list::del_dirs(p);
 	}
 }
