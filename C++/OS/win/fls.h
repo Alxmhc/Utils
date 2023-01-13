@@ -98,69 +98,22 @@ namespace fl_s
 				return res;
 			}
 		};
-
-		template<typename S>
-		static bool excl_dir(const S &name)
-		{
-			if(name[0] != '.')
-				return false;
-			if(name[1] == '/')
-				return true;
-			return (name[2] == '/' && name[1] == '.');
-		}
-
-		template<typename S>
-		static void dir_ex(const S &d, std::vector<S> &r, bool (*filter)(const S&), int depth, bool is_dir)
-		{
-			dInf<S> cl(d);
-			for(;;)
-			{
-				const auto name = cl.nxt();
-				if(name.empty())
-					break;
-				if(name.back() == '/')
-				{
-					if( excl_dir(name) )
-						continue;
-					const auto pth = d + name;
-					if(is_dir && filter(pth))
-					{
-						r.push_back(pth);
-					}
-					if(depth != 0)
-					{
-						dir_ex(pth, r, filter, depth - 1, is_dir);
-					}
-				}
-				else if(!is_dir)
-				{
-					const auto pth = d + name;
-					if(filter(pth))
-					{
-						r.push_back(pth);
-					}
-				}
-			}
-		}
 	public:
 		template<typename S>
-		static std::vector<S> dir_files(const S &pth, bool (*filter)(const S&), int depth = -1)
+		static void del_a(const S &pth)
 		{
-			std::vector<S> r;
-			dir_ex(pth, r, filter, depth, false);
-			return r;
+			if(pth.back() == '/')
+			{
+				del_dir(pth.c_str());
+			}
+			else
+			{
+				del_file(pth.c_str());
+			}
 		}
 
-		template<typename S>
-		static std::vector<S> dir_folders(const S &pth, bool (*filter)(const S&), int depth = -1)
-		{
-			std::vector<S> r;
-			dir_ex(pth, r, filter, depth, true);
-			return r;
-		}
-
-		template<typename S>
-		static void del_dirs(const S &pth)
+		template<typename S, class T>
+		static void proc_dir(const S &pth, T &st, int depth = -1)
 		{
 			dInf<S> cl(pth);
 			for(;;)
@@ -168,41 +121,35 @@ namespace fl_s
 				const auto name = cl.nxt();
 				if(name.empty())
 					break;
+				const auto p = pth + name;
 				if(name.back() == '/')
 				{
-					if( excl_dir(name) )
-						continue;
-					del_dirs(pth + name);
+					if(name[0] == '.')
+					{
+						if(name[1] == '/')
+							continue;
+						if(name[1] == '.' && name[2] == '/')
+							continue;
+					}
+					if(depth != 0)
+					{
+						proc_dir(p, st, depth - 1);
+					}
 				}
-				else
-				{
-					del_file((pth + name).c_str());
-				}
+				st(p);
 			}
-			del_dir(pth.c_str());
 		}
 	};
 
-	template<typename C>
-	static std::vector<std::basic_string<C>> dir_files(const C* pth, bool (*filter)(const std::basic_string<C>&), int depth = -1)
+	template<typename C, class T>
+	static void proc_dir(const C* pth, T &st, int depth = -1)
 	{
 		std::basic_string<C> p(pth);
 		if(p.back() != '/')
 		{
 			p.push_back('/');
 		}
-		return list::dir_files(p, filter, depth);
-	}
-
-	template<typename C>
-	static std::vector<std::basic_string<C>> dir_folders(const C* pth, bool (*filter)(const std::basic_string<C>&), int depth = -1)
-	{
-		std::basic_string<C> p(pth);
-		if(p.back() != '/')
-		{
-			p.push_back('/');
-		}
-		return list::dir_folders(p, filter, depth);
+		list::proc_dir(p, st, depth);
 	}
 
 	template<typename C>
@@ -230,6 +177,7 @@ namespace fl_s
 		{
 			p.push_back('/');
 		}
-		list::del_dirs(p);
+		list::proc_dir(p, list::del_a<std::basic_string<C>>);
+		del_dir(pth);
 	}
 }
