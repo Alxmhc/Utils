@@ -27,7 +27,7 @@ namespace hash
 			static void round(uint64_t &a, uint64_t &b, uint64_t &c, uint64_t x, uint_fast8_t mul)
 			{
 				c ^= x;
-				a -= t1[(c >> 0) & 0xff] ^ t2[(c >> 16) & 0xff] ^ t3[(c >> 32) & 0xff] ^ t4[(c >> 48) & 0xff];
+				a -= t1[c & 0xff] ^ t2[(c >> 16) & 0xff] ^ t3[(c >> 32) & 0xff] ^ t4[(c >> 48) & 0xff];
 				b += t4[(c >> 8) & 0xff] ^ t3[(c >> 24) & 0xff] ^ t2[(c >> 40) & 0xff] ^ t1[(c >> 56) & 0xff];
 				b *= mul;
 			}

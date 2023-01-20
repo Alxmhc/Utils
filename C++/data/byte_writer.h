@@ -2,10 +2,6 @@ class byteWriter
 {
 public:
 	virtual void writeN(const uint8_t*, size_t) = 0;
-	void writeN(const char* s, size_t n)
-	{
-		writeN(reinterpret_cast<const uint8_t*>(s), n);
-	}
 
 	void write(uint8_t c)
 	{
@@ -13,7 +9,7 @@ public:
 	}
 	void write(const std::string &s)
 	{
-		writeN(s.c_str(), s.length());
+		writeN(reinterpret_cast<const uint8_t*>(s.c_str()), s.length());
 	}
 
 	template<unsigned char SZ, char E>
@@ -91,15 +87,23 @@ protected:
 		offset = 0;
 	}
 public:
+	void write(uint8_t c)
+	{
+		buf[offset] = c;
+		offset++;
+		if(offset == SZ)
+		{
+			process(buf);
+			offset = 0;
+		}
+	}
+
 	void writeN(const uint8_t* v, size_t n)
 	{
 		if(n + offset < SZ)
 		{
-			if(n != 0)
-			{
-				std::copy_n(v, n, buf + offset);
-				offset += n;
-			}
+			std::copy_n(v, n, buf + offset);
+			offset += n;
 			return;
 		}
 		size_t part = 0;

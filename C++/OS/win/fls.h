@@ -100,16 +100,13 @@ namespace fl_s
 		};
 	public:
 		template<typename S>
-		static void del_a(const S &pth)
+		static bool del_a(const S &pth)
 		{
 			if(pth.back() == '/')
 			{
-				del_dir(pth.c_str());
+				return del_dir(pth.c_str());
 			}
-			else
-			{
-				del_file(pth.c_str());
-			}
+			return del_file(pth.c_str());
 		}
 
 		template<typename S, class T>
