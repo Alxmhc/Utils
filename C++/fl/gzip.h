@@ -64,12 +64,11 @@ namespace fl_pr
 			return fname;
 		}
 
-		bool GetData(std::vector<uint8_t> &data)
+		bool GetData(byteWriter &bw)
 		{
-			std::vector<uint8_t> tmp;
-			getData(tmp);
-			data.reserve(fsize);
-			if( !compr::deflate::Decode(tmp.data(), tmp.size(), data) )
+			br->set_size(data_pos + data_size);
+			br->set_pos(data_pos);
+			if( !compr::deflate::Decode(*br, bw) )
 				return false;
 			return true;
 		}

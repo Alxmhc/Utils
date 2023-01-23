@@ -2,6 +2,8 @@ namespace compr
 {
 	class deflate
 	{
+		static const size_t wsz = 32768;
+
 		static bool fixedH_code(bitReaderL &brd, uint_fast16_t &fc)
 		{
 			if( !brd.readLE(7, fc) )
@@ -213,10 +215,9 @@ namespace compr
 			return false;
 		}
 	public:
-		static bool Decode(const uint8_t* v, size_t sz, std::vector<uint8_t> &out)
+		static bool Decode(byteReader &br, byteWriter &bw)
 		{
-			out.clear();
-			br_array br(v, sz);
+			std::vector<uint8_t> out;
 			bitReaderL brd(br);
 			for(;;)
 			{
@@ -244,7 +245,14 @@ namespace compr
 				}
 				if(isFin)
 					break;
+				if(out.size() > wsz)
+				{
+					bw.writeN(out.data(), out.size() - wsz);
+					out.erase(out.begin(), out.end() - wsz);
+				}
 			}
+			bw.writeN(out.data(), out.size());
+			bw.Fin();
 			return true;
 		}
 	};

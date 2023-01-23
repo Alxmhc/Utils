@@ -23,6 +23,7 @@ public:
 			return false;
 		pos = 0;
 		size = static_cast<size_t>(fst.tellg());
+		csize = size;
 		fst.seekg(0, std::ios_base::beg);
 		return true;
 	}
@@ -41,7 +42,7 @@ public:
 	}
 	bool skip(size_t n)
 	{
-		if (pos + n > size)
+		if (pos + n > csize)
 			return false;
 		fst.seekg(n, std::ios_base::cur);
 		pos += n;

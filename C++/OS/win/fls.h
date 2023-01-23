@@ -103,9 +103,7 @@ namespace fl_s
 		static bool del_a(const S &pth)
 		{
 			if(pth.back() == '/')
-			{
 				return del_dir(pth.c_str());
-			}
 			return del_file(pth.c_str());
 		}
 

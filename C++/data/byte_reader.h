@@ -2,15 +2,27 @@ class byteReader
 {
 protected:
 	size_t pos;
-	size_t size;
+	size_t size, csize;
 	byteReader() : pos(0) {}
 
 	virtual uint8_t read1() = 0;
 	virtual void readAll(uint8_t*, const size_t) = 0;
 public:
+	bool set_size(size_t sz)
+	{
+		if(sz > size)
+			return false;
+		csize = sz;
+		return true;
+	}
+	void reset_size()
+	{
+		csize = size;
+	}
+
 	size_t get_size() const
 	{
-		return size;
+		return csize;
 	}
 	size_t get_pos() const
 	{
@@ -18,14 +30,14 @@ public:
 	}
 	size_t get_rsize() const
 	{
-		return size - pos;
+		return csize - pos;
 	}
 	virtual void set_pos(size_t) = 0;
 	virtual bool skip(size_t) = 0;
 
 	bool get(uint8_t &c)
 	{
-		if(pos >= size)
+		if(pos >= csize)
 			return false;
 		c = read1();
 		return true;
@@ -33,14 +45,14 @@ public:
 
 	bool readN(uint8_t* d, size_t n)
 	{
-		if(pos + n > size)
+		if(pos + n > csize)
 			return false;
 		readAll(d, n);
 		return true;
 	}
 	bool readN(std::vector<uint8_t> &v, size_t n)
 	{
-		if(pos + n > size)
+		if(pos + n > csize)
 			return false;
 		v.resize(n);
 		readAll(v.data(), n);
@@ -48,7 +60,7 @@ public:
 	}
 	bool readN(std::string &s, size_t n)
 	{
-		if(pos + n > size)
+		if(pos + n > csize)
 			return false;
 		s.resize(n);
 		char* t = const_cast<char*>(s.data());
@@ -58,9 +70,9 @@ public:
 
 	size_t readMx(uint8_t* d, size_t n)
 	{
-		if(pos + n > size)
+		if(pos + n > csize)
 		{
-			n = size - pos;
+			n = csize - pos;
 		}
 		readAll(d, n);
 		return n;
@@ -68,7 +80,7 @@ public:
 
 	bool addN(std::vector<uint8_t> &v, size_t n)
 	{
-		if(pos + n > size)
+		if(pos + n > csize)
 			return false;
 		if(n != 0)
 		{
@@ -91,10 +103,10 @@ public:
 
 	size_t find(uint8_t c)
 	{
-		size_t res = size;
+		size_t res = csize;
 
 		const auto b = pos;
-		while(pos < size)
+		while(pos < csize)
 		{
 			if(read1() == c)
 			{
@@ -108,12 +120,12 @@ public:
 
 	size_t find(const uint8_t* v, size_t k)
 	{
-		size_t res = size;
-		if(k > size)
+		size_t res = csize;
+		if(k > csize)
 			return res;
 
 		const auto b = pos;
-		for(size_t i = pos; i < size - k; i++)
+		for(size_t i = pos; i < csize - k; i++)
 		{
 			size_t j = 0;
 			for(; j < k; j++)
@@ -137,7 +149,7 @@ public:
 	bool read_string(uint8_t c, std::string &s)
 	{
 		const size_t p = find(c);
-		if(p == size)
+		if(p == csize)
 			return false;
 		readN(s, p);
 		skip(1);
@@ -147,7 +159,7 @@ public:
 	bool read_string(const uint8_t* v, size_t k, std::string &s)
 	{
 		const size_t p = find(v, k);
-		if(p == size)
+		if(p == csize)
 			return false;
 		readN(s, p);
 		skip(k);
@@ -176,12 +188,14 @@ public:
 	br_array(const uint8_t* v, size_t sz) : d(v)
 	{
 		size = sz;
+		csize = size;
 	}
 	void open(const uint8_t* v, size_t sz)
 	{
 		d = v;
 		pos = 0;
 		size = sz;
+		csize = size;
 	}
 
 	void set_pos(size_t p)
@@ -190,7 +204,7 @@ public:
 	}
 	bool skip(size_t n)
 	{
-		if (pos + n > size)
+		if (pos + n > csize)
 			return false;
 		pos += n;
 		return true;

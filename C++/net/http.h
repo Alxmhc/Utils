@@ -96,7 +96,8 @@ public:
 				if( !gz.read(&br) )
 					return false;
 				std::vector<uint8_t> tmp;
-				if( !gz.GetData(tmp) )
+				bw_array bw(tmp);
+				if( !gz.GetData(bw) )
 					return false;
 				data = std::move(tmp);
 			}

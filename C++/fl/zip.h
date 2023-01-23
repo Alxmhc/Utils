@@ -146,7 +146,7 @@ namespace fl_pr
 			return true;
 		}
 
-		bool Decompress(const infF &inf, std::vector<uint8_t> &data)
+		static bool Decompress(const infF &inf, std::vector<uint8_t> &data)
 		{
 			switch(inf.method)
 			{
@@ -155,11 +155,12 @@ namespace fl_pr
 			case cDeflate:
 			case cDeflate64:
 				{
+				br_array b(data.data(), data.size());
 				std::vector<uint8_t> tmp;
-				tmp.reserve(inf.fsize);
-				if( !compr::deflate::Decode(data.data(), data.size(), tmp) )
+				bw_array bw(tmp);
+				if( !compr::deflate::Decode(b, bw) )
 					return false;
-				data = tmp;
+				data = std::move(tmp);
 				break;
 				}
 			default:
