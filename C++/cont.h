@@ -6,6 +6,12 @@ protected:
 	size_t data_pos;
 	size_t data_size;
 
+	void Init()
+	{
+		br->set_pos(data_pos);
+		br->set_size(data_pos + data_size);
+	}
+
 	void getData(std::vector<uint8_t> &data)
 	{
 		br->set_pos(data_pos);

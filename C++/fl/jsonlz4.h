@@ -19,12 +19,10 @@ namespace fl_pr
 			return true;
 		}
 
-		bool GetData(std::vector<uint8_t> &data)
+		bool GetData(byteWriter &bw)
 		{
-			std::vector<uint8_t> tmp;
-			getData(tmp);
-			data.reserve(fsize);
-			if( !compr::lz4::Decode(tmp.data(), tmp.size(), data) )
+			Init();
+			if( !compr::lz4::Decode(*br, bw) )
 				return false;
 			return true;
 		}

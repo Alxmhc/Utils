@@ -2,7 +2,7 @@ namespace compr
 {
 	class lz4
 	{
-		static bool get_size(br_array &br, size_t &sz)
+		static bool get_size(byteReader &br, size_t &sz)
 		{
 			if(sz != 15)
 				return true;
@@ -17,30 +17,31 @@ namespace compr
 			}
 		}
 	public:
-		static bool Decode(const uint8_t* v, size_t sz, std::vector<uint8_t> &out)
+		static bool Decode(byteReader &br, byteWriter &bw)
 		{
-			out.clear();
-			br_array br(v, sz);
+			std::vector<uint8_t> out;
 			for(;;)
 			{
 				uint8_t b;
 				if(!br.get(b))
-					break;
+					return false;
 				size_t size = b >> 4;
 				if(!get_size(br, size))
-					break;
+					return false;
 				if(!br.addN(out, size))
-					break;
+					return false;
 				uint_fast16_t offset;
 				if( !br.readC<2, endianness::LITTLE_ENDIAN>(offset) )
-					return true;
+					break;
 				size_t len = b & 0xf;
 				if(!get_size(br, len))
-					break;
+					return false;
 				if(!LZ77_repeat(len + 4, offset, out))
-					break;
+					return false;
 			}
-			return false;
+			bw.writeN(out.data(), out.size());
+			bw.Fin();
+			return true;
 		}
 	};
 }

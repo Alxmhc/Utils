@@ -66,8 +66,7 @@ namespace fl_pr
 
 		bool GetData(byteWriter &bw)
 		{
-			br->set_size(data_pos + data_size);
-			br->set_pos(data_pos);
+			Init();
 			if( !compr::deflate::Decode(*br, bw) )
 				return false;
 			return true;
