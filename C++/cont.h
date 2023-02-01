@@ -8,14 +8,8 @@ protected:
 
 	void Init()
 	{
-		br->set_pos(data_pos);
 		br->set_size(data_pos + data_size);
-	}
-
-	void getData(std::vector<uint8_t> &data)
-	{
 		br->set_pos(data_pos);
-		br->readN(data, data_size);
 	}
 };
 
@@ -31,10 +25,10 @@ protected:
 	};
 	std::vector<inf_1> inf_n;
 
-	void getData(size_t n, std::vector<uint8_t> &data)
+	void Init(size_t n)
 	{
+		br->set_size(inf_n[n].data_pos + inf_n[n].data_size);
 		br->set_pos(inf_n[n].data_pos);
-		br->readN(data, inf_n[n].data_size);
 	}
 public:
 	size_t sz() const
@@ -42,3 +36,11 @@ public:
 		return inf_n.size();
 	}
 };
+
+bool copy(byteReader &br, byteWriter &bw)
+{
+	std::vector<uint8_t> data;
+	br.readN(data, br.get_rsize());
+	bw.writeN(data.data(), data.size());
+	return true;
+}

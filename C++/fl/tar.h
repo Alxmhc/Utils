@@ -56,9 +56,10 @@ namespace fl_pr
 			return infFs[n].fname;
 		}
 
-		bool GetData(size_t n, std::vector<uint8_t> &data)
+		bool GetData(size_t n, byteWriter &bw)
 		{
-			getData(n, data);
+			Init(n);
+			copy(*br, bw);
 			return true;
 		}
 	};

@@ -1,3 +1,20 @@
+template<typename T>
+T GCD(T a, T b)
+{
+	if(b > a)
+	{
+		b %= a;
+	}
+	while (b != 0)
+	{
+		a %= b;
+		if(a == 0)
+			return b;
+		b %= a;
+	}
+	return a;
+}
+
 class b_int
 {
 	typedef uint32_t num;

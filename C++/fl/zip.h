@@ -114,7 +114,7 @@ namespace fl_pr
 			CR_CTR::Decoder<crypt::AES, iv_zip> cr(a, iv, bw);
 			cr.writeN(data.data(), data.size());
 			cr.Fin();
-			data = res;
+			data = std::move(res);
 			return true;
 		}
 
@@ -146,23 +146,18 @@ namespace fl_pr
 			return true;
 		}
 
-		static bool Decompress(const infF &inf, std::vector<uint8_t> &data)
+		static bool Decompress(const infF &inf, byteReader &br, byteWriter &bw)
 		{
 			switch(inf.method)
 			{
 			case cNO:
+				copy(br, bw);
 				break;
 			case cDeflate:
 			case cDeflate64:
-				{
-				br_array b(data.data(), data.size());
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !compr::deflate::Decode(b, bw) )
+				if( !compr::deflate::Decode(br, bw) )
 					return false;
-				data = std::move(tmp);
 				break;
-				}
 			default:
 				return false;
 			}
@@ -230,17 +225,30 @@ namespace fl_pr
 			psw.assign(passw, passw + psz);
 		}
 
-		bool GetData(size_t n, std::vector<uint8_t> &data)
+		bool GetData(size_t n, byteWriter &bw)
 		{
 			if(infFs[n].fsize == 0)
+				return true;
+			Init(n);
+			if(infFs[n].encryption == eNO)
 			{
-				data.clear();
+				if( !Decompress(infFs[n], *br, bw) )
+					return false;
 				return true;
 			}
-			getData(n, data);
+
+			std::vector<uint8_t> data;
+			br->readN(data, br->get_rsize());
 			if( !Decrypt(infFs[n], data) )
 				return false;
-			if( !Decompress(infFs[n], data) )
+
+			if(infFs[n].method == cNO)
+			{
+				bw.writeN(data.data(), data.size());
+				return true;
+			}
+			br_array b(data.data(), data.size());
+			if( !Decompress(infFs[n], b, bw) )
 				return false;
 			return true;
 		}

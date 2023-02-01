@@ -72,7 +72,8 @@ public:
 
 	bool GetData(std::vector<uint8_t> &data)
 	{
-		getData(data);
+		Init();
+		br->readN(data, br->get_rsize());
 
 		auto k = hdr.find("transfer-encoding");
 		if(k != hdr.end())
