@@ -7,7 +7,7 @@ public:
 	{
 		writeN(&c, 1);
 	}
-	void write(const std::string &s)
+	void writeS(const std::string &s)
 	{
 		writeN(reinterpret_cast<const uint8_t*>(s.c_str()), s.length());
 	}
