@@ -1,6 +1,8 @@
 #ifndef H_PCAP
 #define H_PCAP
 
+#include "../data/byte_reader.h"
+
 namespace fl_pr
 {
 	class F_pcap

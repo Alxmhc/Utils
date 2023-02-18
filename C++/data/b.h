@@ -1,6 +1,8 @@
 #ifndef H_B
 #define H_B
 
+#include <cstdint>
+
 const uint8_t* bytes(const char* s)
 {
 	return reinterpret_cast<const uint8_t*>(s);

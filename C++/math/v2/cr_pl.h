@@ -1,6 +1,8 @@
 #ifndef H_CR_PL
 #define H_CR_PL
 
+#include "./vt2.h"
+
 class cr_pl
 {
 public:

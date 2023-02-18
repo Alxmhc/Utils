@@ -1,6 +1,10 @@
 #ifndef H_LZ4
 #define H_LZ4
 
+#include "../compr/decompr.h"
+#include "../byte_reader.h"
+#include "../byte_writer.h"
+
 namespace compr
 {
 	class lz4

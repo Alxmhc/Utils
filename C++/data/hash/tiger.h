@@ -1,6 +1,10 @@
 #ifndef H_TIGER
 #define H_TIGER
 
+#include <array>
+#include "./hash.h"
+#include "../byte_writer.h"
+
 namespace hash
 {
 	class Tiger : public HASH<24, 64>

@@ -1,6 +1,11 @@
 #ifndef H_MD5
 #define H_MD5
 
+#include <array>
+#include "../../math/base/math_.h"
+#include "./hash.h"
+#include "../byte_writer.h"
+
 namespace hash
 {
 	class MD5 : public HASH<16, 64>

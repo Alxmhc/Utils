@@ -1,6 +1,9 @@
 #ifndef H_PL
 #define H_PL
 
+#include "../../base/math_.h"
+#include "../vt3.h"
+
 namespace geom
 {
 	//n*r-p=0; |n|=1; p>=0
@@ -24,7 +27,7 @@ namespace geom
 
 		long double dst(const vt3 &k) const
 		{
-			return abs(dst_(k));
+			return std::abs(dst_(k));
 		}
 
 	private:

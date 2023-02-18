@@ -1,6 +1,8 @@
 #ifndef H_PCAPNG
 #define H_PCAPNG
 
+#include "../data/byte_reader.h"
+
 namespace fl_pr
 {
 	class F_pcapng

@@ -1,6 +1,8 @@
 #ifndef H_PHIS
 #define H_PHIS
 
+#include <vector>
+
 template<typename T>
 long double Ek(const std::vector<long double> &m, const std::vector<T> &v)
 {

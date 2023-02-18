@@ -1,6 +1,10 @@
 #ifndef H_B_INT
 #define H_B_INT
 
+#include <vector>
+#include <algorithm>
+#include "../data/pack.h"
+
 template<typename T>
 T GCD(T a, T b)
 {

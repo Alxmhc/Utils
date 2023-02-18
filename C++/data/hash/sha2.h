@@ -1,6 +1,11 @@
 #ifndef H_SHA2
 #define H_SHA2
 
+#include <array>
+#include "../../math/base/math_.h"
+#include "./hash.h"
+#include "../byte_writer.h"
+
 namespace hash
 {
 	template<uint_fast8_t SZ>

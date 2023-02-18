@@ -1,6 +1,8 @@
 #ifndef H_DECODE
 #define H_DECODE
 
+#include "./byte_writer.h"
+
 namespace decode
 {
 	bool unchunk(const uint8_t* v, const std::size_t n, byteWriter &bw)

@@ -1,6 +1,9 @@
 #ifndef H_SPH
 #define H_SPH
 
+#include "../../base/math_.h"
+#include "../vt3.h"
+
 namespace geom
 {
 	class p_sph

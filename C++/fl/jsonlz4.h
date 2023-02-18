@@ -1,6 +1,9 @@
 #ifndef H_JSONLZ4
 #define H_JSONLZ4
 
+#include "../cont.h"
+#include "../data/compr/lz4.h"
+
 namespace fl_pr
 {
 	class F_jsonlz4 : public cont_1

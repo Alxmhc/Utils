@@ -1,6 +1,8 @@
 #ifndef H_TEST
 #define H_TEST
 
+#include "fl/fl_.h"
+
 template<std::size_t BSIZE>
 bool compare(const char* fl1, const char* fl2)
 {

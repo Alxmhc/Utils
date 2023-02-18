@@ -1,6 +1,11 @@
 #ifndef H_MD4
 #define H_MD4
 
+#include <array>
+#include "../../math/base/math_.h"
+#include "./hash.h"
+#include "../byte_writer.h"
+
 namespace hash
 {
 	class MD4 : public HASH<16, 64>

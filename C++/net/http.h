@@ -1,6 +1,11 @@
 #ifndef H_HTTP
 #define H_HTTP
 
+#include <map>
+#include "../data/b.h"
+#include "../data/decode.h"
+#include "../fl/gzip.h"
+
 namespace URL
 {
 	std::vector<uint8_t> Decode(const char* s, std::size_t sz)

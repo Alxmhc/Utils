@@ -1,6 +1,8 @@
 #ifndef H_HEX
 #define H_HEX
 
+#include "../byte_writer.h"
+
 namespace convert
 {
 	namespace hex

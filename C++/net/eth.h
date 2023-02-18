@@ -1,6 +1,10 @@
 #ifndef H_ETH
 #define H_ETH
 
+#include <vector>
+#include <algorithm>
+#include "../data/pack.h"
+
 namespace net
 {
 	struct Eth

@@ -1,6 +1,8 @@
 #ifndef H_BASE64
 #define H_BASE64
 
+#include "../byte_writer.h"
+
 namespace convert
 {
 	namespace base64

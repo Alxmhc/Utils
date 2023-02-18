@@ -1,6 +1,11 @@
 #ifndef H_RIPEMD
 #define H_RIPEMD
 
+#include <array>
+#include "../../math/base/math_.h"
+#include "./hash.h"
+#include "../byte_writer.h"
+
 namespace hash
 {
 	class RIPEMD128 : public HASH<16, 64>

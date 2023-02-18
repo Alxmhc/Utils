@@ -1,6 +1,8 @@
 #ifndef H_VT2
 #define H_VT2
 
+#include <cmath>
+
 class vt2
 {
 public:

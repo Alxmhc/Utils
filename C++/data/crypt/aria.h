@@ -1,6 +1,10 @@
 #ifndef H_ARIA
 #define H_ARIA
 
+#include <vector>
+#include "../../math/base/math_.h"
+#include "../pack.h"
+
 namespace crypt
 {
 	class ARIA

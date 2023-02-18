@@ -1,6 +1,9 @@
 #ifndef H_CR
 #define H_CR
 
+#include "../../base/math_.h"
+#include "../vt2.h"
+
 namespace geom
 {
 	class p_cr
