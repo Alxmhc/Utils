@@ -49,7 +49,7 @@ class b_int
 			return *this;
 		}
 		bool d = false;
-		size_t i = 0;
+		std::size_t i = 0;
 		for(; i < c.n.size(); i++)
 		{
 			const bool isB = (n[i] >= c.n[i]);
@@ -97,10 +97,10 @@ public:
 		return *this;
 	}
 
-	void fromB(const uint8_t* v, size_t k)
+	void fromB(const uint8_t* v, std::size_t k)
 	{
 		n = std::vector<num>((k+3)>>2);
-		size_t i = 0;
+		std::size_t i = 0;
 		while(k > 3)
 		{
 			k -= 4;
@@ -116,13 +116,13 @@ public:
 
 	std::vector<uint8_t> toB() const
 	{
-		const size_t k = n.size();
+		const std::size_t k = n.size();
 		std::vector<uint8_t> res(k * 4);
-		for(size_t i = 0; i < k; i++)
+		for(std::size_t i = 0; i < k; i++)
 		{
 			bconv<4, endianness::BIG_ENDIAN>::unpack(n[i], res.data() + 4*(k-i-1));
 		}
-		size_t c = 0;
+		std::size_t c = 0;
 		for(; c < res.size() - 1; c++)
 		{
 			if(res[c] != 0)
@@ -167,7 +167,7 @@ public:
 			n.resize(csz);
 		}
 
-		size_t i = 0;
+		std::size_t i = 0;
 		bool d = false;
 		for(; i < csz; i++)
 		{
@@ -239,7 +239,7 @@ public:
 		const auto csz = c.n.size();
 		res.n.resize(n.size() + csz - 1);
 
-		for(size_t i = 0;;)
+		for(std::size_t i = 0;;)
 		{
 			res += *this * c.n[i++];
 			if(i == csz)
@@ -257,7 +257,7 @@ public:
 		return t *= a;
 	}
 
-	const b_int& operator>>=(size_t c)
+	const b_int& operator>>=(std::size_t c)
 	{
 		const auto k = c / BSZ;
 		if(k != 0)
@@ -274,7 +274,7 @@ public:
 			return *this;
 
 		const auto sz = n.size();
-		for(size_t i = 0;;)
+		for(std::size_t i = 0;;)
 		{
 			n[i] >>= c;
 			i++;
@@ -289,7 +289,7 @@ public:
 		return *this;
 	}
 
-	const b_int& operator<<=(size_t c)
+	const b_int& operator<<=(std::size_t c)
 	{
 		const auto k = c / BSZ;
 		if(k != 0)
@@ -302,7 +302,7 @@ public:
 			return *this;
 
 		num d = 0;
-		for(size_t i = 0; i < n.size(); i++)
+		for(std::size_t i = 0; i < n.size(); i++)
 		{
 			const auto t = n[i] >> (BSZ - c);
 			n[i] = (n[i]<<c) | d;

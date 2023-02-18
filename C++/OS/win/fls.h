@@ -151,7 +151,7 @@ namespace fl_s
 	bool create_dirs(const C* pth)
 	{
 		std::basic_string<C> p(pth);
-		for(size_t i = 0; i < p.length() - 1; i++)
+		for(std::size_t i = 0; i < p.length() - 1; i++)
 		{
 			if(p[i] == '/' || p[i] == '\\')
 			{

@@ -44,7 +44,7 @@ namespace fl_pr
 				inf.data_pos = br->get_pos();
 				if(inf.data_size != 0)
 				{
-					const size_t bsize = ((inf.data_size + 0x1ff)>>9)<<9;
+					const std::size_t bsize = ((inf.data_size + 0x1ff)>>9)<<9;
 					if( !br->skip(bsize) )
 						break;
 				}
@@ -54,12 +54,12 @@ namespace fl_pr
 			return true;
 		}
 
-		std::string name(size_t n) const
+		std::string name(std::size_t n) const
 		{
 			return infFs[n].fname;
 		}
 
-		bool GetData(size_t n, byteWriter &bw)
+		bool GetData(std::size_t n, byteWriter &bw)
 		{
 			Init(n);
 			copy(*br, bw);

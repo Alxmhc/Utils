@@ -1,6 +1,9 @@
 #ifndef H_HMAC
 #define H_HMAC
 
+#include <algorithm>
+#include "./hash.h"
+
 namespace hash
 {
 	//rfc 2104
@@ -15,7 +18,7 @@ namespace hash
 			hash.Update(ki, H::block_size);
 		}
 	public:
-		HMAC(const uint8_t* key, size_t ksize)
+		HMAC(const uint8_t* key, std::size_t ksize)
 		{
 			std::fill(ki, ki + H::block_size, 0x36);
 			std::fill(ko, ko + H::block_size, 0x5c);
@@ -40,7 +43,7 @@ namespace hash
 			}
 			Init();
 		}
-		void Update(const uint8_t* data, const size_t dsize)
+		void Update(const uint8_t* data, const std::size_t dsize)
 		{
 			hash.Update(data, dsize);
 		}

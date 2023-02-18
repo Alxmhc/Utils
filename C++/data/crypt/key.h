@@ -1,6 +1,10 @@
 #ifndef H_KEY
 #define H_KEY
 
+#include <vector>
+#include "../pack.h"
+#include "../hash/hmac.h"
+
 template<class H>
 class PBKDF2_HMAC
 {
@@ -8,9 +12,9 @@ class PBKDF2_HMAC
 public:
 	static const uint_fast8_t out_size = H::hash_size;
 
-	PBKDF2_HMAC(const uint8_t* passw, size_t sz) : h(passw, sz) {}
+	PBKDF2_HMAC(const uint8_t* passw, std::size_t sz) : h(passw, sz) {}
 
-	void Calc(const uint8_t* salt, size_t ssize, const uint8_t* nm, uint8_t* res)
+	void Calc(const uint8_t* salt, std::size_t ssize, const uint8_t* nm, uint8_t* res)
 	{
 		h.Update(salt, ssize);
 		h.Update(nm, 4);
@@ -26,7 +30,7 @@ public:
 
 //rfc 2898
 template<class F>
-std::vector<uint8_t> PBKDF2(const uint8_t* passw, size_t psz, const uint8_t* salt, size_t ssz, size_t c, size_t ksz)
+std::vector<uint8_t> PBKDF2(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, std::size_t c, std::size_t ksz)
 {
 	std::vector<uint8_t> key;
 	if(ksz == 0)
@@ -43,9 +47,9 @@ std::vector<uint8_t> PBKDF2(const uint8_t* passw, size_t psz, const uint8_t* sal
 			bconv<4, endianness::BIG_ENDIAN>::unpack(i, num);
 			fcr.Calc(salt, ssz, num, tmp);
 		}
-		const size_t b = key.size();
+		const std::size_t b = key.size();
 		key.insert(key.end(), tmp, tmp + F::out_size);
-		for(size_t j = 1; j < c; j++)
+		for(std::size_t j = 1; j < c; j++)
 		{
 			fcr.Calc(tmp);
 			for(uint_fast8_t k = 0; k < F::out_size; k++)

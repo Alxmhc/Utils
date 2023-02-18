@@ -1,6 +1,8 @@
 #ifndef H_BIN_TREE
 #define H_BIN_TREE
 
+#include "./bit_reader.h"
+
 template<typename T>
 class binTree
 {

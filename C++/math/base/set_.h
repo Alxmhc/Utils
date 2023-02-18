@@ -1,6 +1,9 @@
 #ifndef H_SET_
 #define H_SET_
 
+#include <set>
+#include <algorithm>
+
 template<typename T>
 std::set<T> operator&(const std::set<T> &a, const std::set<T> &b)
 {

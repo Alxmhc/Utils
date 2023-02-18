@@ -1,6 +1,9 @@
 #ifndef H_VECTOR_
 #define H_VECTOR_
 
+#include <vector>
+#include <algorithm>
+
 template<typename T>
 const std::vector<T>& operator+=(std::vector<T> &v, const T &a)
 {

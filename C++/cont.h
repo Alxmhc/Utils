@@ -1,13 +1,16 @@
 #ifndef H_CONT
 #define H_CONT
 
+#include "data/byte_reader.h"
+#include "data/byte_writer.h"
+
 class cont_1
 {
 protected:
 	byteReader* br;
 
-	size_t data_pos;
-	size_t data_size;
+	std::size_t data_pos;
+	std::size_t data_size;
 
 	void Init()
 	{
@@ -23,18 +26,18 @@ protected:
 
 	struct inf_1
 	{
-		size_t data_pos;
-		size_t data_size;
+		std::size_t data_pos;
+		std::size_t data_size;
 	};
 	std::vector<inf_1> inf_n;
 
-	void Init(size_t n)
+	void Init(std::size_t n)
 	{
 		br->set_size(inf_n[n].data_pos + inf_n[n].data_size);
 		br->set_pos(inf_n[n].data_pos);
 	}
 public:
-	size_t sz() const
+	std::size_t sz() const
 	{
 		return inf_n.size();
 	}

@@ -1,6 +1,8 @@
 #ifndef H_CR_M
 #define H_CR_M
 
+#include "../byte_writer.h"
+
 template<class CR>
 class cr_str : public byteWriterBuf<CR::block_size>
 {
@@ -10,7 +12,7 @@ protected:
 	uint8_t iv_cur[CR::block_size];
 	byteWriter* bw;
 
-	virtual void upd(const uint8_t*, size_t) = 0;
+	virtual void upd(const uint8_t*, std::size_t) = 0;
 
 	void process(const uint8_t* v)
 	{
@@ -58,7 +60,7 @@ namespace CR_CTR
 	template<class CR, class INCR>
 	class Encoder : public cr_str<CR>
 	{
-		void upd(const uint8_t* v, size_t sz)
+		void upd(const uint8_t* v, std::size_t sz)
 		{
 			uint8_t tmp[CR::block_size];
 			std::copy_n(this->iv_cur, CR::block_size, tmp);
@@ -84,7 +86,7 @@ namespace CR_OFB
 	template<class CR>
 	class Encoder : public cr_str<CR>
 	{
-		void upd(const uint8_t* v, size_t sz)
+		void upd(const uint8_t* v, std::size_t sz)
 		{
 			this->cr->Enc.process(this->iv_cur);
 			uint8_t tmp[CR::block_size];
@@ -108,7 +110,7 @@ namespace CR_CFB
 	template<class CR>
 	class Encoder : public cr_str<CR>
 	{
-		void upd(const uint8_t* v, size_t sz)
+		void upd(const uint8_t* v, std::size_t sz)
 		{
 			this->cr->Enc.process(this->iv_cur);
 			std::transform(v, v + sz, this->iv_cur, this->iv_cur, [](uint8_t a, uint8_t b){return a ^ b;});
@@ -121,7 +123,7 @@ namespace CR_CFB
 	template<class CR>
 	class Decoder : public cr_str<CR>
 	{
-		void upd(const uint8_t* v, size_t sz)
+		void upd(const uint8_t* v, std::size_t sz)
 		{
 			this->cr->Enc.process(this->iv_cur);
 			std::transform(v, v + sz, this->iv_cur, this->iv_cur, [](uint8_t a, uint8_t b){return a ^ b;});

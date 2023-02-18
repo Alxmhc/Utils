@@ -107,7 +107,7 @@ namespace hash
 		{
 			buf.Init();
 		}
-		void Update(const uint8_t* v, const size_t n)
+		void Update(const uint8_t* v, const std::size_t n)
 		{
 			buf.writeN(v, n);
 			buf.sz += n;
@@ -252,7 +252,7 @@ namespace hash
 		{
 			buf.Init();
 		}
-		void Update(const uint8_t* v, const size_t n)
+		void Update(const uint8_t* v, const std::size_t n)
 		{
 			buf.writeN(v, n);
 			buf.sz += n;

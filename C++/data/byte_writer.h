@@ -1,10 +1,15 @@
 #ifndef H_BYTE_WRITER
 #define H_BYTE_WRITER
 
+#include <vector>
+#include <string>
+#include <algorithm>
+#include "./pack.h"
+
 class byteWriter
 {
 public:
-	virtual void writeN(const uint8_t*, size_t) = 0;
+	virtual void writeN(const uint8_t*, std::size_t) = 0;
 
 	void write(uint8_t c)
 	{
@@ -23,10 +28,10 @@ public:
 		writeN(t, SZ);
 	}
 	template<unsigned char SZ, char E>
-	void writeC(typename UINT_<SZ>::uint_ const *c, size_t n)
+	void writeC(typename UINT_<SZ>::uint_ const *c, std::size_t n)
 	{
 		uint8_t t[SZ];
-		for(size_t i = 0; i < n; i++)
+		for(std::size_t i = 0; i < n; i++)
 		{
 			bconv<SZ, E>::unpack(c[i], t);
 			writeN(t, SZ);
@@ -45,25 +50,25 @@ class bw_array : public byteWriter
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
-	void writeN(const uint8_t* v, size_t n)
+	void writeN(const uint8_t* v, std::size_t n)
 	{
 		d.insert(d.end(), v, v + n);
 	}
 };
 
-template<size_t SZ>
+template<std::size_t SZ>
 class byteWriterBuf : public byteWriter
 {
-	size_t offset;
+	std::size_t offset;
 	uint8_t buf[SZ];
 protected:
 	virtual void process(const uint8_t*) = 0;
 
-	static const size_t bsize = SZ;
+	static const std::size_t bsize = SZ;
 
 	byteWriterBuf() : offset(0) {}
 
-	size_t size() const
+	std::size_t size() const
 	{
 		return offset;
 	}
@@ -101,7 +106,7 @@ public:
 		}
 	}
 
-	void writeN(const uint8_t* v, size_t n)
+	void writeN(const uint8_t* v, std::size_t n)
 	{
 		if(n + offset < SZ)
 		{
@@ -109,7 +114,7 @@ public:
 			offset += n;
 			return;
 		}
-		size_t part = 0;
+		std::size_t part = 0;
 		if(offset != 0)
 		{
 			part = SZ - offset;

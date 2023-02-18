@@ -1,7 +1,7 @@
 #ifndef H_TEST
 #define H_TEST
 
-template<size_t BSIZE>
+template<std::size_t BSIZE>
 bool compare(const char* fl1, const char* fl2)
 {
 	br_fstream fs1, fs2;
@@ -23,7 +23,7 @@ bool compare(const char* fl1, const char* fl2)
 	return true;
 }
 
-template<size_t BSIZE>
+template<std::size_t BSIZE>
 bool compare(const std::vector<uint8_t> &t, const char* fname)
 {
 	br_fstream fs;
@@ -32,7 +32,7 @@ bool compare(const std::vector<uint8_t> &t, const char* fname)
 	if(fs.get_size() != t.size())
 		return false;
 	uint8_t buf[BSIZE];
-	size_t o = 0;
+	std::size_t o = 0;
 	for(;;)
 	{
 		const auto sz = fs.readMx(buf, BSIZE);

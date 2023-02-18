@@ -1,6 +1,8 @@
 #ifndef H_HTREE
 #define H_HTREE
 
+#include "./bin_tree.h"
+
 template<typename T>
 binTree<T> makeHTree(uint_fast8_t* m, T n)
 {

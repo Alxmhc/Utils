@@ -3,7 +3,7 @@
 
 namespace decode
 {
-	bool unchunk(const uint8_t* v, const size_t n, byteWriter &bw)
+	bool unchunk(const uint8_t* v, const std::size_t n, byteWriter &bw)
 	{
 		const uint8_t* e = v + n;
 		for(;;)
@@ -15,7 +15,7 @@ namespace decode
 			if(v == e)
 				break;
 			v++;
-			if(static_cast<size_t>(e - v) < sz + 2)
+			if(static_cast<std::size_t>(e - v) < sz + 2)
 				break;
 			bw.writeN(v, sz);
 			v += sz + 1;

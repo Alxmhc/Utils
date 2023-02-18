@@ -3,12 +3,12 @@
 
 namespace URL
 {
-	std::vector<uint8_t> Decode(const char* s, size_t sz)
+	std::vector<uint8_t> Decode(const char* s, std::size_t sz)
 	{
 		std::vector<uint8_t> r;
 		r.reserve(sz);
 		char t[3] = {};
-		for(size_t i = 0; i < sz;)
+		for(std::size_t i = 0; i < sz;)
 		{
 			if(s[i] != '%')
 			{

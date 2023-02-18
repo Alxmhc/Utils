@@ -1,17 +1,22 @@
 #ifndef H_BYTE_READER
 #define H_BYTE_READER
 
+#include <vector>
+#include <string>
+#include <algorithm>
+#include "./pack.h"
+
 class byteReader
 {
 protected:
-	size_t pos;
-	size_t size, csize;
+	std::size_t pos;
+	std::size_t size, csize;
 	byteReader() : pos(0) {}
 
 	virtual uint8_t read1() = 0;
-	virtual void readAll(uint8_t*, const size_t) = 0;
+	virtual void readAll(uint8_t*, const std::size_t) = 0;
 public:
-	bool set_size(size_t sz)
+	bool set_size(std::size_t sz)
 	{
 		if(sz > size)
 			return false;
@@ -23,20 +28,20 @@ public:
 		csize = size;
 	}
 
-	size_t get_size() const
+	std::size_t get_size() const
 	{
 		return csize;
 	}
-	size_t get_pos() const
+	std::size_t get_pos() const
 	{
 		return pos;
 	}
-	size_t get_rsize() const
+	std::size_t get_rsize() const
 	{
 		return csize - pos;
 	}
-	virtual void set_pos(size_t) = 0;
-	virtual bool skip(size_t) = 0;
+	virtual void set_pos(std::size_t) = 0;
+	virtual bool skip(std::size_t) = 0;
 
 	bool get(uint8_t &c)
 	{
@@ -46,14 +51,14 @@ public:
 		return true;
 	}
 
-	bool readN(uint8_t* d, size_t n)
+	bool readN(uint8_t* d, std::size_t n)
 	{
 		if(pos + n > csize)
 			return false;
 		readAll(d, n);
 		return true;
 	}
-	bool readN(std::vector<uint8_t> &v, size_t n)
+	bool readN(std::vector<uint8_t> &v, std::size_t n)
 	{
 		if(pos + n > csize)
 			return false;
@@ -61,7 +66,7 @@ public:
 		readAll(v.data(), n);
 		return true;
 	}
-	bool readN(std::string &s, size_t n)
+	bool readN(std::string &s, std::size_t n)
 	{
 		if(pos + n > csize)
 			return false;
@@ -71,7 +76,7 @@ public:
 		return true;
 	}
 
-	size_t readMx(uint8_t* d, size_t n)
+	std::size_t readMx(uint8_t* d, std::size_t n)
 	{
 		if(pos + n > csize)
 		{
@@ -81,7 +86,7 @@ public:
 		return n;
 	}
 
-	bool addN(std::vector<uint8_t> &v, size_t n)
+	bool addN(std::vector<uint8_t> &v, std::size_t n)
 	{
 		if(pos + n > csize)
 			return false;
@@ -104,9 +109,9 @@ public:
 		return true;
 	}
 
-	size_t find(uint8_t c)
+	std::size_t find(uint8_t c)
 	{
-		size_t res = csize;
+		std::size_t res = csize;
 
 		const auto b = pos;
 		while(pos < csize)
@@ -121,16 +126,16 @@ public:
 		return res;
 	}
 
-	size_t find(const uint8_t* v, size_t k)
+	std::size_t find(const uint8_t* v, std::size_t k)
 	{
-		size_t res = csize;
+		std::size_t res = csize;
 		if(k > csize)
 			return res;
 
 		const auto b = pos;
-		for(size_t i = pos; i < csize - k; i++)
+		for(std::size_t i = pos; i < csize - k; i++)
 		{
-			size_t j = 0;
+			std::size_t j = 0;
 			for(; j < k; j++)
 			{
 				if(read1() != v[j])
@@ -151,7 +156,7 @@ public:
 
 	bool read_string(uint8_t c, std::string &s)
 	{
-		const size_t p = find(c);
+		const std::size_t p = find(c);
 		if(p == csize)
 			return false;
 		readN(s, p);
@@ -159,9 +164,9 @@ public:
 		return true;
 	}
 
-	bool read_string(const uint8_t* v, size_t k, std::string &s)
+	bool read_string(const uint8_t* v, std::size_t k, std::string &s)
 	{
-		const size_t p = find(v, k);
+		const std::size_t p = find(v, k);
 		if(p == csize)
 			return false;
 		readN(s, p);
@@ -180,7 +185,7 @@ protected:
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t* v, const size_t n)
+	void readAll(uint8_t* v, const std::size_t n)
 	{
 		if(n == 0)
 			return;
@@ -188,12 +193,12 @@ protected:
 		pos += n;
 	}
 public:
-	br_array(const uint8_t* v, size_t sz) : d(v)
+	br_array(const uint8_t* v, std::size_t sz) : d(v)
 	{
 		size = sz;
 		csize = size;
 	}
-	void open(const uint8_t* v, size_t sz)
+	void open(const uint8_t* v, std::size_t sz)
 	{
 		d = v;
 		pos = 0;
@@ -201,11 +206,11 @@ public:
 		csize = size;
 	}
 
-	void set_pos(size_t p)
+	void set_pos(std::size_t p)
 	{
 		pos = p;
 	}
-	bool skip(size_t n)
+	bool skip(std::size_t n)
 	{
 		if (pos + n > csize)
 			return false;

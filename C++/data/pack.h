@@ -1,6 +1,9 @@
 #ifndef H_PACK
 #define H_PACK
 
+#include <cstdint>
+#include <cstring>
+
 namespace endianness
 {
 	enum
@@ -279,27 +282,27 @@ struct bconv<16, endianness::BIG_ENDIAN>
 namespace conv
 {
 	template<unsigned char SZ, char E>
-	void pack(const uint8_t* a, const size_t n, typename UINT_<SZ>::uint_ *r)
+	void pack(const uint8_t* a, const std::size_t n, typename UINT_<SZ>::uint_ *r)
 	{
 		if(E == endianness::current)
 		{
 			memcpy(r, a, n);
 			return;
 		}
-		for(size_t i = 0; i < n / SZ; ++i)
+		for(std::size_t i = 0; i < n / SZ; ++i)
 		{
 			r[i] = bconv<SZ, E>::pack(a + i*SZ);
 		}
 	}
 	template<unsigned char SZ, char E>
-	void unpack(typename UINT_<SZ>::uint_ const *a, size_t n, uint8_t* r)
+	void unpack(typename UINT_<SZ>::uint_ const *a, std::size_t n, uint8_t* r)
 	{
 		if(E == endianness::current)
 		{
 			memcpy(r, a, n*SZ);
 			return;
 		}
-		for(size_t i = 0; i < n; ++i)
+		for(std::size_t i = 0; i < n; ++i)
 		{
 			bconv<SZ, E>::unpack(a[i], r + i*SZ);
 		}

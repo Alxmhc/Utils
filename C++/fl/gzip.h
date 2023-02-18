@@ -1,6 +1,9 @@
 #ifndef H_GZIP
 #define H_GZIP
 
+#include "../cont.h"
+#include "../data/compr/deflate.h"
+
 namespace fl_pr
 {
 	class F_gzip : public cont_1

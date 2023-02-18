@@ -1,6 +1,9 @@
 #ifndef H_BIT_READER
 #define H_BIT_READER
 
+#include "./bin.h"
+#include "./byte_reader.h"
+
 class bitReader
 {
 protected:
@@ -11,17 +14,17 @@ protected:
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 
-	bool readB(uint8_t* v, size_t n)
+	bool readB(uint8_t* v, std::size_t n)
 	{
 		o = 0;
 		return r->readN(v, n);
 	}
-	bool addB(std::vector<uint8_t> &v, size_t n)
+	bool addB(std::vector<uint8_t> &v, std::size_t n)
 	{
 		o = 0;
 		return r->addN(v, n);
 	}
-	bool skipB(size_t n)
+	bool skipB(std::size_t n)
 	{
 		o = 0;
 		return r->skip(n);

@@ -1,7 +1,11 @@
 #ifndef H_DECOMPR
 #define H_DECOMPR
 
-bool LZ77_repeat(size_t sz, size_t dist, std::vector<uint8_t> &out)
+#include <cstdint>
+#include <vector>
+#include <algorithm>
+
+bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 {
 	auto osz = out.size();
 	if(dist == 0 || osz < dist)

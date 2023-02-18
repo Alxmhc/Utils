@@ -1,6 +1,10 @@
 #ifndef H_AES
 #define H_AES
 
+#include <cstdint>
+#include <vector>
+#include <algorithm>
+
 namespace crypt
 {
 	class AES
@@ -43,7 +47,7 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				std::transform(r, r + 16, key->data(), r, [](uint8_t a, uint8_t b){return a ^ b;});
-				size_t i = 16;
+				std::size_t i = 16;
 				for(; i < key->size() - 16; i += 16)
 				{
 					SubShift(r);
@@ -92,7 +96,7 @@ namespace crypt
 
 			void process(uint8_t* r) const
 			{
-				size_t i = key->size() - 16;
+				std::size_t i = key->size() - 16;
 				std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
 				i -= 16;
 				SubShiftI(r);
@@ -115,11 +119,11 @@ namespace crypt
 		{
 			key.resize((ksz + 28) << 2);
 			std::copy_n(k, ksz, key.begin());
-			for(size_t i = ksz; i < key.size(); i += 4)
+			for(std::size_t i = ksz; i < key.size(); i += 4)
 			{
 				uint8_t t[4];
 				std::copy_n(key.data() + i - 4, 4, t);
-				const size_t o = i % ksz;
+				const std::size_t o = i % ksz;
 				if(o == 0)
 				{
 					uint8_t x = t[0];

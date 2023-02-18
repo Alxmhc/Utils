@@ -1,11 +1,15 @@
 #ifndef H_DEFLATE
 #define H_DEFLATE
 
+#include "../htree.h"
+#include "./decompr.h"
+#include "../byte_writer.h"
+
 namespace compr
 {
 	class deflate
 	{
-		static const size_t wsz = 32768;
+		static const std::size_t wsz = 32768;
 
 		static bool fixedH_code(bitReaderL &brd, uint_fast16_t &fc)
 		{

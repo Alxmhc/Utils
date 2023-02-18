@@ -1,6 +1,14 @@
 #ifndef H_ZIP
 #define H_ZIP
 
+#include "../cont.h"
+#include "../data/hash/crc32.h"
+#include "../data/hash/sha1.h"
+#include "../data/crypt/key.h"
+#include "../data/crypt/aes.h"
+#include "../data/crypt/cr_m.h"
+#include "../data/compr/deflate.h"
+
 namespace fl_pr
 {
 	class F_zip : public cont_n
@@ -55,12 +63,12 @@ namespace fl_pr
 			hash::CRC32::InitTable(crcTbl, 0xedb88320);
 
 			uint32_t key[3] = {0x12345678, 0x23456789, 0x34567890};
-			for(size_t i = 0; i < psw.size(); i++)
+			for(std::size_t i = 0; i < psw.size(); i++)
 			{
 				keyUpd(key, psw[i], crcTbl);
 			}
 
-			for(size_t i = 0; i < data.size(); i++)
+			for(std::size_t i = 0; i < data.size(); i++)
 			{
 				uint32_t tmp = key[2] | 2;
 				tmp = (tmp * (tmp ^ 1)) >> 8;
@@ -218,17 +226,17 @@ namespace fl_pr
 			return true;
 		}
 
-		std::string name(size_t n) const
+		std::string name(std::size_t n) const
 		{
 			return infFs[n].fname;
 		}
 
-		void set_psw(const uint8_t* passw, size_t psz)
+		void set_psw(const uint8_t* passw, std::size_t psz)
 		{
 			psw.assign(passw, passw + psz);
 		}
 
-		bool GetData(size_t n, byteWriter &bw)
+		bool GetData(std::size_t n, byteWriter &bw)
 		{
 			if(infFs[n].fsize == 0)
 				return true;

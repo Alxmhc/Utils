@@ -12,9 +12,9 @@ namespace convert
 		public:
 			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? "0123456789ABCDEF" : "0123456789abcdef") {}
 
-			void writeN(const uint8_t* v, size_t n)
+			void writeN(const uint8_t* v, std::size_t n)
 			{
-				for(size_t i = 0; i < n; i++)
+				for(std::size_t i = 0; i < n; i++)
 				{
 					const uint8_t t[2] = {dict[v[i]>>4], dict[v[i]&0x0f]};
 					bw->writeN(t, 2);

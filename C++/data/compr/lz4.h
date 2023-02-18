@@ -5,7 +5,7 @@ namespace compr
 {
 	class lz4
 	{
-		static bool get_size(byteReader &br, size_t &sz)
+		static bool get_size(byteReader &br, std::size_t &sz)
 		{
 			if(sz != 15)
 				return true;
@@ -28,7 +28,7 @@ namespace compr
 				uint8_t b;
 				if(!br.get(b))
 					return false;
-				size_t size = b >> 4;
+				std::size_t size = b >> 4;
 				if(!get_size(br, size))
 					return false;
 				if(!br.addN(out, size))
@@ -36,7 +36,7 @@ namespace compr
 				uint_fast16_t offset;
 				if( !br.readC<2, endianness::LITTLE_ENDIAN>(offset) )
 					break;
-				size_t len = b & 0xf;
+				std::size_t len = b & 0xf;
 				if(!get_size(br, len))
 					return false;
 				if(!LZ77_repeat(len + 4, offset, out))

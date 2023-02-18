@@ -1,6 +1,10 @@
 #ifndef H_FL_
 #define H_FL_
 
+#include <fstream>
+#include "../data/byte_reader.h"
+#include "../data/byte_writer.h"
+
 class br_fstream : public byteReader
 {
 	std::ifstream fst;
@@ -11,7 +15,7 @@ protected:
 		pos++;
 		return r;
 	}
-	void readAll(uint8_t* v, const size_t n)
+	void readAll(uint8_t* v, const std::size_t n)
 	{
 		if(n == 0)
 			return;
@@ -25,7 +29,7 @@ public:
 		if(fst.fail())
 			return false;
 		pos = 0;
-		size = static_cast<size_t>(fst.tellg());
+		size = static_cast<std::size_t>(fst.tellg());
 		csize = size;
 		fst.seekg(0, std::ios_base::beg);
 		return true;
@@ -35,7 +39,7 @@ public:
 		fst.close();
 	}
 
-	void set_pos(size_t p)
+	void set_pos(std::size_t p)
 	{
 		if(p != pos)
 		{
@@ -43,7 +47,7 @@ public:
 			pos = p;
 		}
 	}
-	bool skip(size_t n)
+	bool skip(std::size_t n)
 	{
 		if (pos + n > csize)
 			return false;
@@ -60,7 +64,7 @@ public:
 	template<typename C>
 	bw_fstream(const C* fl) : fst(fl, std::ios_base::binary) {}
 
-	void writeN(const uint8_t* v, size_t n)
+	void writeN(const uint8_t* v, std::size_t n)
 	{
 		fst.write(reinterpret_cast<const char*>(v), n);
 	}
