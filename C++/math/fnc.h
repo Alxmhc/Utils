@@ -1,3 +1,6 @@
+#ifndef H_FNC
+#define H_FNC
+
 namespace fnc
 {
 	template<class F>
@@ -28,3 +31,5 @@ namespace fnc
 		return s;
 	}
 }
+
+#endif

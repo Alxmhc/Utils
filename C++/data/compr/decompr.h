@@ -1,3 +1,6 @@
+#ifndef H_DECOMPR
+#define H_DECOMPR
+
 bool LZ77_repeat(size_t sz, size_t dist, std::vector<uint8_t> &out)
 {
 	auto osz = out.size();
@@ -17,3 +20,5 @@ bool LZ77_repeat(size_t sz, size_t dist, std::vector<uint8_t> &out)
 	std::copy_n(out.begin() + beg, sz, out.begin() + osz);
 	return true;
 }
+
+#endif

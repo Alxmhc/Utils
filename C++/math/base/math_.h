@@ -1,3 +1,6 @@
+#ifndef H_MATH_
+#define H_MATH_
+
 template <typename B>
 B rotl(B x, unsigned char d)
 {
@@ -37,3 +40,5 @@ T operator-(const T &a, const T &b)
 	r -= b;
 	return r;
 }
+
+#endif

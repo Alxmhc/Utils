@@ -1,3 +1,6 @@
+#ifndef H_SHA1
+#define H_SHA1
+
 namespace hash
 {
 	class SHA1 : public HASH<20, 64>
@@ -110,3 +113,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

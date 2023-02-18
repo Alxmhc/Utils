@@ -1,3 +1,6 @@
+#ifndef H_HEX
+#define H_HEX
+
 namespace convert
 {
 	namespace hex
@@ -44,3 +47,5 @@ namespace convert
 		};
 	}
 }
+
+#endif

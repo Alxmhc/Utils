@@ -1,3 +1,6 @@
+#ifndef H_BYTE_WRITER
+#define H_BYTE_WRITER
+
 class byteWriter
 {
 public:
@@ -121,3 +124,5 @@ public:
 		std::copy_n(v + part, offset, buf);
 	}
 };
+
+#endif

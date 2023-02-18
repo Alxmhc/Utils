@@ -1,3 +1,6 @@
+#ifndef H_CR_PL
+#define H_CR_PL
+
 class cr_pl
 {
 public:
@@ -24,3 +27,5 @@ long double abs(const cr_pl &c)
 {
 	return c.r;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_GZIP
+#define H_GZIP
+
 namespace fl_pr
 {
 	class F_gzip : public cont_1
@@ -73,3 +76,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

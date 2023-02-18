@@ -1,3 +1,6 @@
+#ifndef H_CR
+#define H_CR
+
 namespace geom
 {
 	class p_cr
@@ -24,3 +27,5 @@ namespace geom
 		cr(const vt2 &c, long double r) : p_cr(r), cnt(c) {}
 	};
 }
+
+#endif

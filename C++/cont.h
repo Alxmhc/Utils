@@ -1,3 +1,6 @@
+#ifndef H_CONT
+#define H_CONT
+
 class cont_1
 {
 protected:
@@ -44,3 +47,5 @@ bool copy(byteReader &br, byteWriter &bw)
 	bw.writeN(data.data(), data.size());
 	return true;
 }
+
+#endif

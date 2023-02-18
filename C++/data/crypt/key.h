@@ -1,3 +1,6 @@
+#ifndef H_KEY
+#define H_KEY
+
 template<class H>
 class PBKDF2_HMAC
 {
@@ -54,3 +57,5 @@ std::vector<uint8_t> PBKDF2(const uint8_t* passw, size_t psz, const uint8_t* sal
 	key.resize(ksz);
 	return key;
 }
+
+#endif

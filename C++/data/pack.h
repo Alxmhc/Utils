@@ -1,3 +1,6 @@
+#ifndef H_PACK
+#define H_PACK
+
 namespace endianness
 {
 	enum
@@ -302,3 +305,5 @@ namespace conv
 		}
 	}
 }
+
+#endif

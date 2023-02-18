@@ -1,3 +1,6 @@
+#ifndef H_SPH
+#define H_SPH
+
 namespace geom
 {
 	class p_sph
@@ -32,3 +35,5 @@ namespace geom
 		sph(const vt3 &c, long double r) : p_sph(r), cnt(c) {}
 	};
 }
+
+#endif

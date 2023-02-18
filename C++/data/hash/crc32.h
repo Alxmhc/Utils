@@ -1,3 +1,6 @@
+#ifndef H_CRC32
+#define H_CRC32
+
 namespace hash
 {
 	//rfc 1952
@@ -51,3 +54,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_BIN_TREE
+#define H_BIN_TREE
+
 template<typename T>
 class binTree
 {
@@ -70,3 +73,5 @@ public:
 		return false;
 	}
 };
+
+#endif

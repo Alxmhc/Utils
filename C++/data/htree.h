@@ -1,3 +1,6 @@
+#ifndef H_HTREE
+#define H_HTREE
+
 template<typename T>
 binTree<T> makeHTree(uint_fast8_t* m, T n)
 {
@@ -30,3 +33,5 @@ binTree<T> makeHTree(uint_fast8_t* m, T n)
 	}
 	return t;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_HMAC
+#define H_HMAC
+
 namespace hash
 {
 	//rfc 2104
@@ -51,3 +54,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

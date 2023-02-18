@@ -1,3 +1,6 @@
+#ifndef H_PL
+#define H_PL
+
 namespace geom
 {
 	//n*r-p=0; |n|=1; p>=0
@@ -31,3 +34,5 @@ namespace geom
 		}
 	};
 }
+
+#endif

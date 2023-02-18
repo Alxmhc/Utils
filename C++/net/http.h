@@ -1,3 +1,6 @@
+#ifndef H_HTTP
+#define H_HTTP
+
 namespace URL
 {
 	std::vector<uint8_t> Decode(const char* s, size_t sz)
@@ -106,3 +109,5 @@ public:
 		return true;
 	}
 };
+
+#endif

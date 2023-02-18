@@ -1,3 +1,6 @@
+#ifndef H_ZIP
+#define H_ZIP
+
 namespace fl_pr
 {
 	class F_zip : public cont_n
@@ -254,3 +257,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

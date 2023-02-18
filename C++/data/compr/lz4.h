@@ -1,3 +1,6 @@
+#ifndef H_LZ4
+#define H_LZ4
+
 namespace compr
 {
 	class lz4
@@ -45,3 +48,5 @@ namespace compr
 		}
 	};
 }
+
+#endif

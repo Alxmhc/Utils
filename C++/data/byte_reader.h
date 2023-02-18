@@ -1,3 +1,6 @@
+#ifndef H_BYTE_READER
+#define H_BYTE_READER
+
 class byteReader
 {
 protected:
@@ -210,3 +213,5 @@ public:
 		return true;
 	}
 };
+
+#endif

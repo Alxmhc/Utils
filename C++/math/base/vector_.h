@@ -1,3 +1,6 @@
+#ifndef H_VECTOR_
+#define H_VECTOR_
+
 template<typename T>
 const std::vector<T>& operator+=(std::vector<T> &v, const T &a)
 {
@@ -69,3 +72,5 @@ long double dot(const std::vector<T> &a, const std::vector<T> &b)
 	}
 	return s;
 }
+
+#endif

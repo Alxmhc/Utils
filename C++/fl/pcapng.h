@@ -1,3 +1,6 @@
+#ifndef H_PCAPNG
+#define H_PCAPNG
+
 namespace fl_pr
 {
 	class F_pcapng
@@ -39,3 +42,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

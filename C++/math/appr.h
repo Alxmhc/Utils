@@ -1,3 +1,6 @@
+#ifndef H_APPR
+#define H_APPR
+
 //y = a + bx
 vt2 appr_lin(const std::vector<vt2> &v)
 {
@@ -32,3 +35,5 @@ vt2 appr_hyp(const std::vector<vt2> &v)
 	b.x = a.y;
 	return eq1_2(a, b);
 }
+
+#endif

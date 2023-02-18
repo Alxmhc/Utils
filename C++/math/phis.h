@@ -1,3 +1,6 @@
+#ifndef H_PHIS
+#define H_PHIS
+
 template<typename T>
 long double Ek(const std::vector<long double> &m, const std::vector<T> &v)
 {
@@ -15,3 +18,5 @@ long double Ek(long double m, const std::vector<T> &v)
 {
 	return 0.5 * m * dot(v, v);
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_MD4
+#define H_MD4
+
 namespace hash
 {
 	class MD4 : public HASH<16, 64>
@@ -143,3 +146,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

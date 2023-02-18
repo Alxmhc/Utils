@@ -1,3 +1,6 @@
+#ifndef H_LATTICE
+#define H_LATTICE
+
 namespace lattice
 {
 	namespace sc
@@ -97,3 +100,5 @@ namespace lattice
 		}
 	}
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_ETH
+#define H_ETH
+
 namespace net
 {
 	struct Eth
@@ -126,3 +129,5 @@ namespace net
 		}
 	};
 }
+
+#endif

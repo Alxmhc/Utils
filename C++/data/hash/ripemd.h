@@ -1,3 +1,6 @@
+#ifndef H_RIPEMD
+#define H_RIPEMD
+
 namespace hash
 {
 	class RIPEMD128 : public HASH<16, 64>
@@ -1152,3 +1155,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

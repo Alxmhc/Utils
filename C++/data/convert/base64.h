@@ -1,3 +1,6 @@
+#ifndef H_BASE64
+#define H_BASE64
+
 namespace convert
 {
 	namespace base64
@@ -93,3 +96,5 @@ namespace convert
 		};
 	}
 }
+
+#endif

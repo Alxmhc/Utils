@@ -1,3 +1,6 @@
+#ifndef H_BIT_READER
+#define H_BIT_READER
+
 class bitReader
 {
 protected:
@@ -146,3 +149,5 @@ public:
 		return true;
 	}
 };
+
+#endif

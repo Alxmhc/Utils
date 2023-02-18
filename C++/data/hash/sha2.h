@@ -1,3 +1,6 @@
+#ifndef H_SHA2
+#define H_SHA2
+
 namespace hash
 {
 	template<uint_fast8_t SZ>
@@ -296,3 +299,5 @@ namespace hash
 	typedef SHA2_64<48> SHA2_384;
 	typedef SHA2_64<64> SHA2_512;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_DECODE
+#define H_DECODE
+
 namespace decode
 {
 	bool unchunk(const uint8_t* v, const size_t n, byteWriter &bw)
@@ -23,3 +26,5 @@ namespace decode
 		return false;
 	}
 }
+
+#endif

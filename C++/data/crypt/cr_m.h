@@ -1,3 +1,6 @@
+#ifndef H_CR_M
+#define H_CR_M
+
 template<class CR>
 class cr_str : public byteWriterBuf<CR::block_size>
 {
@@ -210,3 +213,5 @@ namespace CR_CBC
 		}
 	};
 }
+
+#endif

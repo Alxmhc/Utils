@@ -1,3 +1,6 @@
+#ifndef H_TAR
+#define H_TAR
+
 namespace fl_pr
 {
 	class F_tar : public cont_n
@@ -64,3 +67,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

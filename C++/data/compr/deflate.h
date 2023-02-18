@@ -1,3 +1,6 @@
+#ifndef H_DEFLATE
+#define H_DEFLATE
+
 namespace compr
 {
 	class deflate
@@ -257,3 +260,5 @@ namespace compr
 		}
 	};
 }
+
+#endif

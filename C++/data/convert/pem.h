@@ -1,3 +1,6 @@
+#ifndef H_PEM
+#define H_PEM
+
 class pem
 {
 public:
@@ -55,3 +58,5 @@ public:
 		return data;
 	}
 };
+
+#endif

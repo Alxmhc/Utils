@@ -1,3 +1,6 @@
+#ifndef H_FL_
+#define H_FL_
+
 class br_fstream : public byteReader
 {
 	std::ifstream fst;
@@ -85,3 +88,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

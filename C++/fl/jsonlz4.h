@@ -1,3 +1,6 @@
+#ifndef H_JSONLZ4
+#define H_JSONLZ4
+
 namespace fl_pr
 {
 	class F_jsonlz4 : public cont_1
@@ -28,3 +31,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif

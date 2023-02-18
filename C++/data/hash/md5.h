@@ -1,3 +1,6 @@
+#ifndef H_MD5
+#define H_MD5
+
 namespace hash
 {
 	class MD5 : public HASH<16, 64>
@@ -165,3 +168,5 @@ namespace hash
 		}
 	};
 }
+
+#endif

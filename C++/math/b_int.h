@@ -1,3 +1,6 @@
+#ifndef H_B_INT
+#define H_B_INT
+
 template<typename T>
 T GCD(T a, T b)
 {
@@ -376,3 +379,5 @@ public:
 		return *this;
 	}
 };
+
+#endif

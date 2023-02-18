@@ -1,3 +1,6 @@
+#ifndef H_VT2
+#define H_VT2
+
 class vt2
 {
 public:
@@ -46,3 +49,5 @@ long double abs(const vt2 &a)
 {
 	return sqrt(dot(a,a));
 }
+
+#endif

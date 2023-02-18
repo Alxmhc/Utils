@@ -1,3 +1,6 @@
+#ifndef H_SET_
+#define H_SET_
+
 template<typename T>
 std::set<T> operator&(const std::set<T> &a, const std::set<T> &b)
 {
@@ -35,3 +38,5 @@ std::set<T> operator-(const std::set<T> &a, const std::set<T> &b)
 	std::set_difference(a.cbegin(), a.cend(), b.cbegin(), b.cend(), std::inserter(res, res.begin()));
 	return res;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef H_HASH
+#define H_HASH
+
 template<uint_fast8_t HSIZE, uint_fast8_t BSIZE>
 class HASH
 {
@@ -8,3 +11,5 @@ public:
 	virtual void Update(const uint8_t*, const size_t) = 0;
 	virtual void Final(uint8_t*) = 0;
 };
+
+#endif

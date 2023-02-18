@@ -1,3 +1,6 @@
+#ifndef H_TEST
+#define H_TEST
+
 template<size_t BSIZE>
 bool compare(const char* fl1, const char* fl2)
 {
@@ -41,3 +44,5 @@ bool compare(const std::vector<uint8_t> &t, const char* fname)
 	}
 	return true;
 }
+
+#endif

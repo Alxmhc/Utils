@@ -1,3 +1,6 @@
+#ifndef H_TIGER
+#define H_TIGER
+
 namespace hash
 {
 	class Tiger : public HASH<24, 64>
@@ -394,3 +397,5 @@ namespace hash
 		0xcd56d9430ea8280e, 0xc12591d7535f5065, 0xc83223f1720aef96, 0xc3a0396f7363a51f
 	};
 }
+
+#endif

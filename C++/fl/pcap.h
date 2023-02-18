@@ -1,3 +1,6 @@
+#ifndef H_PCAP
+#define H_PCAP
+
 namespace fl_pr
 {
 	class F_pcap
@@ -26,3 +29,5 @@ namespace fl_pr
 		}
 	};
 }
+
+#endif
