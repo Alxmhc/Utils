@@ -16,7 +16,10 @@ public:
 
 	void Calc(const uint8_t* salt, std::size_t ssize, const uint8_t* nm, uint8_t* res)
 	{
-		h.Update(salt, ssize);
+		if(ssize != 0)
+		{
+			h.Update(salt, ssize);
+		}
 		h.Update(nm, 4);
 		h.Final(res);
 	}
