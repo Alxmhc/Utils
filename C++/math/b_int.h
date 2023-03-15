@@ -5,23 +5,6 @@
 #include <algorithm>
 #include "../data/pack.h"
 
-template<typename T>
-T GCD(T a, T b)
-{
-	if(b > a)
-	{
-		b %= a;
-	}
-	while (b != 0)
-	{
-		a %= b;
-		if(a == 0)
-			return b;
-		b %= a;
-	}
-	return a;
-}
-
 class b_int
 {
 	typedef uint32_t num;
@@ -30,17 +13,17 @@ class b_int
 
 	std::vector<num> n;
 
-	signed char compare(const b_int &a) const
+	static signed char compare(const b_int &a, const b_int &b)
 	{
-		if(this == &a)
+		if(&a == &b)
 			return 0;
-		auto sz = n.size();
-		if(a.n.size() != sz)
-			return sz > a.n.size() ? 1 : -1;
+		auto sz = a.n.size();
+		if(b.n.size() != sz)
+			return sz > b.n.size() ? 1 : -1;
 		while(sz--)
 		{
-			if(n[sz] != a.n[sz])
-				return n[sz] > a.n[sz] ? 1 : -1;
+			if(a.n[sz] != b.n[sz])
+				return a.n[sz] > b.n[sz] ? 1 : -1;
 		}
 		return 0;
 	}
@@ -147,17 +130,18 @@ public:
 	{
 		return !operator==(a);
 	}
+
 	bool operator>(const b_int &c)
 	{
-		return compare(c) > 0;
+		return compare(*this, c) > 0;
 	}
 	bool operator<(const b_int &c)
 	{
-		return compare(c) < 0;
+		return compare(*this, c) < 0;
 	}
 	bool operator==(const b_int &c)
 	{
-		return compare(c) == 0;
+		return compare(*this, c) == 0;
 	}
 
 	const b_int& operator+=(const b_int &c)
@@ -321,7 +305,7 @@ public:
 
 	const b_int& operator%=(const b_int &c)
 	{
-		auto k = compare(c);
+		auto k = compare(*this, c);
 		if( k <= 0 )
 		{
 			if(k == 0)
@@ -331,6 +315,8 @@ public:
 			return *this;
 		}
 
+		size_t e = 1;
+
 		b_int tmp(c);
 		{
 			const auto d = n.size() - c.n.size();
@@ -338,6 +324,7 @@ public:
 			{
 				std::vector<num> v(d);
 				tmp.n.insert(tmp.n.begin(), v.cbegin(), v.cend());
+				e += d * BSZ;
 			}
 		}
 		{
@@ -354,6 +341,7 @@ public:
 				cb >>= 1;
 				d--;
 			}
+			e += d;
 			if(d < 0)
 			{
 				tmp >>= (-d);
@@ -364,9 +352,9 @@ public:
 			}
 		}
 
-		for(;;)
+		while(e--)
 		{
-			k = compare(tmp);
+			k = compare(*this, tmp);
 			if(k >= 0)
 			{
 				if(k == 0)
@@ -376,8 +364,6 @@ public:
 				}
 				operator-=(tmp);
 			}
-			if(tmp.compare(c) == 0)
-				break;
 			tmp >>= 1;
 		}
 		return *this;

@@ -42,26 +42,21 @@ namespace crypt
 				d[3] += K[3];
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
-					d[1] = (d[1] ^ S0(d[0])) + S1(d[0] >> 8);
-					d[2] += S0(d[0] >> 16);
-					d[3] ^= S1(d[0] >> 24);
-					d[0] = rotr(d[0], 24);
+					const uint32_t t = d[0];
+					d[0] = (d[1] ^ S0(t)) + S1(t >> 8);
+					d[1] = d[2] + S0(t >> 16);
+					d[2] = d[3] ^ S1(t >> 24);
+					d[3] = rotr(t, 24);
 
 					const uint_fast8_t o = i & 3;
 					if(o == 0)
 					{
-						d[0] += d[3];
+						d[3] += d[2];
 					}
 					else if(o == 1)
 					{
-						d[0] += d[1];
+						d[3] += d[0];
 					}
-
-					const uint32_t t = d[0];
-					d[0] = d[1];
-					d[1] = d[2];
-					d[2] = d[3];
-					d[3] = t;
 				}
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
@@ -72,14 +67,10 @@ namespace crypt
 					R = rotl(R, 5);
 					L = rotl(L ^ R, R&0x1f);
 
-					d[1] = (i<8) ? d[1] + L : d[1] ^ R;
-					d[2] += M;
-					d[3] = (i<8) ? d[3] ^ R : d[3] + L;
-
 					const uint32_t t = d[0];
-					d[0] = d[1];
-					d[1] = d[2];
-					d[2] = d[3];
+					d[0] = (i<8) ? d[1] + L : d[1] ^ R;
+					d[1] = d[2] + M;
+					d[2] = (i<8) ? d[3] ^ R : d[3] + L;
 					d[3] = rotl(t, 13);;
 				}
 				for(uint_fast8_t i = 0; i < 8; i++)
@@ -93,14 +84,10 @@ namespace crypt
 					{
 						d[0] -= d[1];
 					}
-					d[1] ^= S1(d[0]);
-					d[2] -= S0(d[0]>>24);
-					d[3] = (d[3] - S1(d[0]>>16)) ^ S0(d[0]>>8);
-
 					const uint32_t t = d[0];
-					d[0] = d[1];
-					d[1] = d[2];
-					d[2] = d[3];
+					d[0] = d[1] ^ S1(t);
+					d[1] = d[2] - S0(t>>24);
+					d[2] = (d[3] - S1(t>>16)) ^ S0(t>>8);
 					d[3] = rotl(t, 24);
 				}
 				d[0] -= K[36];
@@ -128,11 +115,11 @@ namespace crypt
 				d[3] += K[39];
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
-					const uint32_t t = rotr(d[3], 24);
-					d[3] = (d[2] ^ S0(t>>8)) + S1(t>>16);
-					d[2] = d[1] + S0(t>>24);
-					d[1] = d[0] ^ S1(t);
-					d[0] = t;
+					const uint32_t t = d[3];
+					d[3] = (d[2] ^ S0(t)) + S1(t>>8);
+					d[2] = d[1] + S0(t>>16);
+					d[1] = d[0] ^ S1(t>>24);
+					d[0] = rotr(t, 24);
 
 					const uint_fast8_t o = i & 3;
 					if(o == 1)
@@ -146,42 +133,35 @@ namespace crypt
 				}
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
-					const uint32_t t = rotr(d[3], 13);
-
 					uint32_t R = rotl(d[3] * K[2*(15-i)+5], 5);
-					uint32_t M = t + K[2*(15-i)+4];
+					uint32_t M = rotr(d[3], 13) + K[2*(15-i)+4];
 					uint32_t L = S(M) ^ R;
 					M = rotl(M, R&0x1f);
 					R = rotl(R, 5);
 					L = rotl(L ^ R, R&0x1f);
 
+					const uint32_t t = d[3];
 					d[3] = (i<8) ? d[2] - L : d[2] ^ R;
 					d[2] = d[1] - M;
 					d[1] = (i<8) ? d[0] ^ R : d[0] - L;
-					d[0] = t;
+					d[0] = rotr(t, 13);
 				}
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
-					const uint32_t t = d[3];
-					d[3] = d[2];
-					d[2] = d[1];
-					d[1] = d[0];
-					d[0] = t;
-
 					const uint_fast8_t o = i & 3;
 					if(o == 3)
 					{
-						d[0] -= d[3];
+						d[3] -= d[2];
 					}
 					else if(o == 2)
 					{
-						d[0] -= d[1];
+						d[3] -= d[0];
 					}
-
-					d[0] = rotl(d[0], 24);
-					d[3] ^= S1(d[0] >> 24);
-					d[2] -= S0(d[0] >> 16);
-					d[1] = (d[1] - S1(d[0] >> 8)) ^ S0(d[0]);
+					const uint32_t t = d[3];
+					d[3] = d[2] ^ S1(t);
+					d[2] = d[1] - S0(t >> 24);
+					d[1] = (d[0] - S1(t >> 16)) ^ S0(t >> 8);
+					d[0] = rotl(t, 24);
 				}
 				d[0] -= K[0];
 				d[1] -= K[1];
