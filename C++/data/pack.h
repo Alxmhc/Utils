@@ -207,17 +207,17 @@ struct bconv<8, endianness::LITTLE_ENDIAN>
 		UINT_<8>::uint_ r = bconv<4, endianness::LITTLE_ENDIAN>::pack(a + 4);
 		return (r<<32) | bconv<4, endianness::LITTLE_ENDIAN>::pack(a);
 	}
-	static UINT_<8>::uint_ pack(const uint32_t* a)
-	{
-		UINT_<8>::uint_ r = a[1];
-		return (r<<32) | a[0];
-	}
 	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
 	{
 		bconv<4, endianness::LITTLE_ENDIAN>::unpack(c & 0xffffffff, a);
 		bconv<4, endianness::LITTLE_ENDIAN>::unpack((c >> 32) & 0xffffffff, a + 4);
 	}
-	static void unpack(UINT_<8>::uint_ c, uint32_t* a)
+	static UINT_<8>::uint_ pack(const UINT_<4>::uint_* a)
+	{
+		UINT_<8>::uint_ r = a[1];
+		return (r<<32) | a[0];
+	}
+	static void unpack(UINT_<8>::uint_ c, UINT_<4>::uint_* a)
 	{
 		a[0] = c & 0xffffffff;
 		a[1] = (c >> 32) & 0xffffffff;
@@ -231,17 +231,17 @@ struct bconv<8, endianness::BIG_ENDIAN>
 		UINT_<8>::uint_ r = bconv<4, endianness::BIG_ENDIAN>::pack(a);
 		return (r<<32) | bconv<4, endianness::BIG_ENDIAN>::pack(a + 4);
 	}
-	static UINT_<8>::uint_ pack(const uint32_t* a)
-	{
-		UINT_<8>::uint_ r = a[0];
-		return (r<<32) | a[1];
-	}
 	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
 	{
 		bconv<4, endianness::BIG_ENDIAN>::unpack((c >> 32) & 0xffffffff, a);
 		bconv<4, endianness::BIG_ENDIAN>::unpack(c & 0xffffffff, a + 4);
 	}
-	static void unpack(UINT_<8>::uint_ c, uint32_t* a)
+	static UINT_<8>::uint_ pack(const UINT_<4>::uint_* a)
+	{
+		UINT_<8>::uint_ r = a[0];
+		return (r<<32) | a[1];
+	}
+	static void unpack(UINT_<8>::uint_ c, UINT_<4>::uint_* a)
 	{
 		a[0] = (c >> 32) & 0xffffffff;
 		a[1] = c & 0xffffffff;
@@ -253,8 +253,8 @@ struct bconv<16, endianness::LITTLE_ENDIAN>
 {
 	static UINT_<16>::uint_ pack(const uint8_t* a)
 	{
-		UINT_<8>::uint_ l = bconv<8, endianness::LITTLE_ENDIAN>::pack(a);
-		UINT_<8>::uint_ h = bconv<8, endianness::LITTLE_ENDIAN>::pack(a + 8);
+		const UINT_<8>::uint_ l = bconv<8, endianness::LITTLE_ENDIAN>::pack(a);
+		const UINT_<8>::uint_ h = bconv<8, endianness::LITTLE_ENDIAN>::pack(a + 8);
 		return UINT_<16>::uint_(l,h);
 	}
 	static void unpack(UINT_<16>::uint_ c, uint8_t* a)
@@ -262,20 +262,42 @@ struct bconv<16, endianness::LITTLE_ENDIAN>
 		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getL(), a);
 		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getH(), a + 8);
 	}
+	static UINT_<16>::uint_ pack(const UINT_<4>::uint_* a)
+	{
+		const UINT_<8>::uint_ l = bconv<8, endianness::LITTLE_ENDIAN>::pack(a);
+		const UINT_<8>::uint_ h = bconv<8, endianness::LITTLE_ENDIAN>::pack(a + 2);
+		return UINT_<16>::uint_(l,h);
+	}
+	static void unpack(UINT_<16>::uint_ c, UINT_<4>::uint_* a)
+	{
+		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getL(), a);
+		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getH(), a + 2);
+	}
 };
 template<>
 struct bconv<16, endianness::BIG_ENDIAN>
 {
 	static UINT_<16>::uint_ pack(const uint8_t* a)
 	{
-		UINT_<8>::uint_ l = bconv<8, endianness::BIG_ENDIAN>::pack(a + 8);
-		UINT_<8>::uint_ h = bconv<8, endianness::BIG_ENDIAN>::pack(a);
+		const UINT_<8>::uint_ l = bconv<8, endianness::BIG_ENDIAN>::pack(a + 8);
+		const UINT_<8>::uint_ h = bconv<8, endianness::BIG_ENDIAN>::pack(a);
 		return UINT_<16>::uint_(l,h);
 	}
 	static void unpack(UINT_<16>::uint_ c, uint8_t* a)
 	{
 		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getH(), a);
 		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getL(), a + 8);
+	}
+	static UINT_<16>::uint_ pack(const UINT_<4>::uint_* a)
+	{
+		const UINT_<8>::uint_ l = bconv<8, endianness::BIG_ENDIAN>::pack(a + 2);
+		const UINT_<8>::uint_ h = bconv<8, endianness::BIG_ENDIAN>::pack(a);
+		return UINT_<16>::uint_(l,h);
+	}
+	static void unpack(UINT_<16>::uint_ c, UINT_<4>::uint_* a)
+	{
+		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getH(), a);
+		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getL(), a + 2);
 	}
 };
 
