@@ -88,9 +88,9 @@ protected:
 		std::fill(buf + offset, buf + SZ, c);
 	}
 
-	void fill_ef(uint8_t c)
+	void pad_PKCS()
 	{
-		std::fill(buf + offset, buf + SZ, c);
+		std::fill(buf + offset, buf + SZ, SZ - offset);
 		process(buf);
 		offset = 0;
 	}

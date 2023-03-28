@@ -45,8 +45,7 @@ namespace hash
 			}
 			void Fin()
 			{
-				const uint8_t c = static_cast<uint8_t>(16-size());
-				fill_ef(c);
+				pad_PKCS();
 				process(h);
 			}
 		};
