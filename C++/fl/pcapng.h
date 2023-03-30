@@ -33,7 +33,7 @@ namespace fl_pr
 
 			if(type == 6)
 			{
-				const auto size = bconv<4, endianness::LITTLE_ENDIAN>::pack(tmp.data() + 12);
+				const auto size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(tmp.data() + 12);
 				data.assign(tmp.cbegin() + 20, tmp.cbegin() + 20 + size);
 			}
 			else

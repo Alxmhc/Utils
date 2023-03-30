@@ -47,7 +47,7 @@ std::vector<uint8_t> PBKDF2(const uint8_t* passw, std::size_t psz, const uint8_t
 		uint8_t tmp[F::out_size];
 		{
 			uint8_t num[4];
-			bconv<4, endianness::BIG_ENDIAN>::unpack(i, num);
+			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(i, num);
 			fcr.Calc(salt, ssz, num, tmp);
 		}
 		const std::size_t b = key.size();

@@ -24,16 +24,16 @@ public:
 	void writeC(typename UINT_<SZ>::uint_ c)
 	{
 		uint8_t t[SZ];
-		bconv<SZ, E>::unpack(c, t);
+		bconv<1, SZ, E>::unpack(c, t);
 		writeN(t, SZ);
 	}
 	template<unsigned char SZ, char E>
-	void writeC(typename UINT_<SZ>::uint_ const *c, std::size_t n)
+	void writeC(const typename UINT_<SZ>::uint_* c, std::size_t n)
 	{
 		uint8_t t[SZ];
 		for(std::size_t i = 0; i < n; i++)
 		{
-			bconv<SZ, E>::unpack(c[i], t);
+			bconv<1, SZ, E>::unpack(c[i], t);
 			writeN(t, SZ);
 		}
 	}

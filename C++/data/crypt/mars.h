@@ -1,8 +1,8 @@
 #ifndef H_MARS
 #define H_MARS
 
-#include "C:/TEST/Utils/C++/math/base/math_.h"
-#include "C:/TEST/Utils/C++/data/pack.h"
+#include "../../math/base/math_.h"
+#include "../pack.h"
 
 namespace crypt
 {

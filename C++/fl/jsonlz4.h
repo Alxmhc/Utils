@@ -21,7 +21,7 @@ namespace fl_pr
 				return false;
 			data_pos = 12;
 			data_size = br->get_rsize();
-			fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(hdr + 8);
+			fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(hdr + 8);
 			return true;
 		}
 

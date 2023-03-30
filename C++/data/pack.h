@@ -27,10 +27,61 @@ namespace endianness
 }
 
 template<unsigned char SZ> struct UINT_{};
-template<> struct UINT_<1>{typedef  uint_fast8_t uint_;};
-template<> struct UINT_<2>{typedef uint_fast16_t uint_;};
-template<> struct UINT_<4>{typedef uint_fast32_t uint_;};
-template<> struct UINT_<8>{typedef uint_fast64_t uint_;};
+template<> struct UINT_<1>
+{
+	typedef uint_fast8_t uint_;
+};
+template<> struct UINT_<2>
+{
+	typedef uint_fast16_t uint_;
+	static UINT_<1>::uint_ getL(uint_ c)
+	{
+		return c & 0xff;
+	}
+	static UINT_<1>::uint_ getH(uint_ c)
+	{
+		return (c >> 8) & 0xff;
+	}
+	static uint_ from(UINT_<1>::uint_ l, UINT_<1>::uint_ h)
+	{
+		uint_ r = h;
+		return (r << 8) | l;
+	}
+};
+template<> struct UINT_<4>
+{
+	typedef uint_fast32_t uint_;
+	static UINT_<2>::uint_ getL(uint_ c)
+	{
+		return c & 0xffff;
+	}
+	static UINT_<2>::uint_ getH(uint_ c)
+	{
+		return (c >> 16) & 0xffff;
+	}
+	static uint_ from(UINT_<2>::uint_ l, UINT_<2>::uint_ h)
+	{
+		uint_ r = h;
+		return (r << 16) | l;
+	}
+};
+template<> struct UINT_<8>
+{
+	typedef uint_fast64_t uint_;
+	static UINT_<4>::uint_ getL(uint_ c)
+	{
+		return c & 0xffffffff;
+	}
+	static UINT_<4>::uint_ getH(uint_ c)
+	{
+		return (c >> 32) & 0xffffffff;
+	}
+	static uint_ from(UINT_<4>::uint_ l, UINT_<4>::uint_ h)
+	{
+		uint_ r = h;
+		return (r << 32) | l;
+	}
+};
 template<> struct UINT_<16>
 {
 	class uint_
@@ -136,197 +187,113 @@ template<> struct UINT_<16>
 			return r <<= n;
 		}
 	};
+	static UINT_<8>::uint_ getL(uint_ c)
+	{
+		return c.getL();
+	}
+	static UINT_<8>::uint_ getH(uint_ c)
+	{
+		return c.getH();
+	}
+	static uint_ from(UINT_<8>::uint_ l, UINT_<8>::uint_ h)
+	{
+		return uint_(l, h);
+	}
 };
 
-template <unsigned char sz, char E>
+template <unsigned char sz, unsigned char k, char E>
 struct bconv{};
 
-template<>
-struct bconv<2, endianness::LITTLE_ENDIAN>
+template <unsigned char sz, unsigned char k>
+struct bconv<sz, k, endianness::LITTLE_ENDIAN>
 {
-	static UINT_<2>::uint_ pack(const uint8_t* a)
+	template<typename m>
+	static typename UINT_<k*sz>::uint_ pack(const m* a)
 	{
-		UINT_<2>::uint_ r = a[1];
-		return (r<<8) | a[0];
+		const auto l = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a);
+		const auto h = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a + k/2);
+		return UINT_<k*sz>::from(l, h);
 	}
-	static void unpack(UINT_<2>::uint_ c, uint8_t* a)
+	template<typename m>
+	static void unpack(typename UINT_<k*sz>::uint_ c, m* a)
 	{
-		a[0] = c & 0xff;
-		a[1] = (c >> 8) & 0xff;
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(UINT_<k*sz>::getL(c), a);
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(UINT_<k*sz>::getH(c), a + k/2);
 	}
 };
-template<>
-struct bconv<2, endianness::BIG_ENDIAN>
+template<unsigned char sz>
+struct bconv<sz, 1, endianness::LITTLE_ENDIAN>
 {
-	static UINT_<2>::uint_ pack(const uint8_t* a)
+	template<typename m>
+	static typename UINT_<sz>::uint_ pack(const m* a)
 	{
-		UINT_<2>::uint_ r = a[0];
-		return (r<<8) | a[1];
+		return *a;
 	}
-	static void unpack(UINT_<2>::uint_ c, uint8_t* a)
+	template<typename m>
+	static void unpack(typename UINT_<sz>::uint_ c, m* a)
 	{
-		a[0] = (c >> 8) & 0xff;
-		a[1] = c & 0xff;
-	}
-};
-
-template<>
-struct bconv<4, endianness::LITTLE_ENDIAN>
-{
-	static UINT_<4>::uint_ pack(const uint8_t* a)
-	{
-		UINT_<4>::uint_ r = bconv<2, endianness::LITTLE_ENDIAN>::pack(a + 2);
-		return (r<<16) | bconv<2, endianness::LITTLE_ENDIAN>::pack(a);
-	}
-	static void unpack(UINT_<4>::uint_ c, uint8_t* a)
-	{
-		bconv<2, endianness::LITTLE_ENDIAN>::unpack(c & 0xffff, a);
-		bconv<2, endianness::LITTLE_ENDIAN>::unpack((c >> 16) & 0xffff, a + 2);
-	}
-};
-template<>
-struct bconv<4, endianness::BIG_ENDIAN>
-{
-	static UINT_<4>::uint_ pack(const uint8_t* a)
-	{
-		UINT_<4>::uint_ r = bconv<2, endianness::BIG_ENDIAN>::pack(a);
-		return (r<<16) | bconv<2, endianness::BIG_ENDIAN>::pack(a + 2);
-	}
-	static void unpack(UINT_<4>::uint_ c, uint8_t* a)
-	{
-		bconv<2, endianness::BIG_ENDIAN>::unpack((c >> 16) & 0xffff, a);
-		bconv<2, endianness::BIG_ENDIAN>::unpack(c & 0xffff, a + 2);
+		*a = c;
 	}
 };
 
-template<>
-struct bconv<8, endianness::LITTLE_ENDIAN>
+template<unsigned char sz, unsigned char k>
+struct bconv<sz, k, endianness::BIG_ENDIAN>
 {
-	static UINT_<8>::uint_ pack(const uint8_t* a)
+	template<typename m>
+	static typename UINT_<k*sz>::uint_ pack(const m* a)
 	{
-		UINT_<8>::uint_ r = bconv<4, endianness::LITTLE_ENDIAN>::pack(a + 4);
-		return (r<<32) | bconv<4, endianness::LITTLE_ENDIAN>::pack(a);
+		const auto l = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a + k/2);
+		const auto h = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a);
+		return UINT_<k*sz>::from(l, h);
 	}
-	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
+	template<typename m>
+	static void unpack(typename UINT_<k*sz>::uint_ c, m* a)
 	{
-		bconv<4, endianness::LITTLE_ENDIAN>::unpack(c & 0xffffffff, a);
-		bconv<4, endianness::LITTLE_ENDIAN>::unpack((c >> 32) & 0xffffffff, a + 4);
-	}
-	static UINT_<8>::uint_ pack(const UINT_<4>::uint_* a)
-	{
-		UINT_<8>::uint_ r = a[1];
-		return (r<<32) | a[0];
-	}
-	static void unpack(UINT_<8>::uint_ c, UINT_<4>::uint_* a)
-	{
-		a[0] = c & 0xffffffff;
-		a[1] = (c >> 32) & 0xffffffff;
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(UINT_<k*sz>::getL(c), a + k/2);
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(UINT_<k*sz>::getH(c), a);
 	}
 };
-template<>
-struct bconv<8, endianness::BIG_ENDIAN>
+template<unsigned char sz>
+struct bconv<sz, 1, endianness::BIG_ENDIAN>
 {
-	static UINT_<8>::uint_ pack(const uint8_t* a)
+	template<typename m>
+	static typename UINT_<sz>::uint_ pack(const m* a)
 	{
-		UINT_<8>::uint_ r = bconv<4, endianness::BIG_ENDIAN>::pack(a);
-		return (r<<32) | bconv<4, endianness::BIG_ENDIAN>::pack(a + 4);
+		return *a;
 	}
-	static void unpack(UINT_<8>::uint_ c, uint8_t* a)
+	template<typename m>
+	static void unpack(typename UINT_<sz>::uint_ c, m* a)
 	{
-		bconv<4, endianness::BIG_ENDIAN>::unpack((c >> 32) & 0xffffffff, a);
-		bconv<4, endianness::BIG_ENDIAN>::unpack(c & 0xffffffff, a + 4);
-	}
-	static UINT_<8>::uint_ pack(const UINT_<4>::uint_* a)
-	{
-		UINT_<8>::uint_ r = a[0];
-		return (r<<32) | a[1];
-	}
-	static void unpack(UINT_<8>::uint_ c, UINT_<4>::uint_* a)
-	{
-		a[0] = (c >> 32) & 0xffffffff;
-		a[1] = c & 0xffffffff;
-	}
-};
-
-template<>
-struct bconv<16, endianness::LITTLE_ENDIAN>
-{
-	static UINT_<16>::uint_ pack(const uint8_t* a)
-	{
-		const UINT_<8>::uint_ l = bconv<8, endianness::LITTLE_ENDIAN>::pack(a);
-		const UINT_<8>::uint_ h = bconv<8, endianness::LITTLE_ENDIAN>::pack(a + 8);
-		return UINT_<16>::uint_(l,h);
-	}
-	static void unpack(UINT_<16>::uint_ c, uint8_t* a)
-	{
-		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getL(), a);
-		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getH(), a + 8);
-	}
-	static UINT_<16>::uint_ pack(const UINT_<4>::uint_* a)
-	{
-		const UINT_<8>::uint_ l = bconv<8, endianness::LITTLE_ENDIAN>::pack(a);
-		const UINT_<8>::uint_ h = bconv<8, endianness::LITTLE_ENDIAN>::pack(a + 2);
-		return UINT_<16>::uint_(l,h);
-	}
-	static void unpack(UINT_<16>::uint_ c, UINT_<4>::uint_* a)
-	{
-		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getL(), a);
-		bconv<8, endianness::LITTLE_ENDIAN>::unpack(c.getH(), a + 2);
-	}
-};
-template<>
-struct bconv<16, endianness::BIG_ENDIAN>
-{
-	static UINT_<16>::uint_ pack(const uint8_t* a)
-	{
-		const UINT_<8>::uint_ l = bconv<8, endianness::BIG_ENDIAN>::pack(a + 8);
-		const UINT_<8>::uint_ h = bconv<8, endianness::BIG_ENDIAN>::pack(a);
-		return UINT_<16>::uint_(l,h);
-	}
-	static void unpack(UINT_<16>::uint_ c, uint8_t* a)
-	{
-		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getH(), a);
-		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getL(), a + 8);
-	}
-	static UINT_<16>::uint_ pack(const UINT_<4>::uint_* a)
-	{
-		const UINT_<8>::uint_ l = bconv<8, endianness::BIG_ENDIAN>::pack(a + 2);
-		const UINT_<8>::uint_ h = bconv<8, endianness::BIG_ENDIAN>::pack(a);
-		return UINT_<16>::uint_(l,h);
-	}
-	static void unpack(UINT_<16>::uint_ c, UINT_<4>::uint_* a)
-	{
-		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getH(), a);
-		bconv<8, endianness::BIG_ENDIAN>::unpack(c.getL(), a + 2);
+		*a = c;
 	}
 };
 
 namespace conv
 {
-	template<unsigned char SZ, char E>
-	void pack(const uint8_t* a, const std::size_t n, typename UINT_<SZ>::uint_ *r)
+	template<unsigned char SZ, char E, typename m>
+	void pack(const uint8_t* a, const std::size_t n, m* r)
 	{
 		if(E == endianness::current)
 		{
 			memcpy(r, a, n);
 			return;
 		}
-		for(std::size_t i = 0; i < n / SZ; ++i)
+		for(std::size_t i = 0; i < n / SZ; i++)
 		{
-			r[i] = bconv<SZ, E>::pack(a + i*SZ);
+			r[i] = bconv<1, SZ, E>::pack(a + i*SZ);
 		}
 	}
-	template<unsigned char SZ, char E>
-	void unpack(typename UINT_<SZ>::uint_ const *a, std::size_t n, uint8_t* r)
+	template<unsigned char SZ, char E, typename m>
+	void unpack(const m* a, std::size_t n, uint8_t* r)
 	{
 		if(E == endianness::current)
 		{
 			memcpy(r, a, n*SZ);
 			return;
 		}
-		for(std::size_t i = 0; i < n; ++i)
+		for(std::size_t i = 0; i < n; i++)
 		{
-			bconv<SZ, E>::unpack(a[i], r + i*SZ);
+			bconv<1, SZ, E>::unpack(a[i], r + i*SZ);
 		}
 	}
 }

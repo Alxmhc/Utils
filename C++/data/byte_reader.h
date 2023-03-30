@@ -105,7 +105,7 @@ public:
 		uint8_t t[SZ];
 		if (!readN(t, SZ))
 			return false;
-		c = bconv<SZ, E>::pack(t);
+		c = bconv<1, SZ, E>::pack(t);
 		return true;
 	}
 

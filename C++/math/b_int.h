@@ -91,13 +91,13 @@ public:
 		while(k > 3)
 		{
 			k -= 4;
-			n[i++] = bconv<4, endianness::BIG_ENDIAN>::pack(v + k);
+			n[i++] = bconv<1, 4, endianness::BIG_ENDIAN>::pack(v + k);
 		}
 		if(k != 0)
 		{
 			uint_fast8_t t[4] = {};
 			std::copy_n(v, k, t + 4 - k);
-			n[i] = bconv<4, endianness::BIG_ENDIAN>::pack(t);
+			n[i] = bconv<1, 4, endianness::BIG_ENDIAN>::pack(t);
 		}
 	}
 
@@ -107,7 +107,7 @@ public:
 		std::vector<uint8_t> res(k * 4);
 		for(std::size_t i = 0; i < k; i++)
 		{
-			bconv<4, endianness::BIG_ENDIAN>::unpack(n[i], res.data() + 4*(k-i-1));
+			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(n[i], res.data() + 4*(k-i-1));
 		}
 		std::size_t c = 0;
 		for(; c < res.size() - 1; c++)
@@ -204,7 +204,7 @@ public:
 			t *= a;
 			t += d;
 			num n2[2];
-			bconv<8, endianness::LITTLE_ENDIAN>::unpack(t, n2);
+			bconv<4, 2, endianness::LITTLE_ENDIAN>::unpack(t, n2);
 			n[i] = n2[0];
 			d = n2[1];
 		}

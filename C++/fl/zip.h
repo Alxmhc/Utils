@@ -194,16 +194,16 @@ namespace fl_pr
 				inf_1 inf;
 
 				r.encryption = h[2] & 1;
-				r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+4);
+				r.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
 				std::copy_n(h+10, 4, r.crc32);
-				inf.data_size = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+14);
-				r.fsize = bconv<4, endianness::LITTLE_ENDIAN>::pack(h+18);
+				inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
+				r.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
-				const auto szfn = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+22);
+				const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
 				if( !br->readN(r.fname, szfn) )
 					break;
 
-				const auto szex = bconv<2, endianness::LITTLE_ENDIAN>::pack(h+24);
+				const auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
 				if(szex != 0)
 				{
 					std::vector<uint8_t> ext;
@@ -214,7 +214,7 @@ namespace fl_pr
 						if(szex < 11)
 							break;
 						r.encryption = ext[8] + 1;
-						r.method = bconv<2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
+						r.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
 					}
 				}
 				inf.data_pos = br->get_pos();

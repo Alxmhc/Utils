@@ -39,37 +39,37 @@ namespace crypt
 		static UINT_<16>::uint_ A(const UINT_<16>::uint_ &c)
 		{
 			uint8_t vi[16], vo[16];
-			bconv<16, endianness::BIG_ENDIAN>::unpack(c, vi);
+			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
 			Av(vi, vo);
-			return bconv<16, endianness::BIG_ENDIAN>::pack(vo);
+			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
 		static UINT_<16>::uint_ SL(const UINT_<16>::uint_ &c)
 		{
 			uint8_t vi[16];
-			bconv<16, endianness::BIG_ENDIAN>::unpack(c, vi);
+			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
 			uint8_t vo[16] = {
 			SB3[vi[0]],  SB4[vi[1]],  SB1[vi[2]],  SB2[vi[3]],
 			SB3[vi[4]],  SB4[vi[5]],  SB1[vi[6]],  SB2[vi[7]],
 			SB3[vi[8]],  SB4[vi[9]],  SB1[vi[10]], SB2[vi[11]],
 			SB3[vi[12]], SB4[vi[13]], SB1[vi[14]], SB2[vi[15]]};
-			return bconv<16, endianness::BIG_ENDIAN>::pack(vo);
+			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
 		static UINT_<16>::uint_ FO(const UINT_<16>::uint_ &c)
 		{
 			uint8_t v[16];
-			bconv<16, endianness::BIG_ENDIAN>::unpack(c, v);
+			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, v);
 			uint8_t vo[16] = {
 			SB1[v[0]],  SB2[v[1]],  SB3[v[2]],  SB4[v[3]],
 			SB1[v[4]],  SB2[v[5]],  SB3[v[6]],  SB4[v[7]],
 			SB1[v[8]],  SB2[v[9]],  SB3[v[10]], SB4[v[11]],
 			SB1[v[12]], SB2[v[13]], SB3[v[14]], SB4[v[15]]};
 			Av(vo, v);
-			return bconv<16, endianness::BIG_ENDIAN>::pack(v);
+			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(v);
 		}
 
 		static void Process(const std::vector<UINT_<16>::uint_> &key, uint8_t* r)
 		{
-			auto P = bconv<16, endianness::BIG_ENDIAN>::pack(r);
+			auto P = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 			const uint_fast8_t n = static_cast<uint_fast8_t>(key.size() - 1);
 			uint_fast8_t i = 0;
 			for(;;)
@@ -81,7 +81,7 @@ namespace crypt
 				P = A(P);
 			}
 			P ^= key[i];
-			bconv<16, endianness::BIG_ENDIAN>::unpack(P, r);
+			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(P, r);
 		}
 
 		class en
@@ -120,8 +120,8 @@ namespace crypt
 			uint8_t r[16] = {};
 			memcpy(r, k + 16, ksz - 16);
 
-			UINT_<16>::uint_ KL = bconv<16, endianness::BIG_ENDIAN>::pack(k);
-			UINT_<16>::uint_ KR = bconv<16, endianness::BIG_ENDIAN>::pack(r);
+			UINT_<16>::uint_ KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint_ KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 
 			const UINT_<16>::uint_ CK[3] = {
 				UINT_<16>::uint_(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
