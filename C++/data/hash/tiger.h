@@ -2,13 +2,16 @@
 #define H_TIGER
 
 #include <array>
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
-	class Tiger : public HASH<24, 64>
+	class Tiger
 	{
+	public:
+		static const uint_fast8_t hash_size = 24;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			void key_schedule()

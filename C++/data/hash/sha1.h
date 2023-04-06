@@ -3,13 +3,16 @@
 
 #include <array>
 #include "../../math/base/math_.h"
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
-	class SHA1 : public HASH<20, 64>
+	class SHA1
 	{
+	public:
+		static const uint_fast8_t hash_size = 20;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			void Transform()

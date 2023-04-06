@@ -3,13 +3,16 @@
 
 #include <array>
 #include "../../math/base/math_.h"
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
-	class MD4 : public HASH<16, 64>
+	class MD4
 	{
+	public:
+		static const uint_fast8_t hash_size = 16;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static void FF(uint32_t &a, uint32_t b, uint32_t c, uint32_t d, uint32_t x, uint_fast8_t s)

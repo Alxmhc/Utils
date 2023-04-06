@@ -3,13 +3,16 @@
 
 #include <array>
 #include "../../math/base/math_.h"
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
-	class RIPEMD128 : public HASH<16, 64>
+	class RIPEMD128
 	{
+	public:
+		static const uint_fast8_t hash_size = 16;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static void fn1(uint32_t &a, uint32_t b, uint32_t &c, uint32_t d, uint32_t x, uint8_t s)
@@ -261,8 +264,12 @@ namespace hash
 		}
 	};
 
-	class RIPEMD160 : public HASH<20, 64>
+	class RIPEMD160
 	{
+	public:
+		static const uint_fast8_t hash_size = 20;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static void f(uint32_t &a, uint32_t &c, uint32_t e, uint32_t x, uint_fast8_t s)
@@ -567,8 +574,12 @@ namespace hash
 		}
 	};
 
-	class RIPEMD256 : public HASH<32, 64>
+	class RIPEMD256
 	{
+	public:
+		static const uint_fast8_t hash_size = 32;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static void fn1(uint32_t &a, uint32_t b, uint32_t &c, uint32_t d, uint32_t x, uint8_t s)
@@ -835,8 +846,12 @@ namespace hash
 		}
 	};
 
-	class RIPEMD320 : public HASH<40, 64>
+	class RIPEMD320
 	{
+	public:
+		static const uint_fast8_t hash_size = 40;
+		static const uint_fast8_t block_size = 64;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static void f(uint32_t &a, uint32_t &c, uint32_t e, uint32_t x, uint_fast8_t s)

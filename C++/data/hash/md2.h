@@ -1,13 +1,16 @@
 #ifndef H_MD2
 #define H_MD2
 
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
-	class MD2 : public HASH<16, 16>
+	class MD2
 	{
+	public:
+		static const uint_fast8_t hash_size = 16;
+		static const uint_fast8_t block_size = 16;
+	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
 			static const uint8_t tbl[256];

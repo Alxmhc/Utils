@@ -1,14 +1,17 @@
 #ifndef H_CRC32
 #define H_CRC32
 
-#include "./hash.h"
 #include "../pack.h"
 
 namespace hash
 {
 	//rfc 1952
-	class CRC32 : public HASH<4, 1>
+	class CRC32
 	{
+	public:
+		static const uint_fast8_t hash_size = 4;
+		static const uint_fast8_t block_size = 1;
+	private:
 		uint32_t tbl[256];
 		uint32_t crc;
 

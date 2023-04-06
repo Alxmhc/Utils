@@ -273,11 +273,6 @@ namespace conv
 	template<unsigned char SZ, char E, typename m>
 	void pack(const uint8_t* a, const std::size_t n, m* r)
 	{
-		if(E == endianness::current)
-		{
-			memcpy(r, a, n);
-			return;
-		}
 		for(std::size_t i = 0; i < n / SZ; i++)
 		{
 			r[i] = bconv<1, SZ, E>::pack(a + i*SZ);
@@ -286,11 +281,6 @@ namespace conv
 	template<unsigned char SZ, char E, typename m>
 	void unpack(const m* a, std::size_t n, uint8_t* r)
 	{
-		if(E == endianness::current)
-		{
-			memcpy(r, a, n*SZ);
-			return;
-		}
 		for(std::size_t i = 0; i < n; i++)
 		{
 			bconv<1, SZ, E>::unpack(a[i], r + i*SZ);

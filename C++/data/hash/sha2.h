@@ -3,14 +3,17 @@
 
 #include <array>
 #include "../../math/base/math_.h"
-#include "./hash.h"
 #include "../byte_writer.h"
 
 namespace hash
 {
 	template<uint_fast8_t SZ>
-	class SHA2_32 : public HASH<SZ, 64>
+	class SHA2_32
 	{
+	public:
+		static const uint_fast8_t hash_size = SZ;
+		static const uint_fast8_t block_size = 64;
+	private:
 		static const uint32_t st0[8];
 		class tbf : public byteWriterBuf<64>
 		{
@@ -153,8 +156,12 @@ namespace hash
 
 
 	template<uint_fast8_t SZ>
-	class SHA2_64 : public HASH<SZ, 128>
+	class SHA2_64
 	{
+	public:
+		static const uint_fast8_t hash_size = SZ;
+		static const uint_fast8_t block_size = 128;
+	private:
 		static const uint64_t st0[8];
 		class tbf : public byteWriterBuf<128>
 		{

@@ -1,15 +1,19 @@
 #ifndef H_HMAC
 #define H_HMAC
 
+#include <cstdint>
 #include <algorithm>
-#include "./hash.h"
 
 namespace hash
 {
 	//rfc 2104
 	template<class H>
-	class HMAC : public HASH<H::hash_size, H::block_size>
+	class HMAC
 	{
+	public:
+		static const uint_fast8_t hash_size = H::hash_size;
+		static const uint_fast8_t block_size = H::block_size;
+	private:
 		H hash;
 		uint8_t ki[H::block_size], ko[H::block_size];
 
