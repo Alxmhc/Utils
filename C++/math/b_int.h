@@ -39,20 +39,16 @@ class b_int
 		std::size_t i = 0;
 		for(; i < c.n.size(); i++)
 		{
-			const bool isB = (n[i] >= c.n[i]);
-			n[i] -= c.n[i];
 			if(d)
 			{
-				if(isB && n[i] != 0)
-				{
-					d = false;
-				}
+				d = (n[i] <= c.n[i]);
 				n[i]--;
 			}
-			else if( !isB )
+			else
 			{
-				d = true;
+				d = (n[i] < c.n[i]);
 			}
+			n[i] -= c.n[i];
 		}
 		while(d)
 		{
@@ -63,6 +59,7 @@ class b_int
 			n[i]--;
 			i++;
 		}
+
 		const auto sz = n.size();
 		i = sz;
 		while(i != 1 && n[i-1] == 0)
@@ -73,6 +70,7 @@ class b_int
 		{
 			n.resize(i);
 		}
+
 		return *this;
 	}
 public:
@@ -159,15 +157,17 @@ public:
 		bool d = false;
 		for(; i < csz; i++)
 		{
+			n[i] += c.n[i];
 			if(d)
 			{
 				n[i]++;
-				d = (n[i] == 0);
+				d = (n[i] <= c.n[i]);
 			}
-			n[i] += c.n[i];
-			d = d || (n[i] < c.n[i]);
+			else
+			{
+				d = (n[i] < c.n[i]);
+			}
 		}
-
 		if(d)
 		{
 			for(; i < n.size(); ++i)
@@ -201,12 +201,9 @@ public:
 		for(const auto sz = n.size(); i < sz; i++)
 		{
 			num2 t = n[i];
-			t *= a;
-			t += d;
-			num n2[2];
-			bconv<4, 2, endianness::LITTLE_ENDIAN>::unpack(t, n2);
-			n[i] = n2[0];
-			d = n2[1];
+			t = t*a + d;
+			n[i] = UINT_<BSZ/4>::getL(t);
+			d = UINT_<BSZ/4>::getH(t);
 		}
 		if(d)
 		{
