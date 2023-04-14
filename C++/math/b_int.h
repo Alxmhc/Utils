@@ -13,65 +13,30 @@ class b_int
 
 	std::vector<num> n;
 
-	static signed char compare(const b_int &a, const b_int &b)
+	signed char compare(const b_int &c)
 	{
-		if(&a == &b)
+		if(this == &c)
 			return 0;
-		auto sz = a.n.size();
-		if(b.n.size() != sz)
-			return sz > b.n.size() ? 1 : -1;
+		auto sz = n.size();
 		while(sz--)
 		{
-			if(a.n[sz] != b.n[sz])
-				return a.n[sz] > b.n[sz] ? 1 : -1;
+			if(n[sz] != c.n[sz])
+				return n[sz] > c.n[sz] ? 1 : -1;
 		}
 		return 0;
 	}
 
-	const b_int& operator-=(const b_int &c)
+	b_int gBits(std::size_t k)
 	{
-		if(this == &c)
+		const std::size_t sz = (k-1)/BSZ + 1;
+		b_int res;
+		res.n.assign(n.begin(), n.begin() + sz);
+		const auto d = k % BSZ;
+		if(d != 0)
 		{
-			*this = 0;
-			return *this;
+			res.n.back() &= (1<<d) - 1;
 		}
-		bool d = false;
-		std::size_t i = 0;
-		for(; i < c.n.size(); i++)
-		{
-			if(d)
-			{
-				d = (n[i] <= c.n[i]);
-				n[i]--;
-			}
-			else
-			{
-				d = (n[i] < c.n[i]);
-			}
-			n[i] -= c.n[i];
-		}
-		while(d)
-		{
-			if(n[i] != 0)
-			{
-				d = false;
-			}
-			n[i]--;
-			i++;
-		}
-
-		const auto sz = n.size();
-		i = sz;
-		while(i != 1 && n[i-1] == 0)
-		{
-			i--;
-		}
-		if(i != sz)
-		{
-			n.resize(i);
-		}
-
-		return *this;
+		return res;
 	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
@@ -131,29 +96,47 @@ public:
 
 	bool operator>(const b_int &c)
 	{
-		return compare(*this, c) > 0;
+		if(n.size() != c.n.size())
+			return n.size() > c.n.size();
+		return compare(c) > 0;
 	}
 	bool operator<(const b_int &c)
 	{
-		return compare(*this, c) < 0;
+		if(n.size() != c.n.size())
+			return n.size() < c.n.size();
+		return compare(c) < 0;
 	}
 	bool operator==(const b_int &c)
 	{
-		return compare(*this, c) == 0;
+		if(n.size() != c.n.size())
+			return false;
+		return compare(c) == 0;
+	}
+
+	bool operator>=(const b_int &c)
+	{
+		return !operator<(c);
 	}
 
 	const b_int& operator+=(const b_int &c)
 	{
+		if(c == 0)
+			return *this;
 		if(this == &c)
 			return *this <<= 1;
 
-		auto csz = c.n.size();
+		const auto csz = c.n.size();
 		if(n.size() < csz)
 		{
 			n.resize(csz);
 		}
 
 		std::size_t i = 0;
+		while(c.n[i] == 0)
+		{
+			i++;
+		}
+
 		bool d = false;
 		for(; i < csz; i++)
 		{
@@ -168,16 +151,71 @@ public:
 				d = (n[i] < c.n[i]);
 			}
 		}
-		if(d)
+		while(d)
 		{
-			for(; i < n.size(); ++i)
+			if(i == n.size())
 			{
-				n[i]++;
-				if(n[i] != 0)
-					return *this;
+				n.push_back(1);
+				break;
 			}
-			n.push_back(1);
+			n[i]++;
+			d = (n[i] == 0);
+			i++;
 		}
+		return *this;
+	}
+
+	//*this >= c
+	const b_int& operator-=(const b_int &c)
+	{
+		if(c == 0)
+			return *this;
+		if(this == &c)
+		{
+			*this = 0;
+			return *this;
+		}
+
+		std::size_t i = 0;
+		while(c.n[i] == 0)
+		{
+			i++;
+		}
+
+		const auto csz = c.n.size();
+
+		bool d = false;
+		for(; i < csz; i++)
+		{
+			if(d)
+			{
+				d = (n[i] <= c.n[i]);
+				n[i]--;
+			}
+			else
+			{
+				d = (n[i] < c.n[i]);
+			}
+			n[i] -= c.n[i];
+		}
+		while(d)
+		{
+			d = (n[i] == 0);
+			n[i]--;
+			i++;
+		}
+
+		const auto sz = n.size();
+		i = sz;
+		while(i != 1 && n[i-1] == 0)
+		{
+			i--;
+		}
+		if(i != sz)
+		{
+			n.resize(i);
+		}
+
 		return *this;
 	}
 
@@ -220,8 +258,17 @@ public:
 
 	const b_int& operator*=(const b_int &c)
 	{
-		b_int res;
+		if(*this == 0)
+			return *this;
+
 		const auto csz = c.n.size();
+		if(csz == 1)
+		{
+			*this *= c.n[0];
+			return *this;
+		}
+
+		b_int res;
 		res.n.resize(n.size() + csz - 1);
 
 		for(std::size_t i = 0;;)
@@ -244,6 +291,9 @@ public:
 
 	const b_int& operator>>=(std::size_t c)
 	{
+		if(*this == 0)
+			return *this;
+
 		const auto k = c / BSZ;
 		if(k != 0)
 		{
@@ -276,9 +326,19 @@ public:
 
 	const b_int& operator<<=(std::size_t c)
 	{
+		if(*this == 0)
+			return *this;
+
+		std::size_t i = 0;
+		while(n[i] == 0)
+		{
+			i++;
+		}
+
 		const auto k = c / BSZ;
 		if(k != 0)
 		{
+			i += k;
 			std::vector<num> tmp(k);
 			n.insert(n.begin(), tmp.cbegin(), tmp.cend());
 			c %= BSZ;
@@ -287,7 +347,7 @@ public:
 			return *this;
 
 		num d = 0;
-		for(std::size_t i = 0; i < n.size(); i++)
+		for(; i < n.size(); i++)
 		{
 			const auto t = n[i] >> (BSZ - c);
 			n[i] = (n[i]<<c) | d;
@@ -300,69 +360,66 @@ public:
 		return *this;
 	}
 
+	num operator%(num c)
+	{
+		if(c == 1)
+			return 0;
+		auto sz = n.size() - 1;
+		num r = n[sz] % c;
+		while(sz--)
+		{
+			r = UINT_<BSZ/4>::from(n[sz], r) % c;
+		}
+		return r;
+	}
+
 	const b_int& operator%=(const b_int &c)
 	{
-		auto k = compare(*this, c);
-		if( k <= 0 )
+		if(*this < c)
+			return *this;
+		if(c.n.size() == 1)
 		{
-			if(k == 0)
+			const num r = *this % c.n[0];
+			*this = r;
+			return *this;
+		}
+		if((c.n[0] & 1) != 0)
+		{
+			std::size_t k = 0;
+			for(;;)
 			{
-				*this = 0;
+				if((n[0] & 1) != 0)
+				{
+					*this -= c;
+				}
+				*this >>= 1;
+				k++;
+				if(*this < c)
+					break;
+			}
+			for(std::size_t i = 0; i < k; i++)
+			{
+				*this <<= 1;
+				if(*this >= c)
+				{
+					*this -= c;
+				}
 			}
 			return *this;
 		}
 
-		size_t e = 1;
-
-		b_int tmp(c);
+		std::size_t k = 0;
+		b_int t(c);
+		while((t.n[0] & 1) == 0)
 		{
-			const auto d = n.size() - c.n.size();
-			if(d != 0)
-			{
-				std::vector<num> v(d);
-				tmp.n.insert(tmp.n.begin(), v.cbegin(), v.cend());
-				e += d * BSZ;
-			}
+			t >>= 1;
+			k++;
 		}
-		{
-			int d = 0;
-			const auto nb = n.back();
-			num2 cb = tmp.n.back();
-			while(cb < nb)
-			{
-				cb <<= 1;
-				d++;
-			}
-			while(cb > nb)
-			{
-				cb >>= 1;
-				d--;
-			}
-			e += d;
-			if(d < 0)
-			{
-				tmp >>= (-d);
-			}
-			else if(d > 0)
-			{
-				tmp <<= d;
-			}
-		}
-
-		while(e--)
-		{
-			k = compare(*this, tmp);
-			if(k >= 0)
-			{
-				if(k == 0)
-				{
-					*this = 0;
-					break;
-				}
-				operator-=(tmp);
-			}
-			tmp >>= 1;
-		}
+		const auto q = gBits(k);
+		*this >>= k;
+		*this %= t;
+		*this <<= k;
+		*this += q;
 		return *this;
 	}
 };
