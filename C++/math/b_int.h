@@ -5,6 +5,32 @@
 #include <algorithm>
 #include "../data/pack.h"
 
+//(a^b)%c
+uint_fast64_t pw_m(uint_fast64_t a, uint_fast64_t b, uint_fast64_t c)
+{
+	if(a < 2)
+		return a;
+	if(b == 0)
+		return 1;
+	uint_fast64_t r = 1;
+	for(;;)
+	{
+		if((b & 1) != 0)
+		{
+			r *= a;
+			r %= c;
+			if(b == 1)
+				break;
+		}
+		a *= a;
+		a %= c;
+		if(a == 1)
+			break;
+		b >>= 1;
+	}
+	return r;
+}
+
 class b_int
 {
 	typedef uint32_t num;
@@ -13,7 +39,7 @@ class b_int
 
 	std::vector<num> n;
 
-	signed char compare(const b_int &c)
+	signed char compare(const b_int &c) const
 	{
 		if(this == &c)
 			return 0;
@@ -89,31 +115,39 @@ public:
 	{
 		return (n.size() == 1) && (n[0] == a);
 	}
+	bool operator<(num a) const
+	{
+		return (n.size() == 1) && (n[0] < a);
+	}
+	bool operator>(num a) const
+	{
+		return (n.size() != 1) || (n[0] > a);
+	}
 	bool operator!=(num a) const
 	{
 		return !operator==(a);
 	}
 
-	bool operator>(const b_int &c)
+	bool operator>(const b_int &c) const
 	{
 		if(n.size() != c.n.size())
 			return n.size() > c.n.size();
 		return compare(c) > 0;
 	}
-	bool operator<(const b_int &c)
+	bool operator<(const b_int &c) const
 	{
 		if(n.size() != c.n.size())
 			return n.size() < c.n.size();
 		return compare(c) < 0;
 	}
-	bool operator==(const b_int &c)
+	bool operator==(const b_int &c) const
 	{
 		if(n.size() != c.n.size())
 			return false;
 		return compare(c) == 0;
 	}
 
-	bool operator>=(const b_int &c)
+	bool operator>=(const b_int &c) const
 	{
 		return !operator<(c);
 	}
@@ -421,6 +455,32 @@ public:
 		*this <<= k;
 		*this += q;
 		return *this;
+	}
+
+	//(a^b)%c
+	static b_int pw_m(b_int a, num b, b_int c)
+	{
+		if(a < 2)
+			return a;
+		b_int r(1);
+		if(b == 0)
+			return r;
+		for(;;)
+		{
+			if((b & 1) != 0)
+			{
+				r *= a;
+				r %= c;
+				if(b == 1)
+					break;
+			}
+			a *= a;
+			a %= c;
+			if(a == 1)
+				break;
+			b >>= 1;
+		}
+		return r;
 	}
 };
 
