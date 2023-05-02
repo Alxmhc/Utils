@@ -2,6 +2,7 @@
 #define H_ARIA
 
 #include <vector>
+#include <algorithm>
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -118,7 +119,7 @@ namespace crypt
 		ARIA(const uint8_t* k, uint_fast8_t ksz) : Enc(keyEnc), Dec(keyDec)
 		{
 			uint8_t r[16] = {};
-			memcpy(r, k + 16, ksz - 16);
+			std::copy_n(k + 16, ksz - 16, r);
 
 			UINT_<16>::uint_ KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
 			UINT_<16>::uint_ KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);

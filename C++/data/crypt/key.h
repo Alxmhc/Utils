@@ -2,6 +2,7 @@
 #define H_KEY
 
 #include <vector>
+#include "../../arr.h"
 #include "../pack.h"
 #include "../hash/hmac.h"
 
@@ -55,10 +56,7 @@ std::vector<uint8_t> PBKDF2(const uint8_t* passw, std::size_t psz, const uint8_t
 		for(std::size_t j = 1; j < c; j++)
 		{
 			fcr.Calc(tmp);
-			for(uint_fast8_t k = 0; k < F::out_size; k++)
-			{
-				key[b + k] ^= tmp[k];
-			}
+			v_xor(key.data() + b, tmp, F::out_size);
 		}
 	}
 	key.resize(ksz);

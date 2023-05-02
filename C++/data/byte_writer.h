@@ -2,7 +2,6 @@
 #define H_BYTE_WRITER
 
 #include <vector>
-#include <string>
 #include <algorithm>
 #include "./pack.h"
 
@@ -11,13 +10,14 @@ class byteWriter
 public:
 	virtual void writeN(const uint8_t*, std::size_t) = 0;
 
-	void write(uint8_t c)
+	virtual void write(uint8_t c)
 	{
 		writeN(&c, 1);
 	}
-	void writeS(const std::string &s)
+
+	void writeS(const char* s, std::size_t n)
 	{
-		writeN(reinterpret_cast<const uint8_t*>(s.c_str()), s.length());
+		writeN(reinterpret_cast<const uint8_t*>(s), n);
 	}
 
 	template<unsigned char SZ, char E>
@@ -26,16 +26,6 @@ public:
 		uint8_t t[SZ];
 		bconv<1, SZ, E>::unpack(c, t);
 		writeN(t, SZ);
-	}
-	template<unsigned char SZ, char E>
-	void writeC(const typename UINT_<SZ>::uint_* c, std::size_t n)
-	{
-		uint8_t t[SZ];
-		for(std::size_t i = 0; i < n; i++)
-		{
-			bconv<1, SZ, E>::unpack(c[i], t);
-			writeN(t, SZ);
-		}
 	}
 
 	virtual void Fin()

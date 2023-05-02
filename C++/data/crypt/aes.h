@@ -3,7 +3,8 @@
 
 #include <cstdint>
 #include <vector>
-#include <algorithm>
+
+#include "../../arr.h"
 
 namespace crypt
 {
@@ -46,16 +47,16 @@ namespace crypt
 
 			void process(uint8_t* r) const
 			{
-				std::transform(r, r + 16, key->data(), r, [](uint8_t a, uint8_t b){return a ^ b;});
+				v_xor(r, key->data(), 16);
 				std::size_t i = 16;
 				for(; i < key->size() - 16; i += 16)
 				{
 					SubShift(r);
 					Mix(r);
-					std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+					v_xor(r, key->data() + i, 16);
 				}
 				SubShift(r);
-				std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+				v_xor(r, key->data() + i, 16);
 			}
 		};
 
@@ -97,16 +98,16 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				std::size_t i = key->size() - 16;
-				std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+				v_xor(r, key->data() + i, 16);
 				i -= 16;
 				SubShiftI(r);
 				for(; i > 0; i -= 16)
 				{
-					std::transform(r, r + 16, key->data() + i, r, [](uint8_t a, uint8_t b){return a ^ b;});
+					v_xor(r, key->data() + i, 16);
 					MixI(r);
 					SubShiftI(r);
 				}
-				std::transform(r, r + 16, key->data(), r, [](uint8_t a, uint8_t b){return a ^ b;});
+				v_xor(r, key->data(), 16);
 			}
 		};
 	public:

@@ -1,6 +1,7 @@
 #ifndef H_CR_M
 #define H_CR_M
 
+#include "../../arr.h"
 #include "../byte_writer.h"
 
 template<class CR>
@@ -65,7 +66,7 @@ namespace CR_CTR
 			uint8_t tmp[CR::block_size];
 			std::copy_n(this->iv_cur, CR::block_size, tmp);
 			this->cr->Enc.process(tmp);
-			std::transform(v, v + sz, tmp, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
+			v_xor(tmp, v, sz);
 			this->bw->writeN(tmp, sz);
 			INCR::incr(this->iv_cur, CR::block_size);
 		}
@@ -90,7 +91,8 @@ namespace CR_OFB
 		{
 			this->cr->Enc.process(this->iv_cur);
 			uint8_t tmp[CR::block_size];
-			std::transform(v, v + sz, this->iv_cur, tmp, [](uint8_t a, uint8_t b){return a ^ b;});
+			std::copy_n(v, sz, tmp);
+			v_xor(tmp, this->iv_cur, sz);
 			this->bw->writeN(tmp, sz);
 		}
 	public:
@@ -113,7 +115,7 @@ namespace CR_CFB
 		void upd(const uint8_t* v, std::size_t sz)
 		{
 			this->cr->Enc.process(this->iv_cur);
-			std::transform(v, v + sz, this->iv_cur, this->iv_cur, [](uint8_t a, uint8_t b){return a ^ b;});
+			v_xor(this->iv_cur, v, sz);
 			this->bw->writeN(this->iv_cur, sz);
 		}
 	public:
@@ -126,7 +128,7 @@ namespace CR_CFB
 		void upd(const uint8_t* v, std::size_t sz)
 		{
 			this->cr->Enc.process(this->iv_cur);
-			std::transform(v, v + sz, this->iv_cur, this->iv_cur, [](uint8_t a, uint8_t b){return a ^ b;});
+			v_xor(this->iv_cur, v, sz);
 			this->bw->writeN(this->iv_cur, sz);
 			std::copy_n(v, sz, this->iv_cur);
 		}
@@ -178,7 +180,7 @@ namespace CR_CBC
 		}
 		void process(uint8_t* v)
 		{
-			std::transform(iv_cur, iv_cur + CR::block_size, v, v, [](uint8_t a, uint8_t b){return a ^ b;});
+			v_xor(v, iv_cur, CR::block_size);
 			cr->Enc.process(v);
 			std::copy_n(v, CR::block_size, iv_cur);
 		}
@@ -207,7 +209,7 @@ namespace CR_CBC
 			std::copy_n(v, CR::block_size, iv_cur);
 
 			cr->Dec.process(v);
-			std::transform(iv_tmp, iv_tmp + CR::block_size, v, v, [](uint8_t a, uint8_t b){return a ^ b;});
+			v_xor(v, iv_tmp, CR::block_size);
 		}
 		void reset()
 		{
