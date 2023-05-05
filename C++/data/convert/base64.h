@@ -7,7 +7,7 @@ namespace convert
 {
 	namespace base64
 	{
-		const char* en = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+		static const char* en = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 		class Encoder : public byteWriterBuf<3>
 		{

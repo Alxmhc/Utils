@@ -1,16 +1,23 @@
 class f_sqr extends fld_2d{
-	_ccsz(){
+	#resz(){
 		this.csz = [this.size[0]/this.cn[0], this.size[1]/this.cn[1]];
 	}
 
 	constructor(id,n){
 		super(id);
 		this.cn = n;
-		this._ccsz();
+		this.#resz();
 	}
 	resize(sz){
 		super.resize(sz);
-		this._ccsz();
+		this.#resz();
+	}
+
+	get csx(){
+		return this.cn[0];
+	}
+	get csy(){
+		return this.cn[1];
 	}
 
 	//cell from coordinates

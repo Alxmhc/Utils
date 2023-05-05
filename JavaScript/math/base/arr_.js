@@ -45,5 +45,21 @@ _arr = {
 			s += v1[i] * v2[i];
 		}
 		return s;
+	},
+	count: function(v,e){
+		let k = 0;
+		for(let i=0, n=v.length; i<n; ++i){
+			if(v[i] == e){
+				k++;
+			}
+		}
+		return k;
+	},
+	chk_tmpl(v,m){
+		for(let i=0, n=v.length; i<n; ++i){
+			if(m[i] !== null && v[i] != m[i])
+				return false;
+		}
+		return true;
 	}
 }

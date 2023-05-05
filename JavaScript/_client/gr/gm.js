@@ -11,8 +11,8 @@ class game_field{
 	}
 	corr_cr(cr){
 		if(this._rev){
-			cr[0] = this.f.sx - 1 - cr[0];
-			cr[1] = this.f.sy - 1 - cr[1];
+			cr[0] = this.f.csx - 1 - cr[0];
+			cr[1] = this.f.csy - 1 - cr[1];
 		}
 	}
 
@@ -37,8 +37,8 @@ class game_field{
 	set_arr(arr){
 		this.clear();
 		let k = 0;
-		for(let y = 0; y < this.f.sy; ++y){
-			for(let x = 0; x < this.f.sx; ++x){
+		for(let y = 0; y < this.f.csy; ++y){
+			for(let x = 0; x < this.f.csx; ++x){
 				this.draw([x,y], arr[k]);
 				k++;
 			}

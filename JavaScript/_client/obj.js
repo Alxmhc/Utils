@@ -52,6 +52,12 @@ class dom_el{
 	get size(){
 		return [this.o.width, this.o.height];
 	}
+	get szx(){
+		return this.o.width;
+	}
+	get szy(){
+		return this.o.height;
+	}
 	resize(sz){
 		if(sz[0]){
 			this.o.width  = sz[0];
