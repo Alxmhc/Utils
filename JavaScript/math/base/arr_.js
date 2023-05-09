@@ -55,11 +55,25 @@ _arr = {
 		}
 		return k;
 	},
-	chk_tmpl(v,m){
+	v_chk(v,m){
 		for(let i=0, n=v.length; i<n; ++i){
 			if(m[i] !== null && v[i] != m[i])
 				return false;
 		}
 		return true;
+	},
+	v_all(v,m){
+		for(let i=1, n=v.length; i<n; ++i){
+			if(v[i] != m[i]){
+				v[i] = null;
+			}
+		}
+	},
+	v_or(v,m){
+		for(let i=1, n=v.length; i<n; ++i){
+			if(v[i] == null){
+				v[i] = m[i];
+			}
+		}
 	}
 }
