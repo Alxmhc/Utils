@@ -46,11 +46,15 @@ namespace hash
 			InitTable(tbl, 0xedb88320);
 			Init();
 		}
+		void Update(uint8_t c)
+		{
+			crc = tbl[(crc & 0xff) ^ c] ^ (crc >> 8);
+		}
 		void Update(const uint8_t* v, const std::size_t n)
 		{
 			for(std::size_t i = 0; i < n; i++)
 			{
-				crc = tbl[(crc & 0xff) ^ v[i]] ^ (crc >> 8);
+				Update(v[i]);
 			}
 		}
 		void Final(uint8_t* r)

@@ -5,32 +5,6 @@
 #include <algorithm>
 #include "../data/pack.h"
 
-//(a^b)%c
-uint_fast64_t pw_m(uint_fast64_t a, uint_fast64_t b, uint_fast64_t c)
-{
-	if(a < 2)
-		return a;
-	if(b == 0)
-		return 1;
-	uint_fast64_t r = 1;
-	for(;;)
-	{
-		if((b & 1) != 0)
-		{
-			r *= a;
-			r %= c;
-			if(b == 1)
-				break;
-		}
-		a *= a;
-		a %= c;
-		if(a == 1)
-			break;
-		b >>= 1;
-	}
-	return r;
-}
-
 class b_int
 {
 	typedef uint32_t num;
@@ -50,19 +24,6 @@ class b_int
 				return n[sz] > c.n[sz] ? 1 : -1;
 		}
 		return 0;
-	}
-
-	b_int gBits(std::size_t k)
-	{
-		const std::size_t sz = (k-1)/BSZ + 1;
-		b_int res;
-		res.n.assign(n.begin(), n.begin() + sz);
-		const auto d = k % BSZ;
-		if(d != 0)
-		{
-			res.n.back() &= (1<<d) - 1;
-		}
-		return res;
 	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
@@ -115,19 +76,29 @@ public:
 	{
 		return (n.size() == 1) && (n[0] == a);
 	}
-	bool operator<(num a) const
+	bool operator!=(num a) const
 	{
-		return (n.size() == 1) && (n[0] < a);
+		return !operator==(a);
 	}
 	bool operator>(num a) const
 	{
 		return (n.size() != 1) || (n[0] > a);
 	}
-	bool operator!=(num a) const
+	bool operator<(num a) const
 	{
-		return !operator==(a);
+		return (n.size() == 1) && (n[0] < a);
 	}
 
+	bool operator==(const b_int &c) const
+	{
+		if(n.size() != c.n.size())
+			return false;
+		return compare(c) == 0;
+	}
+	bool operator!=(const b_int &c) const
+	{
+		return !operator==(c);
+	}
 	bool operator>(const b_int &c) const
 	{
 		if(n.size() != c.n.size())
@@ -140,16 +111,112 @@ public:
 			return n.size() < c.n.size();
 		return compare(c) < 0;
 	}
-	bool operator==(const b_int &c) const
-	{
-		if(n.size() != c.n.size())
-			return false;
-		return compare(c) == 0;
-	}
-
 	bool operator>=(const b_int &c) const
 	{
 		return !operator<(c);
+	}
+
+	num operator&(num c) const
+	{
+		return n[0] & c;
+	}
+
+	b_int operator&(const b_int &c) const
+	{
+		const std::size_t sz = std::min(n.size(), c.n.size());
+		b_int res;
+		res.n.assign(n.begin(), n.begin() + sz);
+		for(std::size_t i = 0; i < sz; i++)
+		{
+			res.n[i] &= c.n[i];
+		}
+		return res;
+	}
+
+	b_int gBits(std::size_t k) const
+	{
+		b_int res;
+		if(k == 0)
+			return res;
+		const std::size_t sz = (k-1)/BSZ + 1;
+		res.n.assign(n.begin(), n.begin() + sz);
+		const auto d = k % BSZ;
+		if(d != 0)
+		{
+			res.n.back() &= (1<<d) - 1;
+		}
+		return res;
+	}
+
+	const b_int& operator>>=(std::size_t c)
+	{
+		if(*this == 0)
+			return *this;
+
+		const auto k = c / BSZ;
+		if(k != 0)
+		{
+			if(k >= n.size())
+			{
+				*this = 0;
+				return *this;
+			}
+			n.erase(n.begin(), n.begin() + k);
+			c %= BSZ;
+		}
+		if(c == 0)
+			return *this;
+
+		const auto sz = n.size();
+		for(std::size_t i = 0;;)
+		{
+			n[i] >>= c;
+			i++;
+			if(i == sz)
+				break;
+			n[i-1] |= n[i] << (BSZ - c);
+		}
+		if(sz > 1 && n[sz-1] == 0)
+		{
+			n.resize(sz-1);
+		}
+		return *this;
+	}
+
+	const b_int& operator<<=(std::size_t c)
+	{
+		if(*this == 0)
+			return *this;
+
+		std::size_t i = 0;
+		while(n[i] == 0)
+		{
+			i++;
+		}
+
+		const auto k = c / BSZ;
+		if(k != 0)
+		{
+			i += k;
+			std::vector<num> tmp(k);
+			n.insert(n.begin(), tmp.cbegin(), tmp.cend());
+			c %= BSZ;
+		}
+		if(c == 0)
+			return *this;
+
+		num d = 0;
+		for(; i < n.size(); i++)
+		{
+			const auto t = n[i] >> (BSZ - c);
+			n[i] = (n[i]<<c) | d;
+			d = t;
+		}
+		if(d != 0)
+		{
+			n.push_back(d);
+		}
+		return *this;
 	}
 
 	const b_int& operator+=(const b_int &c)
@@ -307,7 +374,8 @@ public:
 
 		for(std::size_t i = 0;;)
 		{
-			res += *this * c.n[i++];
+			res += *this * c.n[i];
+			i++;
 			if(i == csz)
 				break;
 			n.insert(n.begin(), 0);
@@ -321,77 +389,6 @@ public:
 	{
 		b_int t(*this);
 		return t *= a;
-	}
-
-	const b_int& operator>>=(std::size_t c)
-	{
-		if(*this == 0)
-			return *this;
-
-		const auto k = c / BSZ;
-		if(k != 0)
-		{
-			if(k >= n.size())
-			{
-				*this = 0;
-				return *this;
-			}
-			n.erase(n.begin(), n.begin() + k);
-			c %= BSZ;
-		}
-		if(c == 0)
-			return *this;
-
-		const auto sz = n.size();
-		for(std::size_t i = 0;;)
-		{
-			n[i] >>= c;
-			i++;
-			if(i == sz)
-				break;
-			n[i-1] |= n[i] << (BSZ - c);
-		}
-		if(sz > 1 && n[sz-1] == 0)
-		{
-			n.resize(sz-1);
-		}
-		return *this;
-	}
-
-	const b_int& operator<<=(std::size_t c)
-	{
-		if(*this == 0)
-			return *this;
-
-		std::size_t i = 0;
-		while(n[i] == 0)
-		{
-			i++;
-		}
-
-		const auto k = c / BSZ;
-		if(k != 0)
-		{
-			i += k;
-			std::vector<num> tmp(k);
-			n.insert(n.begin(), tmp.cbegin(), tmp.cend());
-			c %= BSZ;
-		}
-		if(c == 0)
-			return *this;
-
-		num d = 0;
-		for(; i < n.size(); i++)
-		{
-			const auto t = n[i] >> (BSZ - c);
-			n[i] = (n[i]<<c) | d;
-			d = t;
-		}
-		if(d != 0)
-		{
-			n.push_back(d);
-		}
-		return *this;
 	}
 
 	num operator%(num c)
@@ -457,14 +454,22 @@ public:
 		return *this;
 	}
 
-	//(a^b)%c
-	static b_int pw_m(b_int a, num b, b_int c)
+	b_int operator%(const b_int &c) const
 	{
-		if(a < 2)
-			return a;
-		b_int r(1);
+		b_int t(*this);
+		return t %= c;
+	}
+
+	//(a^b)%c
+	template<typename T>
+	static T pw_m(T a, num b, const T &c)
+	{
+		T r(1);
 		if(b == 0)
 			return r;
+		a %= c;
+		if(a < 2)
+			return a;
 		for(;;)
 		{
 			if((b & 1) != 0)
@@ -483,5 +488,12 @@ public:
 		return r;
 	}
 };
+
+//(a^b)%c
+static uint_fast32_t pw_m(uint_fast32_t a, uint_fast32_t b, uint_fast32_t c)
+{
+	const auto r = b_int::pw_m(uint_fast64_t(a), b, uint_fast64_t(c));
+	return static_cast<uint_fast32_t>(r);
+}
 
 #endif

@@ -2,12 +2,13 @@
 #define H_ZIP
 
 #include "../cont.h"
-#include "../data/hash/crc32.h"
 #include "../data/hash/sha1.h"
 #include "../data/crypt/key.h"
 #include "../data/crypt/aes.h"
 #include "../data/crypt/cr_m.h"
+
 #include "../data/compr/deflate.h"
+#include "../data/compr/bzip2.h"
 
 namespace fl_pr
 {
@@ -163,6 +164,10 @@ namespace fl_pr
 			{
 			case cNO:
 				copy(br, bw);
+				break;
+			case cBZIP2:
+				if( !compr::bzip2::Decode(br, bw) )
+					return false;
 				break;
 			case cDeflate:
 			case cDeflate64:
