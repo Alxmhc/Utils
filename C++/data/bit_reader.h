@@ -1,7 +1,6 @@
 #ifndef H_BIT_READER
 #define H_BIT_READER
 
-#include "./bin.h"
 #include "./byte_reader.h"
 
 class bitReader
@@ -48,12 +47,10 @@ public:
 		{
 			if( !r->get(b) )
 				return false;
-			b = bitRevT[b];
 			o = 8;
 		}
-		c = b & 1;
 		o--;
-		b >>= 1;
+		c = (b >> o) & 1;
 		return true;
 	}
 
@@ -62,8 +59,6 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
-		if(n > (sizeof(T)<<3))
-			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
@@ -80,8 +75,6 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
-		if(n > (sizeof(T)<<3))
-			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
@@ -108,9 +101,8 @@ public:
 				return false;
 			o = 8;
 		}
-		c = b & 1;
 		o--;
-		b >>= 1;
+		c = (b >> (7 - o)) & 1;
 		return true;
 	}
 
@@ -119,8 +111,6 @@ public:
 	template<typename T>
 	bool readLE(uint_fast8_t n, T &rs)
 	{
-		if(n > (sizeof(T)<<3))
-			return false;
 		rs = 0;
 		if(n == 0)
 			return true;
@@ -137,8 +127,6 @@ public:
 	template<typename T>
 	bool readBE(uint_fast8_t n, T &rs)
 	{
-		if(n > (sizeof(T)<<3))
-			return false;
 		rs = 0;
 		if(n == 0)
 			return true;

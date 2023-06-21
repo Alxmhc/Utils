@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "../htree.h"
+#include "../bin.h"
 #include "../hash/crc32.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
@@ -108,37 +109,32 @@ namespace compr
 			return true;
 		}
 
-		static bool read_trees(bitReaderR &br, uint_fast16_t tsz, std::vector<std::vector<uint8_t>> &trs)
+		static bool read_tree(bitReaderR &br, std::vector<uint8_t> &tr)
 		{
-			for(uint_fast8_t i = 0; i < trs.size(); i++)
+			uint_fast8_t bl;
+			if( !br.readBE(5, bl) )
+				return false;
+			for(uint_fast16_t i = 0; i < tr.size(); i++)
 			{
-				trs[i].resize(tsz);
-
-				uint_fast8_t bl;
-				if( !br.readBE(5, bl) )
-					return false;
-				for(uint_fast16_t j = 0; j < tsz; j++)
+				for(;;)
 				{
-					for(;;)
+					uint_fast8_t t;
+					if( !br.get(t) )
+						return false;
+					if(t == 0)
+						break;
+					if( !br.get(t) )
+						return false;
+					if(t == 1)
 					{
-						uint_fast8_t t;
-						if( !br.get(t) )
-							return false;
-						if(t == 0)
-							break;
-						if( !br.get(t) )
-							return false;
-						if(t == 1)
-						{
-							bl--;
-						}
-						else
-						{
-							bl++;
-						}
+						bl--;
 					}
-					trs[i][j] = bl;
+					else
+					{
+						bl++;
+					}
 				}
+				tr[i] = bl;
 			}
 			return true;
 		}
@@ -160,12 +156,12 @@ namespace compr
 			typedef hTree<uint_fast16_t> Tree;
 			std::vector<std::unique_ptr<Tree>> htrs(tsz);
 			{
-				std::vector<std::vector<uint8_t>> trees(tsz);
-				if( !read_trees(br, sztr, trees) )
-					return false;
+				std::vector<uint8_t> tree(sztr);
 				for(uint_fast8_t i = 0; i < tsz; i++)
 				{
-					htrs[i] = std::unique_ptr<Tree>(new Tree(trees[i].data(), trees[i].size()));
+					if( !read_tree(br, tree) )
+						return false;
+					htrs[i] = std::unique_ptr<Tree>(new Tree(tree.data(), tree.size()));
 				}
 			}
 
@@ -341,6 +337,7 @@ namespace compr
 				else
 					return false;
 			}
+			bw.Fin();
 			return true;
 		}
 	};
