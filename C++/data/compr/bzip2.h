@@ -176,14 +176,6 @@ namespace compr
 					uint_fast16_t c;
 					if( !tr->find(br, c) )
 						return false;
-					if(c == sztr - 1)
-					{
-						if(sz0 != 0)
-						{
-							res.resize(res.size() + sz0);
-						}
-						return true;
-					}
 					if(c > 1)
 					{
 						if(sz0 != 0)
@@ -192,6 +184,8 @@ namespace compr
 							sz0 = 0;
 							l = 0;
 						}
+						if(c == sztr - 1)
+							return true;
 						res.push_back(c - 1);
 					}
 					else
