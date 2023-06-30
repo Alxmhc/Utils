@@ -1,5 +1,5 @@
-#ifndef H_PCAPNG
-#define H_PCAPNG
+#ifndef H_FL_PCAPNG
+#define H_FL_PCAPNG
 
 #include "../data/byte_reader.h"
 

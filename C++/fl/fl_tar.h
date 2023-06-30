@@ -1,5 +1,5 @@
-#ifndef H_TAR
-#define H_TAR
+#ifndef H_FL_TAR
+#define H_FL_TAR
 
 #include "../cont.h"
 

@@ -1,5 +1,5 @@
-#ifndef H_BZ2
-#define H_BZ2
+#ifndef H_FL_BZ2
+#define H_FL_BZ2
 
 #include "../cont.h"
 #include "../data/compr/bzip2.h"

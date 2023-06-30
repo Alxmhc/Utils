@@ -1,5 +1,5 @@
-#ifndef H_ZIP
-#define H_ZIP
+#ifndef H_FL_ZIP
+#define H_FL_ZIP
 
 #include "../cont.h"
 #include "../data/hash/sha1.h"

@@ -4,7 +4,7 @@
 #include <map>
 #include "../data/b.h"
 #include "../data/decode.h"
-#include "../fl/gzip.h"
+#include "../fl/fl_gzip.h"
 
 namespace URL
 {

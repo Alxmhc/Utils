@@ -167,7 +167,7 @@ namespace compr
 
 			//huffman + RLE2
 			std::size_t sz0 = 0;
-			std::size_t l = 0;
+			uint_fast8_t l = 0;
 			for(uint_fast16_t i = 0; ; i++)
 			{
 				const auto tr = htrs[sel[i]].get();

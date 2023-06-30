@@ -1,5 +1,5 @@
-#ifndef H_JSONLZ4
-#define H_JSONLZ4
+#ifndef H_FL_JSONLZ4
+#define H_FL_JSONLZ4
 
 #include "../cont.h"
 #include "../data/compr/lz4.h"

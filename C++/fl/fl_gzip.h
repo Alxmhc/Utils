@@ -1,5 +1,5 @@
-#ifndef H_GZIP
-#define H_GZIP
+#ifndef H_FL_GZIP
+#define H_FL_GZIP
 
 #include "../cont.h"
 #include "../data/compr/deflate.h"

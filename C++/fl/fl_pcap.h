@@ -1,5 +1,5 @@
-#ifndef H_PCAP
-#define H_PCAP
+#ifndef H_FL_PCAP
+#define H_FL_PCAP
 
 #include "../data/byte_reader.h"
 
