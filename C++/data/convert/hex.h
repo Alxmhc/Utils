@@ -3,6 +3,28 @@
 
 #include "../byte_writer.h"
 
+static uint8_t HexDecodeChar(char c)
+{
+	if(c >= '0' && c <= '9')
+		return c - '0';
+	if(c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+	if(c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+	return 16;
+}
+
+template<unsigned char sz>
+static typename UINT_<sz>::uint_ HexDecodeNum(const char* s, uint_fast8_t n)
+{
+	UINT_<sz>::uint_ res = 0;
+	for(unsigned char i = 0; i < n; i++)
+	{
+		res = (res<<4) | HexDecodeChar(s[i]);
+	}
+	return res;
+}
+
 namespace convert
 {
 	namespace hex
@@ -34,8 +56,8 @@ namespace convert
 			byteWriter* bw;
 			void process(const uint8_t* v)
 			{
-				const char t[3] = {v[0],v[1],0};
-				const uint8_t c = static_cast<uint8_t>(strtoul(t, nullptr, 16));
+				const char* s = reinterpret_cast<const char*>(v);
+				uint8_t c = (HexDecodeChar(s[0]) << 4) | HexDecodeChar(s[1]);
 				bw->write(c);
 			}
 		public:

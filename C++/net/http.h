@@ -2,6 +2,7 @@
 #define H_HTTP
 
 #include <map>
+#include "../data/convert/hex.h"
 #include "../data/b.h"
 #include "../data/decode.h"
 #include "../fl/fl_gzip.h"
@@ -12,7 +13,6 @@ namespace URL
 	{
 		std::vector<uint8_t> r;
 		r.reserve(sz);
-		char t[3] = {};
 		for(std::size_t i = 0; i < sz;)
 		{
 			if(s[i] != '%')
@@ -21,11 +21,9 @@ namespace URL
 				i++;
 				continue;
 			}
-			t[0] = s[i+1];
-			t[1] = s[i+2];
-			i += 3;
-			uint8_t c = static_cast<uint8_t>(strtoul(t, nullptr, 16));
+			uint8_t c = (HexDecodeChar(s[i+1]) << 4) | HexDecodeChar(s[i+2]);
 			r.push_back(c);
+			i += 3;
 		}
 		r.shrink_to_fit();
 		return r;
@@ -112,6 +110,14 @@ public:
 			}
 		}
 		return true;
+	}
+
+	std::string GetField1(const std::string &name) const
+	{
+		const auto h = hdr.find(name);
+		if(h == hdr.cend())
+			return "";
+		return h->second.back();
 	}
 };
 
