@@ -1,3 +1,8 @@
+#include <vector>
+#include <string>
+
+#include <windows.h>
+
 namespace fl_s
 {
 	bool create_dir(const char* pth)
@@ -13,6 +18,22 @@ namespace fl_s
 		if(inf == INVALID_FILE_ATTRIBUTES)
 			return CreateDirectoryW(pth, nullptr) == TRUE;
 		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
+	}
+	template<typename C>
+	bool create_dirs(const C* pth)
+	{
+		std::basic_string<C> p(pth);
+		for(std::size_t i = 0; i < p.length() - 1; i++)
+		{
+			if(p[i] == '/' || p[i] == '\\')
+			{
+				p[i] = 0;
+				if( !create_dir(p.c_str()) )
+					return false;
+				p[i] = pth[i];
+			}
+		}
+		return create_dir(pth);
 	}
 
 	bool del_file(const char* pth)
@@ -64,40 +85,41 @@ namespace fl_s
 		}
 	};
 
+	template<typename S>
+	class dInf
+	{
+		HANDLE hf;
+		WIN32_FIND_DATA_<S> ffd;
+		bool isFin;
+	public:
+		dInf(S pth)
+		{
+			pth.push_back('*');
+			hf = ffd.FirstFile(pth.c_str());
+			isFin = (hf == INVALID_HANDLE_VALUE);
+		}
+		~dInf()
+		{
+			FindClose(hf);
+		}
+
+		S nxt()
+		{
+			S res;
+			if(isFin)
+				return res;
+			res = ffd.fd.cFileName;
+			if(ffd.fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				res.push_back('/');
+			}
+			isFin = !ffd.NextFile(hf);
+			return res;
+		}
+	};
+
 	class list
 	{
-		template<typename S>
-		class dInf
-		{
-			HANDLE hf;
-			WIN32_FIND_DATA_<S> ffd;
-			bool isFin;
-		public:
-			dInf(S pth)
-			{
-				pth.push_back('*');
-				hf = ffd.FirstFile(pth.c_str());
-				isFin = (hf == INVALID_HANDLE_VALUE);
-			}
-			~dInf()
-			{
-				FindClose(hf);
-			}
-
-			S nxt()
-			{
-				S res;
-				if(isFin)
-					return res;
-				res = ffd.fd.cFileName;
-				if(ffd.fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-				{
-					res.push_back('/');
-				}
-				isFin = !ffd.NextFile(hf);
-				return res;
-			}
-		};
 	public:
 		template<typename S>
 		static bool del_a(const S &pth)
@@ -137,7 +159,7 @@ namespace fl_s
 	};
 
 	template<typename C, class T>
-	static void proc_dir(const C* pth, T &st, int depth = -1)
+	void proc_dir(const C* pth, T &st, int depth = -1)
 	{
 		std::basic_string<C> p(pth);
 		if(p.back() != '/')
@@ -147,25 +169,16 @@ namespace fl_s
 		list::proc_dir(p, st, depth);
 	}
 
-	template<typename C>
-	bool create_dirs(const C* pth)
+	template<typename C, class T>
+	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr, int depth = -1)
 	{
-		std::basic_string<C> p(pth);
-		for(std::size_t i = 0; i < p.length() - 1; i++)
-		{
-			if(p[i] == '/' || p[i] == '\\')
-			{
-				p[i] = 0;
-				if( !create_dir(p.c_str()) )
-					return false;
-				p[i] = '/';
-			}
-		}
-		return create_dir(pth);
+		std::vector<std::basic_string<C>> res;
+		proc_dir(pth, [&](const std::basic_string<C> &s){if(fltr(s)){res.push_back(s);}}, depth);
+		return res;
 	}
 
 	template<typename C>
-	void del_dirs(const C* pth)
+	void del_all(const C* pth)
 	{
 		std::basic_string<C> p(pth);
 		if(p.back() != '/')
