@@ -133,7 +133,7 @@ public:
 			return res;
 
 		const auto b = pos;
-		for(std::size_t i = pos; i < csize - k; i++)
+		for(std::size_t i = pos; i <= csize - k; i++)
 		{
 			std::size_t j = 0;
 			for(; j < k; j++)
