@@ -96,7 +96,8 @@ public:
 		k = hdr.find("content-encoding");
 		if(k != hdr.end())
 		{
-			if(k->second.back() == "gzip")
+			const auto type = k->second.back();
+			if(type == "gzip")
 			{
 				br_array br(data.data(), data.size());
 				fl_pr::F_gzip gz;
@@ -105,6 +106,15 @@ public:
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
 				if( !gz.GetData(bw) )
+					return false;
+				data = std::move(tmp);
+			}
+			else if(type == "deflate")
+			{
+				br_array br(data.data(), data.size());
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				if( !compr::deflate::Decode(br, bw) )
 					return false;
 				data = std::move(tmp);
 			}

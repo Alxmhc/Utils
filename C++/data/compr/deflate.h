@@ -188,10 +188,12 @@ namespace compr
 				}
 			}
 
-			const hTree<uint_fast8_t> codes(clen, csz);
 			std::vector<uint_fast8_t> vcodes;
-			if( !decode(codes, HLIT + HDIST, brd, vcodes) )
-				return false;
+			{
+				const hTree<uint_fast8_t> codes(clen, csz);
+				if( !decode(codes, HLIT + HDIST, brd, vcodes) )
+					return false;
+			}
 			const hTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
 			const hTree<uint_fast8_t> hdist(vcodes.data() + HLIT, HDIST);
 
