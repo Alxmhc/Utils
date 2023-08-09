@@ -176,23 +176,21 @@ namespace compr
 					uint_fast16_t c;
 					if( !tr->find(br, c) )
 						return false;
-					if(c > 1)
-					{
-						if(sz0 != 0)
-						{
-							res.resize(res.size() + sz0);
-							sz0 = 0;
-							l = 0;
-						}
-						if(c == sztr - 1)
-							return true;
-						res.push_back(c - 1);
-					}
-					else
+					if(c < 2)
 					{
 						sz0 += static_cast<std::size_t>(c + 1) << l;
 						l++;
+						continue;
 					}
+					if(sz0 != 0)
+					{
+						res.resize(res.size() + sz0);
+						sz0 = 0;
+						l = 0;
+					}
+					if(c == sztr - 1)
+						return true;
+					res.push_back(c - 1);
 				}
 			}
 		}

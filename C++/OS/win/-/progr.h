@@ -1,3 +1,38 @@
+//psapi.lib
+
+#include <vector>
+#include <string>
+
+#include <windows.h>
+#include <psapi.h>
+#include <tlhelp32.h>
+
+#undef PROCESSENTRY32
+#undef Process32First
+#undef Process32Next
+
+#undef MODULEENTRY32
+#undef Module32First
+#undef Module32Next
+
+DWORD GetModuleFileName_(HMODULE hmd, LPSTR filename, DWORD sz)
+{
+	return GetModuleFileNameA(hmd, filename, sz);
+}
+DWORD GetModuleFileName_(HMODULE hmd, LPWSTR filename, DWORD sz)
+{
+	return GetModuleFileNameW(hmd, filename, sz);
+}
+
+DWORD GetModuleFileNameEx_(HANDLE hnd, HMODULE hmd, LPSTR filename, DWORD sz)
+{
+	return GetModuleFileNameExA(hnd, hmd, filename, sz);
+}
+DWORD GetModuleFileNameEx_(HANDLE hnd, HMODULE hmd, LPWSTR filename, DWORD sz)
+{
+	return GetModuleFileNameExW(hnd, hmd, filename, sz);
+}
+
 //Program path
 template<typename C>
 std::basic_string<C> get_ex_path()
@@ -5,7 +40,6 @@ std::basic_string<C> get_ex_path()
 	C path[MAX_PATH];
 	GetModuleFileName_(nullptr, path, MAX_PATH);
 	std::basic_string<C> p(path);
-	std::replace(p.begin(), p.end(), '\\', '/');
 	return p;
 }
 
@@ -21,7 +55,6 @@ std::basic_string<C> get_process_path(DWORD PID)
 	if (l == 0)
 		return std::basic_string<C>();
 	std::basic_string<C> r(path);
-	std::replace(r.begin(), r.end(), '\\', '/');
 	return r;
 }
 
