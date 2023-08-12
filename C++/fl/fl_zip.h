@@ -179,6 +179,39 @@ namespace fl_pr
 			}
 			return true;
 		}
+
+		bool read_hdr(infF &inf, inf_1 &p)
+		{
+			uint8_t h[26];
+			if(!br->readN(h, 26))
+				return false;
+			inf.encryption = h[2] & 1;
+			inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
+			std::copy_n(h+10, 4, inf.crc32);
+			p.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
+			inf.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
+
+			const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
+			if( !br->readN(inf.fname, szfn) )
+				return false;
+
+			const auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
+			if(szex != 0)
+			{
+				std::vector<uint8_t> ext;
+				if( !br->readN(ext, szex) )
+					return false;
+				if(inf.method == 99)
+				{
+					if(szex < 11)
+						return false;
+					inf.encryption = ext[8] + 1;
+					inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
+				}
+			}
+			p.data_pos = br->get_pos();
+			return true;
+		}
 	public:
 		bool read(byteReader* r)
 		{
@@ -192,41 +225,15 @@ namespace fl_pr
 					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
 					break;
-				uint8_t h[26];
-				if(!br->readN(h, 26))
-					break;
-				infF r;
-				inf_1 inf;
 
-				r.encryption = h[2] & 1;
-				r.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
-				std::copy_n(h+10, 4, r.crc32);
-				inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
-				r.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
-
-				const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
-				if( !br->readN(r.fname, szfn) )
+				infF inf;
+				inf_1 p;
+				if( !read_hdr(inf, p) )
 					break;
-
-				const auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
-				if(szex != 0)
-				{
-					std::vector<uint8_t> ext;
-					if( !br->readN(ext, szex) )
-						break;
-					if(r.method == 99)
-					{
-						if(szex < 11)
-							break;
-						r.encryption = ext[8] + 1;
-						r.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
-					}
-				}
-				inf.data_pos = br->get_pos();
-				if( !br->skip(inf.data_size) )
+				if( !br->skip(p.data_size) )
 					break;
-				inf_n.push_back(inf);
-				infFs.push_back(r);
+				inf_n.push_back(p);
+				infFs.push_back(inf);
 			}
 			return true;
 		}

@@ -19,6 +19,26 @@ namespace fl_pr
 			uint8_t type;
 		};
 		std::vector<infF> infFs;
+
+		bool read_hdr(infF &inf, inf_1 &p)
+		{
+			br->read_string(0, inf.fname);
+			if(inf.fname.length() == 0)
+				return false;
+			br->skip(123 - inf.fname.length());
+			uint8_t sz[12];
+			if( !br->readN(sz, 12) )
+				return false;
+			p.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
+			if( !br->skip(20) )
+				return false;
+			if( !br->get(inf.type) )
+				return false;
+			if( !br->skip(355) )
+				return false;
+			p.data_pos = br->get_pos();
+			return true;
+		}
 	public:
 		bool read(byteReader* r)
 		{
@@ -27,31 +47,18 @@ namespace fl_pr
 			infFs.clear();
 			for(;;)
 			{
-				infF r;
-				br->read_string(0, r.fname);
-				if(r.fname.length() == 0)
+				infF inf;
+				inf_1 p;
+				if( !read_hdr(inf, p) )
 					break;
-				br->skip(123 - r.fname.length());
-				uint8_t sz[12];
-				if( !br->readN(sz, 12) )
-					break;
-				inf_1 inf;
-				inf.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
-				if( !br->skip(20) )
-					break;
-				if( !br->get(r.type) )
-					break;
-				if( !br->skip(355) )
-					break;
-				inf.data_pos = br->get_pos();
-				if(inf.data_size != 0)
+				if(p.data_size != 0)
 				{
-					const std::size_t bsize = ((inf.data_size + 0x1ff)>>9)<<9;
+					const std::size_t bsize = ((p.data_size + 0x1ff)>>9)<<9;
 					if( !br->skip(bsize) )
 						break;
 				}
-				inf_n.push_back(inf);
-				infFs.push_back(r);
+				inf_n.push_back(p);
+				infFs.push_back(inf);
 			}
 			return true;
 		}

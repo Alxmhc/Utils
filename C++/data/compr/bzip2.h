@@ -161,7 +161,7 @@ namespace compr
 				{
 					if( !read_tree(br, tree) )
 						return false;
-					htrs[i] = std::unique_ptr<Tree>(new Tree(tree.data(), tree.size()));
+					htrs[i] = std::unique_ptr<Tree>(new Tree(tree.data(), static_cast<uint_fast16_t>(tree.size())));
 				}
 			}
 
@@ -305,7 +305,7 @@ namespace compr
 						return false;
 
 					std::vector<uint8_t> res;
-					if( !unpack(br, smp.size() + 2, res) )
+					if( !unpack(br, static_cast<uint_fast16_t>(smp.size() + 2), res) )
 						return false;
 
 					convert::MTF::Decode(res, smp.data());
