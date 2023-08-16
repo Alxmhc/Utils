@@ -44,6 +44,7 @@ namespace fl_pr
 		{
 			br = r;
 
+			inf_n.clear();
 			infFs.clear();
 			for(;;)
 			{
@@ -51,12 +52,9 @@ namespace fl_pr
 				inf_1 p;
 				if( !read_hdr(inf, p) )
 					break;
-				if(p.data_size != 0)
-				{
-					const std::size_t bsize = ((p.data_size + 0x1ff)>>9)<<9;
-					if( !br->skip(bsize) )
-						break;
-				}
+				const std::size_t bsize = ((p.data_size + 0x1ff)>>9)<<9;
+				if( !br->skip(bsize) )
+					break;
 				inf_n.push_back(p);
 				infFs.push_back(inf);
 			}

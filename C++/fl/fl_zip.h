@@ -217,6 +217,7 @@ namespace fl_pr
 		{
 			br = r;
 
+			inf_n.clear();
 			infFs.clear();
 			for(;;)
 			{
@@ -225,7 +226,6 @@ namespace fl_pr
 					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
 					break;
-
 				infF inf;
 				inf_1 p;
 				if( !read_hdr(inf, p) )

@@ -12,4 +12,7 @@ class fld_2d extends dom_el{
 	draw(im, crd, sz){
 		img.fn(im, p => this.c.drawImage(p, crd[0], crd[1], sz[0], sz[1]));
 	}
+	fill(){
+		this.c.fillRect(0, 0, this.szx, this.szy);
+	}
 }
