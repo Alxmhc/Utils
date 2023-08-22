@@ -1,7 +1,7 @@
 #ifndef H_CR_SPH
 #define H_CR_SPH
 
-#include "./vt3.h"
+#include "vt3.h"
 
 class cr_sph
 {

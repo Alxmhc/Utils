@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "./pack.h"
+#include "pack.h"
 
 class byteReader
 {

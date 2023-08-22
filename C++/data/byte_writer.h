@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <algorithm>
-#include "./pack.h"
+#include "pack.h"
 
 class byteWriter
 {

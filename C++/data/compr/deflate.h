@@ -2,7 +2,7 @@
 #define H_DEFLATE
 
 #include "../htree.h"
-#include "./decompr.h"
+#include "decompr.h"
 #include "../byte_writer.h"
 
 namespace compr

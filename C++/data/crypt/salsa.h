@@ -1,6 +1,7 @@
 #ifndef H_SALSA
 #define H_SALSA
 
+#include <algorithm>
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -26,9 +27,9 @@ namespace crypt
 			static const uint_fast8_t block_size = 64;
 			en(uint32_t* k, uint_fast8_t r) : key(k), rounds(r), p(0) {}
 
-			void reset()
+			void set_num(uint64_t n)
 			{
-				p = 0;
+				p = n;
 			}
 
 			void process(uint8_t* r)

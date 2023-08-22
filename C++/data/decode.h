@@ -1,7 +1,7 @@
 #ifndef H_DECODE
 #define H_DECODE
 
-#include "./byte_writer.h"
+#include "byte_writer.h"
 
 namespace decode
 {

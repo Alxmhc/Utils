@@ -1,7 +1,7 @@
 #ifndef H_HTREE
 #define H_HTREE
 
-#include "./bin_tree.h"
+#include "bin_tree.h"
 
 template<typename T>
 class hTree : public binTree<T>

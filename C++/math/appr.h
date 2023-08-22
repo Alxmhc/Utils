@@ -2,7 +2,7 @@
 #define H_APPR
 
 #include <vector>
-#include "./eq.h"
+#include "eq.h"
 
 //y = a + bx
 vt2 appr_lin(const std::vector<vt2> &v)

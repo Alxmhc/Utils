@@ -2,7 +2,7 @@
 #define H_PEM
 
 #include "../byte_reader.h"
-#include "./base64.h"
+#include "base64.h"
 
 class pem
 {

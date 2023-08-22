@@ -1,7 +1,7 @@
 #ifndef H_BIT_READER
 #define H_BIT_READER
 
-#include "./byte_reader.h"
+#include "byte_reader.h"
 
 class bitReader
 {
