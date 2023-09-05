@@ -63,13 +63,6 @@ class Chess{
 	set_p(cr, p){
 		this.arr[cr[0] + (cr[1]<<3)] = p;
 	}
-	get_type(p){
-		if(p === null)
-			return {color: null, type: null};
-		if(p < 6)
-			return {color: 0, type: p};
-		return {color: 1, type: p - 6};
-	}
 
 	moves(m){
 		for(let v of m){
@@ -84,3 +77,13 @@ class Chess{
 	}
 }
 Chess.sz = [8,8]
+Chess.get_color = function(p){
+	if(p === null)
+		return null;
+	return p < 6 ? 0 : 1;
+}
+Chess.get_type = function(p){
+	if(p === null)
+		return null;
+	return p < 6 ? p : p - 6;
+}
