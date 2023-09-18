@@ -1,6 +1,7 @@
 #ifndef H_BZIP2
 #define H_BZIP2
 
+#include <numeric>
 #include <memory>
 
 #include "../htree.h"
@@ -33,14 +34,21 @@ namespace convert
 
 	namespace MTF
 	{
-		void Decode(std::vector<uint8_t> &res, uint8_t* m)
+		void Decode(uint8_t* res, std::size_t sz, uint8_t* m)
 		{
-			for(std::size_t i = 0; i < res.size(); i++)
+			for(std::size_t i = 0; i < sz; i++)
 			{
 				const auto c = res[i];
 				res[i] = m[c];
 				std::rotate(m, m + c, m + c + 1);
 			}
+		}
+
+		void Decode_t(uint8_t* res, std::size_t sz, uint_fast16_t tsz)
+		{
+			std::vector<uint8_t> tmp(tsz);
+			std::iota(tmp.begin(), tmp.end(), 0);
+			Decode(res, sz, tmp.data());
 		}
 	}
 }
@@ -100,12 +108,7 @@ namespace compr
 				sel[i] = c;
 			}
 
-			std::vector<uint8_t> p(ntrees);
-			for(uint_fast8_t i = 0; i < ntrees; i++)
-			{
-				p[i] = i;
-			}
-			convert::MTF::Decode(sel, p.data());
+			convert::MTF::Decode_t(sel.data(), sel.size(), ntrees);
 			return true;
 		}
 
@@ -308,7 +311,7 @@ namespace compr
 					if( !unpack(br, static_cast<uint_fast16_t>(smp.size() + 2), res) )
 						return false;
 
-					convert::MTF::Decode(res, smp.data());
+					convert::MTF::Decode(res.data(), res.size(), smp.data());
 					convert::BWT::Decode(res.data(), res.size(), optr);
 					RLE1_Decode(res);
 					if(bcrc(res) != bCRC)
