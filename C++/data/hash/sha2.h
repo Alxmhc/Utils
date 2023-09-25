@@ -2,6 +2,7 @@
 #define H_SHA2
 
 #include <array>
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -58,14 +59,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				st[0] += wt[0];
-				st[1] += wt[1];
-				st[2] += wt[2];
-				st[3] += wt[3];
-				st[4] += wt[4];
-				st[5] += wt[5];
-				st[6] += wt[6];
-				st[7] += wt[7];
+				v_add(st, wt, 8);
 			}
 
 			static const uint32_t K[64];
@@ -206,14 +200,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				st[0] += wt[0];
-				st[1] += wt[1];
-				st[2] += wt[2];
-				st[3] += wt[3];
-				st[4] += wt[4];
-				st[5] += wt[5];
-				st[6] += wt[6];
-				st[7] += wt[7];
+				v_add(st, wt, 8);
 			}
 
 			static const uint64_t K[80];

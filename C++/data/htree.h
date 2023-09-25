@@ -32,7 +32,7 @@ public:
 				k <<= s - p;
 				p = s;
 			}
-			add(k, s, tmp[i].second);
+			this->add(k, s, tmp[i].second);
 			k++;
 		}
 	}

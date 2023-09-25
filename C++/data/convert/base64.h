@@ -14,7 +14,9 @@ namespace convert
 			byteWriter* bw;
 			void process(const uint8_t* v)
 			{
-				uint_fast32_t t = (v[0] << 16) | (v[1] << 8) | v[2];
+				uint_fast32_t t = v[0];
+				t = (t << 8) | v[1];
+				t = (t << 8) | v[2];
 				uint8_t r[4];
 				r[0] = en[(t>>18) & 0x3f];
 				r[1] = en[(t>>12) & 0x3f];

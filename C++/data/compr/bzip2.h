@@ -128,7 +128,7 @@ namespace compr
 			//huffman + RLE2
 			std::size_t sz0 = 0;
 			uint_fast8_t l = 0;
-			for(uint_fast16_t i = 0; ; i++)
+			for(uint_fast16_t i = 0; i < sel.size(); i++)
 			{
 				const auto tr = htrs[sel[i]].get();
 				for(uint_fast8_t n = 0; n < 50; n++)
@@ -153,6 +153,7 @@ namespace compr
 					res.push_back(c - 1);
 				}
 			}
+			return false;
 		}
 
 		static bool RLE1_Decode(std::vector<uint8_t> &res)
