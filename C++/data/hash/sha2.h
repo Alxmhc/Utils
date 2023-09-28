@@ -2,6 +2,7 @@
 #define H_SHA2
 
 #include <array>
+
 #include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
@@ -213,7 +214,7 @@ namespace hash
 			}
 		public:
 			uint64_t st[8];
-			UINT_<16>::uint_ sz;
+			UINT_<16>::uint sz;
 
 			void Init()
 			{

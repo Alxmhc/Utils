@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+
 #include "pack.h"
 
 class byteWriter
@@ -21,7 +22,7 @@ public:
 	}
 
 	template<unsigned char SZ, char E>
-	void writeC(typename UINT_<SZ>::uint_ c)
+	void writeC(typename UINT_<SZ>::uint c)
 	{
 		uint8_t t[SZ];
 		bconv<1, SZ, E>::unpack(c, t);

@@ -2,6 +2,7 @@
 #define H_APPR
 
 #include <vector>
+
 #include "eq.h"
 
 //y = a + bx

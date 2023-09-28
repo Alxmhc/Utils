@@ -1,8 +1,6 @@
 #ifndef H_VT3
 #define H_VT3
 
-#include <cmath>
-
 class vt3
 {
 public:
@@ -30,6 +28,14 @@ public:
 		z -= a.z;
 		return *this;
 	}
+	const vt3& operator*=(const vt3 &a)
+	{
+		x *= a.x;
+		y *= a.y;
+		z *= a.z;
+		return *this;
+	}
+
 	const vt3& operator*=(long double k)
 	{
 		x *= k;
@@ -37,12 +43,16 @@ public:
 		z *= k;
 		return *this;
 	}
-	const vt3& operator*=(const vt3 &k)
+	const vt3& operator/=(long double k)
 	{
-		x *= k.x;
-		y *= k.y;
-		z *= k.z;
+		x /= k;
+		y /= k;
+		z /= k;
 		return *this;
+	}
+	vt3 operator*(long double k) const
+	{
+		return vt3(k*x, k*y, k*z);
 	}
 
 	static vt3 pr(const vt3 &a, const vt3 &b)
@@ -57,11 +67,6 @@ public:
 long double dot(const vt3 &a, const vt3 &b)
 {
 	return a.x*b.x + a.y*b.y + a.z*b.z;
-}
-
-long double abs(const vt3 &a)
-{
-	return sqrt(dot(a,a));
 }
 
 #endif

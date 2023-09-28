@@ -2,6 +2,7 @@
 #define H_TIGER
 
 #include <array>
+
 #include "../byte_writer.h"
 
 namespace hash

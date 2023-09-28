@@ -1,8 +1,6 @@
 #ifndef H_VT2
 #define H_VT2
 
-#include <cmath>
-
 class vt2
 {
 public:
@@ -28,28 +26,34 @@ public:
 		y -= a.y;
 		return *this;
 	}
+	const vt2& operator*=(const vt2 &a)
+	{
+		x *= a.x;
+		y *= a.y;
+		return *this;
+	}
+
 	const vt2& operator*=(long double k)
 	{
 		x *= k;
 		y *= k;
 		return *this;
 	}
-	const vt2& operator*=(const vt2 &k)
+	const vt2& operator/=(long double k)
 	{
-		x *= k.x;
-		y *= k.y;
+		x /= k;
+		y /= k;
 		return *this;
+	}
+	vt2 operator*(long double k) const
+	{
+		return vt2(k*x, k*y);
 	}
 };
 
 long double dot(const vt2 &a, const vt2 &b)
 {
 	return a.x*b.x + a.y*b.y;
-}
-
-long double abs(const vt2 &a)
-{
-	return sqrt(dot(a,a));
 }
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -10,8 +11,8 @@ namespace crypt
 {
 	class ARIA
 	{
-		std::vector<UINT_<16>::uint_> keyEnc;
-		std::vector<UINT_<16>::uint_> keyDec;
+		std::vector<UINT_<16>::uint> keyEnc;
+		std::vector<UINT_<16>::uint> keyDec;
 
 		static const uint8_t SB1[256];
 		static const uint8_t SB2[256];
@@ -37,14 +38,14 @@ namespace crypt
 			vo[14] = vi[0] ^ vi[3] ^ vi[4] ^ vi[5]  ^ vi[9]  ^ vi[11] ^ vi[14];
 			vo[15] = vi[1] ^ vi[2] ^ vi[4] ^ vi[5]  ^ vi[8]  ^ vi[10] ^ vi[15];
 		}
-		static UINT_<16>::uint_ A(const UINT_<16>::uint_ &c)
+		static UINT_<16>::uint A(const UINT_<16>::uint &c)
 		{
 			uint8_t vi[16], vo[16];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
 			Av(vi, vo);
 			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
-		static UINT_<16>::uint_ SL(const UINT_<16>::uint_ &c)
+		static UINT_<16>::uint SL(const UINT_<16>::uint &c)
 		{
 			uint8_t vi[16];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
@@ -55,7 +56,7 @@ namespace crypt
 			SB3[vi[12]], SB4[vi[13]], SB1[vi[14]], SB2[vi[15]]};
 			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
-		static UINT_<16>::uint_ FO(const UINT_<16>::uint_ &c)
+		static UINT_<16>::uint FO(const UINT_<16>::uint &c)
 		{
 			uint8_t v[16];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, v);
@@ -68,7 +69,7 @@ namespace crypt
 			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(v);
 		}
 
-		static void Process(const std::vector<UINT_<16>::uint_> &key, uint8_t* r)
+		static void Process(const std::vector<UINT_<16>::uint> &key, uint8_t* r)
 		{
 			auto P = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 			const uint_fast8_t n = static_cast<uint_fast8_t>(key.size() - 1);
@@ -87,10 +88,10 @@ namespace crypt
 
 		class en
 		{
-			const std::vector<UINT_<16>::uint_>* key;
+			const std::vector<UINT_<16>::uint>* key;
 		public:
 			static const uint_fast8_t block_size = 16;
-			en(const std::vector<UINT_<16>::uint_> &k) : key(&k) {}
+			en(const std::vector<UINT_<16>::uint> &k) : key(&k) {}
 
 			void process(uint8_t* r) const
 			{
@@ -100,10 +101,10 @@ namespace crypt
 
 		class de
 		{
-			const std::vector<UINT_<16>::uint_>* key;
+			const std::vector<UINT_<16>::uint>* key;
 		public:
 			static const uint_fast8_t block_size = 16;
-			de(const std::vector<UINT_<16>::uint_> &k) : key(&k) {}
+			de(const std::vector<UINT_<16>::uint> &k) : key(&k) {}
 
 			void process(uint8_t* r) const
 			{
@@ -121,19 +122,19 @@ namespace crypt
 			uint8_t r[16] = {};
 			std::copy_n(k + 16, ksz - 16, r);
 
-			UINT_<16>::uint_ KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
-			UINT_<16>::uint_ KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 
-			const UINT_<16>::uint_ CK[3] = {
-				UINT_<16>::uint_(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
-				UINT_<16>::uint_(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
-				UINT_<16>::uint_(0x0324977504e8c90e, 0xdb92371d2126e970)
+			const UINT_<16>::uint CK[3] = {
+				UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
+				UINT_<16>::uint(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
+				UINT_<16>::uint(0x0324977504e8c90e, 0xdb92371d2126e970)
 			};
 
 			const uint_fast8_t nr = (ksz >> 2) + 8;
 
 			const uint_fast8_t n = (nr-12) >> 1;
-			UINT_<16>::uint_ W[4];
+			UINT_<16>::uint W[4];
 			W[0] = KL;
 			W[1] = FO(W[0] ^ CK[(n+0)%3]) ^ KR;
 			W[2] = A(SL(W[1] ^ CK[(n+1)%3])) ^ W[0];

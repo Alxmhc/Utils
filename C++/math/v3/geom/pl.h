@@ -15,8 +15,7 @@ namespace geom
 	public:
 		pl(const vt3 &a, const vt3 &b, const vt3 &c)
 		{
-			n = vt3::pr(b-a, c-a);
-			n /= abs(n);
+			n = nrm(vt3::pr(b-a, c-a));
 			p = dot(a, n);
 			if(p < 0)
 			{

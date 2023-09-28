@@ -2,6 +2,7 @@
 #define H_CAMELLIA
 
 #include <vector>
+
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -9,7 +10,7 @@ namespace crypt
 {
 	class Camellia
 	{
-		UINT_<16>::uint_ key[17];
+		UINT_<16>::uint key[17];
 
 		static const uint8_t SB[256];
 
@@ -34,7 +35,7 @@ namespace crypt
 			x2[7] ^= t[0] ^ t[3] ^ t[4] ^ t[5] ^ t[6];
 		}
 
-		static void F1(UINT_<16>::uint_ &D, UINT_<16>::uint_ K)
+		static void F1(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			D ^= K;
 			uint8_t x[16];
@@ -44,7 +45,7 @@ namespace crypt
 			D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(x);
 			D ^= K;
 		}
-		static void F2(UINT_<16>::uint_ &D, UINT_<16>::uint_ K)
+		static void F2(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			D ^= K;
 			uint8_t x[16];
@@ -55,7 +56,7 @@ namespace crypt
 			D ^= K;
 		}
 
-		static void FL1(UINT_<16>::uint_ &D, UINT_<16>::uint_ K)
+		static void FL1(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			uint32_t x[4], k[4];
 			bconv<4, 4, endianness::BIG_ENDIAN>::unpack(D, x);
@@ -66,7 +67,7 @@ namespace crypt
 			x[3] ^= rotl(x[2] & k[2], 1);
 			D = bconv<4, 4, endianness::BIG_ENDIAN>::pack(x);
 		}
-		static void FL2(UINT_<16>::uint_ &D, UINT_<16>::uint_ K)
+		static void FL2(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			uint32_t x[4], k[4];
 			bconv<4, 4, endianness::BIG_ENDIAN>::unpack(D, x);
@@ -80,15 +81,15 @@ namespace crypt
 
 		class en
 		{
-			const UINT_<16>::uint_* key;
+			const UINT_<16>::uint* key;
 			const bool e;
 		public:
 			static const uint_fast8_t block_size = 16;
-			en(const UINT_<16>::uint_* k, bool ext) : key(k), e(ext) {}
+			en(const UINT_<16>::uint* k, bool ext) : key(k), e(ext) {}
 
 			void process(uint8_t* r) const
 			{
-				UINT_<16>::uint_ D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+				UINT_<16>::uint D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 				D ^= key[0];
 				F1(D, key[2]);
 				F1(D, key[3]);
@@ -108,7 +109,7 @@ namespace crypt
 					F1(D, key[12]);
 					F1(D, key[13]);
 				}
-				D = UINT_<16>::uint_(D.getH(), D.getL());
+				D = UINT_<16>::uint(D.getH(), D.getL());
 				D ^= key[1];
 				bconv<1, 16, endianness::BIG_ENDIAN>::unpack(D, r);
 			}
@@ -116,17 +117,17 @@ namespace crypt
 
 		class de
 		{
-			const UINT_<16>::uint_* key;
+			const UINT_<16>::uint* key;
 			const bool e;
 		public:
 			static const uint_fast8_t block_size = 16;
-			de(const UINT_<16>::uint_* k, bool ext) : key(k), e(ext) {}
+			de(const UINT_<16>::uint* k, bool ext) : key(k), e(ext) {}
 
 			void process(uint8_t* r) const
 			{
-				UINT_<16>::uint_ D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+				UINT_<16>::uint D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 				D ^= key[1];
-				D = UINT_<16>::uint_(D.getH(), D.getL());
+				D = UINT_<16>::uint(D.getH(), D.getL());
 				if(e)
 				{
 					F2(D, key[13]);
@@ -157,22 +158,22 @@ namespace crypt
 
 		Camellia(const uint8_t* k, uint_fast8_t ksz) : Enc(key, ksz != 16), Dec(key, ksz != 16)
 		{
-			UINT_<16>::uint_ KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
-			UINT_<16>::uint_ KR;
+			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint KR;
 			if(ksz == 24)
 			{
 				const uint64_t t = bconv<1, 8, endianness::BIG_ENDIAN>::pack(k + 16);
-				KR = UINT_<16>::uint_(~t, t);
+				KR = UINT_<16>::uint(~t, t);
 			}
 			else if(ksz == 32)
 			{
 				KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k + 16);
 			}
 
-			UINT_<16>::uint_ KA = KL ^ KR;
-			F1(KA, UINT_<16>::uint_(0xb67ae8584caa73b2, 0xa09e667f3bcc908b));
+			UINT_<16>::uint KA = KL ^ KR;
+			F1(KA, UINT_<16>::uint(0xb67ae8584caa73b2, 0xa09e667f3bcc908b));
 			KA ^= KL;
-			F1(KA, UINT_<16>::uint_(0x54ff53a5f1d36f1c, 0xc6ef372fe94f82be));
+			F1(KA, UINT_<16>::uint(0x54ff53a5f1d36f1c, 0xc6ef372fe94f82be));
 
 			key[0] = KL;
 			key[4] = rotl(KA, 15);
@@ -180,7 +181,7 @@ namespace crypt
 			{
 				key[3] = rotl(KL, 15);
 				key[5] = rotl(KL, 45);
-				key[6] = UINT_<16>::uint_(rotl(KL, 60).getL(), rotl(KA, 45).getH());
+				key[6] = UINT_<16>::uint(rotl(KL, 60).getL(), rotl(KA, 45).getH());
 				key[7] = rotl(KA, 60);
 				key[8] = rotl(KL, 94);
 				key[9] = rotl(KA, 94);
@@ -203,7 +204,7 @@ namespace crypt
 				key[16] = rotl(KA, 77);
 
 				KA ^= KR;
-				F1(KA, UINT_<16>::uint_(0xb05688c2b3e6c1fd, 0x10e527fade682d1d));
+				F1(KA, UINT_<16>::uint(0xb05688c2b3e6c1fd, 0x10e527fade682d1d));
 
 				key[5] = rotl(KA, 30);
 				key[9] = rotl(KA, 60);

@@ -126,7 +126,7 @@ namespace compr
 
 		static bool inflate_nocompr(bitReaderL &brd, std::vector<uint8_t> &out)
 		{
-			uint_fast16_t sz, nsz;
+			uint16_t sz, nsz;
 			if( !brd.readB_C<2, endianness::LITTLE_ENDIAN>(sz) )
 				return false;
 			if( !brd.readB_C<2, endianness::LITTLE_ENDIAN>(nsz) )

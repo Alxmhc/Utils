@@ -2,6 +2,7 @@
 #define H_SALSA
 
 #include <algorithm>
+
 #include "../../math/base/math_.h"
 #include "../pack.h"
 

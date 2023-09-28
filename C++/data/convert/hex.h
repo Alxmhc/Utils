@@ -15,9 +15,9 @@ static uint8_t HexDecodeChar(char c)
 }
 
 template<unsigned char sz>
-static typename UINT_<sz>::uint_ HexDecodeNum(const char* s, uint_fast8_t n)
+static typename UINT_<sz>::uint HexDecodeNum(const char* s, uint_fast8_t n)
 {
-	UINT_<sz>::uint_ res = 0;
+	UINT_<sz>::uint res = 0;
 	for(unsigned char i = 0; i < n; i++)
 	{
 		res = (res<<4) | HexDecodeChar(s[i]);

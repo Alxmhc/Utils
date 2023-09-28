@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+
 #include "pack.h"
 
 class byteReader
@@ -100,7 +101,7 @@ public:
 	}
 
 	template<unsigned char SZ, char E>
-	bool readC(typename UINT_<SZ>::uint_ &c)
+	bool readC(typename UINT_<SZ>::uint &c)
 	{
 		uint8_t t[SZ];
 		if (!readN(t, SZ))

@@ -2,6 +2,7 @@
 #define H_MD4
 
 #include <array>
+
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 

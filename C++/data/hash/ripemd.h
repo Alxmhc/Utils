@@ -2,6 +2,7 @@
 #define H_RIPEMD
 
 #include <array>
+
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 

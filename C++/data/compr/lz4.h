@@ -37,7 +37,7 @@ namespace compr
 					return false;
 				if(!br.addN(out, size))
 					return false;
-				uint_fast16_t offset;
+				uint16_t offset;
 				if( !br.readC<2, endianness::LITTLE_ENDIAN>(offset) )
 					break;
 				std::size_t len = b & 0xf;

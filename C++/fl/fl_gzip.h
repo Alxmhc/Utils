@@ -32,7 +32,7 @@ namespace fl_pr
 				return false;
 			if( (flg & 4) != 0 )
 			{
-				uint_fast16_t sz;
+				uint16_t sz;
 				if (!br->readC<2, endianness::LITTLE_ENDIAN>(sz))
 					return false;
 				if (!br->skip(sz))

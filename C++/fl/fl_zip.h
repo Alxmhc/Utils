@@ -6,7 +6,6 @@
 #include "../data/crypt/key.h"
 #include "../data/crypt/aes.h"
 #include "../data/crypt/cr_m.h"
-
 #include "../data/compr/deflate.h"
 #include "../data/compr/bzip2.h"
 

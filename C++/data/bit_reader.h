@@ -30,7 +30,7 @@ public:
 	}
 
 	template<unsigned char SZ, char E>
-	bool readB_C(typename UINT_<SZ>::uint_ &c)
+	bool readB_C(typename UINT_<SZ>::uint &c)
 	{
 		o = 0;
 		return r->readC<SZ, E>(c);

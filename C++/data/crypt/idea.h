@@ -83,7 +83,7 @@ namespace crypt
 
 		IDEA(const uint8_t* k) : Enc(keyEnc), Dec(keyDec)
 		{
-			UINT_<16>::uint_ c = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint c = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
 			for(uint_fast8_t i = 0; i < 6; i++)
 			{
 				bconv<2, 8, endianness::BIG_ENDIAN>::unpack(c, keyEnc + 8*i);
