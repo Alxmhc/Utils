@@ -64,9 +64,12 @@ public:
 	}
 };
 
-long double dot(const vt3 &a, const vt3 &b)
+namespace vt
 {
-	return a.x*b.x + a.y*b.y + a.z*b.z;
+	long double dot(const vt3 &a, const vt3 &b)
+	{
+		return a.x*b.x + a.y*b.y + a.z*b.z;
+	}
 }
 
 #endif

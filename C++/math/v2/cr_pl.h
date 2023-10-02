@@ -10,7 +10,7 @@ public:
 	long double r, f;
 	cr_pl() : r(0.0), f(0.0) {}
 	cr_pl(long double s, long double a) : r(s), f(a) {}
-	cr_pl(const vt2 &v) : r(vt_abs(v)), f(std::atan2(v.y, v.x)) {}
+	cr_pl(const vt2 &v) : r(vt::abs(v)), f(std::atan2(v.y, v.x)) {}
 
 	vt2 v() const
 	{

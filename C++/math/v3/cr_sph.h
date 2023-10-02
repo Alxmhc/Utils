@@ -10,7 +10,7 @@ public:
 	long double r, t, f;
 	cr_sph() : r(0.0), t(0.0), f(0.0) {}
 	cr_sph(long double s, long double a, long double b) : r(s), t(a), f(b) {}
-	cr_sph(const vt3 &v) : r(vt_abs(v)), t(std::acos(v.z/r)), f(std::atan2(v.y, v.x)) {}
+	cr_sph(const vt3 &v) : r(vt::abs(v)), t(std::acos(v.z/r)), f(std::atan2(v.y, v.x)) {}
 
 	vt3 v() const
 	{

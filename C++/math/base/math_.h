@@ -17,11 +17,6 @@ B rotr(B x, unsigned char d)
 
 const long double pi = 3.1415926535897932384626;
 
-static long double dot(long double a, long double b)
-{
-	return a*b;
-}
-
 template<typename T>
 T operator+(const T &a, const T &b)
 {
@@ -37,20 +32,28 @@ T operator-(const T &a, const T &b)
 	return r;
 }
 
-template<typename T>
-long double vt_abs(const T &a)
+namespace vt
 {
-	return std::sqrt(dot(a, a));
-}
-long double vt_abs(long double a)
-{
-	return std::abs(a);
-}
+	static long double dot(long double a, long double b)
+	{
+		return a*b;
+	}
 
-template<typename T>
-const T& nrm(T &a)
-{
-	return a /= vt_abs(a);
+	template<typename T>
+	long double abs(const T &a)
+	{
+		return std::sqrt(dot(a, a));
+	}
+	static long double abs(long double a)
+	{
+		return std::abs(a);
+	}
+
+	template<typename T>
+	const T& nrm(T &a)
+	{
+		return a /= abs(a);
+	}
 }
 
 #endif
