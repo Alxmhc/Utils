@@ -32,13 +32,13 @@ T operator-(const T &a, const T &b)
 	return r;
 }
 
+static long double dot(long double a, long double b)
+{
+	return a*b;
+}
+
 namespace vt
 {
-	static long double dot(long double a, long double b)
-	{
-		return a*b;
-	}
-
 	template<typename T>
 	long double abs(const T &a)
 	{
@@ -50,9 +50,9 @@ namespace vt
 	}
 
 	template<typename T>
-	const T& nrm(T &a)
+	void nrm(T &a)
 	{
-		return a /= abs(a);
+		a /= abs(a);
 	}
 }
 

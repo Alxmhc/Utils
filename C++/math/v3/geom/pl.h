@@ -15,8 +15,9 @@ namespace geom
 	public:
 		pl(const vt3 &a, const vt3 &b, const vt3 &c)
 		{
-			n = vt::nrm(vt3::pr(b-a, c-a));
-			p = vt::dot(a, n);
+			n = vt3::pr(b-a, c-a);
+			vt::nrm(n);
+			p = dot(a, n);
 			if(p < 0)
 			{
 				n = -n;
@@ -32,7 +33,7 @@ namespace geom
 	private:
 		long double dst_(const vt3 &k) const
 		{
-			return vt::dot(n, k) - p;
+			return dot(n, k) - p;
 		}
 	};
 }
