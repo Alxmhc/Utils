@@ -2,6 +2,7 @@
 #define H_ARR
 
 #include <algorithm>
+#include <numeric>
 
 template<typename T>
 void v_xor(T* a, const T* b, std::size_t sz)
