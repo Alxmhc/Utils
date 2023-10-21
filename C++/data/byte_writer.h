@@ -2,6 +2,7 @@
 #define H_BYTE_WRITER
 
 #include <vector>
+#include <string>
 #include <algorithm>
 
 #include "pack.h"
@@ -19,6 +20,10 @@ public:
 	void writeS(const char* s, std::size_t n)
 	{
 		writeN(reinterpret_cast<const uint8_t*>(s), n);
+	}
+	void writeS(const std::string &s)
+	{
+		writeS(s.c_str(), s.length());
 	}
 
 	template<unsigned char SZ, char E>
