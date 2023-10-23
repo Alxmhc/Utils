@@ -54,6 +54,10 @@ public:
 	{
 		return vt3(k*x, k*y, k*z);
 	}
+	vt3 operator/(long double k) const
+	{
+		return vt3(x/k, y/k, z/k);
+	}
 
 	static vt3 pr(const vt3 &a, const vt3 &b)
 	{

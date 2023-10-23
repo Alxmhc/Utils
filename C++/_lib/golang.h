@@ -1,3 +1,5 @@
+#include <cstdint>
+
 typedef int8_t  GoInt8;
 typedef int16_t GoInt16;
 typedef int32_t GoInt32;
