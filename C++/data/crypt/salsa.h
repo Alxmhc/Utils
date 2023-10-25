@@ -21,7 +21,7 @@ namespace crypt
 
 		class en
 		{
-			uint32_t* key;
+			const uint32_t* key;
 			uint_fast8_t rounds;
 			uint64_t p;
 		public:
@@ -35,13 +35,16 @@ namespace crypt
 
 			void process(uint8_t* r)
 			{
-				key[8] = p & 0xffffffff;
-				key[9] = p >> 32;
+				const uint32_t p0 = p & 0xffffffff;
+				const uint32_t p1 = p >> 32;
 				p++;
 
 				uint32_t tmp[16];
 				std::copy_n(key, 16, tmp);
-				for (uint_fast8_t i = rounds; i != 0; i-=2)
+				tmp[8] = p0;
+				tmp[9] = p1;
+
+				for(uint_fast8_t i = rounds; i != 0; i-=2)
 				{
 					qrnd( tmp[0],  tmp[4],  tmp[8], tmp[12]);
 					qrnd( tmp[5],  tmp[9], tmp[13],  tmp[1]);
@@ -53,6 +56,9 @@ namespace crypt
 					qrnd(tmp[10], tmp[11],  tmp[8],  tmp[9]);
 					qrnd(tmp[15], tmp[12], tmp[13], tmp[14]);
 				}
+				tmp[8] += p0;
+				tmp[9] += p1;
+
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
 					uint8_t t[4];
@@ -87,7 +93,6 @@ namespace crypt
 				key[10] = 0x79622d32;
 				conv::pack<4, endianness::LITTLE_ENDIAN>(k + 16, 16, key + 11);
 			}
-
 			key[6] = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(iv);
 			key[7] = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(iv + 4);
 			key[8] = 0;
