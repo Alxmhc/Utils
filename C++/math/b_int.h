@@ -342,8 +342,8 @@ public:
 		{
 			num2 t = n[i];
 			t = t*a + d;
-			n[i] = UINT_<BSZ/4>::getL(t);
-			d = UINT_<BSZ/4>::getH(t);
+			n[i] = static_cast<num>(t);
+			d = t >> BSZ;
 		}
 		if(d)
 		{
@@ -397,12 +397,12 @@ public:
 		if(c == 1)
 			return 0;
 		auto sz = n.size() - 1;
-		num r = n[sz] % c;
+		num2 r = n[sz] % c;
 		while(sz--)
 		{
-			r = UINT_<BSZ/4>::from(n[sz], r) % c;
+			r = ((r << BSZ) | n[sz]) % c;
 		}
-		return r;
+		return static_cast<num>(r);
 	}
 
 	const b_int& operator%=(const b_int &c)
