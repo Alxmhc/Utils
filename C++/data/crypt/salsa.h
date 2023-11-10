@@ -1,8 +1,7 @@
 #ifndef H_SALSA
 #define H_SALSA
 
-#include <algorithm>
-
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -17,32 +16,15 @@ namespace crypt
 			x3 ^= rotl(x2 + x1, 13);
 			x0 ^= rotl(x3 + x2, 18);
 		}
-		uint32_t key[16];
 
 		class en
 		{
-			const uint32_t* key;
+			uint32_t key[16];
 			uint_fast8_t rounds;
-			uint64_t p;
-		public:
-			static const uint_fast8_t block_size = 64;
-			en(uint32_t* k, uint_fast8_t r) : key(k), rounds(r), p(0) {}
 
-			void set_num(uint64_t n)
+			void nxt(uint32_t* tmp)
 			{
-				p = n;
-			}
-
-			void process(uint8_t* r)
-			{
-				const uint32_t p0 = p & 0xffffffff;
-				const uint32_t p1 = p >> 32;
-				p++;
-
-				uint32_t tmp[16];
 				std::copy_n(key, 16, tmp);
-				tmp[8] = p0;
-				tmp[9] = p1;
 
 				for(uint_fast8_t i = rounds; i != 0; i-=2)
 				{
@@ -56,13 +38,39 @@ namespace crypt
 					qrnd(tmp[10], tmp[11],  tmp[8],  tmp[9]);
 					qrnd(tmp[15], tmp[12], tmp[13], tmp[14]);
 				}
-				tmp[8] += p0;
-				tmp[9] += p1;
+				v_add(tmp, key, 16);
+
+				key[8]++;
+				if(key[8] == 0)
+				{
+					key[9]++;
+				}
+			}
+		public:
+			static const uint_fast8_t block_size = 64;
+
+			en(uint_fast8_t r) : rounds(r) {}
+
+			void Init(uint32_t* k)
+			{
+				std::copy_n(k, 16, key);
+			}
+
+			void set_num(uint64_t n)
+			{
+				key[8] = static_cast<uint32_t>(n);
+				key[9] = n >> 32;
+			}
+
+			void process(uint8_t* r)
+			{
+				uint32_t tmp[16];
+				nxt(tmp);
 
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
 					uint8_t t[4];
-					bconv<1, 4, endianness::LITTLE_ENDIAN>::unpack(tmp[i] + key[i], t);
+					bconv<1, 4, endianness::LITTLE_ENDIAN>::unpack(tmp[i], t);
 					r[4*i]   ^= t[0];
 					r[4*i+1] ^= t[1];
 					r[4*i+2] ^= t[2];
@@ -76,8 +84,10 @@ namespace crypt
 		en Enc;
 		en Dec;
 
-		Salsa20(const uint8_t *k, size_t length, const uint8_t* iv, uint_fast8_t r = 20) : Enc(key, r), Dec(key, r)
+		Salsa20(const uint8_t *k, size_t length, const uint8_t* iv, uint_fast8_t r = 20) : Enc(r), Dec(r)
 		{
+			uint32_t key[16];
+
 			key[0] = 0x61707865;
 			key[15] = 0x6b206574;
 			conv::pack<4, endianness::LITTLE_ENDIAN>(k, 16, key + 1);
@@ -97,6 +107,9 @@ namespace crypt
 			key[7] = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(iv + 4);
 			key[8] = 0;
 			key[9] = 0;
+
+			Enc.Init(key);
+			Dec.Init(key);
 		}
 	};
 }
