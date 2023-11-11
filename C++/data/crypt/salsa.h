@@ -1,8 +1,9 @@
 #ifndef H_SALSA
 #define H_SALSA
 
+#include "../../arr.h"
 #include "../../math/base/math_.h"
-#include "../byte_writer.h"
+#include "../pack.h"
 
 namespace crypt
 {
