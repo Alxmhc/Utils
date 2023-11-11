@@ -5,6 +5,7 @@
 #include <string>
 #include <algorithm>
 
+#include "../arr.h"
 #include "pack.h"
 
 class byteWriter
@@ -126,6 +127,53 @@ public:
 		}
 		offset = n - part;
 		std::copy_n(v + part, offset, buf);
+	}
+};
+
+template<std::size_t SZ>
+class byteProcBuf
+{
+	std::size_t offset;
+protected:
+	uint8_t buf[SZ];
+
+	virtual void gen() = 0;
+
+	byteProcBuf() : offset(0) {}
+public:
+	void process(uint8_t* v, std::size_t n)
+	{
+		if(offset != 0)
+		{
+			const auto k = SZ - offset;
+			if(n <= k)
+			{
+				v_xor(v, buf + offset, n);
+				offset = n < k ? offset + n : 0;
+				return;
+			}
+			v_xor(v, buf + offset, k);
+			v += k;
+			n -= k;
+		}
+		while(n >= SZ)
+		{
+			gen();
+			v_xor(v, buf, SZ);
+			v += SZ;
+			n -= SZ;
+		}
+		offset = n;
+		if(n != 0)
+		{
+			gen();
+			v_xor(v, buf, n);
+		}
+	}
+
+	void Fin()
+	{
+		offset = 0;
 	}
 };
 
