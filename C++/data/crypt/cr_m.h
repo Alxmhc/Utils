@@ -4,6 +4,79 @@
 #include "../../arr.h"
 #include "../byte_writer.h"
 
+struct iv_ctr
+{
+	static void incr(uint8_t* v, const uint_fast8_t sz)
+	{
+		uint_fast8_t i = sz;
+		while(i != 0)
+		{
+			i--;
+			if(v[i] != 255)
+			{
+				v[i]++;
+				break;
+			}
+			v[i] = 0;
+		}
+	}
+};
+
+namespace CR_CTR
+{
+	template<class CR, class INCR>
+	class Encoder : public byteProcBuf<CR::block_size>
+	{
+		const CR* cr;
+		uint8_t iv[CR::block_size];
+
+		void gen()
+		{
+			std::copy_n(iv, CR::block_size, this->buf);
+			cr->Enc.process(this->buf);
+			INCR::incr(iv, CR::block_size);
+		}
+	public:
+		Encoder(const CR &c, const uint8_t* v) : cr(&c)
+		{
+			std::copy_n(v, CR::block_size, iv);
+		}
+	};
+
+	template<class CR, class INCR>
+	class Decoder : public Encoder<CR, INCR>
+	{
+	public:
+		Decoder(const CR &c, const uint8_t* v) : Encoder<CR, INCR>(c, v) {}
+	};
+}
+
+namespace CR_OFB
+{
+	template<class CR>
+	class Encoder : public byteProcBuf<CR::block_size>
+	{
+		const CR* cr;
+
+		void gen()
+		{
+			cr->Enc.process(this->buf);
+		}
+	public:
+		Encoder(const CR &c, const uint8_t* v) : cr(&c)
+		{
+			std::copy_n(v, CR::block_size, this->buf);
+		}
+	};
+
+	template<class CR>
+	class Decoder : public Encoder<CR>
+	{
+	public:
+		Decoder(const CR &c, const uint8_t* v) : Encoder<CR>(c, v) {}
+	};
+}
+
 template<class CR>
 class cr_str : public byteWriterBuf<CR::block_size>
 {
@@ -37,75 +110,6 @@ public:
 		std::copy_n(iv, CR::block_size, iv_cur);
 	}
 };
-
-struct iv_ctr
-{
-	static void incr(uint8_t* v, const uint_fast8_t sz)
-	{
-		uint_fast8_t i = sz;
-		while(i != 0)
-		{
-			i--;
-			if(v[i] != 255)
-			{
-				v[i]++;
-				break;
-			}
-			v[i] = 0;
-		}
-	}
-};
-
-namespace CR_CTR
-{
-	template<class CR, class INCR>
-	class Encoder : public cr_str<CR>
-	{
-		void upd(const uint8_t* v, std::size_t sz)
-		{
-			uint8_t tmp[CR::block_size];
-			std::copy_n(this->iv_cur, CR::block_size, tmp);
-			this->cr->Enc.process(tmp);
-			v_xor(tmp, v, sz);
-			this->bw->writeN(tmp, sz);
-			INCR::incr(this->iv_cur, CR::block_size);
-		}
-	public:
-		Encoder(const CR &c, const uint8_t* v, byteWriter &b) : cr_str<CR>(c, v, b) {}
-	};
-
-	template<class CR, class INCR>
-	class Decoder : public Encoder<CR, INCR>
-	{
-	public:
-		Decoder(const CR &c, const uint8_t* v, byteWriter &b) : Encoder<CR, INCR>(c, v, b) {}
-	};
-}
-
-namespace CR_OFB
-{
-	template<class CR>
-	class Encoder : public cr_str<CR>
-	{
-		void upd(const uint8_t* v, std::size_t sz)
-		{
-			this->cr->Enc.process(this->iv_cur);
-			uint8_t tmp[CR::block_size];
-			std::copy_n(v, sz, tmp);
-			v_xor(tmp, this->iv_cur, sz);
-			this->bw->writeN(tmp, sz);
-		}
-	public:
-		Encoder(const CR &c, const uint8_t* v, byteWriter &b) : cr_str<CR>(c, v, b) {}
-	};
-
-	template<class CR>
-	class Decoder : public Encoder<CR>
-	{
-	public:
-		Decoder(const CR &c, const uint8_t* v, byteWriter &b) : Encoder<CR>(c, v, b) {}
-	};
-}
 
 namespace CR_CFB
 {

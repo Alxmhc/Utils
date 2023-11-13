@@ -1,7 +1,7 @@
 #ifndef H_ARR
 #define H_ARR
 
-#include <cstdint>>
+#include <cstdint>
 #include <algorithm>
 #include <numeric>
 
@@ -33,6 +33,11 @@ protected:
 	virtual void gen() = 0;
 
 	byteProcBuf() : offset(0) {}
+
+	void reset()
+	{
+		offset = 0;
+	}
 public:
 	void process(uint8_t* v, std::size_t n)
 	{
@@ -62,11 +67,6 @@ public:
 			gen();
 			v_xor(v, buf, n);
 		}
-	}
-
-	void Fin()
-	{
-		offset = 0;
 	}
 };
 

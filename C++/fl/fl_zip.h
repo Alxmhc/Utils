@@ -117,15 +117,10 @@ namespace fl_pr
 			if(std::memcmp(hsh, hs, 10) != 0)
 				return false;
 
-			std::vector<uint8_t> res;
-			res.reserve(data.size());
-			bw_array bw(res);
 			crypt::AES a(key.data(), ssz*2);
 			const uint8_t iv[] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-			CR_CTR::Decoder<crypt::AES, iv_zip> cr(a, iv, bw);
-			cr.writeN(data.data(), data.size());
-			cr.Fin();
-			data = std::move(res);
+			CR_CTR::Decoder<crypt::AES, iv_zip> cr(a, iv);
+			cr.process(data.data(), data.size());
 			return true;
 		}
 
