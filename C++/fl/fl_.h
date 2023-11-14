@@ -52,8 +52,11 @@ public:
 	{
 		if (pos + n > csize)
 			return false;
-		fst.seekg(n, std::ios_base::cur);
-		pos += n;
+		if(n != 0)
+		{
+			fst.seekg(n, std::ios_base::cur);
+			pos += n;
+		}
 		return true;
 	}
 };
