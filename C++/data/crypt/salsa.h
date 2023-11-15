@@ -17,6 +17,24 @@ namespace crypt
 			x0 ^= rotl(x3 + x2, 18);
 		}
 	public:
+		static void cr(uint32_t* tmp, const uint32_t* k, uint_fast8_t r)
+		{
+			std::copy_n(k, 16, tmp);
+			for(uint_fast8_t i = r; i != 0; i-=2)
+			{
+				qrnd( tmp[0],  tmp[4],  tmp[8], tmp[12]);
+				qrnd( tmp[5],  tmp[9], tmp[13],  tmp[1]);
+				qrnd(tmp[10], tmp[14],  tmp[2],  tmp[6]);
+				qrnd(tmp[15],  tmp[3],  tmp[7], tmp[11]);
+
+				qrnd( tmp[0],  tmp[1],  tmp[2],  tmp[3]);
+				qrnd( tmp[5],  tmp[6],  tmp[7],  tmp[4]);
+				qrnd(tmp[10], tmp[11],  tmp[8],  tmp[9]);
+				qrnd(tmp[15], tmp[12], tmp[13], tmp[14]);
+			}
+			v_add(tmp, k, 16);
+		}
+
 		class Enc : public byteProcBuf<64>
 		{
 			uint32_t key[16];
@@ -25,20 +43,7 @@ namespace crypt
 			void gen()
 			{
 				uint32_t tmp[16];
-				std::copy_n(key, 16, tmp);
-				for(uint_fast8_t i = rounds; i != 0; i-=2)
-				{
-					qrnd( tmp[0],  tmp[4],  tmp[8], tmp[12]);
-					qrnd( tmp[5],  tmp[9], tmp[13],  tmp[1]);
-					qrnd(tmp[10], tmp[14],  tmp[2],  tmp[6]);
-					qrnd(tmp[15],  tmp[3],  tmp[7], tmp[11]);
-
-					qrnd( tmp[0],  tmp[1],  tmp[2],  tmp[3]);
-					qrnd( tmp[5],  tmp[6],  tmp[7],  tmp[4]);
-					qrnd(tmp[10], tmp[11],  tmp[8],  tmp[9]);
-					qrnd(tmp[15], tmp[12], tmp[13], tmp[14]);
-				}
-				v_add(tmp, key, 16);
+				cr(tmp, key, rounds);
 				conv::unpack<4, endianness::LITTLE_ENDIAN>(tmp, 16, buf);
 
 				key[8]++;

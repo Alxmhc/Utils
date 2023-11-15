@@ -3,7 +3,7 @@
 
 #include "../cont.h"
 #include "../data/hash/sha1.h"
-#include "../data/crypt/key.h"
+#include "../data/crypt/pbkdf2.h"
 #include "../data/crypt/aes.h"
 #include "../data/crypt/cr_m.h"
 #include "../data/compr/deflate.h"

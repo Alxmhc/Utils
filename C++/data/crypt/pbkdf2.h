@@ -1,5 +1,5 @@
-#ifndef H_KEY
-#define H_KEY
+#ifndef H_PBKDF2
+#define H_PBKDF2
 
 #include <vector>
 
