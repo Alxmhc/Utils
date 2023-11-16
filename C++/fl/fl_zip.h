@@ -102,7 +102,8 @@ namespace fl_pr
 			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
 				return false;
 
-			auto key = PBKDF2<PBKDF2_HMAC<hash::SHA1>>(psw.data(), psw.size(), data.data(), ssz, 1000, ssz*4 + 2);
+			const PBKDF2<PBKDF2_HMAC<hash::SHA1>> kg(1000);
+			auto key = kg.gen(psw.data(), psw.size(), data.data(), ssz, ssz*4 + 2);
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
 				return false;
 

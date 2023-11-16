@@ -35,33 +35,40 @@ public:
 
 //rfc 2898
 template<class F>
-std::vector<uint8_t> PBKDF2(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, std::size_t c, std::size_t ksz)
+class PBKDF2
 {
-	std::vector<uint8_t> key;
-	if(ksz == 0)
-		return key;
-	auto kl = (ksz - 1) / F::out_size + 1;
-	key.reserve(kl * F::out_size);
+	const std::size_t c;
+public:
+	PBKDF2(std::size_t k) : c(k) {}
 
-	F fcr(passw, psz);
-	for(uint_fast32_t i = 1; i <= kl; i++)
+	std::vector<uint8_t> gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, std::size_t ksz) const
 	{
-		uint8_t tmp[F::out_size];
+		std::vector<uint8_t> key;
+		if(ksz == 0)
+			return key;
+		auto kl = (ksz - 1) / F::out_size + 1;
+		key.reserve(kl * F::out_size);
+
+		F fcr(passw, psz);
+		for(uint_fast32_t i = 1; i <= kl; i++)
 		{
-			uint8_t num[4];
-			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(i, num);
-			fcr.Calc(salt, ssz, num, tmp);
+			uint8_t tmp[F::out_size];
+			{
+				uint8_t num[4];
+				bconv<1, 4, endianness::BIG_ENDIAN>::unpack(i, num);
+				fcr.Calc(salt, ssz, num, tmp);
+			}
+			const std::size_t b = key.size();
+			key.insert(key.end(), tmp, tmp + F::out_size);
+			for(std::size_t j = 1; j < c; j++)
+			{
+				fcr.Calc(tmp);
+				v_xor(key.data() + b, tmp, F::out_size);
+			}
 		}
-		const std::size_t b = key.size();
-		key.insert(key.end(), tmp, tmp + F::out_size);
-		for(std::size_t j = 1; j < c; j++)
-		{
-			fcr.Calc(tmp);
-			v_xor(key.data() + b, tmp, F::out_size);
-		}
+		key.resize(ksz);
+		return key;
 	}
-	key.resize(ksz);
-	return key;
-}
+};
 
 #endif
