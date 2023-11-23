@@ -9,10 +9,73 @@
 
 namespace crypt
 {
+	//key sz = 16, 24, 32
 	class ARIA
 	{
-		std::vector<UINT_<16>::uint> keyEnc;
-		std::vector<UINT_<16>::uint> keyDec;
+		static void Init_Enc(const uint8_t* k, uint_fast8_t ksz, std::vector<UINT_<16>::uint> &key)
+		{
+			uint8_t r[16] = {};
+			std::copy_n(k + 16, ksz - 16, r);
+
+			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+
+			const UINT_<16>::uint CK[3] = {
+				UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
+				UINT_<16>::uint(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
+				UINT_<16>::uint(0x0324977504e8c90e, 0xdb92371d2126e970)
+			};
+
+			const uint_fast8_t nr = (ksz >> 2) + 8;
+
+			const uint_fast8_t n = (nr-12) >> 1;
+			UINT_<16>::uint W[4];
+			W[0] = KL;
+			W[1] = FO(W[0] ^ CK[(n+0)%3]) ^ KR;
+			W[2] = A(SL(W[1] ^ CK[(n+1)%3])) ^ W[0];
+			W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
+
+			key.resize(nr + 1);
+			key[0]  = W[0] ^ rotr(W[1], 19);
+			key[1]  = W[1] ^ rotr(W[2], 19);
+			key[2]  = W[2] ^ rotr(W[3], 19);
+			key[3]  = W[3] ^ rotr(W[0], 19);
+			key[4]  = W[0] ^ rotr(W[1], 31);
+			key[5]  = W[1] ^ rotr(W[2], 31);
+			key[6]  = W[2] ^ rotr(W[3], 31);
+			key[7]  = W[3] ^ rotr(W[0], 31);
+			key[8]  = W[0] ^ rotl(W[1], 61);
+			key[9]  = W[1] ^ rotl(W[2], 61);
+			key[10] = W[2] ^ rotl(W[3], 61);
+			key[11] = W[3] ^ rotl(W[0], 61);
+			key[12] = W[0] ^ rotl(W[1], 31);
+			if(nr > 12)
+			{
+				key[13] = W[1] ^ rotl(W[2], 31);
+				key[14] = W[2] ^ rotl(W[3], 31);
+				if(nr > 14)
+				{
+					key[15] = W[3] ^ rotl(W[0], 31);
+					key[16] = W[0] ^ rotl(W[1], 19);
+				}
+			}
+		}
+
+		static void Init_Dec(const uint8_t* k, uint_fast8_t ksz, std::vector<UINT_<16>::uint> &key)
+		{
+			const uint_fast8_t nr = (ksz >> 2) + 8;
+
+			Init_Enc(k, ksz, key);
+
+			std::swap(key[0], key[nr]);
+			for(uint_fast8_t i = 1; i < nr/2; i++)
+			{
+				std::swap(key[i], key[nr - i]);
+				key[i] = A(key[i]);
+				key[nr - i] = A(key[nr - i]);
+			}
+			key[nr/2] = A(key[nr/2]);
+		}
 
 		static const uint8_t SB1[256];
 		static const uint8_t SB2[256];
@@ -86,93 +149,42 @@ namespace crypt
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(P, r);
 		}
 
-		class en
-		{
-			const std::vector<UINT_<16>::uint>* key;
-		public:
-			static const uint_fast8_t block_size = 16;
-			en(const std::vector<UINT_<16>::uint> &k) : key(&k) {}
-
-			void process(uint8_t* r) const
-			{
-				Process(*key, r);
-			}
-		};
-
-		class de
-		{
-			const std::vector<UINT_<16>::uint>* key;
-		public:
-			static const uint_fast8_t block_size = 16;
-			de(const std::vector<UINT_<16>::uint> &k) : key(&k) {}
-
-			void process(uint8_t* r) const
-			{
-				Process(*key, r);
-			}
-		};
 	public:
 		static const uint_fast8_t block_size = 16;
 
-		en Enc;
-		de Dec;
-
-		ARIA(const uint8_t* k, uint_fast8_t ksz) : Enc(keyEnc), Dec(keyDec)
+		class Enc
 		{
-			uint8_t r[16] = {};
-			std::copy_n(k + 16, ksz - 16, r);
+			std::vector<UINT_<16>::uint> key;
+		public:
+			static const uint_fast8_t block_size = 16;
 
-			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
-			UINT_<16>::uint KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
-
-			const UINT_<16>::uint CK[3] = {
-				UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
-				UINT_<16>::uint(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
-				UINT_<16>::uint(0x0324977504e8c90e, 0xdb92371d2126e970)
-			};
-
-			const uint_fast8_t nr = (ksz >> 2) + 8;
-
-			const uint_fast8_t n = (nr-12) >> 1;
-			UINT_<16>::uint W[4];
-			W[0] = KL;
-			W[1] = FO(W[0] ^ CK[(n+0)%3]) ^ KR;
-			W[2] = A(SL(W[1] ^ CK[(n+1)%3])) ^ W[0];
-			W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
-
-			keyEnc.resize(nr + 1);
-			keyEnc[0]  = W[0] ^ rotr(W[1], 19);
-			keyEnc[1]  = W[1] ^ rotr(W[2], 19);
-			keyEnc[2]  = W[2] ^ rotr(W[3], 19);
-			keyEnc[3]  = W[3] ^ rotr(W[0], 19);
-			keyEnc[4]  = W[0] ^ rotr(W[1], 31);
-			keyEnc[5]  = W[1] ^ rotr(W[2], 31);
-			keyEnc[6]  = W[2] ^ rotr(W[3], 31);
-			keyEnc[7]  = W[3] ^ rotr(W[0], 31);
-			keyEnc[8]  = W[0] ^ rotl(W[1], 61);
-			keyEnc[9]  = W[1] ^ rotl(W[2], 61);
-			keyEnc[10] = W[2] ^ rotl(W[3], 61);
-			keyEnc[11] = W[3] ^ rotl(W[0], 61);
-			keyEnc[12] = W[0] ^ rotl(W[1], 31);
-			if(nr > 12)
+			Enc(const uint8_t* k, uint_fast8_t ksz)
 			{
-				keyEnc[13] = W[1] ^ rotl(W[2], 31);
-				keyEnc[14] = W[2] ^ rotl(W[3], 31);
-				if(nr > 14)
-				{
-					keyEnc[15] = W[3] ^ rotl(W[0], 31);
-					keyEnc[16] = W[0] ^ rotl(W[1], 19);
-				}
+				Init_Enc(k, ksz, key);
 			}
 
-			keyDec.resize(nr + 1);
-			keyDec[0] = keyEnc[nr];
-			for(uint_fast8_t i = 1; i < nr; i++)
+			void process(uint8_t* r) const
 			{
-				keyDec[i] = A(keyEnc[nr-i]);
+				Process(key, r);
 			}
-			keyDec[nr] = keyEnc[0];
-		}
+		};
+
+		class Dec
+		{
+			std::vector<UINT_<16>::uint> key;
+		public:
+			static const uint_fast8_t block_size = 16;
+
+			Dec(const uint8_t* k, uint_fast8_t ksz)
+			{
+				Init_Dec(k, ksz, key);
+			}
+
+			void process(uint8_t* r) const
+			{
+				Process(key, r);
+			}
+		};
 	};
 
 	const uint8_t ARIA::SB1[256] = {

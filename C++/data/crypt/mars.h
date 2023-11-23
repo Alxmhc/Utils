@@ -6,9 +6,45 @@
 
 namespace crypt
 {
+	//key sz = 16, 24, 32, 40, 48
 	class MARS
 	{
-		uint32_t Key[40];
+		static void Init(const uint8_t* k, uint_fast8_t ksz, uint32_t* key)
+		{
+			uint32_t T[15] = {};
+			conv::pack<4, endianness::LITTLE_ENDIAN>(k, ksz, T);
+			T[ksz/4] = ksz/4;
+			for(uint_fast8_t j = 0; j < 4; j++)
+			{
+				for(uint_fast8_t i = 0; i < 15; i++)
+				{
+					T[i] ^= rotl(T[(i+8)%15] ^ T[(i+13)%15], 3) ^ (4*i + j);
+				}
+				for(uint_fast8_t k = 0; k < 4; k++)
+				{
+					for(uint_fast8_t i = 0; i < 15; i++)
+					{
+						T[i] = rotl(T[i] + S(T[(i+14)%15]), 9);
+					}
+				}
+				for(uint_fast8_t i = 0; i < 10; i++)
+				{
+					key[10*j + i] = T[4*i%15];
+				}
+			}
+			for(uint_fast8_t i = 5; i < 36; i += 2)
+			{
+				const uint32_t w = key[i] | 3;
+				uint32_t M = (~w ^ (w<<1)) & (~w ^ (w>>1)) & 0x7ffffffe;
+
+				M &= M>>1; M &= M>>2; M &= M>>4;
+				M |= M<<1; M |= M<<2; M |= M<<4;
+				M &= 0x7ffffffc;
+
+				const uint32_t p = rotl(Sbox[265 + (key[i] & 3)], key[i-1] & 0x1f);
+				key[i] = w ^ (p & M);
+			}
+		}
 
 		static const uint32_t Sbox[512];
 
@@ -25,21 +61,28 @@ namespace crypt
 			return Sbox[(c & 0x1ff)];
 		}
 
-		class en
+	public:
+		static const uint_fast8_t block_size = 16;
+
+		class Enc
 		{
-			const uint32_t* K;
+			uint32_t key[40];
 		public:
 			static const uint_fast8_t block_size = 16;
-			en(const uint32_t* k) : K(k) {}
+
+			Enc(const uint8_t* k, uint_fast8_t ksz)
+			{
+				Init(k, ksz, key);
+			}
 
 			void process(uint8_t* r) const
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				d[0] += K[0];
-				d[1] += K[1];
-				d[2] += K[2];
-				d[3] += K[3];
+				d[0] += key[0];
+				d[1] += key[1];
+				d[2] += key[2];
+				d[3] += key[3];
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[0];
@@ -60,8 +103,8 @@ namespace crypt
 				}
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
-					uint32_t R = rotl(rotl(d[0], 13) * K[2*i+5], 5);
-					uint32_t M = d[0] + K[2*i+4];
+					uint32_t R = rotl(rotl(d[0], 13) * key[2*i+5], 5);
+					uint32_t M = d[0] + key[2*i+4];
 					uint32_t L = S(M) ^ R;
 					M = rotl(M, R&0x1f);
 					R = rotl(R, 5);
@@ -90,29 +133,33 @@ namespace crypt
 					d[2] = (d[3] - S1(t>>16)) ^ S0(t>>8);
 					d[3] = rotl(t, 24);
 				}
-				d[0] -= K[36];
-				d[1] -= K[37];
-				d[2] -= K[38];
-				d[3] -= K[39];
+				d[0] -= key[36];
+				d[1] -= key[37];
+				d[2] -= key[38];
+				d[3] -= key[39];
 				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
 			}
 		};
 
-		class de
+		class Dec
 		{
-			const uint32_t* K;
+			uint32_t key[40];
 		public:
 			static const uint_fast8_t block_size = 16;
-			de(const uint32_t* k) : K(k) {}
+
+			Dec(const uint8_t* k, uint_fast8_t ksz)
+			{
+				Init(k, ksz, key);
+			}
 
 			void process(uint8_t* r) const
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				d[0] += K[36];
-				d[1] += K[37];
-				d[2] += K[38];
-				d[3] += K[39];
+				d[0] += key[36];
+				d[1] += key[37];
+				d[2] += key[38];
+				d[3] += key[39];
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[3];
@@ -133,8 +180,8 @@ namespace crypt
 				}
 				for(uint_fast8_t i = 0; i < 16; i++)
 				{
-					uint32_t R = rotl(d[3] * K[2*(15-i)+5], 5);
-					uint32_t M = rotr(d[3], 13) + K[2*(15-i)+4];
+					uint32_t R = rotl(d[3] * key[2*(15-i)+5], 5);
+					uint32_t M = rotr(d[3], 13) + key[2*(15-i)+4];
 					uint32_t L = S(M) ^ R;
 					M = rotl(M, R&0x1f);
 					R = rotl(R, 5);
@@ -163,55 +210,13 @@ namespace crypt
 					d[1] = (d[0] - S1(t >> 16)) ^ S0(t >> 8);
 					d[0] = rotl(t, 24);
 				}
-				d[0] -= K[0];
-				d[1] -= K[1];
-				d[2] -= K[2];
-				d[3] -= K[3];
+				d[0] -= key[0];
+				d[1] -= key[1];
+				d[2] -= key[2];
+				d[3] -= key[3];
 				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
 			}
 		};
-	public:
-		static const uint_fast8_t block_size = 16;
-
-		en Enc;
-		de Dec;
-
-		MARS(const uint8_t* k, uint_fast8_t ksz) : Enc(Key), Dec(Key)
-		{
-			uint32_t T[15] = {};
-			conv::pack<4, endianness::LITTLE_ENDIAN>(k, ksz, T);
-			T[ksz/4] = ksz/4;
-			for(uint_fast8_t j = 0; j < 4; j++)
-			{
-				for(uint_fast8_t i = 0; i < 15; i++)
-				{
-					T[i] ^= rotl(T[(i+8)%15] ^ T[(i+13)%15], 3) ^ (4*i + j);
-				}
-				for(uint_fast8_t k = 0; k < 4; k++)
-				{
-					for(uint_fast8_t i = 0; i < 15; i++)
-					{
-						T[i] = rotl(T[i] + S(T[(i+14)%15]), 9);
-					}
-				}
-				for(uint_fast8_t i = 0; i < 10; i++)
-				{
-					Key[10*j + i] = T[4*i%15];
-				}
-			}
-			for(uint_fast8_t i = 5; i < 36; i += 2)
-			{
-				const uint32_t w = Key[i] | 3;
-				uint32_t M = (~w ^ (w<<1)) & (~w ^ (w>>1)) & 0x7ffffffe;
-
-				M &= M>>1; M &= M>>2; M &= M>>4;
-				M |= M<<1; M |= M<<2; M |= M<<4;
-				M &= 0x7ffffffc;
-
-				const uint32_t p = rotl(Sbox[265 + (Key[i] & 3)], Key[i-1] & 0x1f);
-				Key[i] = w ^ (p & M);
-			}
-		}
 	};
 
 	const uint32_t MARS::Sbox[512] = {

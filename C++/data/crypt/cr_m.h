@@ -25,55 +25,55 @@ struct iv_ctr
 namespace CR_CTR
 {
 	template<class CR, class INCR>
-	class Encoder : public byteProcBuf<CR::block_size>
+	class Encr : public byteProcBuf<CR::block_size>
 	{
-		const CR* cr;
+		const typename CR::Enc cr;
 		uint8_t iv[CR::block_size];
 
 		void gen()
 		{
 			std::copy_n(iv, CR::block_size, this->buf);
-			cr->Enc.process(this->buf);
+			cr.process(this->buf);
 			INCR::incr(iv, CR::block_size);
 		}
 	public:
-		Encoder(const CR &c, const uint8_t* v) : cr(&c)
+		Encr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, iv);
 		}
 	};
 
 	template<class CR, class INCR>
-	class Decoder : public Encoder<CR, INCR>
+	class Decr : public Encr<CR, INCR>
 	{
 	public:
-		Decoder(const CR &c, const uint8_t* v) : Encoder<CR, INCR>(c, v) {}
+		Decr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : Encr<CR, INCR>(k, ksz, v) {}
 	};
 }
 
 namespace CR_OFB
 {
 	template<class CR>
-	class Encoder : public byteProcBuf<CR::block_size>
+	class Encr : public byteProcBuf<CR::block_size>
 	{
-		const CR* cr;
+		const typename CR::Enc cr;
 
 		void gen()
 		{
-			cr->Enc.process(this->buf);
+			cr.process(this->buf);
 		}
 	public:
-		Encoder(const CR &c, const uint8_t* v) : cr(&c)
+		Encr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, this->buf);
 		}
 	};
 
 	template<class CR>
-	class Decoder : public Encoder<CR>
+	class Decr : public Encr<CR>
 	{
 	public:
-		Decoder(const CR &c, const uint8_t* v) : Encoder<CR>(c, v) {}
+		Decr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : Encr<CR>(k, ksz, v) {}
 	};
 }
 
@@ -82,7 +82,6 @@ class cr_str : public byteWriterBuf<CR::block_size>
 {
 	uint8_t iv[CR::block_size];
 protected:
-	const CR* cr;
 	uint8_t iv_cur[CR::block_size];
 	byteWriter* bw;
 
@@ -93,7 +92,7 @@ protected:
 		upd(v, CR::block_size);
 	}
 public:
-	cr_str(const CR &c, const uint8_t* v, byteWriter &b) : cr(&c), bw(&b)
+	cr_str(const uint8_t* v, byteWriter &b) : bw(&b)
 	{
 		std::copy_n(v, CR::block_size, iv);
 		std::copy_n(v, CR::block_size, iv_cur);
@@ -116,28 +115,32 @@ namespace CR_CFB
 	template<class CR>
 	class Encoder : public cr_str<CR>
 	{
+		const typename CR::Enc cr;
+
 		void upd(const uint8_t* v, std::size_t sz)
 		{
-			this->cr->Enc.process(this->iv_cur);
+			cr.process(this->iv_cur);
 			v_xor(this->iv_cur, v, sz);
 			this->bw->writeN(this->iv_cur, sz);
 		}
 	public:
-		Encoder(const CR &c, const uint8_t* v, byteWriter &b) : cr_str<CR>(c, v, b) {}
+		Encoder(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v, byteWriter &b) : cr_str<CR>(v, b), cr(k, ksz) {}
 	};
 
 	template<class CR>
 	class Decoder : public cr_str<CR>
 	{
+		const typename CR::Enc cr;
+
 		void upd(const uint8_t* v, std::size_t sz)
 		{
-			this->cr->Enc.process(this->iv_cur);
+			cr.process(this->iv_cur);
 			v_xor(this->iv_cur, v, sz);
 			this->bw->writeN(this->iv_cur, sz);
 			std::copy_n(v, sz, this->iv_cur);
 		}
 	public:
-		Decoder(const CR &c, const uint8_t* v, byteWriter &b) : cr_str<CR>(c, v, b) {}
+		Decoder(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v, byteWriter &b) : cr_str<CR>(v, b), cr(k, ksz) {}
 	};
 }
 
@@ -146,24 +149,24 @@ namespace CR_ECB
 	template<class CR>
 	class Enc
 	{
-		const CR* cr;
+		const typename CR::Enc cr;
 	public:
-		Enc(const CR &c) : cr(&c) {}
+		Enc(const uint8_t* k, uint_fast8_t ksz) : cr(k, ksz) {}
 		void process(uint8_t* v)
 		{
-			cr->Enc.process(v);
+			cr.process(v);
 		}
 	};
 
 	template<class CR>
 	class Dec
 	{
-		const CR* cr;
+		const typename CR::Dec cr;
 	public:
-		Dec(const CR &c) : cr(&c) {}
+		Dec(const uint8_t* k, uint_fast8_t ksz) : cr(k, ksz) {}
 		void process(uint8_t* v)
 		{
-			cr->Dec.process(v);
+			cr.process(v);
 		}
 	};
 }
@@ -173,11 +176,11 @@ namespace CR_CBC
 	template<class CR>
 	class Enc
 	{
-		const CR* cr;
+		const typename CR::Enc cr;
 		uint8_t iv[CR::block_size];
 		uint8_t iv_cur[CR::block_size];
 	public:
-		Enc(const CR &c, const uint8_t* v) : cr(&c)
+		Enc(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, iv);
 			std::copy_n(v, CR::block_size, iv_cur);
@@ -185,7 +188,7 @@ namespace CR_CBC
 		void process(uint8_t* v)
 		{
 			v_xor(v, iv_cur, CR::block_size);
-			cr->Enc.process(v);
+			cr.process(v);
 			std::copy_n(v, CR::block_size, iv_cur);
 		}
 		void reset()
@@ -197,11 +200,11 @@ namespace CR_CBC
 	template<class CR>
 	class Dec
 	{
-		const CR* cr;
+		const typename CR::Dec cr;
 		uint8_t iv[CR::block_size];
 		uint8_t iv_cur[CR::block_size];
 	public:
-		Dec(const CR &c, const uint8_t* v) : cr(&c)
+		Dec(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, iv);
 			std::copy_n(v, CR::block_size, iv_cur);
@@ -212,7 +215,7 @@ namespace CR_CBC
 			std::copy_n(iv_cur, CR::block_size, iv_tmp);
 			std::copy_n(v, CR::block_size, iv_cur);
 
-			cr->Dec.process(v);
+			cr.process(v);
 			v_xor(v, iv_tmp, CR::block_size);
 		}
 		void reset()

@@ -7,6 +7,8 @@
 
 namespace crypt
 {
+	//key sz = 16, 32
+	//iv sz = 8
 	class Salsa20
 	{
 		static void qrnd(uint32_t &x0, uint32_t &x1, uint32_t &x2, uint32_t &x3)
@@ -35,7 +37,7 @@ namespace crypt
 			v_add(tmp, k, 16);
 		}
 
-		class Enc : public byteProcBuf<64>
+		class Encr : public byteProcBuf<64>
 		{
 			uint32_t key[16];
 			const uint_fast8_t rounds;
@@ -53,12 +55,12 @@ namespace crypt
 				}
 			}
 		public:
-			Enc(const uint8_t *k, size_t length, const uint8_t* iv, uint_fast8_t r = 20) : rounds(r)
+			Encr(const uint8_t *k, size_t ksz, const uint8_t* iv, uint_fast8_t r = 20) : rounds(r)
 			{
 				key[0] = 0x61707865;
 				key[15] = 0x6b206574;
 				conv::pack<4, endianness::LITTLE_ENDIAN>(k, 16, key + 1);
-				if(length == 16)
+				if(ksz == 16)
 				{
 					key[5] = 0x3120646e;
 					key[10] = 0x79622d36;
@@ -83,7 +85,11 @@ namespace crypt
 			}
 		};
 
-		typedef Enc Dec;
+		class Decr : public Encr
+		{
+		public:
+			Decr(const uint8_t *k, size_t ksz, const uint8_t* iv, uint_fast8_t r = 20) : Encr(k, ksz, iv, r) {}
+		};
 	};
 }
 
