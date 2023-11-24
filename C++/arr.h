@@ -30,13 +30,18 @@ class byteProcBuf
 protected:
 	uint8_t buf[SZ];
 
-	virtual void gen() = 0;
-
 	byteProcBuf() : offset(0) {}
 
 	void reset()
 	{
 		offset = 0;
+	}
+
+	virtual void gen() = 0;
+
+	virtual void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const
+	{
+		v_xor(v, b, sz);
 	}
 public:
 	void process(uint8_t* v, std::size_t n)
@@ -46,18 +51,18 @@ public:
 			const auto k = SZ - offset;
 			if(n <= k)
 			{
-				v_xor(v, buf + offset, n);
+				post_proc(v, buf + offset, n);
 				offset = n < k ? offset + n : 0;
 				return;
 			}
-			v_xor(v, buf + offset, k);
+			post_proc(v, buf + offset, k);
 			v += k;
 			n -= k;
 		}
 		while(n >= SZ)
 		{
 			gen();
-			v_xor(v, buf, SZ);
+			post_proc(v, buf, SZ);
 			v += SZ;
 			n -= SZ;
 		}
@@ -65,7 +70,7 @@ public:
 		if(n != 0)
 		{
 			gen();
-			v_xor(v, buf, n);
+			post_proc(v, buf, n);
 		}
 	}
 };

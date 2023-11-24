@@ -2,7 +2,6 @@
 #define H_CR_M
 
 #include "../../arr.h"
-#include "../byte_writer.h"
 
 struct iv_ctr
 {
@@ -77,70 +76,52 @@ namespace CR_OFB
 	};
 }
 
-template<class CR>
-class cr_str : public byteWriterBuf<CR::block_size>
-{
-	uint8_t iv[CR::block_size];
-protected:
-	uint8_t iv_cur[CR::block_size];
-	byteWriter* bw;
-
-	virtual void upd(const uint8_t*, std::size_t) = 0;
-
-	void process(const uint8_t* v)
-	{
-		upd(v, CR::block_size);
-	}
-public:
-	cr_str(const uint8_t* v, byteWriter &b) : bw(&b)
-	{
-		std::copy_n(v, CR::block_size, iv);
-		std::copy_n(v, CR::block_size, iv_cur);
-	}
-
-	void Fin()
-	{
-		if(size() != 0)
-		{
-			upd(data(), size());
-			reset();
-		}
-		bw->Fin();
-		std::copy_n(iv, CR::block_size, iv_cur);
-	}
-};
-
 namespace CR_CFB
 {
 	template<class CR>
-	class Encoder : public cr_str<CR>
+	class Encr : public byteProcBuf<CR::block_size>
 	{
 		const typename CR::Enc cr;
 
-		void upd(const uint8_t* v, std::size_t sz)
+		void gen()
 		{
-			cr.process(this->iv_cur);
-			v_xor(this->iv_cur, v, sz);
-			this->bw->writeN(this->iv_cur, sz);
+			cr.process(this->buf);
+		}
+
+		void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
+		{
+			v_xor(v, b, sz);
+			std::copy_n(v, sz, b);
 		}
 	public:
-		Encoder(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v, byteWriter &b) : cr_str<CR>(v, b), cr(k, ksz) {}
+		Encr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
+		{
+			std::copy_n(v, CR::block_size, this->buf);
+		}
 	};
 
 	template<class CR>
-	class Decoder : public cr_str<CR>
+	class Decr : public byteProcBuf<CR::block_size>
 	{
 		const typename CR::Enc cr;
 
-		void upd(const uint8_t* v, std::size_t sz)
+		void gen()
 		{
-			cr.process(this->iv_cur);
-			v_xor(this->iv_cur, v, sz);
-			this->bw->writeN(this->iv_cur, sz);
-			std::copy_n(v, sz, this->iv_cur);
+			cr.process(this->buf);
+		}
+
+		void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
+		{
+			uint8_t t[CR::block_size];
+			std::copy_n(v, sz, t);
+			v_xor(v, b, sz);
+			std::copy_n(t, sz, b);
 		}
 	public:
-		Decoder(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v, byteWriter &b) : cr_str<CR>(v, b), cr(k, ksz) {}
+		Decr(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
+		{
+			std::copy_n(v, CR::block_size, this->buf);
+		}
 	};
 }
 
