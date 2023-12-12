@@ -16,15 +16,72 @@ class b_int
 
 	signed char compare(const b_int &c) const
 	{
-		if(this == &c)
-			return 0;
 		auto sz = n.size();
+		{
+			const auto csz = c.n.size();
+			if(sz != csz)
+				return sz > csz ? 1 : -1;
+		}
 		while(sz--)
 		{
 			if(n[sz] != c.n[sz])
 				return n[sz] > c.n[sz] ? 1 : -1;
 		}
 		return 0;
+	}
+
+	void fix()
+	{
+		auto sz = n.size();
+		while(sz != 1 && n[sz-1] == 0)
+		{
+			sz--;
+		}
+		n.resize(sz);
+	}
+
+	//*this >= c
+	const b_int& operator-=(const b_int &c)
+	{
+		if(c == 0)
+			return *this;
+		if(this == &c)
+		{
+			*this = 0;
+			return *this;
+		}
+
+		std::size_t i = 0;
+		while(c.n[i] == 0)
+		{
+			i++;
+		}
+
+		const auto csz = c.n.size();
+
+		bool d = false;
+		for(; i < csz; i++)
+		{
+			if(d)
+			{
+				d = (n[i] <= c.n[i]);
+				n[i]--;
+			}
+			else
+			{
+				d = (n[i] < c.n[i]);
+			}
+			n[i] -= c.n[i];
+		}
+		while(d)
+		{
+			d = (n[i] == 0);
+			n[i]--;
+			i++;
+		}
+
+		fix();
+		return *this;
 	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
@@ -81,19 +138,9 @@ public:
 	{
 		return !operator==(a);
 	}
-	bool operator>(num a) const
-	{
-		return (n.size() != 1) || (n[0] > a);
-	}
-	bool operator<(num a) const
-	{
-		return (n.size() == 1) && (n[0] < a);
-	}
 
 	bool operator==(const b_int &c) const
 	{
-		if(n.size() != c.n.size())
-			return false;
 		return compare(c) == 0;
 	}
 	bool operator!=(const b_int &c) const
@@ -102,51 +149,15 @@ public:
 	}
 	bool operator>(const b_int &c) const
 	{
-		if(n.size() != c.n.size())
-			return n.size() > c.n.size();
 		return compare(c) > 0;
 	}
 	bool operator<(const b_int &c) const
 	{
-		if(n.size() != c.n.size())
-			return n.size() < c.n.size();
 		return compare(c) < 0;
 	}
 	bool operator>=(const b_int &c) const
 	{
 		return !operator<(c);
-	}
-
-	num operator&(num c) const
-	{
-		return n[0] & c;
-	}
-
-	b_int operator&(const b_int &c) const
-	{
-		const std::size_t sz = std::min(n.size(), c.n.size());
-		b_int res;
-		res.n.assign(n.begin(), n.begin() + sz);
-		for(std::size_t i = 0; i < sz; i++)
-		{
-			res.n[i] &= c.n[i];
-		}
-		return res;
-	}
-
-	b_int gBits(std::size_t k) const
-	{
-		b_int res;
-		if(k == 0)
-			return res;
-		const std::size_t sz = (k-1)/BSZ + 1;
-		res.n.assign(n.begin(), n.begin() + sz);
-		const auto d = k % BSZ;
-		if(d != 0)
-		{
-			res.n.back() &= (1<<d) - 1;
-		}
-		return res;
 	}
 
 	const b_int& operator>>=(std::size_t c)
@@ -177,10 +188,8 @@ public:
 				break;
 			n[i-1] |= n[i] << (BSZ - c);
 		}
-		if(sz > 1 && n[sz-1] == 0)
-		{
-			n.resize(sz-1);
-		}
+
+		fix();
 		return *this;
 	}
 
@@ -264,60 +273,6 @@ public:
 			d = (n[i] == 0);
 			i++;
 		}
-		return *this;
-	}
-
-	//*this >= c
-	const b_int& operator-=(const b_int &c)
-	{
-		if(c == 0)
-			return *this;
-		if(this == &c)
-		{
-			*this = 0;
-			return *this;
-		}
-
-		std::size_t i = 0;
-		while(c.n[i] == 0)
-		{
-			i++;
-		}
-
-		const auto csz = c.n.size();
-
-		bool d = false;
-		for(; i < csz; i++)
-		{
-			if(d)
-			{
-				d = (n[i] <= c.n[i]);
-				n[i]--;
-			}
-			else
-			{
-				d = (n[i] < c.n[i]);
-			}
-			n[i] -= c.n[i];
-		}
-		while(d)
-		{
-			d = (n[i] == 0);
-			n[i]--;
-			i++;
-		}
-
-		const auto sz = n.size();
-		i = sz;
-		while(i != 1 && n[i-1] == 0)
-		{
-			i--;
-		}
-		if(i != sz)
-		{
-			n.resize(i);
-		}
-
 		return *this;
 	}
 
@@ -411,54 +366,37 @@ public:
 			return *this;
 		if(c.n.size() == 1)
 		{
-			const num r = *this % c.n[0];
-			*this = r;
-			return *this;
-		}
-		if((c.n[0] & 1) != 0)
-		{
-			std::size_t k = 0;
-			for(;;)
-			{
-				if((n[0] & 1) != 0)
-				{
-					*this -= c;
-				}
-				*this >>= 1;
-				k++;
-				if(*this < c)
-					break;
-			}
-			for(std::size_t i = 0; i < k; i++)
-			{
-				*this <<= 1;
-				if(*this >= c)
-				{
-					*this -= c;
-				}
-			}
+			*this = *this % c.n[0];
 			return *this;
 		}
 
-		std::size_t k = 0;
+		std::size_t d = (n.size() - c.n.size()) * BSZ;
+		{
+			auto f = n.back();
+			while(f < c.n.back())
+			{
+				f <<= 1;
+				d--;
+			}
+			while(f > c.n.back())
+			{
+				f >>= 1;
+				d++;
+			}
+		}
+
 		b_int t(c);
-		while((t.n[0] & 1) == 0)
+		t <<= d;
+		for(; d != 0; d--)
 		{
 			t >>= 1;
-			k++;
+			if(*this >= t)
+			{
+				*this -= t;
+			}
 		}
-		const auto q = gBits(k);
-		*this >>= k;
-		*this %= t;
-		*this <<= k;
-		*this += q;
+		
 		return *this;
-	}
-
-	b_int operator%(const b_int &c) const
-	{
-		b_int t(*this);
-		return t %= c;
 	}
 
 	//(a^b)%c
