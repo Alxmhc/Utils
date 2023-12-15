@@ -138,6 +138,14 @@ public:
 	{
 		return !operator==(a);
 	}
+	bool operator>(num a) const
+	{
+		return (n.size() != 1) || (n[0] > a);
+	}
+	bool operator<(num a) const
+	{
+		return (n.size() == 1) && (n[0] < a);
+	}
 
 	bool operator==(const b_int &c) const
 	{
@@ -158,6 +166,11 @@ public:
 	bool operator>=(const b_int &c) const
 	{
 		return !operator<(c);
+	}
+
+	num operator&(num a) const
+	{
+		return n[0] & a;
 	}
 
 	const b_int& operator>>=(std::size_t c)
@@ -347,7 +360,7 @@ public:
 		return t *= a;
 	}
 
-	num operator%(num c)
+	num operator%(num c) const
 	{
 		if(c == 1)
 			return 0;
@@ -358,6 +371,12 @@ public:
 			r = ((r << BSZ) | n[sz]) % c;
 		}
 		return static_cast<num>(r);
+	}
+
+	b_int operator%(const b_int &c) const
+	{
+		b_int r(*this);
+		return r %= c;
 	}
 
 	const b_int& operator%=(const b_int &c)
@@ -372,17 +391,19 @@ public:
 
 		std::size_t d = (n.size() - c.n.size()) * BSZ;
 		{
-			auto f = n.back();
-			while(f < c.n.back())
+			const auto f = n.back();
+			auto cf = c.n.back();
+			while(cf > f)
 			{
-				f <<= 1;
+				cf >>= 1;
 				d--;
 			}
-			while(f > c.n.back())
+			while(cf < (f >> 1))
 			{
-				f >>= 1;
+				cf <<= 1;
 				d++;
 			}
+			d++;
 		}
 
 		b_int t(c);
@@ -397,6 +418,23 @@ public:
 		}
 		
 		return *this;
+	}
+
+	// % (1<<c)
+	b_int gBits(std::size_t c) const
+	{
+		b_int res;
+		if(c == 0)
+			return res;
+		const std::size_t sz = (c-1)/BSZ + 1;
+		res.n.assign(n.begin(), n.begin() + sz);
+		const uint_fast8_t d = c % BSZ;
+		if(d != 0)
+		{
+			res.n.back() &= (1<<d) - 1;
+		}
+		res.fix();
+		return res;
 	}
 
 	//(a^b)%c
