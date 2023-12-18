@@ -36,7 +36,7 @@ class HTTP_ : public cont_1
 	std::string fln;
 	std::map<std::string, std::vector<std::string>> hdr;
 public:
-	bool read(byteReader* b)
+	bool read_v1(byteReader* b)
 	{
 		br = b;
 		hdr.clear();

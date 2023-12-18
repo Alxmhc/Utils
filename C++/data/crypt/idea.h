@@ -2,7 +2,6 @@
 #define H_IDEA
 
 #include "../../math/base/math_.h"
-#include "../../math/b_int.h"
 
 namespace crypt
 {

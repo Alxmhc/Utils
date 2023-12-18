@@ -212,21 +212,23 @@ public:
 			return *this;
 
 		std::size_t i = 0;
+		{
+			const auto k = c / BSZ;
+			if(k != 0)
+			{
+				i += k;
+				std::vector<num> tmp(k);
+				n.insert(n.begin(), tmp.cbegin(), tmp.cend());
+				c %= BSZ;
+			}
+		}
+		if(c == 0)
+			return *this;
+
 		while(n[i] == 0)
 		{
 			i++;
 		}
-
-		const auto k = c / BSZ;
-		if(k != 0)
-		{
-			i += k;
-			std::vector<num> tmp(k);
-			n.insert(n.begin(), tmp.cbegin(), tmp.cend());
-			c %= BSZ;
-		}
-		if(c == 0)
-			return *this;
 
 		num d = 0;
 		for(; i < n.size(); i++)
@@ -341,13 +343,14 @@ public:
 		b_int res;
 		res.n.resize(n.size() + csz - 1);
 
+		b_int t(*this);
 		for(std::size_t i = 0;;)
 		{
-			res += *this * c.n[i];
+			res += t * c.n[i];
 			i++;
 			if(i == csz)
 				break;
-			n.insert(n.begin(), 0);
+			t.n.insert(t.n.begin(), 0);
 		}
 
 		*this = res;
@@ -436,28 +439,46 @@ public:
 		res.fix();
 		return res;
 	}
+};
+
+class bint_mod
+{
+	b_int m;
+public:
+	bint_mod(const b_int c) : m(c) {}
+
+	void mul_s(b_int &a, const b_int &b) const
+	{
+		a *= b;
+		a %= m;
+	}
+
+	b_int mul(const b_int &a, const b_int &b) const
+	{
+		b_int res(a);
+		mul_s(res, b);
+		return res;
+	}
 
 	//(a^b)%c
-	template<typename T>
-	static T pw_m(T a, num b, const T &c)
+	template<typename C>
+	b_int pow(b_int a, C b) const
 	{
-		T r(1);
+		b_int r(1);
 		if(b == 0)
 			return r;
-		a %= c;
+		a %= m;
 		if(a < 2)
 			return a;
 		for(;;)
 		{
 			if((b & 1) != 0)
 			{
-				r *= a;
-				r %= c;
+				mul_s(r, a);
 				if(b == 1)
 					break;
 			}
-			a *= a;
-			a %= c;
+			mul_s(a, a);
 			if(a == 1)
 				break;
 			b >>= 1;
@@ -465,12 +486,5 @@ public:
 		return r;
 	}
 };
-
-//(a^b)%c
-static uint_fast32_t pw_m(uint_fast32_t a, uint_fast32_t b, uint_fast32_t c)
-{
-	const auto r = b_int::pw_m(uint_fast64_t(a), b, uint_fast64_t(c));
-	return static_cast<uint_fast32_t>(r);
-}
 
 #endif
