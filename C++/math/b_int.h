@@ -39,50 +39,6 @@ class b_int
 		}
 		n.resize(sz);
 	}
-
-	//*this >= c
-	const b_int& operator-=(const b_int &c)
-	{
-		if(c == 0)
-			return *this;
-		if(this == &c)
-		{
-			*this = 0;
-			return *this;
-		}
-
-		std::size_t i = 0;
-		while(c.n[i] == 0)
-		{
-			i++;
-		}
-
-		const auto csz = c.n.size();
-
-		bool d = false;
-		for(; i < csz; i++)
-		{
-			if(d)
-			{
-				d = (n[i] <= c.n[i]);
-				n[i]--;
-			}
-			else
-			{
-				d = (n[i] < c.n[i]);
-			}
-			n[i] -= c.n[i];
-		}
-		while(d)
-		{
-			d = (n[i] == 0);
-			n[i]--;
-			i++;
-		}
-
-		fix();
-		return *this;
-	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
 
@@ -94,7 +50,18 @@ public:
 
 	void fromB(const uint8_t* v, std::size_t k)
 	{
-		n = std::vector<num>((k+3)>>2);
+		while(k != 0 && *v == 0)
+		{
+			v++;
+			k--;
+		}
+		if(k == 0)
+		{
+			*this = 0;
+			return;
+		}
+
+		n.resize((k+3)>>2);
 		std::size_t i = 0;
 		while(k > 3)
 		{
@@ -291,6 +258,50 @@ public:
 		return *this;
 	}
 
+	//*this >= c
+	const b_int& operator-=(const b_int &c)
+	{
+		if(c == 0)
+			return *this;
+		if(this == &c)
+		{
+			*this = 0;
+			return *this;
+		}
+
+		std::size_t i = 0;
+		while(c.n[i] == 0)
+		{
+			i++;
+		}
+
+		const auto csz = c.n.size();
+
+		bool d = false;
+		for(; i < csz; i++)
+		{
+			if(d)
+			{
+				d = (n[i] <= c.n[i]);
+				n[i]--;
+			}
+			else
+			{
+				d = (n[i] < c.n[i]);
+			}
+			n[i] -= c.n[i];
+		}
+		while(d)
+		{
+			d = (n[i] == 0);
+			n[i]--;
+			i++;
+		}
+
+		fix();
+		return *this;
+	}
+
 	const b_int& operator*=(num a)
 	{
 		if(a == 1 || *this == 0)
@@ -444,13 +455,19 @@ public:
 class bint_mod
 {
 	b_int m;
+
+	void mul_s_(b_int &a, const b_int &b) const
+	{
+		a *= b;
+		a %= m;
+	}
 public:
 	bint_mod(const b_int c) : m(c) {}
 
 	void mul_s(b_int &a, const b_int &b) const
 	{
-		a *= b;
 		a %= m;
+		mul_s_(a, b % m);
 	}
 
 	b_int mul(const b_int &a, const b_int &b) const
@@ -474,11 +491,11 @@ public:
 		{
 			if((b & 1) != 0)
 			{
-				mul_s(r, a);
+				mul_s_(r, a);
 				if(b == 1)
 					break;
 			}
-			mul_s(a, a);
+			mul_s_(a, a);
 			if(a == 1)
 				break;
 			b >>= 1;
