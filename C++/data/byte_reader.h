@@ -24,6 +24,10 @@ public:
 		csize = sz;
 		return true;
 	}
+	bool set_rsize(std::size_t sz)
+	{
+		return set_size(sz + pos);
+	}
 	void reset_size()
 	{
 		csize = size;

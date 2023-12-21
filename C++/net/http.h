@@ -34,7 +34,7 @@ namespace URL
 class HTTP_ : public cont_1
 {
 	std::string fln;
-	std::map<std::string, std::vector<std::string>> hdr;
+	std::map<std::string, std::string> hdr;
 public:
 	bool read_v1(byteReader* b)
 	{
@@ -71,7 +71,15 @@ public:
 			}
 			std::string k(sb, f);
 			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			hdr[k].push_back(std::string(f + 2, p));
+			if(hdr.find(k) == hdr.end())
+			{
+				hdr[k] = std::string(f + 2, p);
+			}
+			else
+			{
+				hdr[k] += "; ";
+				hdr[k] += std::string(f + 2, p);
+			}
 			sb = p + 2;
 		}
 		return true;
@@ -85,7 +93,7 @@ public:
 		auto k = hdr.find("transfer-encoding");
 		if(k != hdr.end())
 		{
-			if(k->second.back() == "chunked")
+			if(k->second == "chunked")
 			{
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
@@ -97,7 +105,7 @@ public:
 		k = hdr.find("content-encoding");
 		if(k != hdr.end())
 		{
-			const auto type = k->second.back();
+			const auto type = k->second;
 			if(type == "gzip")
 			{
 				br_array br(data.data(), data.size());
@@ -128,7 +136,7 @@ public:
 		const auto h = hdr.find(name);
 		if(h == hdr.cend())
 			return "";
-		return h->second.back();
+		return h->second;
 	}
 };
 
