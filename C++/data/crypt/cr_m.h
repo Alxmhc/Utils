@@ -11,7 +11,7 @@ struct iv_ctr
 		while(i != 0)
 		{
 			i--;
-			if(v[i] != 255)
+			if(v[i] != 0xff)
 			{
 				v[i]++;
 				break;
@@ -159,22 +159,16 @@ namespace CR_CBC
 	{
 		const typename CR::Enc cr;
 		uint8_t iv[CR::block_size];
-		uint8_t iv_cur[CR::block_size];
 	public:
 		Enc(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, iv);
-			std::copy_n(v, CR::block_size, iv_cur);
 		}
 		void process(uint8_t* v)
 		{
-			v_xor(v, iv_cur, CR::block_size);
+			v_xor(v, iv, CR::block_size);
 			cr.process(v);
-			std::copy_n(v, CR::block_size, iv_cur);
-		}
-		void reset()
-		{
-			std::copy_n(iv, CR::block_size, iv_cur);
+			std::copy_n(v, CR::block_size, iv);
 		}
 	};
 
@@ -183,25 +177,19 @@ namespace CR_CBC
 	{
 		const typename CR::Dec cr;
 		uint8_t iv[CR::block_size];
-		uint8_t iv_cur[CR::block_size];
 	public:
 		Dec(const uint8_t* k, uint_fast8_t ksz, const uint8_t* v) : cr(k, ksz)
 		{
 			std::copy_n(v, CR::block_size, iv);
-			std::copy_n(v, CR::block_size, iv_cur);
 		}
 		void process(uint8_t* v)
 		{
 			uint8_t iv_tmp[CR::block_size];
-			std::copy_n(iv_cur, CR::block_size, iv_tmp);
-			std::copy_n(v, CR::block_size, iv_cur);
+			std::copy_n(iv, CR::block_size, iv_tmp);
+			std::copy_n(v, CR::block_size, iv);
 
 			cr.process(v);
 			v_xor(v, iv_tmp, CR::block_size);
-		}
-		void reset()
-		{
-			std::copy_n(iv, CR::block_size, iv_cur);
 		}
 	};
 }
