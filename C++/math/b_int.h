@@ -39,6 +39,21 @@ class b_int
 		}
 		n.resize(sz);
 	}
+
+	std::size_t bsize() const
+	{
+		std::size_t res = (n.size() - 1) * BSZ;
+		auto c = n.back();
+		for(uint_fast8_t p = BSZ / 2; p != 0; p >>= 1)
+		{
+			const auto t = c >> p;
+			if(t == 0)
+				continue;
+			res += p;
+			c = t;
+		}
+		return res;
+	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
 
@@ -393,7 +408,7 @@ public:
 		return r %= c;
 	}
 
-	const b_int& operator%=(const b_int &c)
+	const b_int& operator%=(b_int c)
 	{
 		if(*this < c)
 			return *this;
@@ -402,35 +417,17 @@ public:
 			*this = *this % c.n[0];
 			return *this;
 		}
+		std::size_t d = bsize() - c.bsize() + 1;
 
-		std::size_t d = (n.size() - c.n.size()) * BSZ;
-		{
-			const auto f = n.back();
-			auto cf = c.n.back();
-			while(cf > f)
-			{
-				cf >>= 1;
-				d--;
-			}
-			while(cf < (f >> 1))
-			{
-				cf <<= 1;
-				d++;
-			}
-			d++;
-		}
-
-		b_int t(c);
-		t <<= d;
+		c <<= d;
 		for(; d != 0; d--)
 		{
-			t >>= 1;
-			if(*this >= t)
+			c >>= 1;
+			if(*this >= c)
 			{
-				*this -= t;
+				*this -= c;
 			}
 		}
-		
 		return *this;
 	}
 
