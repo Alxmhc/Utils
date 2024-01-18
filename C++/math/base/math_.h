@@ -15,6 +15,21 @@ B rotr(B x, unsigned char d)
 	return (x>>d) | (x<<((sizeof(B)<<3)-d));
 }
 
+template<typename T>
+uint_fast8_t log2i(T c)
+{
+	uint_fast8_t res = 0;
+	for(uint_fast8_t p = sizeof(T) * 4; p != 0; p >>= 1)
+	{
+		const auto t = c >> p;
+		if(t == 0)
+			continue;
+		c = t;
+		res |= p;
+	}
+	return res;
+}
+
 const long double pi = 3.1415926535897932384626;
 
 template<typename T>

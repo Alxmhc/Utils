@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "base/math_.h"
 #include "../data/pack.h"
 
 class b_int
@@ -43,16 +44,19 @@ class b_int
 	std::size_t bsize() const
 	{
 		std::size_t res = (n.size() - 1) * BSZ;
-		auto c = n.back();
-		for(uint_fast8_t p = BSZ / 2; p != 0; p >>= 1)
-		{
-			const auto t = c >> p;
-			if(t == 0)
-				continue;
-			res += p;
-			c = t;
-		}
+		res += log2i(n.back()) + 1;
 		return res;
+	}
+
+	void set_bit(std::size_t pos)
+	{
+		const auto k = pos / BSZ;
+		if(k >= n.size())
+		{
+			n.resize(k+1);
+		}
+		num i = 1;
+		n[k] |= i << (pos % BSZ);
 	}
 public:
 	explicit b_int(num c = 0) : n(1, c) {}
@@ -152,7 +156,7 @@ public:
 
 	num operator&(num a) const
 	{
-		return n[0] & a;
+		return n.front() & a;
 	}
 
 	const b_int& operator>>=(std::size_t c)
@@ -408,17 +412,38 @@ public:
 		return r %= c;
 	}
 
+	const b_int& operator/=(b_int c)
+	{
+		b_int t;
+		std::swap(t, *this);
+		if(t < c)
+			return *this;
+
+		std::size_t d = t.bsize() - c.bsize() + 1;
+		c <<= d;
+		for(; d != 0; d--)
+		{
+			c >>= 1;
+			if(t >= c)
+			{
+				set_bit(d-1);
+				t -= c;
+			}
+		}
+		return *this;
+	}
+
 	const b_int& operator%=(b_int c)
 	{
 		if(*this < c)
 			return *this;
 		if(c.n.size() == 1)
 		{
-			*this = *this % c.n[0];
+			*this = *this % c.n.front();
 			return *this;
 		}
-		std::size_t d = bsize() - c.bsize() + 1;
 
+		std::size_t d = bsize() - c.bsize() + 1;
 		c <<= d;
 		for(; d != 0; d--)
 		{
@@ -452,6 +477,15 @@ public:
 class bint_mod
 {
 	b_int m;
+
+	void add_s_(b_int &a, const b_int &b) const
+	{
+		a += b;
+		if(a >= m)
+		{
+			a -= m;
+		}
+	}
 
 	void mul_s_(b_int &a, const b_int &b) const
 	{
