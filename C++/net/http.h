@@ -16,15 +16,16 @@ namespace URL
 		r.reserve(sz);
 		for(std::size_t i = 0; i < sz;)
 		{
-			if(s[i] != '%')
+			const char c = s[i];
+			i++;
+			if(c != '%')
 			{
-				r.push_back(s[i]);
-				i++;
+				r.push_back(c);
 				continue;
 			}
-			uint8_t c = (HexDecodeChar(s[i+1]) << 4) | HexDecodeChar(s[i+2]);
-			r.push_back(c);
-			i += 3;
+			const uint8_t n = convert::hex::Dec::pr_byte(s + i);
+			r.push_back(n);
+			i += 2;
 		}
 		r.shrink_to_fit();
 		return r;

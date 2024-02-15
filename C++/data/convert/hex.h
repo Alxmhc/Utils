@@ -3,38 +3,35 @@
 
 #include "../byte_writer.h"
 
-static uint8_t HexDecodeChar(char c)
-{
-	if(c >= '0' && c <= '9')
-		return c - '0';
-	if(c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-	if(c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
-	return 16;
-}
-
-template<unsigned char sz>
-static typename UINT_<sz>::uint HexDecodeNum(const char* s, uint_fast8_t n)
-{
-	typename UINT_<sz>::uint res = 0;
-	for(unsigned char i = 0; i < n; i++)
-	{
-		res = (res<<4) | HexDecodeChar(s[i]);
-	}
-	return res;
-}
-
 namespace convert
 {
 	namespace hex
 	{
+		const char* dct_lc = "0123456789abcdef";
+		const char* dct_uc = "0123456789ABCDEF";
+
+		namespace Enc
+		{
+			static std::string pr_string(const uint8_t* v, std::size_t n, bool isU = false)
+			{
+				std::string res;
+				res.reserve(n*2);
+				const char* dict = isU ? dct_uc : dct_lc;
+				for(std::size_t i = 0; i < n; i++)
+				{
+					res.push_back(dict[v[i]>>4]);
+					res.push_back(dict[v[i]&0x0f]);
+				}
+				return res;
+			}
+		}
+
 		class Encoder : public byteWriter
 		{
 			byteWriter* bw;
 			const char* dict;
 		public:
-			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? "0123456789ABCDEF" : "0123456789abcdef") {}
+			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? dct_uc : dct_lc) {}
 
 			void writeN(const uint8_t* v, std::size_t n)
 			{
@@ -51,13 +48,56 @@ namespace convert
 			}
 		};
 
+		namespace Dec
+		{
+			static uint8_t pr_char(char c)
+			{
+				if(c >= '0' && c <= '9')
+					return c - '0';
+				if(c >= 'A' && c <= 'F')
+					return c - 'A' + 10;
+				if(c >= 'a' && c <= 'f')
+					return c - 'a' + 10;
+				return 16;
+			}
+
+			static uint8_t pr_byte(const char* s)
+			{
+				uint8_t r = pr_char(s[0]);
+				r <<= 4;
+				r |= pr_char(s[1]);
+				return r;
+			}
+
+			template<unsigned char sz>
+			static typename UINT_<sz>::uint pr_num(const char* s, uint_fast8_t n)
+			{
+				typename UINT_<sz>::uint res = 0;
+				for(unsigned char i = 0; i < n; i++)
+				{
+					res = (res<<4) | pr_char(s[i]);
+				}
+				return res;
+			}
+
+			static std::vector<uint8_t> pr_string(const char* s, std::size_t sz)
+			{
+				std::vector<uint8_t> res(sz >> 1);
+				for(std::size_t i = 0; i < res.size(); i++)
+				{
+					res[i] = pr_byte(s);
+					s += 2;
+				}
+				return res;
+			}
+		}
+
 		class Decoder : public byteWriterBuf<2>
 		{
 			byteWriter* bw;
 			void process(const uint8_t* v)
 			{
-				const char* s = reinterpret_cast<const char*>(v);
-				uint8_t c = (HexDecodeChar(s[0]) << 4) | HexDecodeChar(s[1]);
+				const uint8_t c = Dec::pr_byte(reinterpret_cast<const char*>(v));
 				bw->write(c);
 			}
 		public:
