@@ -15,6 +15,22 @@ B rotr(B x, unsigned char d)
 	return (x>>d) | (x<<((sizeof(B)<<3)-d));
 }
 
+template <typename B>
+B rotl(B x, unsigned char d, unsigned char sz)
+{
+	B m(1);
+	m = (m << sz) - 1;
+	return ((x<<d) | (x>>(sz-d))) & m;
+}
+
+template <typename B>
+B rotr(B x, unsigned char d, unsigned char sz)
+{
+	B m(1);
+	m = (m << sz) - 1;
+	return ((x>>d) | (x<<(sz-d))) & m;
+}
+
 template<typename T>
 uint_fast8_t log2i(T c)
 {
@@ -28,6 +44,28 @@ uint_fast8_t log2i(T c)
 		res |= p;
 	}
 	return res;
+}
+
+//76543210
+template<typename T>
+static uint_fast8_t getBitL(T c, uint_fast8_t n)
+{
+	return (c >> n) & 1;
+}
+
+//76543210
+template<typename T>
+static void setBitL(T &c, uint_fast8_t n, uint_fast8_t b = 1)
+{
+	const T m = static_cast<T>(1) << n;
+	if(b)
+	{
+		c |= m;
+	}
+	else
+	{
+		c &= ~m;
+	}
 }
 
 const long double pi = 3.1415926535897932384626;
