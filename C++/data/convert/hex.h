@@ -80,14 +80,19 @@ namespace convert
 				return res;
 			}
 
+			static void pr_string(const char* s, std::size_t sz, uint8_t* out)
+			{
+				for(std::size_t i = 0; i < (sz >> 1); i++)
+				{
+					out[i] = pr_byte(s);
+					s += 2;
+				}
+			}
+
 			static std::vector<uint8_t> pr_string(const char* s, std::size_t sz)
 			{
 				std::vector<uint8_t> res(sz >> 1);
-				for(std::size_t i = 0; i < res.size(); i++)
-				{
-					res[i] = pr_byte(s);
-					s += 2;
-				}
+				pr_string(s, sz, res.data());
 				return res;
 			}
 		}
