@@ -1,6 +1,8 @@
 #ifndef H_SM4
 #define H_SM4
 
+#include <algorithm>
+
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -99,10 +101,7 @@ namespace crypt
 			Dec(const uint8_t* k, uint_fast8_t ksz)
 			{
 				Init(k, key);
-				for(uint_fast8_t i = 0; i < 16; i++)
-				{
-					std::swap(key[i], key[31-i]);
-				}
+				std::reverse(key, key + 32);
 			}
 
 			void process(uint8_t* r) const

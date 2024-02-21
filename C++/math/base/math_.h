@@ -1,6 +1,7 @@
 #ifndef H_MATH_
 #define H_MATH_
 
+#include <cstdint>
 #include <cmath>
 
 template <typename B>
@@ -48,24 +49,21 @@ uint_fast8_t log2i(T c)
 
 //76543210
 template<typename T>
-static uint_fast8_t getBitL(T c, uint_fast8_t n)
+static uint_fast8_t getBit(T c, uint_fast8_t n)
 {
 	return (c >> n) & 1;
 }
-
-//76543210
 template<typename T>
-static void setBitL(T &c, uint_fast8_t n, uint_fast8_t b = 1)
+static void setBit0(T &c, uint_fast8_t n)
 {
 	const T m = static_cast<T>(1) << n;
-	if(b)
-	{
-		c |= m;
-	}
-	else
-	{
-		c &= ~m;
-	}
+	c &= ~m;
+}
+template<typename T>
+static void setBit1(T &c, uint_fast8_t n)
+{
+	const T m = static_cast<T>(1) << n;
+	c |= m;
 }
 
 const long double pi = 3.1415926535897932384626;

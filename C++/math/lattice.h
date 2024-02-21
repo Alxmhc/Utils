@@ -1,7 +1,6 @@
 #ifndef H_LATTICE
 #define H_LATTICE
 
-#include <cstdint>
 #include <vector>
 
 #include "base/math_.h"
