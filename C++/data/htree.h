@@ -20,7 +20,7 @@ public:
 			tmp[sz].second = i;
 			sz++;
 		}
-		std::sort(tmp.begin(), tmp.begin() + sz);
+		std::stable_sort(tmp.begin(), tmp.begin() + sz);
 
 		uint_fast32_t k = 0;
 		uint_fast8_t p = 0;
