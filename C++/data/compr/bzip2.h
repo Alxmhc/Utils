@@ -134,7 +134,7 @@ namespace compr
 				for(uint_fast8_t n = 0; n < 50; n++)
 				{
 					uint_fast16_t c;
-					if( !tr->find(br, c) )
+					if( !btree_decode(tr, br, c) )
 						return false;
 					if(c < 2)
 					{

@@ -84,7 +84,7 @@ namespace compr
 			while(n < ncode)
 			{
 				uint_fast8_t tmp;
-				if( !codes.find(brd, tmp) )
+				if( !btree_decode(&codes, brd, tmp) )
 					return false;
 				if(tmp < 16)
 				{
@@ -200,7 +200,7 @@ namespace compr
 			for(;;)
 			{
 				uint_fast16_t c;
-				if( !hlit.find(brd, c) )
+				if( !btree_decode(&hlit, brd, c) )
 					break;
 				if(c < 256)
 				{
@@ -214,7 +214,7 @@ namespace compr
 				uint_fast8_t d = c & 0xff;
 				if( !get_size(d, brd, sz) )
 					break;
-				if( !hdist.find(brd, d) )
+				if( !btree_decode(&hdist, brd, d) )
 					break;
 				if( !get_dist(d, brd, dist) )
 					break;

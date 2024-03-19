@@ -55,25 +55,34 @@ public:
 		a->fin = true;
 	}
 
-	bool find(bitReader &rd, T &c) const
+	const binTree* nxt(uint_fast8_t b) const
 	{
-		const binTree<T>* a = this;
-		for(;;)
-		{
-			uint_fast8_t n;
-			if( !rd.get(n) )
-				break;
-			a = n == 0 ? a->left : a->right;
-			if(a == nullptr)
-				break;
-			if(a->fin)
-			{
-				c = a->val;
-				return true;
-			}
-		}
-		return false;
+		return b == 0 ? left : right;
+	}
+
+	bool get_val(T &res) const
+	{
+		if(!fin)
+			return false;
+		res = val;
+		return true;
 	}
 };
+
+template<typename T>
+bool btree_decode(const binTree<T>* tr, bitReader &rd, T &res)
+{
+	for(;;)
+	{
+		if(tr == nullptr)
+			return false;
+		if(tr->get_val(res))
+			return true;
+		uint8_t b;
+		if( !rd.get(b) )
+			return false;
+		tr = tr->nxt(b);
+	}
+}
 
 #endif

@@ -1,9 +1,9 @@
 #ifndef H_SCRYPT
 #define H_SCRYPT
 
-#include "../hash/sha2.h"
+#include "../../hash/sha2.h"
 #include "pbkdf2.h"
-#include "salsa.h"
+#include "../salsa.h"
 
 //rfc7914
 class scrypt
