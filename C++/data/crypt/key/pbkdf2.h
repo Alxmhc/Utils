@@ -41,33 +41,34 @@ class PBKDF2
 public:
 	PBKDF2(std::size_t k) : c(k) {}
 
-	std::vector<uint8_t> gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, std::size_t ksz) const
+	void gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, uint8_t* key, std::size_t ksz) const
 	{
-		std::vector<uint8_t> key;
 		if(ksz == 0)
-			return key;
-		auto kl = (ksz - 1) / F::out_size + 1;
-		key.reserve(kl * F::out_size);
-
+			return;
 		F fcr(passw, psz);
-		for(uint_fast32_t i = 1; i <= kl; i++)
+		uint_fast32_t i = 0;
+		std::size_t o = 0;
+		for(;;)
 		{
 			uint8_t tmp[F::out_size];
 			{
+				i++;
 				uint8_t num[4];
 				bconv<1, 4, endianness::BIG_ENDIAN>::unpack(i, num);
 				fcr.Calc(salt, ssz, num, tmp);
 			}
-			const std::size_t b = key.size();
-			key.insert(key.end(), tmp, tmp + F::out_size);
+			const bool is_fin = (ksz - o <= F::out_size);
+			const uint_fast8_t sz = is_fin ? ksz - o : F::out_size;
+			std::copy_n(tmp, sz, key + o);
 			for(std::size_t j = 1; j < c; j++)
 			{
 				fcr.Calc(tmp);
-				v_xor(key.data() + b, tmp, F::out_size);
+				v_xor(key + o, tmp, sz);
 			}
+			if(is_fin)
+				break;
+			o += F::out_size;
 		}
-		key.resize(ksz);
-		return key;
 	}
 };
 

@@ -27,12 +27,16 @@ class scrypt
 public:
 	scrypt(uint_fast32_t bsz, uint_fast64_t c, uint_fast32_t p) : bsize(bsz), cost(c), par(p) {}
 
-	std::vector<uint8_t> gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, std::size_t ksz) const
+	void gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, uint8_t* key, std::size_t ksz) const
 	{
+		if(ksz == 0)
+			return;
+
 		const auto bsz = bsize * 32;
 		const PBKDF2<PBKDF2_HMAC<hash::SHA2_256>> k(1);
 
-		auto B = k.gen(passw, psz, salt, ssz, 4*bsz*par);
+		std::vector<uint8_t> B(4*bsz*par);
+		k.gen(passw, psz, salt, ssz, B.data(), B.size());
 		std::vector<uint32_t> Bp(bsz*par);
 		conv::pack<4,endianness::LITTLE_ENDIAN>(B.data(), B.size(), Bp.data());
 		{
@@ -56,8 +60,7 @@ public:
 			}
 		}
 		conv::unpack<4,endianness::LITTLE_ENDIAN>(Bp.data(), Bp.size(), B.data());
-
-		return k.gen(passw, psz, B.data(), B.size(), ksz);
+		k.gen(passw, psz, B.data(), B.size(), key, ksz);
 	}
 };
 

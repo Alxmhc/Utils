@@ -103,7 +103,8 @@ namespace fl_pr
 				return false;
 
 			const PBKDF2<PBKDF2_HMAC<hash::SHA1>> kg(1000);
-			auto key = kg.gen(psw.data(), psw.size(), data.data(), ssz, ssz*4 + 2);
+			std::vector<uint8_t> key(ssz*4 + 2);
+			kg.gen(psw.data(), psw.size(), data.data(), ssz, key.data(), key.size());
 			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
 				return false;
 
