@@ -25,7 +25,6 @@ public:
 		}
 
 		hash::HMAC<H> hs(k, H::hash_size);
-		std::size_t o = 0;
 		uint8_t i = 0;
 		for(;;)
 		{
@@ -35,15 +34,16 @@ public:
 			}
 			i++;
 			hs.Update(&i, 1);
-			hs.Final(k);
-			if(ksz - o <= H::hash_size)
+			if(ksz <= H::hash_size)
 			{
-				std::copy_n(k, ksz - o, key + o);
+				hs.Final(k);
+				std::copy_n(k, ksz, key);
 				break;
 			}
-			std::copy_n(k, H::hash_size, key + o);
-			hs.Update(k, H::hash_size);
-			o += H::hash_size;
+			hs.Final(key);
+			hs.Update(key, H::hash_size);
+			key += H::hash_size;
+			ksz -= H::hash_size;
 		}
 	}
 };
