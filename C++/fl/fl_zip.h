@@ -120,7 +120,8 @@ namespace fl_pr
 				return false;
 
 			const uint8_t iv[] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-			CR_CTR::Decr<crypt::AES, iv_zip> cr(key.data(), ssz*2, iv);
+			crypt::AES::Enc de(key.data(), ssz*2);
+			crypt::CR_CTR::Decr<crypt::AES, iv_zip> cr(de, iv);
 			cr.process(data.data(), data.size());
 			return true;
 		}

@@ -81,7 +81,7 @@ namespace crypt
 		public:
 			static const uint_fast8_t block_size = 16;
 
-			Enc(const uint8_t* k, uint_fast8_t ksz)
+			Enc(const uint8_t* k)
 			{
 				Init(k, key);
 			}
@@ -98,7 +98,7 @@ namespace crypt
 		public:
 			static const uint_fast8_t block_size = 16;
 
-			Dec(const uint8_t* k, uint_fast8_t ksz)
+			Dec(const uint8_t* k)
 			{
 				Init(k, key);
 				std::reverse(key, key + 32);
