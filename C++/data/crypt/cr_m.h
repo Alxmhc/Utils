@@ -114,10 +114,8 @@ namespace crypt
 
 			void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
 			{
-				uint8_t t[CR::block_size];
-				std::copy_n(v, sz, t);
+				std::swap_ranges(b, b + sz, v);
 				v_xor(v, b, sz);
-				std::copy_n(t, sz, b);
 			}
 		public:
 			Decr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
