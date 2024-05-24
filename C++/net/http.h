@@ -32,12 +32,12 @@ namespace URL
 	}
 }
 
-class HTTP_ : public cont_1
+class HTTP1 : public cont_1
 {
 	std::string fln;
 	std::map<std::string, std::string> hdr;
 public:
-	bool read_v1(byteReader* b)
+	bool read(byteReader* b)
 	{
 		br = b;
 		hdr.clear();
@@ -96,11 +96,10 @@ public:
 		{
 			if(k->second == "chunked")
 			{
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !decode::unchunk(data.data(), data.size(), bw) )
+				std::size_t sz = data.size();
+				if( !decode::unchunk(data.data(), sz) )
 					return false;
-				data = std::move(tmp);
+				data.resize(sz);
 			}
 		}
 		k = hdr.find("content-encoding");

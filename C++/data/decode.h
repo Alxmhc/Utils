@@ -1,29 +1,35 @@
 #ifndef H_DECODE
 #define H_DECODE
 
-#include "byte_writer.h"
+#include <cstdint>
+#include <algorithm>
 
 namespace decode
 {
-	bool unchunk(const uint8_t* v, const std::size_t n, byteWriter &bw)
+	bool unchunk(uint8_t* v, std::size_t &n)
 	{
-		const uint8_t* e = v + n;
+		std::size_t nsz = 0;
 		for(;;)
 		{
 			const auto sz = strtoul(reinterpret_cast<const char*>(v), nullptr, 16);
 			if(sz == 0)
+			{
+				n = nsz;
 				return true;
-			v = std::find(v, e, '\n');
-			if(v == e)
+			}
+			nsz += sz;
+
+			auto e = std::find(v + 2, v + n, '\n');
+			if(e == v + n)
 				break;
-			v++;
-			if(static_cast<std::size_t>(e - v) < sz + 2)
+			e += 1;
+			n -= e - v;
+			std::memmove(v, e, n);
+			v += sz;
+
+			if(v[1] != '\n' || sz > n)
 				break;
-			bw.writeN(v, sz);
-			v += sz + 1;
-			if(*v != '\n')
-				break;
-			v++;
+			n -= sz;
 		}
 		return false;
 	}

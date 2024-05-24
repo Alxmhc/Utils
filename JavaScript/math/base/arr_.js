@@ -1,78 +1,94 @@
 _v = {
 	qlen: function(v){
-		return v.dot(v);
+		return v.dot(v)
 	},
 	len: function(v){
-		return Math.sqrt(this.qlen(v));
+		return Math.sqrt(this.qlen(v))
 	},
 	qdst: function(a,b){
-		return this.qlen(a.clone().sub(b));
+		return this.qlen(a.clone().sub(b))
 	},
 	dst: function(a,b){
-		return Math.sqrt(this.qdst(a,b));
+		return Math.sqrt(this.qdst(a,b))
+	},
+	nrm: function(v){
+		v.mul(1.0/this.len(v))
 	}
 }
 
-function nrm(v){
-	return v.mul(1.0/_v.len(v))
-}
-
 _arr = {
-	eq: function(a1, a2){
-		let n = a1.length;
-		if(a2.length != n)
+	count: function(v,e){
+		let k = 0
+		for(let i=0, n=v.length; i<n; ++i){
+			if(v[i] == e){
+				k++
+			}
+		}
+		return k
+	},
+	sum: function(v){
+		let s = 0
+		for(let i=0, n=v.length; i<n; ++i){
+			s += v[i]
+		}
+		return s
+	},
+	avr: function(v){
+		const n = v.length
+		return n!==0 ? this.sum(v)/n : 0
+	},
+
+	eq: function(v1, v2){
+		let n = v1.length
+		if(v2.length != n)
 			return false
 		while(n--){
-			if(a1[n] != a2[n])
+			if(v1[n] != v2[n])
 				return false
 		}
 		return true
 	},
-	sum: function(v){
-		let s = 0;
-		for(let i=0, n=v.length; i<n; ++i){
-			s += v[i];
-		}
-		return s;
-	},
-	avr: function(v){
-		const n = v.length;
-		return n!==0 ? _arr.sum(v)/n : 0;
-	},
 	dot: function(v1, v2){
-		let s = 0;
+		let s = 0
 		for(let i=0, n=v1.length; i<n; ++i){
-			s += v1[i] * v2[i];
+			s += v1[i] * v2[i]
 		}
-		return s;
+		return s
 	},
-	count: function(v,e){
-		let k = 0;
+	s_add: function(v1, v2){
+		for(let i=0, n=v1.length; i<n; ++i){
+			v1[i] += v2[i]
+		}
+	},
+	s_sub: function(v1, v2){
+		for(let i=0, n=v1.length; i<n; ++i){
+			v1[i] -= v2[i]
+		}
+	},
+	s_mul_k: function(v, k){
 		for(let i=0, n=v.length; i<n; ++i){
-			if(v[i] == e){
-				k++;
-			}
+			v[i] *= k
 		}
-		return k;
 	},
-	v_chk(v,m){
+
+	m_chk(v,m){
 		for(let i=0, n=v.length; i<n; ++i){
 			if(m[i] !== null && v[i] != m[i])
-				return false;
+				return false
 		}
-		return true;
+		return true
 	},
-	v_all(v,m){
+	m_all(v,m){
 		for(let i=0, n=v.length; i<n; ++i){
 			if(v[i] != m[i]){
-				v[i] = null;
+				v[i] = null
 			}
 		}
 	},
-	v_or(v,m){
+	m_or(v,m){
 		for(let i=0, n=v.length; i<n; ++i){
 			if(v[i] == null){
-				v[i] = m[i];
+				v[i] = m[i]
 			}
 		}
 	}
