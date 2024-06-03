@@ -1,35 +1,39 @@
 #ifndef H_DECODE
 #define H_DECODE
 
-#include <cstdint>
-#include <algorithm>
+#include "convert/hex.h"
 
 namespace decode
 {
 	bool unchunk(uint8_t* v, std::size_t &n)
 	{
 		std::size_t nsz = 0;
+		uint8_t* p = v;
 		for(;;)
 		{
-			const auto sz = strtoul(reinterpret_cast<const char*>(v), nullptr, 16);
+			std::size_t sz = 0;
+			while(n != 0)
+			{
+				if(*p == '\r')
+					break;
+				sz = (sz << 4) | convert::hex::Dec::pr_char(*p);
+				p++;
+				n--;
+			}
 			if(sz == 0)
 			{
 				n = nsz;
 				return true;
 			}
+			if(n < sz + 4)
+				break;
 			nsz += sz;
+			n -= sz + 4;
 
-			auto e = std::find(v + 2, v + n, '\n');
-			if(e == v + n)
-				break;
-			e += 1;
-			n -= e - v;
-			std::memmove(v, e, n);
+			p += 2;
+			std::memmove(v, p, sz);
 			v += sz;
-
-			if(v[1] != '\n' || sz > n)
-				break;
-			n -= sz;
+			p += sz + 2;
 		}
 		return false;
 	}
