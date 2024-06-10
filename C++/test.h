@@ -26,25 +26,30 @@ bool compare(const char* fl1, const char* fl2)
 }
 
 template<std::size_t BSIZE>
-bool compare(const std::vector<uint8_t> &t, const char* fname)
+bool compare(const uint8_t* v, std::size_t sz, const char* fname)
 {
 	br_fstream fs;
 	if( !fs.open(fname) )
 		return false;
-	if(fs.get_size() != t.size())
+	if(fs.get_size() != sz)
 		return false;
 	uint8_t buf[BSIZE];
-	std::size_t o = 0;
 	for(;;)
 	{
-		const auto sz = fs.readMx(buf, BSIZE);
-		if(std::memcmp(t.data() + o, buf, sz) != 0)
+		const auto s = fs.readMx(buf, BSIZE);
+		if(std::memcmp(v, buf, s) != 0)
 			return false;
-		if(sz != BSIZE)
+		if(s != BSIZE)
 			break;
-		o += BSIZE;
+		v += BSIZE;
 	}
 	return true;
+}
+
+template<std::size_t BSIZE>
+bool compare(const std::vector<uint8_t> &t, const char* fname)
+{
+	return compare<BSIZE>(t.data(), t.size(), fname);
 }
 
 #endif

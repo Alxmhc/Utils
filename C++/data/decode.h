@@ -7,7 +7,7 @@ namespace decode
 {
 	bool unchunk(uint8_t* v, std::size_t &n)
 	{
-		std::size_t nsz = 0;
+		const uint8_t* b = v;
 		uint8_t* p = v;
 		for(;;)
 		{
@@ -22,12 +22,11 @@ namespace decode
 			}
 			if(sz == 0)
 			{
-				n = nsz;
+				n = v - b;
 				return true;
 			}
 			if(n < sz + 4)
 				break;
-			nsz += sz;
 			n -= sz + 4;
 
 			p += 2;
