@@ -8,6 +8,7 @@
 #include "../data/crypt/cr_m.h"
 #include "../data/compr/deflate.h"
 #include "../data/compr/bzip2.h"
+#include "../data/compr/lzma.h"
 
 namespace fl_pr
 {
@@ -161,15 +162,23 @@ namespace fl_pr
 			case cNO:
 				copy(br, bw);
 				break;
-			case cBZIP2:
-				if( !compr::bzip2::Decode(br, bw) )
-					return false;
-				break;
 			case cDeflate:
 			case cDeflate64:
 				if( !compr::deflate::Decode(br, bw) )
 					return false;
 				break;
+			case cBZIP2:
+				if( !compr::bzip2::Decode(br, bw) )
+					return false;
+				break;
+			case cLZMA:
+			{
+				if( !br.skip(4) )
+					return false;
+				if( !compr::lzma::Decode(br, bw, inf.fsize) )
+					return false;
+				break;
+			}
 			default:
 				return false;
 			}

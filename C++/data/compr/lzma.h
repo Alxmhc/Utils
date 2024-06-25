@@ -11,43 +11,39 @@ namespace compr
 {
 	class lzma
 	{
-		uint_fast8_t lc, lp, pb;
-		bool Decode_Props(uint_fast8_t p)
+		struct props
 		{
-			if(p > 224)
-				return false;
-			lc = p % 9;
-			p /= 9;
-			lp = p % 5;
-			pb = p / 5;
-			return true;
-		}
+			uint_fast8_t lc, lp, pb;
+			uint32_t dict_size;
 
-		uint32_t dict_size;
-		uint64_t fl_size;
-		bool Init(byteReader &br)
-		{
-			uint8_t p;
-			if( !br.get(p) )
-				return false;
-			if( !Decode_Props(p) )
-				return false;
-
-			if( !br.readC<4, endianness::LITTLE_ENDIAN>(dict_size) )
-				return false;
-			if(dict_size < 4096)
+			bool Decode_Props(uint_fast8_t p)
 			{
-				dict_size = 4096;
-			}
-
-			if(fl_size == -1)
-			{
-				if( !br.readC<8, endianness::LITTLE_ENDIAN>(fl_size) )
+				if(p > 224)
 					return false;
+				lc = p % 9;
+				p /= 9;
+				lp = p % 5;
+				pb = p / 5;
+				return true;
 			}
 
-			return true;
-		}
+			bool Init(byteReader &br)
+			{
+				uint8_t p;
+				if( !br.get(p) )
+					return false;
+				if( !Decode_Props(p) )
+					return false;
+
+				if( !br.readC<4, endianness::LITTLE_ENDIAN>(dict_size) )
+					return false;
+				if(dict_size < 4096)
+				{
+					dict_size = 4096;
+				}
+				return true;
+			}
+		};
 
 		class RangeDecoder
 		{
@@ -88,25 +84,6 @@ namespace compr
 				return true;
 			}
 
-			bool DecodeDirectBits(unsigned char numBits, unsigned int &res)
-			{
-				res = 0;
-				do{
-					res <<= 1;
-					Range >>= 1;
-					if(Code - Range < 0x80000000)
-					{
-						Code -= Range;
-						res++;
-					}
-					if(Code == Range)
-						return false;
-					if( !Normalize() )
-						return false;
-				} while (--numBits);
-				return true;
-			}
-
 			bool DecodeBit(uint16_t &prob, uint_fast8_t &res)
 			{
 				const auto bound = (Range >> 11) * prob;
@@ -140,21 +117,6 @@ namespace compr
 				return true;
 			}
 
-			bool RevBitDecode(uint16_t* probs, unsigned char nBits, unsigned int &res)
-			{
-				unsigned int m = 1;
-				res = 0;
-				for(unsigned char i = 0; i < nBits; i++)
-				{
-					uint_fast8_t bit;
-					if( !DecodeBit(probs[m], bit) )
-						return false;
-					m = (m << 1) | bit;
-					res |= (unsigned int)bit << i;
-				}
-				return true;
-			}
-
 			bool LenDecode(uint16_t* Coder, unsigned char posState, unsigned int &res)
 			{
 				uint_fast8_t bit;
@@ -181,134 +143,151 @@ namespace compr
 				return true;
 			}
 
+			bool DecodeLit(uint16_t* probs, unsigned char state, uint32_t rep, const props &pr, std::vector<uint8_t> &out)
+			{
+				if( !out.empty() )
+				{
+					const unsigned int litState = ((out.size() & ((1 << pr.lp) - 1)) << pr.lc) + (out.back() >> (8 - pr.lc));
+					probs += litState * 0x300;
+				}
+				unsigned int symbol = 1;
+				if (state >= 7)
+				{
+					if(rep >= out.size())
+						return false;
+					uint_fast8_t mByte = out[out.size() - (rep + 1)];
+					while (symbol < 0x100)
+					{
+						uint_fast8_t mBit = (mByte >> 7) & 1;
+						mByte <<= 1;
+						uint_fast8_t bit;
+						if( !DecodeBit(probs[0x100 * (mBit + 1) | symbol], bit) )
+							return false;
+						symbol = (symbol << 1) | bit;
+						if (mBit != bit)
+							break;
+					}
+				}
+				while (symbol < 0x100)
+				{
+					uint_fast8_t bit;
+					if( !DecodeBit(probs[symbol], bit) )
+						return false;
+					symbol = (symbol << 1) | bit;
+				}
+				out.push_back(symbol & 0xff);
+				return true;
+			}
+
+			bool DecodeDistance(uint16_t* Pos, unsigned int len, unsigned int &dist)
+			{
+				if( !BitDecode(Pos + 16 + 115 + (len > 3 ? 3 : len)*64, 6, dist) )
+					return false;
+				if(dist > 3)
+				{
+					auto numBits = static_cast<unsigned char>((dist >> 1) - 1);
+					auto posSlot = dist;
+					dist = 2 | (dist & 1);
+					if (posSlot > 13)
+					{
+						for ( ;numBits > 4; numBits--)
+						{
+							dist <<= 1;
+							Range >>= 1;
+							if(Code - Range < 0x80000000)
+							{
+								Code -= Range;
+								dist++;
+							}
+							if(Code == Range)
+								return false;
+							if( !Normalize() )
+								return false;
+						};
+						dist <<= numBits;
+					}
+					else
+					{
+						dist <<= numBits;
+						Pos += 16 + dist - posSlot;
+					}
+					uint_fast8_t m = 1;
+					for(uint_fast8_t i = 0; i < numBits; i++)
+					{
+						uint_fast8_t bit;
+						if( !DecodeBit(Pos[m], bit) )
+							return false;
+						m = (m << 1) | bit;
+						dist |= (unsigned int)bit << i;
+					}
+				}
+				return true;
+			}
+
 			bool IsFin() const
 			{
 				return Code == 0;
 			}
 		};
 
-		std::vector<uint16_t> LitProbs;
-
-		bool DecodeLiteral(unsigned char state, uint32_t rep)
-		{
-			unsigned int litState = out.empty() ? 0 : ((out.size() & ((1 << lp) - 1)) << lc) + (out.back() >> (8 - lc));
-			uint16_t* probs = LitProbs.data() + (unsigned int)0x300 * litState;
-			unsigned int symbol = 1;
-			if (state >= 7)
-			{
-				if(rep >= out.size())
-					return false;
-				uint_fast8_t mByte = out[out.size() - (rep + 1)];
-				while (symbol < 0x100)
-				{
-					uint_fast8_t mBit = (mByte >> 7) & 1;
-					mByte <<= 1;
-					uint_fast8_t bit;
-					if( !rd.DecodeBit(probs[0x100 * (mBit + 1) | symbol], bit) )
-						return false;
-					symbol = (symbol << 1) | bit;
-					if (mBit != bit)
-						break;
-				}
-			}
-			while (symbol < 0x100)
-			{
-				uint_fast8_t bit;
-				if( !rd.DecodeBit(probs[symbol], bit) )
-					return false;
-				symbol = (symbol << 1) | bit;
-			}
-			out.push_back(symbol & 0xff);
-			return true;
-		}
-
-		std::array<uint16_t, 2*(16*8 + 16*8 + 256 + 2)> Len;
-
-		std::array<uint16_t, 16 + 115 + 4*64> PosDecoders;
-
-		bool DecodeDistance(unsigned int len, unsigned int &dist)
-		{
-			if(len > 3)
-			{
-				len = 3;
-			}
-			
-			if( !rd.BitDecode(PosDecoders.data() + 16 + 115 + len*64, 6, dist) )
-				return false;
-			if(dist < 4)
-				return true;
-			
-			unsigned char numDirectBits = static_cast<unsigned char>((dist >> 1) - 1);
-			unsigned int posSlot = dist;
-			dist = ((2 | (posSlot & 1)) << numDirectBits);
-			if (posSlot < 14)
-			{
-				unsigned int d;
-				if( !rd.RevBitDecode(PosDecoders.data() + 16 + dist - posSlot, numDirectBits, d) )
-					return false;
-				dist += d;
-			}
-			else
-			{
-				unsigned int d;
-				if( !rd.DecodeDirectBits(numDirectBits - 4, d) )
-					return false;
-				dist += d << 4;
-				const unsigned char nbits = 4;
-				if( !rd.RevBitDecode(PosDecoders.data(), nbits, d) )
-					return false;
-				dist += d;
-			}
-			return true;
-		}
-
-		std::array<uint16_t, 240 + 192> mRep;
-
-		RangeDecoder rd;
-		std::vector<uint8_t> out;
+		static const unsigned int Len_sz = 2*(16*8 + 16*8 + 256 + 2);
+		static const unsigned int Pos_sz = 16 + 115 + 4*64;
+		static const unsigned int Rep_sz = 240 + 192;
 	public:
-		lzma(uint64_t fsz = -1) : fl_size(fsz)
+		static bool Decode(byteReader &br, byteWriter &bw, uint64_t fsize = -1)
 		{
-			PosDecoders.fill(1024);
-			mRep.fill(1024);
-			Len.fill(1024);
-		}
-
-		bool Decode(byteReader &br, byteWriter &bw)
-		{
-			if( !Init(br) )
+			props pr;
+			if( !pr.Init(br) )
 				return false;
+
+			if(fsize == -1)
+			{
+				if( !br.readC<8, endianness::LITTLE_ENDIAN>(fsize) )
+					return false;
+			}
+
+			RangeDecoder rd;
 			if( !rd.Init(br) )
 				return false;
-			LitProbs.resize(0x300 << (lc + lp), 1024);
+
+			std::vector<uint16_t> probs(Len_sz + Pos_sz + Rep_sz + (0x300 << (pr.lc + pr.lp)), 1024);
+			uint16_t* Len = probs.data();
+			uint16_t* Pos = Len + Len_sz;
+			uint16_t* Rep = Pos + Pos_sz;
+			uint16_t* Probs = Rep + Rep_sz;
+
+			std::vector<uint8_t> out;
+			if(fsize != -1)
+			{
+				out.reserve(static_cast<std::size_t>(fsize));
+			}
 
 			uint32_t rep0 = 0, rep1 = 0, rep2 = 0, rep3 = 0;
 			unsigned char state = 0;
 
-			auto fsize = fl_size;
 			for(;;)
 			{
 				if(fsize == 0 && rd.IsFin())
 					break;
 
-				unsigned char posState = out.size() & ((1 << pb) - 1);
+				unsigned char posState = out.size() & ((1 << pr.pb) - 1);
 				const auto state2 = (state << 4) + posState;
 
 				uint_fast8_t bit;
-				if( !rd.DecodeBit(mRep[state2 + 240], bit) )
+				if( !rd.DecodeBit(Rep[state2 + 240], bit) )
 					return false;
 				if(bit == 0)
 				{
 					if (fsize == 0)
 						return false;
-					if( !DecodeLiteral(state, rep0) )
+					if( !rd.DecodeLit(Probs, state, rep0, pr, out) )
 						return false;
 					state = state < 4 ? 0 : state < 10 ? state - 3 : state - 6;
 					fsize--;
 					continue;
 				}
 
-				if( !rd.DecodeBit(mRep[state], bit) )
+				if( !rd.DecodeBit(Rep[state], bit) )
 					return false;
 				unsigned int len;
 				if(bit != 0)
@@ -317,11 +296,11 @@ namespace compr
 						return false;
 					if(out.empty())
 						return false;
-					if( !rd.DecodeBit(mRep[state + 12], bit) )
+					if( !rd.DecodeBit(Rep[state + 12], bit) )
 						return false;
 					if(bit == 0)
 					{
-						if( !rd.DecodeBit(mRep[state2 + 48], bit) )
+						if( !rd.DecodeBit(Rep[state2 + 48], bit) )
 							return false;
 						if(bit == 0)
 						{
@@ -333,7 +312,7 @@ namespace compr
 					}
 					else
 					{
-						if( !rd.DecodeBit(mRep[state + 24], bit) )
+						if( !rd.DecodeBit(Rep[state + 24], bit) )
 							return false;
 						if(bit == 0)
 						{
@@ -341,7 +320,7 @@ namespace compr
 						}
 						else
 						{
-							if( !rd.DecodeBit(mRep[state + 36], bit) )
+							if( !rd.DecodeBit(Rep[state + 36], bit) )
 								return false;
 							if(bit == 0)
 							{
@@ -360,7 +339,7 @@ namespace compr
 							}
 						}
 					}
-					if( !rd.LenDecode(Len.data() + Len.size()/2, posState, len) )
+					if( !rd.LenDecode(Len + Len_sz/2, posState, len) )
 						return false;
 					state = state < 7 ? 8 : 11;
 				}
@@ -369,10 +348,10 @@ namespace compr
 					rep3 = rep2;
 					rep2 = rep1;
 					rep1 = rep0;
-					if( !rd.LenDecode(Len.data(), posState, len) )
+					if( !rd.LenDecode(Len, posState, len) )
 						return false;
 					state = state < 7 ? 7 : 10;
-					if( !DecodeDistance(len, rep0) )
+					if( !rd.DecodeDistance(Pos, len, rep0) )
 						return false;
 					if(rep0 == 0xFFFFFFFF)
 					{
