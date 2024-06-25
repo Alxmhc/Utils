@@ -1,8 +1,6 @@
 #ifndef H_LZMA
 #define H_LZMA
 
-#include <array>
-
 #include "decompr.h"
 #include "../byte_reader.h"
 #include "../byte_writer.h"
