@@ -367,6 +367,7 @@ namespace compr
 			}
 
 			bw.writeN(out.data(), out.size());
+			bw.Fin();
 			return true;
 		}
 	};

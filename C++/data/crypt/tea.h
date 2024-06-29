@@ -53,7 +53,7 @@ namespace crypt
 			{
 				uint32_t t[2];
 				conv::pack<4, endianness::BIG_ENDIAN>(r, 8, t);
-				uint32_t s = d * 32;
+				uint32_t s = d << 5;
 				for(uint8_t i = 0; i < 32; i++)
 				{
 					t[1] -= ((t[0]<<4) + key[2]) ^ (t[0] + s) ^ ((t[0]>>5) + key[3]);

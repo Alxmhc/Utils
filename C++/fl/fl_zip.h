@@ -200,19 +200,22 @@ namespace fl_pr
 			if( !br->readN(inf.fname, szfn) )
 				return false;
 
-			const auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
+			auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
 			if(szex != 0)
 			{
-				std::vector<uint8_t> ext;
-				if( !br->readN(ext, szex) )
-					return false;
 				if(inf.method == 99)
 				{
 					if(szex < 11)
 						return false;
+					uint8_t ext[11];
+					if( !br->readN(ext, 11) )
+						return false;
 					inf.encryption = ext[8] + 1;
-					inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext.data() + 9);
+					inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext + 9);
+					szex -= 11;
 				}
+				if( !br->skip(szex) )
+					return false;
 			}
 			p.data_pos = br->get_pos();
 			return true;

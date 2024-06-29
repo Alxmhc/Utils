@@ -37,14 +37,15 @@ public:
 	{
 		return csize;
 	}
-	std::size_t get_pos() const
-	{
-		return pos;
-	}
 	std::size_t get_rsize() const
 	{
 		return csize - pos;
 	}
+	std::size_t get_pos() const
+	{
+		return pos;
+	}
+
 	virtual void set_pos(std::size_t) = 0;
 	virtual bool skip(std::size_t) = 0;
 

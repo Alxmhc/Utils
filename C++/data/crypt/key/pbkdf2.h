@@ -58,7 +58,7 @@ public:
 				fcr.Calc(salt, ssz, num, tmp);
 			}
 			const bool is_fin = (ksz - o <= F::out_size);
-			const uint_fast8_t sz = is_fin ? ksz - o : F::out_size;
+			const uint_fast8_t sz = is_fin ? static_cast<uint_fast8_t>(ksz - o) : F::out_size;
 			std::copy_n(tmp, sz, key + o);
 			for(std::size_t j = 1; j < c; j++)
 			{
