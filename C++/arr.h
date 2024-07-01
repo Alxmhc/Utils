@@ -23,10 +23,10 @@ T v_sum(const T* a, std::size_t sz)
 	return std::accumulate(a, a + sz, T());
 }
 
-template<std::size_t SZ>
+template<uint8_t SZ>
 class byteProcBuf
 {
-	std::size_t offset;
+	uint8_t offset;
 protected:
 	uint8_t buf[SZ];
 
@@ -48,11 +48,11 @@ public:
 	{
 		if(offset != 0)
 		{
-			const auto k = SZ - offset;
+			const uint8_t k = SZ - offset;
 			if(n <= k)
 			{
 				post_proc(v, buf + offset, n);
-				offset = n < k ? offset + n : 0;
+				offset = n < k ? static_cast<uint8_t>(offset + n) : 0;
 				return;
 			}
 			post_proc(v, buf + offset, k);
@@ -66,7 +66,7 @@ public:
 			v += SZ;
 			n -= SZ;
 		}
-		offset = n;
+		offset = static_cast<uint8_t>(n);
 		if(n != 0)
 		{
 			gen();

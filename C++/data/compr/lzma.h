@@ -238,7 +238,7 @@ namespace compr
 			if( !pr.Init(br) )
 				return false;
 
-			if(fsize == -1)
+			if(fsize == static_cast<uint64_t>(-1))
 			{
 				if( !br.readC<8, endianness::LITTLE_ENDIAN>(fsize) )
 					return false;
@@ -255,7 +255,7 @@ namespace compr
 			uint16_t* Probs = Rep + Rep_sz;
 
 			std::vector<uint8_t> out;
-			if(fsize != -1)
+			if(fsize != static_cast<uint64_t>(-1))
 			{
 				out.reserve(static_cast<std::size_t>(fsize));
 			}
@@ -288,7 +288,24 @@ namespace compr
 				if( !rd.DecodeBit(Rep[state], bit) )
 					return false;
 				unsigned int len;
-				if(bit != 0)
+				if(bit == 0)
+				{
+					rep3 = rep2;
+					rep2 = rep1;
+					rep1 = rep0;
+					if( !rd.LenDecode(Len, posState, len) )
+						return false;
+					state = state < 7 ? 7 : 10;
+					if( !rd.DecodeDistance(Pos, len, rep0) )
+						return false;
+					if(rep0 == 0xFFFFFFFF)
+					{
+						if( !rd.IsFin() )
+							return false;
+						break;
+					}
+				}
+				else
 				{
 					if(fsize == 0)
 						return false;
@@ -340,23 +357,6 @@ namespace compr
 					if( !rd.LenDecode(Len + Len_sz/2, posState, len) )
 						return false;
 					state = state < 7 ? 8 : 11;
-				}
-				else
-				{
-					rep3 = rep2;
-					rep2 = rep1;
-					rep1 = rep0;
-					if( !rd.LenDecode(Len, posState, len) )
-						return false;
-					state = state < 7 ? 7 : 10;
-					if( !rd.DecodeDistance(Pos, len, rep0) )
-						return false;
-					if(rep0 == 0xFFFFFFFF)
-					{
-						if( !rd.IsFin() )
-							return false;
-						break;
-					}
 				}
 				len += 2;
 				if(fsize < len)

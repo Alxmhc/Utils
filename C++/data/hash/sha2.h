@@ -17,7 +17,7 @@ namespace hash
 		static const uint_fast8_t block_size = 64;
 	private:
 		static const uint32_t st0[8];
-		class tbf : public byteWriterBuf<64>
+		class tbf : public byteWriterBuf<block_size>
 		{
 			static uint32_t f(uint32_t a, uint32_t b)
 			{
@@ -158,7 +158,7 @@ namespace hash
 		static const uint_fast8_t block_size = 128;
 	private:
 		static const uint64_t st0[8];
-		class tbf : public byteWriterBuf<128>
+		class tbf : public byteWriterBuf<block_size>
 		{
 			static uint64_t f(uint64_t a, uint64_t b)
 			{

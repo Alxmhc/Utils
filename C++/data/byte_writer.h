@@ -52,19 +52,19 @@ public:
 	}
 };
 
-template<std::size_t SZ>
+template<uint8_t SZ>
 class byteWriterBuf : public byteWriter
 {
-	std::size_t offset;
+	uint8_t offset;
 	uint8_t buf[SZ];
 protected:
 	virtual void process(const uint8_t*) = 0;
 
-	static const std::size_t bsize = SZ;
+	static const uint8_t bsize = SZ;
 
 	byteWriterBuf() : offset(0) {}
 
-	std::size_t size() const
+	uint8_t size() const
 	{
 		return offset;
 	}
@@ -109,7 +109,7 @@ public:
 			if(n != 0)
 			{
 				std::copy_n(v, n, buf + offset);
-				offset += n;
+				offset += static_cast<uint8_t>(n);
 			}
 			return;
 		}
@@ -124,7 +124,7 @@ public:
 		{
 			process(v + part);
 		}
-		offset = n - part;
+		offset = static_cast<uint8_t>(n - part);
 		std::copy_n(v + part, offset, buf);
 	}
 };
