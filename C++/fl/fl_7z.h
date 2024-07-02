@@ -80,6 +80,33 @@ namespace fl_pr
 			return c == t;
 		}
 
+		static bool PackInfo(byteReader &br, uint64_t &pos, std::vector<uint64_t> &size)
+		{
+			if(!getNum(br, pos))
+				return false;
+
+			uint32_t n;
+			if(!getNum(br, n))
+				return false;
+
+			uint8_t t;
+			if(!br.get(t) || t != pSize)
+				return false;
+			size.resize(n);
+			for(std::size_t i = 0; i < n; i++)
+			{
+				if(!getNum(br, size[i]))
+					return false;
+			}
+
+			if(!br.get(t))
+				return false;
+
+			//CRC
+
+			return t == pEnd;
+		}
+
 		static bool getHeader(byteReader &br, std::vector<uint8_t> &hdr)
 		{
 			uint8_t header[32];

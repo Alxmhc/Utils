@@ -15,6 +15,7 @@ protected:
 	byteReader() : pos(0) {}
 
 	virtual uint8_t read1() = 0;
+	virtual const uint8_t* get_data(uint_fast8_t) = 0;
 	virtual void readAll(uint8_t*, const std::size_t) = 0;
 public:
 	bool set_size(std::size_t sz)
@@ -108,8 +109,8 @@ public:
 	template<unsigned char SZ, char E>
 	bool readC(typename UINT_<SZ>::uint &c)
 	{
-		uint8_t t[SZ];
-		if (!readN(t, SZ))
+		auto t = get_data(SZ);
+		if(t == nullptr)
 			return false;
 		c = bconv<1, SZ, E>::pack(t);
 		return true;
@@ -190,6 +191,14 @@ protected:
 		uint8_t r = d[pos];
 		pos++;
 		return r;
+	}
+	const uint8_t* get_data(uint_fast8_t n) override
+	{
+		if (pos + n > csize)
+			return nullptr;
+		const uint8_t* res = d + pos;
+		pos += n;
+		return res;
 	}
 	void readAll(uint8_t* v, const std::size_t n)
 	{

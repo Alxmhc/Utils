@@ -25,16 +25,12 @@ namespace compr
 				return true;
 			}
 
-			bool Init(byteReader &br)
+			bool Init(const uint8_t* h)
 			{
-				uint8_t p;
-				if( !br.get(p) )
-					return false;
-				if( !Decode_Props(p) )
+				if( !Decode_Props(h[0]) )
 					return false;
 
-				if( !br.readC<4, endianness::LITTLE_ENDIAN>(dict_size) )
-					return false;
+				dict_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h + 1);
 				if(dict_size < 4096)
 				{
 					dict_size = 4096;
@@ -235,9 +231,13 @@ namespace compr
 		static bool Decode(byteReader &br, byteWriter &bw, uint64_t fsize = -1)
 		{
 			props pr;
-			if( !pr.Init(br) )
-				return false;
-
+			{
+				uint8_t h[5];
+				if( !br.readN(h, 5) )
+					return false;
+				if( !pr.Init(h) )
+					return false;
+			}
 			if(fsize == static_cast<uint64_t>(-1))
 			{
 				if( !br.readC<8, endianness::LITTLE_ENDIAN>(fsize) )

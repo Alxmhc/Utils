@@ -9,12 +9,21 @@
 class br_fstream : public byteReader
 {
 	std::ifstream fst;
+	uint8_t buf[256];
 protected:
 	uint8_t read1()
 	{
 		uint8_t r = static_cast<uint8_t>(fst.get());
 		pos++;
 		return r;
+	}
+	const uint8_t* get_data(uint_fast8_t n) override
+	{
+		if (pos + n > csize)
+			return nullptr;
+		fst.read(reinterpret_cast<char*>(buf), n);
+		pos += n;
+		return buf;
 	}
 	void readAll(uint8_t* v, const std::size_t n)
 	{
