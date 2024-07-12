@@ -1,6 +1,7 @@
 #ifndef H_FL_PNM
 #define H_FL_PNM
 
+#include "../data/convert/base.h"
 #include "../data/byte_writer.h"
 
 namespace fl_pr
@@ -32,14 +33,16 @@ namespace fl_pr
 			default:
 				return false;
 			}
+
+			static const char* d = "0123456789";
 			bw.write('\n');
-			bw.writeS(std::to_string(sx));
+			bw.writeS(convert::base::Enc::pr_num(sx, d, 10));
 			bw.write(' ');
-			bw.writeS(std::to_string(sy));
+			bw.writeS(convert::base::Enc::pr_num(sy, d, 10));
 			bw.write('\n');
 			if(t != tGr1)
 			{
-				bw.writeS(std::to_string(mx));
+				bw.writeS(convert::base::Enc::pr_num(mx, d, 10));
 				bw.write('\n');
 			}
 			return true;

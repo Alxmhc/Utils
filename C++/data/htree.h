@@ -22,11 +22,11 @@ public:
 		}
 		std::stable_sort(tmp.begin(), tmp.begin() + sz);
 
-		uint_fast32_t k = 0;
+		uint_fast64_t k = 0;
 		uint_fast8_t p = 0;
 		for(T i = 0; i < sz; ++i)
 		{
-			const uint_fast8_t s = tmp[i].first;
+			const auto s = tmp[i].first;
 			if(p != s)
 			{
 				k <<= s - p;

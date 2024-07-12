@@ -26,13 +26,13 @@ public:
 		delete right;
 	}
 
-	void add(uint_fast32_t n, uint_fast8_t nbit, T c)
+	void add(uint_fast64_t n, uint_fast8_t nbit, T c)
 	{
-		uint_fast32_t f = 1 << (nbit - 1);
 		binTree<T>* a = this;
-		while(f != 0)
+		while(nbit != 0)
 		{
-			const auto c = n & f;
+			nbit--;
+			const auto c = (n >> nbit) & 1;
 			if(c == 0)
 			{
 				if(a->left == nullptr)
@@ -49,7 +49,6 @@ public:
 				}
 				a = a->right;
 			}
-			f >>= 1;
 		}
 		a->val = c;
 		a->fin = true;

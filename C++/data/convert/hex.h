@@ -1,14 +1,15 @@
 #ifndef H_HEX
 #define H_HEX
 
+#include "base.h"
 #include "../byte_writer.h"
 
 namespace convert
 {
 	namespace hex
 	{
-		const char* dct_lc = "0123456789abcdef";
-		const char* dct_uc = "0123456789ABCDEF";
+		static const char* dct_lc = "0123456789abcdef";
+		static const char* dct_uc = "0123456789ABCDEF";
 
 		namespace Enc
 		{
@@ -23,6 +24,11 @@ namespace convert
 					res.push_back(dict[v[i]&0x0f]);
 				}
 				return res;
+			}
+
+			static std::string pr_num(std::size_t n, bool isU = false)
+			{
+				return base::Enc::pr_num(n, isU ? dct_uc : dct_lc, 16);
 			}
 		}
 

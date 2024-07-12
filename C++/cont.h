@@ -43,7 +43,7 @@ public:
 	}
 };
 
-bool copy(byteReader &br, byteWriter &bw)
+static bool copy(byteReader &br, byteWriter &bw)
 {
 	std::vector<uint8_t> data;
 	br.readN(data, br.get_rsize());

@@ -5,7 +5,7 @@
 #include <vector>
 #include <algorithm>
 
-bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
+static bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 {
 	auto osz = out.size();
 	if(dist == 0 || osz < dist)

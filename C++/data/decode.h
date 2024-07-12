@@ -5,7 +5,7 @@
 
 namespace decode
 {
-	bool unchunk(uint8_t* v, std::size_t &n)
+	static bool unchunk(uint8_t* v, std::size_t &n)
 	{
 		const uint8_t* b = v;
 		uint8_t* p = v;
