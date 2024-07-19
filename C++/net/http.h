@@ -163,16 +163,6 @@ static const hTree<unsigned int> http2_htr(http2_hcode, 257);
 
 class HTTP2
 {
-	static const unsigned char hdr_size = 24;
-	static const unsigned char fr_hdr_size = 9;
-
-	typedef std::pair<std::string, std::string> field;
-	static const unsigned char stat_tbl_sz = 61;
-	static const field stat_tbl[stat_tbl_sz];
-
-	std::size_t dyn_tbl_msz;
-	std::deque<field> dyn_tbl;
-
 	template<typename T>
 	static bool int_decode(br_array &br, T &res, uint_fast8_t nBit)
 	{
@@ -224,7 +214,17 @@ class HTTP2
 		if(br.get_rsize() != 0)
 			return false;
 		br.reset_size();
+		return true;
 	}
+
+	static const unsigned char hdr_size = 24;
+	static const unsigned char fr_hdr_size = 9;
+
+	typedef std::pair<std::string, std::string> field;
+	static const unsigned char stat_tbl_sz = 61;
+	static const field stat_tbl[stat_tbl_sz];
+	std::size_t dyn_tbl_msz;
+	std::deque<field> dyn_tbl;
 
 	static field tbl_get(unsigned int num, const std::deque<field> &d_fld)
 	{
@@ -238,17 +238,8 @@ class HTTP2
 			return field("", "");
 		return d_fld[num];
 	}
-public:
-	HTTP2() : dyn_tbl_msz(4096) {}
 
-	static bool Is_http2(const uint8_t* data, std::size_t size)
-	{
-		if(size < hdr_size)
-			return false;
-		return std::memcmp(data, "\x50\x52\x49\x20\x2a\x20\x48\x54\x54\x50\x2f\x32\x2e\x30\x0d\x0a\x0d\x0a\x53\x4d\x0d\x0a\x0d\x0a", hdr_size) == 0;
-	}
-
-	bool header_decode(br_array &br, std::vector<field> &res)
+	bool header_decode(br_array &br, std::vector<field> &hdr)
 	{
 		for(;;)
 		{
@@ -326,7 +317,79 @@ public:
 			}
 			if(fld.first.empty())
 				return false;
-			res.push_back(fld);
+			hdr.push_back(fld);
+		}
+		return true;
+	}
+
+	static bool unpad(br_array &br)
+	{
+		uint8_t pad;
+		if( !br.get(pad) )
+			return false;
+		if( br.get_rsize() < pad )
+			return false;
+		br.set_size(br.get_size() - pad);
+		return true;
+	}
+
+	struct pack
+	{
+		std::vector<field> hdr;
+		std::vector<uint8_t> bd;
+		bool h_fin, d_fin;
+
+		pack() : h_fin(false), d_fin(false) {}
+	};
+public:
+	HTTP2() : dyn_tbl_msz(4096) {}
+
+	static bool Is_http2(const uint8_t* data, std::size_t size)
+	{
+		if(size < hdr_size)
+			return false;
+		return std::memcmp(data, "\x50\x52\x49\x20\x2a\x20\x48\x54\x54\x50\x2f\x32\x2e\x30\x0d\x0a\x0d\x0a\x53\x4d\x0d\x0a\x0d\x0a", hdr_size) == 0;
+	}
+
+	bool frame_decode(br_array &br, uint_fast8_t t, uint_fast8_t f, pack* p)
+	{
+		switch(t)
+		{
+		case 0:
+		{
+			if((f & 0x08) != 0)
+			{
+				if( !unpad(br) )
+					return false;
+			}
+			br.addN(p->bd, br.get_rsize());
+			p->d_fin = (f & 0x01) != 0;
+			break;
+		}
+		case 1:
+		{
+			if((f & 0x08) != 0)
+			{
+				if( !unpad(br) )
+					return false;
+			}
+			if((f & 0x20) != 0)
+			{
+				if( !br.skip(5) )
+					return false;
+			}
+			if( !header_decode(br, p->hdr) )
+				return false;
+			p->h_fin = (f & 0x04) != 0;
+			break;
+		}
+		case 9:
+		{
+			if( !header_decode(br, p->hdr) )
+				return false;
+			p->h_fin = (f & 0x04) != 0;
+			break;
+		}
 		}
 		return true;
 	}

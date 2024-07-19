@@ -82,8 +82,9 @@ namespace crypt
 		static const uint8_t SB3[256];
 		static const uint8_t SB4[256];
 
-		static void Av(const uint8_t* vi, uint8_t* vo)
+		static UINT_<16>::uint Av(const uint8_t* vi)
 		{
+			uint8_t vo[16];
 			vo[0]  = vi[3] ^ vi[4] ^ vi[6] ^ vi[8]  ^ vi[9]  ^ vi[13] ^ vi[14];
 			vo[1]  = vi[2] ^ vi[5] ^ vi[7] ^ vi[8]  ^ vi[9]  ^ vi[12] ^ vi[15];
 			vo[2]  = vi[1] ^ vi[4] ^ vi[6] ^ vi[10] ^ vi[11] ^ vi[12] ^ vi[15];
@@ -100,13 +101,13 @@ namespace crypt
 			vo[13] = vi[0] ^ vi[3] ^ vi[6] ^ vi[7]  ^ vi[8]  ^ vi[10] ^ vi[13];
 			vo[14] = vi[0] ^ vi[3] ^ vi[4] ^ vi[5]  ^ vi[9]  ^ vi[11] ^ vi[14];
 			vo[15] = vi[1] ^ vi[2] ^ vi[4] ^ vi[5]  ^ vi[8]  ^ vi[10] ^ vi[15];
+			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
 		static UINT_<16>::uint A(const UINT_<16>::uint &c)
 		{
-			uint8_t vi[16], vo[16];
+			uint8_t vi[16];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
-			Av(vi, vo);
-			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
+			return Av(vi);
 		}
 		static UINT_<16>::uint SL(const UINT_<16>::uint &c)
 		{
@@ -128,8 +129,7 @@ namespace crypt
 			SB1[v[4]],  SB2[v[5]],  SB3[v[6]],  SB4[v[7]],
 			SB1[v[8]],  SB2[v[9]],  SB3[v[10]], SB4[v[11]],
 			SB1[v[12]], SB2[v[13]], SB3[v[14]], SB4[v[15]]};
-			Av(vo, v);
-			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(v);
+			return Av(vo);
 		}
 
 		static void Process(const std::vector<UINT_<16>::uint> &key, uint8_t* r)

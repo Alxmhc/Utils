@@ -12,7 +12,7 @@ class byteReader
 protected:
 	std::size_t pos;
 	std::size_t size, csize;
-	byteReader() : pos(0) {}
+	byteReader() : pos(0), size(0), csize(0) {}
 
 	virtual uint8_t read1() = 0;
 	virtual const uint8_t* get_data(uint_fast8_t) = 0;
