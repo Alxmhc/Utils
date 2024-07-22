@@ -13,7 +13,7 @@ namespace crypt
 	{
 		static void Init(const uint8_t* k, uint_fast8_t ksz, UINT_<16>::uint* key)
 		{
-			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			const auto KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
 			UINT_<16>::uint KR;
 			if(ksz == 24)
 			{
@@ -153,7 +153,7 @@ namespace crypt
 
 			void process(uint8_t* r) const
 			{
-				UINT_<16>::uint D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+				auto D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 				D ^= key[0];
 				F1(D, key[2]);
 				F1(D, key[3]);
@@ -194,7 +194,7 @@ namespace crypt
 
 			void process(uint8_t* r) const
 			{
-				UINT_<16>::uint D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+				auto D = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 				D ^= key[1];
 				D = UINT_<16>::uint(D.getH(), D.getL());
 				if(e)

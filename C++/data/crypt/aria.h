@@ -17,8 +17,8 @@ namespace crypt
 			uint8_t r[16] = {};
 			std::copy_n(k + 16, ksz - 16, r);
 
-			UINT_<16>::uint KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
-			UINT_<16>::uint KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+			const auto KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			const auto KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
 
 			const UINT_<16>::uint CK[3] = {
 				UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),

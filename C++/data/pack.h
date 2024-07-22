@@ -224,8 +224,10 @@ struct bconv<sz, k, endianness::LITTLE_ENDIAN>
 	template<typename m>
 	static void unpack(typename UINT_<k*sz>::uint c, m* a)
 	{
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(UINT_<k*sz>::getL(c), a);
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(UINT_<k*sz>::getH(c), a + k/2);
+		const auto l = UINT_<k*sz>::getL(c);
+		const auto h = UINT_<k*sz>::getH(c);
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(l, a);
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(h, a + k/2);
 	}
 };
 template<unsigned char sz>
@@ -256,8 +258,10 @@ struct bconv<sz, k, endianness::BIG_ENDIAN>
 	template<typename m>
 	static void unpack(typename UINT_<k*sz>::uint c, m* a)
 	{
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(UINT_<k*sz>::getL(c), a + k/2);
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(UINT_<k*sz>::getH(c), a);
+		const auto l = UINT_<k*sz>::getL(c);
+		const auto h = UINT_<k*sz>::getH(c);
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(l, a + k/2);
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(h, a);
 	}
 };
 template<unsigned char sz>
