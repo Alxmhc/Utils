@@ -332,7 +332,7 @@ class HTTP2
 		br.set_size(br.get_size() - pad);
 		return true;
 	}
-
+public:
 	struct pack
 	{
 		std::vector<field> hdr;
@@ -341,7 +341,7 @@ class HTTP2
 
 		pack() : h_fin(false), d_fin(false) {}
 	};
-public:
+
 	HTTP2() : dyn_tbl_msz(4096) {}
 
 	static bool Is_http2(const uint8_t* data, std::size_t size)
