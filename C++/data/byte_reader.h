@@ -83,16 +83,6 @@ public:
 		return true;
 	}
 
-	std::size_t readMx(uint8_t* d, std::size_t n)
-	{
-		if(pos + n > csize)
-		{
-			n = csize - pos;
-		}
-		readAll(d, n);
-		return n;
-	}
-
 	bool addN(std::vector<uint8_t> &v, std::size_t n)
 	{
 		if(pos + n > csize)
@@ -104,6 +94,30 @@ public:
 			readAll(v.data() + sz, n);
 		}
 		return true;
+	}
+
+	std::size_t readMx(uint8_t* d, std::size_t n)
+	{
+		if(pos + n > csize)
+		{
+			n = csize - pos;
+		}
+		readAll(d, n);
+		return n;
+	}
+	std::size_t addMx(std::vector<uint8_t> &v, std::size_t n)
+	{
+		if(pos + n > csize)
+		{
+			n = csize - pos;
+		}
+		if(n != 0)
+		{
+			const auto sz = v.size();
+			v.resize(sz + n);
+			readAll(v.data() + sz, n);
+		}
+		return n;
 	}
 
 	template<unsigned char SZ, char E>

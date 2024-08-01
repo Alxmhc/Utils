@@ -393,6 +393,28 @@ public:
 		}
 		return true;
 	}
+
+	bool buf_read(byteReader &br, std::vector<uint8_t> &buf) const
+	{
+		if(buf.size() < fr_hdr_size)
+		{
+			br.addMx(buf, fr_hdr_size - buf.size());
+			if(buf.size() < fr_hdr_size)
+				return false;
+		}
+
+		uint_fast32_t frlen = buf[0];
+		frlen = (frlen << 8) | buf[1];
+		frlen = (frlen << 8) | buf[2];
+		frlen += fr_hdr_size;
+		if(buf.size() < frlen)
+		{
+			br.addMx(buf, frlen - buf.size());
+			if(buf.size() < frlen)
+				return false;
+		}
+		return true;
+	}
 };
 
 const HTTP2::field HTTP2::stat_tbl[] = {
