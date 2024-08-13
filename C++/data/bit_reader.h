@@ -13,6 +13,28 @@ protected:
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 
+	bool skip(std::size_t n)
+	{
+		if(n <= o)
+		{
+			o -= static_cast<uint_fast8_t>(n);
+			return true;
+		}
+		n -= o;
+		o = 0;
+
+		if( !r->skip(n >> 3) )
+			return false;
+		const uint_fast8_t k = n & 7;
+		if(k != 0)
+		{
+			if( !r->get(b) )
+				return false;
+			o = 8 - k;
+		}
+		return true;
+	}
+
 	bool readB(uint8_t* v, std::size_t n)
 	{
 		o = 0;
