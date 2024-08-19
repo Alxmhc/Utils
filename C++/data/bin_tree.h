@@ -8,16 +8,36 @@ class binTree
 {
 	binTree* left;
 	binTree* right;
-	T val;
 	bool fin;
+	T val;
 
 public:
 	binTree() : left(nullptr), right(nullptr), fin(false){}
 
-	binTree(binTree &&t) : left(t.left), right(t.right), val(t.val), fin(t.fin)
+	binTree(binTree &&t) : left(t.left), right(t.right), fin(t.fin), val(t.val)
 	{
 		t.left = nullptr;
 		t.right = nullptr;
+	}
+
+	binTree& operator=(binTree &&t)
+	{
+		if(this != &t)
+		{
+			delete left;
+			left = t.left;
+			t.left = nullptr;
+
+			delete right;
+			right = t.right;
+			t.right = nullptr;
+
+			fin = t.fin;
+			t.fin = false;
+
+			val = t.val;
+		}
+		return *this;
 	}
 
 	~binTree()
@@ -61,10 +81,11 @@ public:
 
 	bool get_val(T &res) const
 	{
-		if(!fin)
-			return false;
-		res = val;
-		return true;
+		if(fin)
+		{
+			res = val;
+		}
+		return fin;
 	}
 };
 

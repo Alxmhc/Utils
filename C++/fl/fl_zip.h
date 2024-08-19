@@ -29,6 +29,7 @@ namespace fl_pr
 			cDeflate64 =   9,
 			cBZIP2     =  12,
 			cLZMA      =  14,
+			cZSTD      =  93,
 			cWavPack   =  97,
 			cPPMd      =  98
 		};

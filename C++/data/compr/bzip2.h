@@ -114,14 +114,15 @@ namespace compr
 
 			//construct trees
 			typedef hTree<uint_fast16_t> Tree;
-			std::vector<std::unique_ptr<Tree>> htrs(tsz);
+			std::vector<Tree> htrs;
+			htrs.reserve(tsz);
 			{
 				std::vector<uint8_t> tree(sztr);
 				for(uint_fast8_t i = 0; i < tsz; i++)
 				{
 					if( !read_tree(br, tree) )
 						return false;
-					htrs[i] = std::unique_ptr<Tree>(new Tree(tree.data(), static_cast<uint_fast16_t>(tree.size())));
+					htrs.push_back(Tree(tree.data(), static_cast<uint_fast16_t>(tree.size())));
 				}
 			}
 
@@ -130,7 +131,7 @@ namespace compr
 			uint_fast8_t l = 0;
 			for(uint_fast16_t i = 0; i < sel.size(); i++)
 			{
-				const auto tr = htrs[sel[i]].get();
+				const auto tr = &htrs[sel[i]];
 				for(uint_fast8_t n = 0; n < 50; n++)
 				{
 					uint_fast16_t c;

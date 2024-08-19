@@ -7,6 +7,8 @@ template<typename T>
 class hTree : public binTree<T>
 {
 public:
+	hTree(hTree &&t) : binTree(std::move(t)) {}
+
 	hTree(const uint_fast8_t* m, T n)
 	{
 		typedef std::pair<uint_fast8_t, T> pr;
