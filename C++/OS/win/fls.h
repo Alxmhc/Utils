@@ -130,7 +130,7 @@ namespace fl_s
 		}
 
 		template<typename S, class T>
-		static void proc_dir(const S &pth, T &st, int depth = -1)
+		static void proc_dir(const S &pth, const T &st, int depth = -1)
 		{
 			dInf<S> cl(pth);
 			for(;;)
@@ -173,7 +173,8 @@ namespace fl_s
 	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr, int depth = -1)
 	{
 		std::vector<std::basic_string<C>> res;
-		proc_dir(pth, [&](const std::basic_string<C> &s){if(fltr(s)){res.push_back(s);}}, depth);
+		auto fnc = [&](const std::basic_string<C> &s){if(fltr(s)){res.push_back(s);}};
+		proc_dir(pth, fnc, depth);
 		return res;
 	}
 

@@ -7,7 +7,7 @@ template<typename T>
 class hTree : public binTree<T>
 {
 public:
-	hTree(hTree &&t) : binTree(std::move(t)) {}
+	hTree(hTree &&t) : binTree<T>(std::move(t)) {}
 
 	hTree(const uint_fast8_t* m, T n)
 	{
