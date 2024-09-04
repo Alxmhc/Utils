@@ -30,13 +30,83 @@ namespace fl_pr
 		bool g;
 		uint8_t key[32];
 
+		void make_key(const uint8_t* t_seed, uint_fast64_t tr_rnd, const uint8_t* m_seed, uint_fast8_t msz)
+		{
+			crypt::AES::Enc en(t_seed, 32);
+			for(uint_fast64_t i = 0; i < tr_rnd; i++)
+			{
+				en.process(key);
+				en.process(key + 16);
+			}
+
+			hash::SHA2_256 hs;
+			hs.Update(key, 32);
+			hs.Final(key);
+			hs.Update(m_seed, msz);
+			hs.Update(key, 32);
+			hs.Final(key);
+		}
+
 		std::string comment;
 		bool compressed;
 		std::vector<uint8_t> data;
 		uint32_t s_id;
 		uint8_t p_key[32];
 
-		bool Decrypt(byteReader &br)
+		bool Decrypt1(byteReader &br)
+		{
+			uint32_t f;
+			if(!br.readC<4, endianness::LITTLE_ENDIAN>(f))
+				return false;
+			if(!br.skip(4))
+				return false;
+
+			uint8_t iv[16];
+			uint8_t hash[32];
+			{
+				uint8_t t_seed[32];
+				uint32_t tr_rnd;
+				uint8_t m_seed[16];
+				if(!br.readN(m_seed, 16))
+					return false;
+				if(!br.readN(iv, 16))
+					return false;
+				if(!br.skip(8))
+					return false;
+				if(!br.readN(hash, 32))
+					return false;
+				if(!br.readN(t_seed, 32))
+					return false;
+				if(!br.readC<4, endianness::LITTLE_ENDIAN>(tr_rnd))
+					return false;
+				make_key(t_seed, tr_rnd, m_seed, 16);
+			}
+
+			br.readN(data, br.get_rsize());
+			if((data.size() & 15) != 0)
+				return false;
+			crypt::AES::Dec de(key, 32);
+			crypt::CR_CBC::Dec<crypt::AES> dec(de, iv);
+			for(std::size_t i = 0; i < data.size(); i += 16)
+			{
+				dec.process(data.data() + i);
+			}
+			const uint_fast8_t pad = data.back();
+			if(pad > data.size())
+				return false;
+			data.resize(data.size() - pad);
+			{
+				hash::SHA2_256 hs;
+				hs.Update(data.data(), data.size());
+				uint8_t h[32];
+				hs.Final(h);
+				if(std::memcmp(h, hash, 32) != 0)
+					return false;
+			}
+			return true;
+		}
+
+		bool Decrypt2(byteReader &br)
 		{
 			if(!br.skip(4))
 				return false;
@@ -152,22 +222,7 @@ namespace fl_pr
 						return false;
 					}
 				}
-
-				{
-					crypt::AES::Enc en(t_seed, 32);
-					for(uint_fast64_t i = 0; i < tr_rnd; i++)
-					{
-						en.process(key);
-						en.process(key + 16);
-					}
-
-					hash::SHA2_256 hs;
-					hs.Update(key, 32);
-					hs.Final(key);
-					hs.Update(m_seed, 32);
-					hs.Update(key, 32);
-					hs.Final(key);
-				}
+				make_key(t_seed, tr_rnd, m_seed, 32);
 			}
 
 			{
@@ -195,7 +250,6 @@ namespace fl_pr
 				std::size_t hb = 0;
 
 				hash::SHA2_256 hs;
-				uint8_t hash[32];
 				for(;;)
 				{
 					const std::size_t he = hb + 40;
@@ -211,6 +265,7 @@ namespace fl_pr
 						return false;
 
 					hs.Update(data.data() + he, sz);
+					uint8_t hash[32];
 					hs.Final(hash);
 					if(std::memcmp(data.data() + hb + 4, hash, 32) != 0)
 						return false;
@@ -272,22 +327,34 @@ namespace fl_pr
 			if(!read_Ver(br))
 				return;
 
-			if(ver == 1)
-				return;
-
 			hash::SHA2_256 hs;
 			hs.Update(psw, psz);
 			hs.Final(key);
-			hs.Update(key, 32);
-			hs.Final(key);
 
-			g = Decrypt(br);
+			if(ver == 1)
+			{
+				g = Decrypt1(br);
+			}
+			else
+			{
+				hs.Update(key, 32);
+				hs.Final(key);
+				g = Decrypt2(br);
+			}
+			std::fill_n(key, 32, 0);
 		}
 
 		bool GetData(byteWriter &bw)
 		{
 			if(!g)
 				return false;
+
+			if(ver == 1)
+			{
+				bw.writeN(data.data(), data.size());
+				data.clear();
+				return true;
+			}
 
 			std::vector<uint8_t> out;
 
