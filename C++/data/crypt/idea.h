@@ -8,7 +8,7 @@ namespace crypt
 	//key sz = 16
 	class IDEA
 	{
-		static void Init_Enc(const uint8_t* k, uint16_t* key)
+		static void Init(const uint8_t* k, uint16_t* key)
 		{
 			auto c = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
 			for(uint_fast8_t i = 0; i < 6; i++)
@@ -17,29 +17,6 @@ namespace crypt
 				c = rotl(c, 25);
 			}
 			bconv<2, 4, endianness::BIG_ENDIAN>::unpack(c.getH(), key + 48);
-		}
-
-		static void Init_Dec(const uint8_t* k, uint16_t* key)
-		{
-			Init_Enc(k, key);
-			uint16_t t[52];
-
-			for (uint_fast8_t i = 0; i < 48; i += 6)
-			{
-				t[i] = mulI(key[48-i]);
-				t[i+1] = -key[50-i];
-				t[i+2] = -key[49-i];
-				t[i+3] = mulI(key[51-i]);
-				t[i+4] = key[46-i];
-				t[i+5] = key[47-i];
-			}
-			std::swap(t[1], t[2]);
-			t[48] = mulI(key[0]);
-			t[49] = -key[1];
-			t[50] = -key[2];
-			t[51] = mulI(key[3]);
-
-			std::copy_n(t, 52, key);
 		}
 
 		static uint16_t mul(uint16_t a, uint16_t b)
@@ -92,7 +69,7 @@ namespace crypt
 
 			Enc(const uint8_t* k)
 			{
-				Init_Enc(k, key);
+				Init(k, key);
 			}
 
 			void process(uint8_t* r) const
@@ -109,7 +86,24 @@ namespace crypt
 
 			Dec(const uint8_t* k)
 			{
-				Init_Dec(k, key);
+				Init(k, key);
+
+				uint16_t t[52];
+				for (uint_fast8_t i = 0; i < 48; i += 6)
+				{
+					t[i] = mulI(key[48-i]);
+					t[i+1] = -key[50-i];
+					t[i+2] = -key[49-i];
+					t[i+3] = mulI(key[51-i]);
+					t[i+4] = key[46-i];
+					t[i+5] = key[47-i];
+				}
+				std::swap(t[1], t[2]);
+				t[48] = mulI(key[0]);
+				t[49] = -key[1];
+				t[50] = -key[2];
+				t[51] = mulI(key[3]);
+				std::copy_n(t, 52, key);
 			}
 
 			void process(uint8_t* r) const

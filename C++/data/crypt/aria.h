@@ -12,30 +12,30 @@ namespace crypt
 	//key sz = 16, 24, 32
 	class ARIA
 	{
-		static void Init_Enc(const uint8_t* k, uint_fast8_t ksz, std::vector<UINT_<16>::uint> &key)
+		static void Init(const uint8_t* k, uint_fast8_t ksz, std::vector<UINT_<16>::uint> &key)
 		{
-			uint8_t r[16] = {};
-			std::copy_n(k + 16, ksz - 16, r);
-
-			const auto KL = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
-			const auto KR = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
-
-			const UINT_<16>::uint CK[3] = {
-				UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
-				UINT_<16>::uint(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
-				UINT_<16>::uint(0x0324977504e8c90e, 0xdb92371d2126e970)
-			};
-
-			const uint_fast8_t nr = (ksz >> 2) + 8;
-
-			const uint_fast8_t n = (nr-12) >> 1;
 			UINT_<16>::uint W[4];
-			W[0] = KL;
-			W[1] = FO(W[0] ^ CK[(n+0)%3]) ^ KR;
-			W[2] = A(SL(W[1] ^ CK[(n+1)%3])) ^ W[0];
-			W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
+			{
+				const uint_fast8_t nr = (ksz >> 2) + 8;
+				key.resize(nr + 1);
 
-			key.resize(nr + 1);
+				const UINT_<16>::uint CK[3] = {
+					UINT_<16>::uint(0xfe13abe8fa9a6ee0, 0x517cc1b727220a94),
+					UINT_<16>::uint(0xff28b1d5ef5de2b0, 0x6db14acc9e21c820),
+					UINT_<16>::uint(0x0324977504e8c90e, 0xdb92371d2126e970)
+				};
+				const uint_fast8_t n = (nr-12) >> 1;
+
+				uint8_t r[16] = {};
+				std::copy_n(k + 16, ksz - 16, r);
+				W[0] = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+				W[1] = bconv<1, 16, endianness::BIG_ENDIAN>::pack(r);
+				W[1] ^= FO(W[0] ^ CK[(n+0)%3]);
+				W[2] = SL(W[1] ^ CK[(n+1)%3]);
+				A(W[2]);
+				W[2] ^= W[0];
+				W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
+			}
 			key[0]  = W[0] ^ rotr(W[1], 19);
 			key[1]  = W[1] ^ rotr(W[2], 19);
 			key[2]  = W[2] ^ rotr(W[3], 19);
@@ -49,32 +49,16 @@ namespace crypt
 			key[10] = W[2] ^ rotl(W[3], 61);
 			key[11] = W[3] ^ rotl(W[0], 61);
 			key[12] = W[0] ^ rotl(W[1], 31);
-			if(nr > 12)
+			if(ksz > 16)
 			{
 				key[13] = W[1] ^ rotl(W[2], 31);
 				key[14] = W[2] ^ rotl(W[3], 31);
-				if(nr > 14)
+				if(ksz > 24)
 				{
 					key[15] = W[3] ^ rotl(W[0], 31);
 					key[16] = W[0] ^ rotl(W[1], 19);
 				}
 			}
-		}
-
-		static void Init_Dec(const uint8_t* k, uint_fast8_t ksz, std::vector<UINT_<16>::uint> &key)
-		{
-			const uint_fast8_t nr = (ksz >> 2) + 8;
-
-			Init_Enc(k, ksz, key);
-
-			std::swap(key[0], key[nr]);
-			for(uint_fast8_t i = 1; i < nr/2; i++)
-			{
-				std::swap(key[i], key[nr - i]);
-				key[i] = A(key[i]);
-				key[nr - i] = A(key[nr - i]);
-			}
-			key[nr/2] = A(key[nr/2]);
 		}
 
 		static const uint8_t SB1[256];
@@ -103,11 +87,11 @@ namespace crypt
 			vo[15] = vi[1] ^ vi[2] ^ vi[4] ^ vi[5]  ^ vi[8]  ^ vi[10] ^ vi[15];
 			return bconv<1, 16, endianness::BIG_ENDIAN>::pack(vo);
 		}
-		static UINT_<16>::uint A(const UINT_<16>::uint &c)
+		static void A(UINT_<16>::uint &c)
 		{
 			uint8_t vi[16];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(c, vi);
-			return Av(vi);
+			c = Av(vi);
 		}
 		static UINT_<16>::uint SL(const UINT_<16>::uint &c)
 		{
@@ -143,7 +127,7 @@ namespace crypt
 				P = SL(P ^ key[i++]);
 				if(i == n)
 					break;
-				P = A(P);
+				A(P);
 			}
 			P ^= key[i];
 			bconv<1, 16, endianness::BIG_ENDIAN>::unpack(P, r);
@@ -160,7 +144,7 @@ namespace crypt
 
 			Enc(const uint8_t* k, uint_fast8_t ksz)
 			{
-				Init_Enc(k, ksz, key);
+				Init(k, ksz, key);
 			}
 
 			void process(uint8_t* r) const
@@ -177,7 +161,17 @@ namespace crypt
 
 			Dec(const uint8_t* k, uint_fast8_t ksz)
 			{
-				Init_Dec(k, ksz, key);
+				Init(k, ksz, key);
+
+				const uint_fast8_t nr = (ksz >> 2) + 8;
+				std::swap(key[0], key[nr]);
+				for(uint_fast8_t i = 1; i < nr/2; i++)
+				{
+					std::swap(key[i], key[nr - i]);
+					A(key[i]);
+					A(key[nr - i]);
+				}
+				A(key[nr/2]);
 			}
 
 			void process(uint8_t* r) const

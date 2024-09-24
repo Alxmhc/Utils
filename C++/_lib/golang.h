@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <string>
 
 typedef int8_t  GoInt8;
 typedef int16_t GoInt16;

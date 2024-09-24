@@ -110,12 +110,14 @@ namespace vt
 //(a^b)%c
 static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
 {
+	if(c == 1)
+		return 0;
 	if(b == 0)
 		return 1;
 	a %= c;
-	if(a < 2)
+	if(a < 2 || b == 1)
 		return static_cast<uint32_t>(a);
-	uint64_t r = 1;
+	uint_fast64_t r = 1;
 	for(;;)
 	{
 		if((b & 1) != 0)
