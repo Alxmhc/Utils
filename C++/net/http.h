@@ -218,7 +218,6 @@ class HTTP2
 	}
 
 	static const unsigned char hdr_size = 24;
-	static const unsigned char fr_hdr_size = 9;
 
 	typedef std::pair<std::string, std::string> field;
 	static const unsigned char stat_tbl_sz = 61;
@@ -351,67 +350,89 @@ public:
 		return std::memcmp(data, "\x50\x52\x49\x20\x2a\x20\x48\x54\x54\x50\x2f\x32\x2e\x30\x0d\x0a\x0d\x0a\x53\x4d\x0d\x0a\x0d\x0a", hdr_size) == 0;
 	}
 
-	bool frame_decode(br_array &br, uint_fast8_t t, uint_fast8_t f, pack* p)
+	struct frame
 	{
-		switch(t)
+		static const unsigned char hdr_size = 9;
+
+		uint_fast8_t type, fl;
+		uint32_t id;
+		std::vector<uint8_t> buf;
+
+		bool Update(byteReader &br)
+		{
+			if(buf.size() < hdr_size)
+			{
+				br.addMx(buf, hdr_size - buf.size());
+				if(buf.size() < hdr_size)
+					return false;
+			}
+
+			uint_fast32_t frlen = buf[0];
+			frlen = (frlen << 8) | buf[1];
+			frlen = (frlen << 8) | buf[2];
+			frlen += hdr_size;
+			if(buf.size() < frlen)
+			{
+				br.addMx(buf, frlen - buf.size());
+				if(buf.size() < frlen)
+					return false;
+			}
+
+			type = buf[3];
+			fl = buf[4];
+			id = bconv<1, 4, endianness::BIG_ENDIAN>::pack(buf.data() + 5);
+			id &= 0x7fffffff;
+
+			return true;
+		}
+
+		void Clear()
+		{
+			buf.clear();
+		}
+	};
+
+	bool frame_decode(const frame &fr, pack* p)
+	{
+		br_array br(fr.buf.data(), fr.buf.size());
+		br.skip(frame::hdr_size);
+		switch(fr.type)
 		{
 		case 0:
 		{
-			if((f & 0x08) != 0)
+			if((fr.fl & 0x08) != 0)
 			{
 				if( !unpad(br) )
 					return false;
 			}
 			br.addN(p->bd, br.get_rsize());
-			p->d_fin = (f & 0x01) != 0;
+			p->d_fin = (fr.fl & 0x01) != 0;
 			break;
 		}
 		case 1:
 		{
-			if((f & 0x08) != 0)
+			if((fr.fl & 0x08) != 0)
 			{
 				if( !unpad(br) )
 					return false;
 			}
-			if((f & 0x20) != 0)
+			if((fr.fl & 0x20) != 0)
 			{
 				if( !br.skip(5) )
 					return false;
 			}
 			if( !header_decode(br, p->hdr) )
 				return false;
-			p->h_fin = (f & 0x04) != 0;
+			p->h_fin = (fr.fl & 0x04) != 0;
 			break;
 		}
 		case 9:
 		{
 			if( !header_decode(br, p->hdr) )
 				return false;
-			p->h_fin = (f & 0x04) != 0;
+			p->h_fin = (fr.fl & 0x04) != 0;
 			break;
 		}
-		}
-		return true;
-	}
-
-	bool buf_read(byteReader &br, std::vector<uint8_t> &buf) const
-	{
-		if(buf.size() < fr_hdr_size)
-		{
-			br.addMx(buf, fr_hdr_size - buf.size());
-			if(buf.size() < fr_hdr_size)
-				return false;
-		}
-
-		uint_fast32_t frlen = buf[0];
-		frlen = (frlen << 8) | buf[1];
-		frlen = (frlen << 8) | buf[2];
-		frlen += fr_hdr_size;
-		if(buf.size() < frlen)
-		{
-			br.addMx(buf, frlen - buf.size());
-			if(buf.size() < frlen)
-				return false;
 		}
 		return true;
 	}
