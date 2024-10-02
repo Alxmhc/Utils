@@ -76,7 +76,7 @@ class bw_fstream : public byteWriter
 	std::ofstream fst;
 public:
 	template<typename C>
-	bw_fstream(const C* fl) : fst(fl, std::ios_base::binary) {}
+	bw_fstream(const C* fl, bool append = false) : fst(fl, std::ios_base::binary | (append ? std::ios_base::app : 0)) {}
 
 	void writeN(const uint8_t* v, std::size_t n)
 	{

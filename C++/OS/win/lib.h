@@ -12,6 +12,7 @@ public:
 
 	bool load(const char* pth)
 	{
+		free();
 		inst = LoadLibraryA(pth);
 		return inst != nullptr;
 	}
