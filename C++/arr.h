@@ -18,9 +18,28 @@ void v_add(T* a, const T* b, std::size_t sz)
 }
 
 template<typename T>
-T v_sum(const T* a, std::size_t sz)
+std::size_t cnt_b(const T* v, std::size_t sz, const T &c)
 {
-	return std::accumulate(a, a + sz, T());
+	std::size_t k = 0;
+	for(; k < sz; k++)
+	{
+		if(v[k] != c)
+			break;
+	}
+	return k;
+}
+
+template<typename T>
+std::size_t cnt_e(const T* v, std::size_t sz, const T &c)
+{
+	std::size_t k = 0;
+	for(; sz != 0; k++)
+	{
+		sz--;
+		if(v[sz] != c)
+			break;
+	}
+	return k;
 }
 
 template<uint8_t SZ>
