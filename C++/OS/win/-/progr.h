@@ -46,7 +46,7 @@ std::basic_string<C> get_ex_path()
 template<typename C>
 std::basic_string<C> get_process_path(DWORD PID)
 {
-	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PID);
+	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, PID);
 	if(!Handle)
 		return std::basic_string<C>();
 	C path[MAX_PATH];
@@ -63,7 +63,10 @@ std::vector<PROCESSENTRY32> processList()
 	std::vector<PROCESSENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 	if ( sns == INVALID_HANDLE_VALUE )
+	{
+		CloseHandle(sns);
 		return res;
+	}
 
 	PROCESSENTRY32 inf;
 	inf.dwSize = sizeof(inf);
@@ -82,7 +85,10 @@ std::vector<MODULEENTRY32> moduleList(DWORD id)
 	std::vector<MODULEENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, id);
 	if (sns == INVALID_HANDLE_VALUE)
+	{
+		CloseHandle(sns);
 		return res;
+	}
 
 	MODULEENTRY32 inf;
 	inf.dwSize = sizeof(MODULEENTRY32);

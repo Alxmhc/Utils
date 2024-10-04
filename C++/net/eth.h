@@ -10,9 +10,12 @@ namespace net
 {
 	struct Eth
 	{
-		static const uint_fast16_t IPv4 = 0x0800;
-		static const uint_fast16_t IPv6 = 0x86dd;
-		static const uint_fast16_t  ARP = 0x0806;
+		enum
+		{
+			IPv4 = 0x0800,
+			ARP =  0x0806,
+			IPv6 = 0x86dd
+		};
 
 		uint8_t  src[6];
 		uint8_t  dst[6];
@@ -30,13 +33,21 @@ namespace net
 		}
 	};
 
+	namespace IP
+	{
+		enum
+		{
+			ICMP   = 0x01,
+			TCP    = 0x06,
+			UDP    = 0x11,
+			RDP    = 0x1b,
+			ICMPv6 = 0x3a,
+			HIP    = 0x8b
+		};
+	}
+
 	struct IPv4
 	{
-		static const uint_fast8_t  TCP = 0x06;
-		static const uint_fast8_t  UDP = 0x11;
-		static const uint_fast8_t ICMP = 0x01;
-		static const uint_fast8_t  HIP = 0x8b;
-
 		uint8_t src[4];
 		uint8_t dst[4];
 		uint_fast16_t ID;
@@ -60,9 +71,6 @@ namespace net
 
 	struct IPv6
 	{
-		static const uint_fast8_t    UDP = 0x11;
-		static const uint_fast8_t ICMPv6 = 0x3a;
-
 		uint8_t src[16];
 		uint8_t dst[16];
 		uint_fast8_t type;

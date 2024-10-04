@@ -36,6 +36,26 @@ BOOL GetUserNameEx_(EXTENDED_NAME_FORMAT format, LPWSTR buf, LPDWORD sz)
 	return GetUserNameExW(format, buf, sz);
 }
 
+#undef GetEnvironmentStrings
+template<typename C> C* GetEnvironmentStrings_(){}
+template<> LPCH GetEnvironmentStrings_<char>()
+{
+	return GetEnvironmentStrings();
+}
+template<> LPWCH GetEnvironmentStrings_<wchar_t>()
+{
+	return GetEnvironmentStringsW();
+}
+
+BOOL FreeEnvironmentStrings_(LPCH env)
+{
+	return FreeEnvironmentStringsA(env);
+}
+BOOL FreeEnvironmentStrings_(LPWCH env)
+{
+	return FreeEnvironmentStringsW(env);
+}
+
 template<typename C>
 std::basic_string<C> get_username()
 {
@@ -64,26 +84,6 @@ std::basic_string<C> get_username_f()
 	GetUserNameEx_(NameSamCompatible, username, &sz);
 	std::basic_string<C> r(username);
 	return r;
-}
-
-#undef GetEnvironmentStrings
-template<typename C> C* GetEnvironmentStrings_(){}
-template<> LPCH GetEnvironmentStrings_<char>()
-{
-	return GetEnvironmentStrings();
-}
-template<> LPWCH GetEnvironmentStrings_<wchar_t>()
-{
-	return GetEnvironmentStringsW();
-}
-
-BOOL FreeEnvironmentStrings_(LPCH env)
-{
-	return FreeEnvironmentStringsA(env);
-}
-BOOL FreeEnvironmentStrings_(LPWCH env)
-{
-	return FreeEnvironmentStringsW(env);
 }
 
 //Enviroment
