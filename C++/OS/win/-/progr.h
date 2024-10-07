@@ -35,38 +35,31 @@ DWORD GetModuleFileNameEx_(HANDLE hnd, HMODULE hmd, LPWSTR filename, DWORD sz)
 
 //Program path
 template<typename C>
-std::basic_string<C> get_ex_path()
+std::basic_string<C> get_cur_pr_path()
 {
 	C path[MAX_PATH];
 	GetModuleFileName_(nullptr, path, MAX_PATH);
-	std::basic_string<C> p(path);
-	return p;
+	return std::basic_string<C>(path);
 }
 
 template<typename C>
-std::basic_string<C> get_process_path(DWORD PID)
+std::basic_string<C> get_pr_path(DWORD id)
 {
-	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, PID);
+	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, id);
 	if(!Handle)
 		return std::basic_string<C>();
 	C path[MAX_PATH];
-	DWORD l = GetModuleFileNameEx_(Handle, 0, path, MAX_PATH);
+	GetModuleFileNameEx_(Handle, 0, path, MAX_PATH);
 	CloseHandle(Handle);
-	if (l == 0)
-		return std::basic_string<C>();
-	std::basic_string<C> r(path);
-	return r;
+	return std::basic_string<C>(path);
 }
 
 std::vector<PROCESSENTRY32> processList()
 {
 	std::vector<PROCESSENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if ( sns == INVALID_HANDLE_VALUE )
-	{
-		CloseHandle(sns);
+	if (sns == INVALID_HANDLE_VALUE)
 		return res;
-	}
 
 	PROCESSENTRY32 inf;
 	inf.dwSize = sizeof(inf);
@@ -85,10 +78,7 @@ std::vector<MODULEENTRY32> moduleList(DWORD id)
 	std::vector<MODULEENTRY32> res;
 	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, id);
 	if (sns == INVALID_HANDLE_VALUE)
-	{
-		CloseHandle(sns);
 		return res;
-	}
 
 	MODULEENTRY32 inf;
 	inf.dwSize = sizeof(MODULEENTRY32);

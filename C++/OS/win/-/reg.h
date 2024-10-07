@@ -12,26 +12,21 @@ namespace reg
 		return res;
 	}
 
-	bool read_inf(HKEY key, const char* name, DWORD &type, DWORD &size)
-	{
-		return RegQueryValueExA(key, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS;
-	}
-
 	bool Read_String(HKEY key, const char* path, const char* name, std::string &res)
 	{
 		const auto k = reg::Open(key, path);
 		if(k == nullptr)
 			return false;
 		DWORD type, size;
-		if(!read_inf(k, name, type, size) || type != REG_SZ)
+		bool r = false;
+		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		&& type == REG_SZ)
 		{
-			RegCloseKey(k);
-			return false;
+			res.resize(size);
+			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size) == ERROR_SUCCESS;
 		}
-		res.resize(size);
-		const bool e = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size) == ERROR_SUCCESS;
 		RegCloseKey(k);
-		return e;
+		return r;
 	}
 
 	bool Read_DWORD(HKEY key, const char* path, const char* name, DWORD &res)
@@ -40,13 +35,13 @@ namespace reg
 		if(k == nullptr)
 			return false;
 		DWORD type, size;
-		if(!read_inf(k, name, type, size) || type != REG_DWORD)
+		bool r = false;
+		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		&& type == REG_DWORD)
 		{
-			RegCloseKey(k);
-			return false;
+			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
 		}
-		const bool e = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
 		RegCloseKey(k);
-		return e;
+		return r;
 	}
 };

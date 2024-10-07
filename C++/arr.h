@@ -12,12 +12,6 @@ void v_xor(T* a, const T* b, std::size_t sz)
 }
 
 template<typename T>
-void v_add(T* a, const T* b, std::size_t sz)
-{
-	std::transform(a, a + sz, b, a, [](T a, T b){return a + b;});
-}
-
-template<typename T>
 std::size_t cnt_b(const T* v, std::size_t sz, const T &c)
 {
 	std::size_t k = 0;

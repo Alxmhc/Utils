@@ -34,7 +34,10 @@ namespace crypt
 				qrnd(tmp[10], tmp[11],  tmp[8],  tmp[9]);
 				qrnd(tmp[15], tmp[12], tmp[13], tmp[14]);
 			}
-			v_add(tmp, k, 16);
+			for(uint_fast8_t i = 0; i < 16; i++)
+			{
+				tmp[i] += k[i];
+			}
 		}
 
 		class Encr : public byteProcBuf<64>
