@@ -1,12 +1,12 @@
 #ifndef H_FL_7Z
 #define H_FL_7Z
 
-#include "C:/TEST/Utils/C++/cont.h"
-#include "C:/TEST/Utils/C++/data/hash/crc32.h"
+#include "../data/hash/crc32.h"
+#include "../data/byte_reader.h"
 
 namespace fl_pr
 {
-	class F_7z : public cont_n
+	class F_7z
 	{
 	public:
 		enum ID //from description

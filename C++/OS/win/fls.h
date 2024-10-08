@@ -91,35 +91,56 @@ namespace fl_s
 		HANDLE hf;
 		WIN32_FIND_DATA_<S> ffd;
 		bool isFin;
-	public:
-		dInf(S pth)
+
+		void Close()
 		{
+			if(hf != nullptr)
+			{
+				FindClose(hf);
+				hf = nullptr;
+			}
+		}
+	public:
+		dInf() : hf(nullptr), isFin(true) {}
+
+		~dInf()
+		{
+			Close();
+		}
+
+		void Init(S pth)
+		{
+			Close();
 			pth.push_back('*');
 			hf = ffd.FirstFile(pth.c_str());
 			isFin = (hf == INVALID_HANDLE_VALUE);
 		}
-		~dInf()
-		{
-			FindClose(hf);
-		}
 
-		S nxt()
+		bool nxt(S &res)
 		{
-			S res;
 			if(isFin)
-				return res;
+				return false;
 			res = ffd.fd.cFileName;
 			if(ffd.fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
 				res.push_back('/');
 			}
 			isFin = !ffd.NextFile(hf);
-			return res;
+			return true;
 		}
 	};
 
 	class list
 	{
+		template<typename S>
+		static bool is_pass(const S &name)
+		{
+			if(name.length() == 2)
+				return name[0] == '.' && name[1] == '/';
+			if(name.length() == 3)
+				return name[0] == '.' && name[1] == '.' && name[2] == '/';
+			return false;
+		}
 	public:
 		template<typename S>
 		static bool del_a(const S &pth)
@@ -132,28 +153,27 @@ namespace fl_s
 		template<typename S, class T>
 		static void proc_dir(const S &pth, const T &st, int depth = -1)
 		{
-			dInf<S> cl(pth);
-			for(;;)
+			std::vector<std::pair<S, int>> pths;
+			pths.push_back(std::pair<S, int>(pth, depth));
+			dInf<S> g;
+			while(!pths.empty())
 			{
-				const auto name = cl.nxt();
-				if(name.empty())
-					break;
-				const auto p = pth + name;
-				if(name.back() == '/')
+				const auto p = std::move(pths.back());
+				pths.pop_back();
+				g.Init(p.first);
+
+				S name;
+				while(g.nxt(name))
 				{
-					if(name[0] == '.')
+					if(is_pass(name))
+						continue;
+					name = p.first + name;
+					if(name.back() == '/' && p.second != 0)
 					{
-						if(name[1] == '/')
-							continue;
-						if(name[1] == '.' && name[2] == '/')
-							continue;
+						pths.push_back(std::pair<S, int>(name, p.second - 1));
 					}
-					if(depth != 0)
-					{
-						proc_dir(p, st, depth - 1);
-					}
+					st(name);
 				}
-				st(p);
 			}
 		}
 	};

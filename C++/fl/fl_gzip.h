@@ -1,17 +1,21 @@
 #ifndef H_FL_GZIP
 #define H_FL_GZIP
 
-#include "../cont.h"
 #include "../data/compr/deflate.h"
 
 namespace fl_pr
 {
-	class F_gzip : public cont_1
+	class F_gzip
 	{
+		byteReader* br;
+
 		std::string fname;
 		uint_fast32_t fsize;
 		uint8_t crc32[4];
 		std::string comment;
+
+		std::size_t data_pos;
+		std::size_t data_size;
 	public:
 		bool read(byteReader* r)
 		{
@@ -72,7 +76,8 @@ namespace fl_pr
 
 		bool GetData(byteWriter &bw)
 		{
-			Init();
+			br->set_pos(data_pos);
+			br->set_rsize(data_size);
 			if( !compr::deflate::Decode(*br, bw) )
 				return false;
 			return true;

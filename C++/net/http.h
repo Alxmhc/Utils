@@ -33,10 +33,14 @@ namespace URL
 	}
 }
 
-class HTTP1 : public cont_1
+class HTTP1
 {
+	byteReader* br;
+
 	std::string fln;
 	std::map<std::string, std::string> hdr;
+
+	std::size_t data_pos;
 public:
 	bool read(byteReader* b)
 	{
@@ -47,7 +51,6 @@ public:
 		if(data_pos == br->get_size())
 			return false;
 		data_pos += 4;
-		data_size = br->get_size() - data_pos;
 
 		std::string h;
 		br->readN(h, data_pos - 2);
@@ -89,7 +92,7 @@ public:
 
 	bool GetData(std::vector<uint8_t> &data)
 	{
-		Init();
+		br->set_pos(data_pos);
 		br->readN(data, br->get_rsize());
 
 		auto k = hdr.find("transfer-encoding");

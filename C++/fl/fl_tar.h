@@ -5,7 +5,7 @@
 
 namespace fl_pr
 {
-	class F_tar : public cont_n
+	class F_tar
 	{
 		enum
 		{
@@ -13,14 +13,18 @@ namespace fl_pr
 			tDir  = 5
 		};
 
+		byteReader* br;
 		struct infF
 		{
 			std::string fname;
 			uint8_t type;
+
+			std::size_t data_pos;
+			std::size_t data_size;
 		};
 		std::vector<infF> infFs;
 
-		bool read_hdr(infF &inf, inf_1 &p)
+		bool read_hdr(infF &inf)
 		{
 			br->read_string(0, inf.fname);
 			if(inf.fname.length() == 0)
@@ -29,14 +33,14 @@ namespace fl_pr
 			uint8_t sz[12];
 			if( !br->readN(sz, 12) )
 				return false;
-			p.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
+			inf.data_size = strtoul(reinterpret_cast<const char*>(sz), nullptr, 8);
 			if( !br->skip(20) )
 				return false;
 			if( !br->get(inf.type) )
 				return false;
 			if( !br->skip(355) )
 				return false;
-			p.data_pos = br->get_pos();
+			inf.data_pos = br->get_pos();
 			return true;
 		}
 	public:
@@ -44,18 +48,15 @@ namespace fl_pr
 		{
 			br = r;
 
-			inf_n.clear();
 			infFs.clear();
 			for(;;)
 			{
 				infF inf;
-				inf_1 p;
-				if( !read_hdr(inf, p) )
+				if( !read_hdr(inf) )
 					break;
-				const std::size_t bsize = ((p.data_size + 0x1ff)>>9)<<9;
+				const std::size_t bsize = ((inf.data_size + 0x1ff)>>9)<<9;
 				if( !br->skip(bsize) )
 					break;
-				inf_n.push_back(p);
 				infFs.push_back(inf);
 			}
 			return true;
@@ -68,7 +69,9 @@ namespace fl_pr
 
 		bool GetData(std::size_t n, byteWriter &bw)
 		{
-			Init(n);
+			br->set_pos(infFs[n].data_pos);
+			br->set_rsize(infFs[n].data_size);
+
 			copy(*br, bw);
 			return true;
 		}

@@ -12,7 +12,7 @@
 
 namespace fl_pr
 {
-	class F_zip : public cont_n
+	class F_zip
 	{
 		enum
 		{
@@ -34,6 +34,7 @@ namespace fl_pr
 			cPPMd      =  98
 		};
 
+		byteReader* br;
 		struct infF
 		{
 			std::string fname;
@@ -43,6 +44,9 @@ namespace fl_pr
 
 			uint_fast16_t method;
 			uint_fast8_t  encryption;
+
+			std::size_t data_pos;
+			std::size_t data_size;
 		};
 		std::vector<infF> infFs;
 
@@ -186,7 +190,7 @@ namespace fl_pr
 			return true;
 		}
 
-		bool read_hdr(infF &inf, inf_1 &p)
+		bool read_hdr(infF &inf)
 		{
 			uint8_t h[26];
 			if(!br->readN(h, 26))
@@ -194,7 +198,7 @@ namespace fl_pr
 			inf.encryption = h[2] & 1;
 			inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
 			std::copy_n(h+10, 4, inf.crc32);
-			p.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
+			inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
 			inf.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
 
 			const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
@@ -218,7 +222,7 @@ namespace fl_pr
 				if( !br->skip(szex) )
 					return false;
 			}
-			p.data_pos = br->get_pos();
+			inf.data_pos = br->get_pos();
 			return true;
 		}
 	public:
@@ -226,7 +230,6 @@ namespace fl_pr
 		{
 			br = r;
 
-			inf_n.clear();
 			infFs.clear();
 			for(;;)
 			{
@@ -236,12 +239,10 @@ namespace fl_pr
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
 					break;
 				infF inf;
-				inf_1 p;
-				if( !read_hdr(inf, p) )
+				if( !read_hdr(inf) )
 					break;
-				if( !br->skip(p.data_size) )
+				if( !br->skip(inf.data_size) )
 					break;
-				inf_n.push_back(p);
 				infFs.push_back(inf);
 			}
 			return true;
@@ -261,7 +262,10 @@ namespace fl_pr
 		{
 			if(infFs[n].fsize == 0)
 				return true;
-			Init(n);
+
+			br->set_pos(infFs[n].data_pos);
+			br->set_rsize(infFs[n].data_size);
+
 			if(infFs[n].encryption == eNO)
 			{
 				if( !Decompress(infFs[n], *br, bw) )
