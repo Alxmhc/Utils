@@ -60,13 +60,12 @@ public:
 	}
 	bool skip(std::size_t n)
 	{
+		if(n == 0)
+			return true;
 		if (pos + n > csize)
 			return false;
-		if(n != 0)
-		{
-			fst.seekg(n, std::ios_base::cur);
-			pos += n;
-		}
+		fst.seekg(n, std::ios_base::cur);
+		pos += n;
 		return true;
 	}
 };

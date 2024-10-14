@@ -60,9 +60,7 @@ namespace fl_pr
 		}
 		bool decryptZIP(std::vector<uint8_t> &data) const
 		{
-			if(psw.size() == 0)
-				return false;
-			if(data.size() <= 12)
+			if(br->get_rsize() < 12)
 				return false;
 
 			uint32_t crcTbl[256];
@@ -74,6 +72,7 @@ namespace fl_pr
 				keyUpd(key, psw[i], crcTbl);
 			}
 
+			br->readN(data, br->get_rsize());
 			for(std::size_t i = 0; i < data.size(); i++)
 			{
 				uint32_t tmp = key[2] | 2;
@@ -103,27 +102,29 @@ namespace fl_pr
 		};
 		bool decryptAES(uint_fast8_t ssz, std::vector<uint8_t> &data) const
 		{
-			if(psw.size() == 0)
-				return false;
-			if(data.size() <= static_cast<uint_fast8_t>(ssz + 12))
+			if(br->get_rsize() < static_cast<uint_fast8_t>(ssz + 12))
 				return false;
 
-			const PBKDF2<PBKDF2_HMAC<hash::SHA1>> kg(1000);
 			std::vector<uint8_t> key(ssz*4 + 2);
-			kg.gen(psw.data(), psw.size(), data.data(), ssz, key.data(), key.size());
-			if(key[ssz*4] != data[ssz] || key[ssz*4+1] != data[ssz+1])
-				return false;
-
-			uint8_t hsh[10];
-			std::copy_n(data.end() - 10, 10, hsh);
-			data = std::vector<uint8_t>(data.begin() + ssz + 2, data.end() - 10);
-
-			hash::HMAC<hash::SHA1> h(key.data() + ssz*2, ssz*2);
-			h.Update(data.data(), data.size());
-			uint8_t hs[hash::SHA1::hash_size];
-			h.Final(hs);
-			if(std::memcmp(hsh, hs, 10) != 0)
-				return false;
+			{
+				std::vector<uint8_t> s(ssz + 2);
+				br->readN(s.data(), s.size());
+				const PBKDF2<PBKDF2_HMAC<hash::SHA1>> kg(1000);
+				kg.gen(psw.data(), psw.size(), s.data(), ssz, key.data(), key.size());
+				if(key[ssz*4] != s[ssz] || key[ssz*4+1] != s[ssz+1])
+					return false;
+			}
+			br->readN(data, br->get_rsize() - 10);
+			{
+				uint8_t hsh[10];
+				br->readN(hsh, 10);
+				hash::HMAC<hash::SHA1> h(key.data() + ssz*2, ssz*2);
+				h.Update(data.data(), data.size());
+				uint8_t hs[hash::SHA1::hash_size];
+				h.Final(hs);
+				if(std::memcmp(hsh, hs, 10) != 0)
+					return false;
+			}
 
 			const uint8_t iv[] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 			crypt::AES::Enc de(key.data(), ssz*2);
@@ -136,8 +137,6 @@ namespace fl_pr
 		{
 			switch(inf.encryption)
 			{
-			case eNO:
-				break;
 			case eZIP:
 				if( !decryptZIP(data) )
 					return false;
@@ -274,7 +273,6 @@ namespace fl_pr
 			}
 
 			std::vector<uint8_t> data;
-			br->readN(data, br->get_rsize());
 			if( !Decrypt(infFs[n], data) )
 				return false;
 
