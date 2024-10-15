@@ -62,6 +62,11 @@ namespace fl_pr
 			return true;
 		}
 
+		std::size_t size() const
+		{
+			return infFs.size();
+		}
+
 		std::string name(std::size_t n) const
 		{
 			return infFs[n].fname;

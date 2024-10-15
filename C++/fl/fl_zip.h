@@ -191,20 +191,21 @@ namespace fl_pr
 
 		bool read_hdr(infF &inf)
 		{
-			uint8_t h[26];
-			if(!br->readN(h, 26))
-				return false;
-			inf.encryption = h[2] & 1;
-			inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
-			std::copy_n(h+10, 4, inf.crc32);
-			inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
-			inf.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
-
-			const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
-			if( !br->readN(inf.fname, szfn) )
-				return false;
-
-			auto szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
+			uint_fast16_t szex;
+			{
+				uint8_t h[26];
+				if(!br->readN(h, 26))
+					return false;
+				inf.encryption = h[2] & 1;
+				inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
+				std::copy_n(h+10, 4, inf.crc32);
+				inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
+				inf.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
+				szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
+				const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
+				if( !br->readN(inf.fname, szfn) )
+					return false;
+			}
 			if(szex != 0)
 			{
 				if(inf.method == 99)
@@ -245,6 +246,11 @@ namespace fl_pr
 				infFs.push_back(inf);
 			}
 			return true;
+		}
+
+		std::size_t size() const
+		{
+			return infFs.size();
 		}
 
 		std::string name(std::size_t n) const

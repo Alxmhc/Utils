@@ -1,8 +1,6 @@
 #ifndef H_BZIP2
 #define H_BZIP2
 
-#include <memory>
-
 #include "../convert/conv.h"
 #include "../htree.h"
 #include "../bin.h"
