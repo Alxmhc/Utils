@@ -70,26 +70,36 @@ _arr = {
 			v[i] *= k
 		}
 	},
-
-	m_chk(v,m){
-		for(let i=0, n=v.length; i<n; ++i){
-			if(m[i] !== null && v[i] != m[i])
-				return false
-		}
-		return true
-	},
-	m_all(v,m){
-		for(let i=0, n=v.length; i<n; ++i){
-			if(v[i] != m[i]){
-				v[i] = null
-			}
-		}
-	},
-	m_or(v,m){
-		for(let i=0, n=v.length; i<n; ++i){
-			if(v[i] == null){
-				v[i] = m[i]
-			}
-		}
+	swap(a, i, j){
+		const t = a[i]
+		a[i] = a[j]
+		a[j] = t
 	}
+}
+
+function nxt_perm(a){
+	if(a.length < 2)
+		return false
+	const li = a.length-1
+	let i = li
+	while(i!=0){
+		if(a[i] > a[i-1])
+			break
+		i--;
+	}
+	if(i == 0)
+		return false
+
+	for(let p=0,k=(li+1-i)>>1; p<k; p++){
+		_arr.swap(a, i+p, li-p)
+	}
+
+	let j = i
+	i--
+	while(a[i]>=a[j]){
+		j++
+	}
+	_arr.swap(a, i, j)
+
+	return true
 }
