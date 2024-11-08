@@ -70,18 +70,23 @@ _arr = {
 			v[i] *= k
 		}
 	},
+
 	swap(a, i, j){
 		const t = a[i]
 		a[i] = a[j]
 		a[j] = t
+	},
+	part_reverse(v,a,b=v.length-1){
+		for(let i=0,k=(b-a+1)>>1;i<k;i++){
+			this.swap(v,a+i,b-i)
+		}
 	}
 }
 
 function nxt_perm(a){
 	if(a.length < 2)
 		return false
-	const li = a.length-1
-	let i = li
+	let i = a.length-1
 	while(i!=0){
 		if(a[i] > a[i-1])
 			break
@@ -89,16 +94,10 @@ function nxt_perm(a){
 	}
 	if(i == 0)
 		return false
+	_arr.part_reverse(a,i)
 
-	for(let p=0,k=(li+1-i)>>1; p<k; p++){
-		_arr.swap(a, i+p, li-p)
-	}
-
-	let j = i
-	i--
-	while(a[i]>=a[j]){
-		j++
-	}
+	const j = i-1
+	for(const e=a[j];a[i]<=e;i++){}
 	_arr.swap(a, i, j)
 
 	return true
