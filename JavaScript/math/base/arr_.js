@@ -20,7 +20,7 @@ _arr = {
 	count: function(v,e){
 		let k = 0
 		for(let i=0, n=v.length; i<n; ++i){
-			if(v[i] == e){
+			if(v[i] === e){
 				k++
 			}
 		}
@@ -43,7 +43,7 @@ _arr = {
 		if(v2.length != n)
 			return false
 		while(n--){
-			if(v1[n] != v2[n])
+			if(v1[n] !== v2[n])
 				return false
 		}
 		return true
@@ -68,6 +68,14 @@ _arr = {
 	s_mul_k: function(v, k){
 		for(let i=0, n=v.length; i<n; ++i){
 			v[i] *= k
+		}
+	},
+
+	m_and(v, m){
+		for(let i=0, n=v.length; i<n; ++i){
+			if(v[i] !== m[i]){
+				v[i] = null
+			}
 		}
 	},
 

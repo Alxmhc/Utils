@@ -223,11 +223,11 @@ namespace compr
 			return bconv<1, 4, endianness::BIG_ENDIAN>::pack(hash);
 		}
 	public:
-		static bool Decode(byteReader &b, byteWriter &bw)
+		static bool Decode(byteReader &br, byteWriter &bw)
 		{
 			{
 				uint8_t hdr[4];
-				if( !b.readN(hdr, 4) )
+				if( !br.readN(hdr, 4) )
 					return false;
 				if(std::memcmp(hdr, "\x42\x5a\x68", 3) != 0)
 					return false;
@@ -235,37 +235,37 @@ namespace compr
 				if(bsz < '1' || bsz > '9')
 					return false;
 			}
-			bitReaderR br(b);
+			bitReaderR brd(br);
 
 			uint_fast32_t CRC = 0;
 			for(;;)
 			{
 				uint_fast64_t hdr;
-				if( !br.readBE(48, hdr) )
+				if( !brd.readBE(48, hdr) )
 					return false;
 				if(hdr == 0x314159265359)
 				{
 					uint_fast32_t bCRC;
-					if( !br.readBE(32, bCRC) )
+					if( !brd.readBE(32, bCRC) )
 						return false;
 					{
 						uint_fast8_t rnd;
-						if( !br.get(rnd) )
+						if( !brd.get(rnd) )
 							return false;
 						if(rnd == 1)
 							return false;
 					}
 
 					uint_fast32_t optr;
-					if( !br.readBE(24, optr) )
+					if( !brd.readBE(24, optr) )
 						return false;
 
-					auto smp = read_map(br);
+					auto smp = read_map(brd);
 					if(smp.size() == 0)
 						return false;
 
 					std::vector<uint8_t> res;
-					if( !unpack(br, static_cast<uint_fast16_t>(smp.size() + 2), res) )
+					if( !unpack(brd, static_cast<uint_fast16_t>(smp.size() + 2), res) )
 						return false;
 
 					convert::MTF::Decode(res.data(), res.size(), smp.data());
@@ -280,7 +280,7 @@ namespace compr
 				else if(hdr == 0x177245385090)
 				{
 					uint_fast32_t sCRC;
-					if( !br.readBE(32, sCRC) )
+					if( !brd.readBE(32, sCRC) )
 						return false;
 					if(sCRC != CRC)
 						return false;
