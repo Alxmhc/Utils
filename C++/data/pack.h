@@ -36,68 +36,24 @@ template<> struct UINT_<2>
 {
 	typedef uint16_t uint;
 	typedef uint_fast16_t uint_f;
-
-	static UINT_<1>::uint getL(uint c)
-	{
-		return c & 0xff;
-	}
-	static UINT_<1>::uint getH(uint c)
-	{
-		return (c >> 8) & 0xff;
-	}
-	static uint from(UINT_<1>::uint l, UINT_<1>::uint h)
-	{
-		uint r = h;
-		return (r << 8) | l;
-	}
 };
 template<> struct UINT_<4>
 {
 	typedef uint32_t uint;
 	typedef uint_fast32_t uint_f;
-
-	static UINT_<2>::uint getL(uint c)
-	{
-		return c & 0xffff;
-	}
-	static UINT_<2>::uint getH(uint c)
-	{
-		return (c >> 16) & 0xffff;
-	}
-	static uint from(UINT_<2>::uint l, UINT_<2>::uint h)
-	{
-		uint r = h;
-		return (r << 16) | l;
-	}
 };
 template<> struct UINT_<8>
 {
 	typedef uint64_t uint;
 	typedef uint_fast64_t uint_f;
-
-	static UINT_<4>::uint getL(uint c)
-	{
-		return c & 0xffffffff;
-	}
-	static UINT_<4>::uint getH(uint c)
-	{
-		return (c >> 32) & 0xffffffff;
-	}
-	static uint from(UINT_<4>::uint l, UINT_<4>::uint h)
-	{
-		uint r = h;
-		return (r << 32) | l;
-	}
 };
 template<> struct UINT_<16>
 {
 	class uint
 	{
-		static const uint_fast8_t hsz = 64;
-		typedef uint64_t htype;
-		htype l, h;
+		UINT_<8>::uint l, h;
 	public:
-		explicit uint(htype ln = 0, htype hn = 0) : l(ln), h(hn) {}
+		explicit uint(UINT_<8>::uint ln = 0, UINT_<8>::uint hn = 0) : l(ln), h(hn) {}
 
 		const uint& operator=(const uint &c)
 		{
@@ -105,23 +61,23 @@ template<> struct UINT_<16>
 			h = c.h;
 			return *this;
 		}
-		const uint& operator=(htype c)
+		const uint& operator=(UINT_<8>::uint c)
 		{
 			l = c;
 			h = 0;
 			return *this;
 		}
 
-		htype getL() const
+		UINT_<8>::uint getL() const
 		{
 			return l;
 		}
-		htype getH() const
+		UINT_<8>::uint getH() const
 		{
 			return h;
 		}
 
-		const uint& operator+=(htype c)
+		const uint& operator+=(UINT_<8>::uint c)
 		{
 			l += c;
 			if(l < c)
@@ -145,28 +101,28 @@ template<> struct UINT_<16>
 		}
 		const uint& operator>>=(uint_fast8_t n)
 		{
-			if(n < hsz)
+			if(n < 64)
 			{
-				l = (l>>n)|(h<<(hsz-n));
+				l = (l>>n)|(h<<(64-n));
 				h >>= n;
 			}
 			else
 			{
-				l = n < 2*hsz ? h>>(n-hsz) : 0;
+				l = n < 128 ? h>>(n-64) : 0;
 				h = 0;
 			}
 			return *this;
 		}
 		const uint& operator<<=(uint_fast8_t n)
 		{
-			if(n < hsz)
+			if(n < 64)
 			{
-				h = (h<<n)|(l>>(hsz-n));
+				h = (h<<n)|(l>>(64-n));
 				l <<= n;
 			}
 			else
 			{
-				h = n < 2*hsz ? l<<(n-hsz) : 0;
+				h = n < 128 ? l<<(n-64) : 0;
 				l = 0;
 			}
 			return *this;
@@ -194,19 +150,41 @@ template<> struct UINT_<16>
 			return r <<= n;
 		}
 	};
-	static UINT_<8>::uint getL(uint c)
-	{
-		return c.getL();
-	}
-	static UINT_<8>::uint getH(uint c)
-	{
-		return c.getH();
-	}
-	static uint from(UINT_<8>::uint l, UINT_<8>::uint h)
-	{
-		return uint(l, h);
-	}
 };
+
+template<unsigned char sz>
+typename UINT_<sz>::uint uint_from(typename UINT_<sz/2>::uint l, typename UINT_<sz/2>::uint h)
+{
+	typename UINT_<sz>::uint res = h;
+	return (res<<(4*sz)) | l;
+}
+template<>
+UINT_<16>::uint uint_from<16>(UINT_<8>::uint l, UINT_<8>::uint h)
+{
+	return UINT_<16>::uint(l, h);
+}
+
+template<unsigned char sz>
+typename UINT_<sz/2>::uint uint_getL(typename UINT_<sz>::uint c)
+{
+	return static_cast<typename UINT_<sz/2>::uint>(c);
+}
+template<>
+UINT_<8>::uint uint_getL<16>(UINT_<16>::uint c)
+{
+	return c.getL();
+}
+
+template<unsigned char sz>
+typename UINT_<sz/2>::uint uint_getH(typename UINT_<sz>::uint c)
+{
+	return static_cast<typename UINT_<sz/2>::uint>(c>>(4*sz));
+}
+template<>
+UINT_<8>::uint uint_getH<16>(UINT_<16>::uint c)
+{
+	return c.getH();
+}
 
 template <unsigned char sz, unsigned char k, char E>
 struct bconv{};
@@ -214,32 +192,26 @@ struct bconv{};
 template <unsigned char sz, unsigned char k>
 struct bconv<sz, k, endianness::LITTLE_ENDIAN>
 {
-	template<typename m>
-	static typename UINT_<k*sz>::uint pack(const m* a)
+	static typename UINT_<k*sz>::uint pack(const typename UINT_<sz>::uint* a)
 	{
 		const auto l = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a);
 		const auto h = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a + k/2);
-		return UINT_<k*sz>::from(l, h);
+		return uint_from<k*sz>(l, h);
 	}
-	template<typename m>
-	static void unpack(typename UINT_<k*sz>::uint c, m* a)
+	static void unpack(typename UINT_<k*sz>::uint c, typename UINT_<sz>::uint* a)
 	{
-		const auto l = UINT_<k*sz>::getL(c);
-		const auto h = UINT_<k*sz>::getH(c);
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(l, a);
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(h, a + k/2);
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(uint_getL<k*sz>(c), a);
+		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(uint_getH<k*sz>(c), a + k/2);
 	}
 };
 template<unsigned char sz>
 struct bconv<sz, 1, endianness::LITTLE_ENDIAN>
 {
-	template<typename m>
-	static typename UINT_<sz>::uint pack(const m* a)
+	static typename UINT_<sz>::uint pack(const typename UINT_<sz>::uint* a)
 	{
 		return *a;
 	}
-	template<typename m>
-	static void unpack(typename UINT_<sz>::uint c, m* a)
+	static void unpack(typename UINT_<sz>::uint c, typename UINT_<sz>::uint* a)
 	{
 		*a = c;
 	}
@@ -248,32 +220,26 @@ struct bconv<sz, 1, endianness::LITTLE_ENDIAN>
 template<unsigned char sz, unsigned char k>
 struct bconv<sz, k, endianness::BIG_ENDIAN>
 {
-	template<typename m>
-	static typename UINT_<k*sz>::uint pack(const m* a)
+	static typename UINT_<k*sz>::uint pack(const typename UINT_<sz>::uint* a)
 	{
 		const auto l = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a + k/2);
 		const auto h = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a);
-		return UINT_<k*sz>::from(l, h);
+		return uint_from<k*sz>(l, h);
 	}
-	template<typename m>
-	static void unpack(typename UINT_<k*sz>::uint c, m* a)
+	static void unpack(typename UINT_<k*sz>::uint c, typename UINT_<sz>::uint* a)
 	{
-		const auto l = UINT_<k*sz>::getL(c);
-		const auto h = UINT_<k*sz>::getH(c);
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(l, a + k/2);
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(h, a);
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(uint_getL<k*sz>(c), a + k/2);
+		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(uint_getH<k*sz>(c), a);
 	}
 };
 template<unsigned char sz>
 struct bconv<sz, 1, endianness::BIG_ENDIAN>
 {
-	template<typename m>
-	static typename UINT_<sz>::uint pack(const m* a)
+	static typename UINT_<sz>::uint pack(const typename UINT_<sz>::uint* a)
 	{
 		return *a;
 	}
-	template<typename m>
-	static void unpack(typename UINT_<sz>::uint c, m* a)
+	static void unpack(typename UINT_<sz>::uint c, typename UINT_<sz>::uint* a)
 	{
 		*a = c;
 	}

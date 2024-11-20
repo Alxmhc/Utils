@@ -34,7 +34,8 @@ namespace crypt
 				W[2] = SL(W[1] ^ CK[(n+1)%3]);
 				A(W[2]);
 				W[2] ^= W[0];
-				W[3] = FO(W[2] ^ CK[(n+2)%3]) ^ W[1];
+				W[3] = FO(W[2] ^ CK[(n+2)%3]);
+				W[3] ^= W[1];
 			}
 			key[0]  = W[0] ^ rotr(W[1], 19);
 			key[1]  = W[1] ^ rotr(W[2], 19);

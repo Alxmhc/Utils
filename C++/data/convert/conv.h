@@ -39,7 +39,7 @@ namespace convert
 			}
 		}
 
-		void Decode_t(uint8_t* res, std::size_t sz, uint_fast16_t tsz)
+		void Decode_t(uint8_t* res, std::size_t sz, uint_fast8_t tsz)
 		{
 			std::vector<uint8_t> tmp(tsz);
 			std::iota(tmp.begin(), tmp.end(), 0);

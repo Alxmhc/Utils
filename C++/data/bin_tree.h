@@ -81,11 +81,10 @@ public:
 
 	bool get_val(T &res) const
 	{
-		if(fin)
-		{
-			res = val;
-		}
-		return fin;
+		if(!fin)
+			return false;
+		res = val;
+		return true;
 	}
 };
 
