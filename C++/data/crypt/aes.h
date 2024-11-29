@@ -120,8 +120,7 @@ namespace crypt
 			{
 				for(uint_fast8_t i = 0; i < 16; i += 4)
 				{
-					uint8_t d[4];
-					std::copy_n(r + i, 4, d);
+					const uint8_t d[4] = {r[i], r[i+1], r[i+2], r[i+3]};
 					r[i]   = Mule[d[0]] ^ Mulb[d[1]] ^ Muld[d[2]] ^ Mul9[d[3]];
 					r[i+1] = Mul9[d[0]] ^ Mule[d[1]] ^ Mulb[d[2]] ^ Muld[d[3]];
 					r[i+2] = Muld[d[0]] ^ Mul9[d[1]] ^ Mule[d[2]] ^ Mulb[d[3]];
