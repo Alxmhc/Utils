@@ -9,7 +9,7 @@ namespace compr
 {
 	class deflate
 	{
-		static const std::size_t wsz = 32768;
+		static const std::size_t d_sz = 65536;
 
 		static bool fixedH_code(bitReaderL &brd, uint_fast16_t &fc)
 		{
@@ -50,29 +50,31 @@ namespace compr
 
 		static bool get_size(const uint_fast8_t c, bitReaderL &brd, uint_fast16_t &sz)
 		{
-			if(c >= 30)
+			if(c > 29)
 				return false;
-			static const uint_fast16_t lengthT[30] = {0,3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258};
-			static const uint_fast8_t length_exT[30] = {0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0};
+			static const uint_fast16_t lengthT[] = {0,3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258};
+			sz = lengthT[c];
 
+			static const uint_fast8_t length_exT[] = {0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0};
 			uint_fast8_t exb;
 			if( !brd.readBE(length_exT[c], exb) )
 				return false;
-			sz = lengthT[c] + exb;
+			sz += exb;
 			return true;
 		}
 
 		static bool get_dist(const uint_fast8_t c, bitReaderL &brd, uint_fast16_t &dist)
 		{
-			if(c >= 30)
+			if(c > 31)
 				return false;
-			static const uint_fast16_t distT[30] = {1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577};
-			static const uint_fast8_t dist_exT[30] = {0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13};
+			static const uint_fast16_t distT[] = {1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,32769,49153};
+			dist = distT[c];
 
+			static const uint_fast8_t dist_exT[] = {0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,14};
 			uint_fast16_t exb;
 			if( !brd.readBE(dist_exT[c], exb) )
 				return false;
-			dist = distT[c] + exb;
+			dist += exb;
 			return true;
 		}
 
@@ -254,10 +256,10 @@ namespace compr
 				}
 				if(isFin)
 					break;
-				if(out.size() > wsz)
+				if(out.size() > d_sz)
 				{
-					bw.writeN(out.data(), out.size() - wsz);
-					out.erase(out.begin(), out.end() - wsz);
+					bw.writeN(out.data(), out.size() - d_sz);
+					out.erase(out.begin(), out.end() - d_sz);
 				}
 			}
 			bw.writeN(out.data(), out.size());
