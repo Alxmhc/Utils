@@ -33,13 +33,49 @@ namespace URL
 	}
 }
 
+struct http_header
+{
+	bool is_out;
+	std::string f;
+	std::string s;
+
+	std::map<std::string, std::string> m;
+
+	void clear()
+	{
+		f.clear();
+		s.clear();
+		m.clear();
+	}
+
+	void AddField(const std::string &name, const std::string &val)
+	{
+		if(m.find(name) == m.end())
+		{
+			m[name] = val;
+		}
+		else
+		{
+			m[name] += "; ";
+			m[name] += val;
+		}
+	}
+
+	bool GetField(const std::string &name, std::string &val) const
+	{
+		const auto h = m.find(name);
+		if(h == m.cend())
+			return false;
+		val = h->second;
+		return true;
+	}
+};
+
 class HTTP1
 {
 	byteReader* br;
 
-	std::string fln;
-	std::map<std::string, std::string> hdr;
-
+	http_header hdr;
 	std::size_t data_pos;
 public:
 	bool read(byteReader* b)
@@ -60,7 +96,23 @@ public:
 		const char* rn = "\r\n";
 		{
 			const auto p = std::search(sb, se, rn, rn + 2);
-			fln.assign(sb, p);
+			hdr.is_out = std::memcmp(sb, "HTTP", 4) != 0;
+			const auto p1 = std::find(sb, p, ' ');
+			if(p1 == p)
+				return false;
+			const auto p2 = std::find(p1 + 1, p, ' ');
+			if(p2 == p)
+				return false;
+			if(hdr.is_out)
+			{
+				hdr.f.assign(sb, p1);
+				hdr.s.assign(p1+1, p2);
+			}
+			else
+			{
+				hdr.f.assign(p1+1, p2);
+				hdr.s.assign(p2+1, p);
+			}
 			sb = p + 2;
 		}
 
@@ -70,21 +122,10 @@ public:
 			const auto p = std::search(sb, se, rn, rn + 2);
 			const auto f = std::search(sb, p, d, d + 2);
 			if(f == p)
-			{
-				hdr.clear();
 				return false;
-			}
 			std::string k(sb, f);
 			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			if(hdr.find(k) == hdr.end())
-			{
-				hdr[k] = std::string(f + 2, p);
-			}
-			else
-			{
-				hdr[k] += "; ";
-				hdr[k] += std::string(f + 2, p);
-			}
+			hdr.AddField(k, std::string(f + 2, p));
 			sb = p + 2;
 		}
 		return true;
@@ -95,22 +136,18 @@ public:
 		br->set_pos(data_pos);
 		br->readN(data, br->get_rsize());
 
-		auto k = hdr.find("transfer-encoding");
-		if(k != hdr.end())
+		std::string fld;
+		if(hdr.GetField("transfer-encoding", fld)
+		&& fld == "chunked")
 		{
-			if(k->second == "chunked")
-			{
-				std::size_t sz = data.size();
-				if( !decode::unchunk(data.data(), sz) )
-					return false;
-				data.resize(sz);
-			}
+			std::size_t sz = data.size();
+			if( !decode::unchunk(data.data(), sz) )
+				return false;
+			data.resize(sz);
 		}
-		k = hdr.find("content-encoding");
-		if(k != hdr.end())
+		if(hdr.GetField("content-encoding", fld))
 		{
-			const auto type = k->second;
-			if(type == "gzip")
+			if(fld == "gzip")
 			{
 				br_array br(data.data(), data.size());
 				fl_pr::F_gzip gz;
@@ -122,7 +159,7 @@ public:
 					return false;
 				data = std::move(tmp);
 			}
-			else if(type == "deflate")
+			else if(fld == "deflate")
 			{
 				br_array br(data.data(), data.size());
 				std::vector<uint8_t> tmp;
@@ -133,14 +170,6 @@ public:
 			}
 		}
 		return true;
-	}
-
-	std::string GetField1(const std::string &name) const
-	{
-		const auto h = hdr.find(name);
-		if(h == hdr.cend())
-			return "";
-		return h->second;
 	}
 };
 
@@ -166,8 +195,7 @@ static const hTree<unsigned int> http2_htr(http2_hcode, 257);
 
 class HTTP2
 {
-	template<typename T>
-	static bool int_decode(br_array &br, T &res, uint_fast8_t nBit)
+	static bool int_decode(br_array &br, uint_fast32_t &res, uint_fast8_t nBit)
 	{
 		{
 			const auto p = (1 << nBit) - 1;
@@ -175,12 +203,12 @@ class HTTP2
 			if(res != p)
 				return true;
 		}
-		for(uint_fast8_t i = 0; i < sizeof(T); i++)
+		for(uint_fast8_t i = 0; i < 4; i++)
 		{
 			uint8_t t;
 			if( !br.get(t) )
 				return false;
-			res += static_cast<T>(t & 0x7f) << (7*i);
+			res += static_cast<uint_fast32_t>(t & 0x7f) << (7*i);
 			if((t & 0x80) == 0)
 				return true;
 		}
@@ -194,7 +222,7 @@ class HTTP2
 			return false;
 		const bool is_huff = (t & 0x80) != 0;
 
-		uint_fast16_t size = t;
+		uint_fast32_t size = t;
 		if( !int_decode(br, size, 7) )
 			return false;
 
@@ -225,23 +253,53 @@ class HTTP2
 	typedef std::pair<std::string, std::string> field;
 	static const unsigned char stat_tbl_sz = 61;
 	static const field stat_tbl[stat_tbl_sz];
-	std::size_t dyn_tbl_msz;
-	std::deque<field> dyn_tbl;
 
-	static field tbl_get(unsigned int num, const std::deque<field> &d_fld)
+	class h2_tbl
 	{
-		if(num == 0)
-			return field("", "");
-		num--;
-		if(num < stat_tbl_sz)
-			return stat_tbl[num];
-		num -= stat_tbl_sz;
-		if(num >= d_fld.size())
-			return field("", "");
-		return d_fld[num];
-	}
+		std::deque<field> tbl;
+		std::size_t msz;
+	public:
+		h2_tbl() : msz(0) {}
 
-	bool header_decode(br_array &br, std::vector<field> &hdr)
+		void set_msize(std::size_t nsz)
+		{
+			msz = nsz;
+			if(tbl.size() > msz)
+			{
+				tbl.resize(msz);
+			}
+		}
+
+		void addFld(const std::string &name, const std::string &val)
+		{
+			tbl.emplace_front(field(name, val));
+			if(tbl.size() > msz)
+			{
+				tbl.resize(msz);
+			}
+		}
+
+		bool get(unsigned int num, std::string &name, std::string &val)
+		{
+			if(num == 0)
+				return false;
+			num--;
+			if(num < stat_tbl_sz)
+			{
+				name = stat_tbl[num].first;
+				val = stat_tbl[num].second;
+				return true;
+			}
+			num -= stat_tbl_sz;
+			if(num >= tbl.size())
+				return false;
+			name = tbl[num].first;
+			val = tbl[num].second;
+			return true;
+		}
+	};
+
+	static bool header_decode(br_array &br, http_header &hdr, h2_tbl &dtbl)
 	{
 		for(;;)
 		{
@@ -250,12 +308,13 @@ class HTTP2
 				break;
 			uint_fast32_t id = t;
 
-			field fld;
+			std::string name, val;
 			if((id & 0x80) != 0)
 			{
 				if( !int_decode(br, id, 7) )
 					return false;
-				fld = tbl_get(id, dyn_tbl);
+				if(!dtbl.get(id, name, val))
+					return false;
 			}
 			else if((id & 0x40) != 0)
 			{
@@ -263,26 +322,23 @@ class HTTP2
 				{
 					if( !int_decode(br, id, 6) )
 						return false;
-					fld = tbl_get(id, dyn_tbl);
+					if(!dtbl.get(id, name, val))
+						return false;
 				}
 				else
 				{
-					if( !string_decode(br, fld.first) )
+					if( !string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, fld.second) )
+				if( !string_decode(br, val) )
 					return false;
-				dyn_tbl.emplace_front(fld);
-				if(dyn_tbl.size() > dyn_tbl_msz)
-				{
-					dyn_tbl.resize(dyn_tbl_msz);
-				}
+				dtbl.addFld(name, val);
 			}
 			else if((id & 0x20) != 0)
 			{
 				if( !int_decode(br, id, 5) )
 					return false;
-				dyn_tbl_msz = id < 4096 ? id : 4096;
+				dtbl.set_msize(id);
 				continue;
 			}
 			else if((id & 0x10) != 0)
@@ -291,14 +347,15 @@ class HTTP2
 				{
 					if( !int_decode(br, id, 4) )
 						return false;
-					fld = tbl_get(id, dyn_tbl);
+					if(!dtbl.get(id, name, val))
+						return false;
 				}
 				else
 				{
-					if( !string_decode(br, fld.first) )
+					if( !string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, fld.second) )
+				if( !string_decode(br, val) )
 					return false;
 			}
 			else
@@ -307,19 +364,43 @@ class HTTP2
 				{
 					if( !int_decode(br, id, 4) )
 						return false;
-					fld = tbl_get(id, dyn_tbl);
+					if(!dtbl.get(id, name, val))
+						return false;
 				}
 				else
 				{
-					if( !string_decode(br, fld.first) )
+					if( !string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, fld.second) )
+				if( !string_decode(br, val) )
 					return false;
 			}
-			if(fld.first.empty())
+			if(name.empty())
 				return false;
-			hdr.push_back(fld);
+			if(name[0] == ':')
+			{
+				if(name == ":authority")
+				{
+					hdr.AddField("host", val);
+				}
+				else if(name == ":method")
+				{
+					hdr.is_out = true;
+					hdr.f = val;
+				}
+				else if(name == ":path")
+				{
+					hdr.is_out = true;
+					hdr.s = val;
+				}
+				else if(name == ":status")
+				{
+					hdr.is_out = false;
+					hdr.f = val;
+				}
+				continue;
+			}
+			hdr.AddField(name, val);
 		}
 		return true;
 	}
@@ -334,18 +415,9 @@ class HTTP2
 		br.set_size(br.get_size() - pad);
 		return true;
 	}
+
+	h2_tbl tbl;
 public:
-	struct pack
-	{
-		std::vector<field> hdr;
-		std::vector<uint8_t> bd;
-		bool h_fin, d_fin;
-
-		pack() : h_fin(false), d_fin(false) {}
-	};
-
-	HTTP2() : dyn_tbl_msz(4096) {}
-
 	static bool Is_http2(const uint8_t* data, std::size_t size)
 	{
 		if(size < hdr_size)
@@ -395,12 +467,35 @@ public:
 		}
 	};
 
+	struct pack
+	{
+		http_header hdr;
+		std::vector<uint8_t> bd;
+		bool h_fin, d_fin;
+
+		pack() : h_fin(false), d_fin(false) {}
+	};
+
 	bool frame_decode(const frame &fr, pack* p)
 	{
 		br_array br(fr.buf.data(), fr.buf.size());
 		br.skip(frame::hdr_size);
 		switch(fr.type)
 		{
+		case 4:
+		{
+			uint8_t t;
+			if(!br.get(t) || t != 0)
+				break;
+			if(!br.get(t) || t != 1)
+				break;
+			uint32_t nsz;
+			if(br.readC<4, endianness::BIG_ENDIAN>(nsz))
+			{
+				tbl.set_msize(nsz);
+			}
+			break;
+		}
 		case 0:
 		{
 			if((fr.fl & 0x08) != 0)
@@ -424,14 +519,14 @@ public:
 				if( !br.skip(5) )
 					return false;
 			}
-			if( !header_decode(br, p->hdr) )
+			if( !header_decode(br, p->hdr, tbl) )
 				return false;
 			p->h_fin = (fr.fl & 0x04) != 0;
 			break;
 		}
 		case 9:
 		{
-			if( !header_decode(br, p->hdr) )
+			if( !header_decode(br, p->hdr, tbl) )
 				return false;
 			p->h_fin = (fr.fl & 0x04) != 0;
 			break;
