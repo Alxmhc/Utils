@@ -78,45 +78,41 @@ class HTTP1
 	http_header hdr;
 	std::size_t data_pos;
 public:
-	bool read(byteReader* b)
+	static bool parse_hdr(const char* sb, std::size_t sz, http_header &res)
 	{
-		br = b;
-		hdr.clear();
+		res.clear();
+		const char* se = sb + sz;
 
-		data_pos = br->find(bytes("\r\n\r\n"), 4);
-		if(data_pos == br->get_size())
-			return false;
-		data_pos += 4;
-
-		std::string h;
-		br->readN(h, data_pos - 2);
-		const char* sb = h.c_str();
-		const char* se = sb + h.length();
-
-		const char* rn = "\r\n";
+		static const char* rn = "\r\n";
 		{
-			const auto p = std::search(sb, se, rn, rn + 2);
-			hdr.is_out = std::memcmp(sb, "HTTP", 4) != 0;
-			const auto p1 = std::find(sb, p, ' ');
-			if(p1 == p)
-				return false;
-			const auto p2 = std::find(p1 + 1, p, ' ');
-			if(p2 == p)
-				return false;
-			if(hdr.is_out)
+			std::vector<const char*> p;
+			p.reserve(2);
+			const auto f = std::search(sb, se, rn, rn + 2);
+			for(const char* s = sb; s != f; s++)
 			{
-				hdr.f.assign(sb, p1);
-				hdr.s.assign(p1+1, p2);
+				if(*s == ' ')
+				{
+					p.push_back(s);
+				}
+			}
+			if(p.size() != 2)
+				return false;
+
+			res.is_out = std::memcmp(sb, "HTTP", 4) != 0;
+			if(res.is_out)
+			{
+				res.f.assign(sb, p[0]);
+				res.s.assign(p[0]+1, p[1]);
 			}
 			else
 			{
-				hdr.f.assign(p1+1, p2);
-				hdr.s.assign(p2+1, p);
+				res.f.assign(p[0]+1, p[1]);
+				res.s.assign(p[1]+1, f);
 			}
-			sb = p + 2;
+			sb = f + 2;
 		}
 
-		const char* d = ": ";
+		static const char* d = ": ";
 		while(sb != se)
 		{
 			const auto p = std::search(sb, se, rn, rn + 2);
@@ -125,9 +121,26 @@ public:
 				return false;
 			std::string k(sb, f);
 			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			hdr.AddField(k, std::string(f + 2, p));
+			res.AddField(k, std::string(f + 2, p));
 			sb = p + 2;
 		}
+		return true;
+	}
+
+	bool read(byteReader* b)
+	{
+		br = b;
+
+		data_pos = br->find(bytes("\r\n\r\n"), 4);
+		if(data_pos == br->get_size())
+			return false;
+
+		std::string h;
+		br->readN(h, data_pos + 2);
+		if(!parse_hdr(h.c_str(), h.length(), hdr))
+			return false;
+
+		data_pos += 4;
 		return true;
 	}
 
