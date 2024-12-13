@@ -48,9 +48,9 @@ struct http_header
 		m.clear();
 	}
 
-	void AddField(const std::string &name, const std::string &val)
+	void AddField(const std::string &name, const std::string &val, bool replace = false)
 	{
-		if(m.find(name) == m.end())
+		if(replace || m.find(name) == m.end())
 		{
 			m[name] = val;
 		}
@@ -82,20 +82,18 @@ public:
 	{
 		res.clear();
 		const char* se = sb + sz;
-
-		static const char* rn = "\r\n";
 		{
 			std::vector<const char*> p;
 			p.reserve(2);
-			const auto f = std::search(sb, se, rn, rn + 2);
-			for(const char* s = sb; s != f; s++)
+			const char* f = sb;
+			for(; *f != '\r'; f++)
 			{
-				if(*s == ' ')
+				if(*f == ' ')
 				{
-					p.push_back(s);
+					p.push_back(f);
 				}
 			}
-			if(p.size() != 2)
+			if(p.size() != 2 || *(f+1) != '\n')
 				return false;
 
 			res.is_out = std::memcmp(sb, "HTTP", 4) != 0;
@@ -112,6 +110,7 @@ public:
 			sb = f + 2;
 		}
 
+		static const char* rn = "\r\n";
 		static const char* d = ": ";
 		while(sb != se)
 		{
