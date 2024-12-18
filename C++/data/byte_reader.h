@@ -130,69 +130,42 @@ public:
 		return true;
 	}
 
-	std::size_t find(uint8_t c)
+	bool read_string(uint8_t e, std::string &s)
 	{
-		std::size_t res = csize;
-
-		const auto b = pos;
+		s.clear();
 		while(pos < csize)
 		{
-			if(read1() == c)
-			{
-				res = pos - 1 - b;
-				break;
-			}
+			const auto c = read1();
+			if(c == e)
+				return true;
+			s.push_back(c);
 		}
-		set_pos(b);
-		return res;
+		return false;
 	}
 
-	std::size_t find(const uint8_t* v, std::size_t k)
+	bool read_string(const uint8_t* e, uint_fast8_t k, std::string &s)
 	{
-		std::size_t res = csize;
-		if(k > csize)
-			return res;
+		if(k == 0)
+			return false;
+		if(k == 1)
+			return read_string(*e, s);
+		k--;
 
-		const auto b = pos;
-		for(std::size_t i = pos; i <= csize - k; i++)
+		s.clear();
+		while(pos + k < csize)
 		{
-			std::size_t j = 0;
-			for(; j < k; j++)
+			const auto c = read1();
+			if(c != e[0])
 			{
-				if(read1() != v[j])
-					break;
-			}
-			if(j == 0)
+				s.push_back(c);
 				continue;
-			if(j == k)
-			{
-				res = pos - k - b;
-				break;
 			}
-			set_pos(i+1);
+			if(std::memcmp(get_data(k), e+1, k) == 0)
+				return true;
+			s.push_back(c);
+			set_pos(pos - k);
 		}
-		set_pos(b);
-		return res;
-	}
-
-	bool read_string(uint8_t c, std::string &s)
-	{
-		const std::size_t p = find(c);
-		if(p == csize)
-			return false;
-		readN(s, p);
-		skip(1);
-		return true;
-	}
-
-	bool read_string(const uint8_t* v, std::size_t k, std::string &s)
-	{
-		const std::size_t p = find(v, k);
-		if(p == csize)
-			return false;
-		readN(s, p);
-		skip(k);
-		return true;
+		return false;
 	}
 };
 

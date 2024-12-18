@@ -129,17 +129,15 @@ public:
 	bool read(byteReader* b)
 	{
 		br = b;
-
-		data_pos = br->find(bytes("\r\n\r\n"), 4);
-		if(data_pos == br->get_size())
-			return false;
-
+		
 		std::string h;
-		br->readN(h, data_pos + 2);
+		if(!br->read_string(bytes("\r\n\r\n"), 4, h))
+			return false;
+		h += "\r\n";
 		if(!parse_hdr(h.c_str(), h.length(), hdr))
 			return false;
 
-		data_pos += 4;
+		data_pos = br->get_pos();
 		return true;
 	}
 
