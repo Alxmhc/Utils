@@ -195,11 +195,14 @@ protected:
 		pos += n;
 	}
 public:
+	br_array() : d(nullptr) {}
+
 	br_array(const uint8_t* v, std::size_t sz) : d(v)
 	{
 		size = sz;
 		csize = size;
 	}
+
 	void open(const uint8_t* v, std::size_t sz)
 	{
 		d = v;

@@ -10,9 +10,9 @@ namespace fl_pr
 		byteReader* br;
 
 		std::string fname;
+		std::string comment;
 		uint_fast32_t fsize;
 		uint8_t crc32[4];
-		std::string comment;
 
 		std::size_t data_pos;
 		std::size_t data_size;
@@ -69,9 +69,14 @@ namespace fl_pr
 			return true;
 		}
 
-		std::string name() const
+		std::string get_name() const
 		{
 			return fname;
+		}
+
+		std::string get_comment() const
+		{
+			return comment;
 		}
 
 		bool GetData(byteWriter &bw)
