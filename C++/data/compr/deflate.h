@@ -11,7 +11,7 @@ namespace compr
 	{
 		static const std::size_t d_sz = 65536;
 
-		static bool fixedH_code(bitReaderL &brd, uint_fast16_t &fc)
+		static bool fixedH_decode(bitReaderL &brd, uint_fast16_t &fc)
 		{
 			if( !brd.readLE(7, fc) )
 				return false;
@@ -143,7 +143,7 @@ namespace compr
 			for(;;)
 			{
 				uint_fast16_t c;
-				if( !fixedH_code(brd, c) )
+				if( !fixedH_decode(brd, c) )
 					break;
 				if(c < 256)
 				{
