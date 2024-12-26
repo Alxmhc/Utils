@@ -1,3 +1,4 @@
+#include <vector>
 #include <string>
 
 #include <windows.h>
@@ -40,6 +41,23 @@ namespace reg
 		&& type == REG_DWORD)
 		{
 			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
+		}
+		RegCloseKey(k);
+		return r;
+	}
+
+	bool Read_BIN(HKEY key, const char* path, const char* name, std::vector<uint8_t> &res)
+	{
+		const auto k = reg::Open(key, path);
+		if(k == nullptr)
+			return false;
+		DWORD type, size;
+		bool r = false;
+		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		&& type == REG_BINARY)
+		{
+			res.resize(size);
+			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(res.data()), &size) == ERROR_SUCCESS;
 		}
 		RegCloseKey(k);
 		return r;

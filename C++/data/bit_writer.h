@@ -28,14 +28,12 @@ public:
 
 	void writeN(const uint8_t* v, std::size_t n)
 	{
-		pad0();
 		r->writeN(v, n);
 	}
 
 	template<unsigned char SZ, char E>
 	void writeC(typename UINT_<SZ>::uint c)
 	{
-		pad0();
 		uint8_t t[SZ];
 		bconv<1, SZ, E>::unpack(c, t);
 		r->writeN(t, SZ);

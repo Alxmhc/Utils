@@ -1,7 +1,10 @@
 #ifndef H_IDEA
 #define H_IDEA
 
+#include <algorithm>
+
 #include "../../math/base/math_.h"
+#include "../pack.h"
 
 namespace crypt
 {
