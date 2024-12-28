@@ -153,35 +153,35 @@ template<> struct UINT_<16>
 };
 
 template<unsigned char sz>
-static typename UINT_<sz>::uint uint_from(typename UINT_<sz/2>::uint l, typename UINT_<sz/2>::uint h)
+inline typename UINT_<sz>::uint uint_from(typename UINT_<sz/2>::uint l, typename UINT_<sz/2>::uint h)
 {
 	typename UINT_<sz>::uint res = h;
 	return (res<<(4*sz)) | l;
 }
 template<>
-static UINT_<16>::uint uint_from<16>(UINT_<8>::uint l, UINT_<8>::uint h)
+inline UINT_<16>::uint uint_from<16>(UINT_<8>::uint l, UINT_<8>::uint h)
 {
 	return UINT_<16>::uint(l, h);
 }
 
 template<unsigned char sz>
-static typename UINT_<sz/2>::uint uint_getL(typename UINT_<sz>::uint c)
+inline typename UINT_<sz/2>::uint uint_getL(typename UINT_<sz>::uint c)
 {
 	return static_cast<typename UINT_<sz/2>::uint>(c);
 }
 template<>
-static UINT_<8>::uint uint_getL<16>(UINT_<16>::uint c)
+inline UINT_<8>::uint uint_getL<16>(UINT_<16>::uint c)
 {
 	return c.getL();
 }
 
 template<unsigned char sz>
-static typename UINT_<sz/2>::uint uint_getH(typename UINT_<sz>::uint c)
+inline typename UINT_<sz/2>::uint uint_getH(typename UINT_<sz>::uint c)
 {
 	return static_cast<typename UINT_<sz/2>::uint>(c>>(4*sz));
 }
 template<>
-static UINT_<8>::uint uint_getH<16>(UINT_<16>::uint c)
+inline UINT_<8>::uint uint_getH<16>(UINT_<16>::uint c)
 {
 	return c.getH();
 }
