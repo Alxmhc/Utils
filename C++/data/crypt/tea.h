@@ -10,13 +10,13 @@ namespace crypt
 	{
 		static const uint32_t d = 0x9E3779B9;
 	public:
-		static const uint_fast8_t block_size = 16;
+		static const uint_fast8_t block_size = 8;
 
 		class Enc
 		{
 			uint32_t key[4];
 		public:
-			static const uint_fast8_t block_size = 16;
+			static const uint_fast8_t block_size = 8;
 
 			Enc(const uint8_t* k)
 			{
@@ -42,7 +42,7 @@ namespace crypt
 		{
 			uint32_t key[4];
 		public:
-			static const uint_fast8_t block_size = 16;
+			static const uint_fast8_t block_size = 8;
 
 			Dec(const uint8_t* k)
 			{
