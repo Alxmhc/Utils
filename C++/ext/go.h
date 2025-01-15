@@ -1,3 +1,6 @@
+#ifndef EXT_GO
+#define EXT_GO
+
 #include <cstdint>
 #include <string>
 
@@ -32,3 +35,5 @@ public:
 	GoString(const char* s, std::size_t k) : p(s), n(k) {}
 	GoString(const std::string &s) : p(s.c_str()), n(s.length()) {}
 };
+
+#endif

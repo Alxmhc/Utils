@@ -30,5 +30,4 @@ func SaveToRGB(dat []byte, szx, szy int, fout string) {
 	png.Encode(fl, im)
 }
 
-func main() {
-}
+func main() {}

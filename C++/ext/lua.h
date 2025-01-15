@@ -1,3 +1,6 @@
+#ifndef EXT_LUA
+#define EXT_LUA
+
 class scr_Lua
 {
 	lua_State* s;
@@ -65,3 +68,5 @@ private:
 		lua_pushstring(s, val.c_str());
 	}
 };
+
+#endif

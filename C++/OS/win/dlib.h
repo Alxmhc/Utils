@@ -1,3 +1,6 @@
+#ifndef H_DLIB
+#define H_DLIB
+
 #include <windows.h>
 
 class dlib
@@ -7,16 +10,16 @@ public:
 	dlib() : inst(nullptr) {}
 	~dlib()
 	{
-		free();
+		Close();
 	}
 
-	bool load(const char* pth)
+	bool Read(const char* pth)
 	{
-		free();
+		Close();
 		inst = LoadLibraryA(pth);
 		return inst != nullptr;
 	}
-	void free()
+	void Close()
 	{
 		if(inst != nullptr)
 		{
@@ -30,3 +33,5 @@ public:
 		return GetProcAddress(inst, fname);
 	}
 };
+
+#endif
