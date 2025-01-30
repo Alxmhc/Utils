@@ -50,14 +50,19 @@ struct http_header
 
 	void AddField(const std::string &name, const std::string &val, bool replace = false)
 	{
+		std::string lname(name);
+		for(std::size_t i = 0; i < lname.size(); i++)
+		{
+			lname[i] = tolower(lname[i]);
+		}
 		if(replace || m.find(name) == m.end())
 		{
-			m[name] = val;
+			m[lname] = val;
 		}
 		else
 		{
-			m[name] += "; ";
-			m[name] += val;
+			m[lname] += "; ";
+			m[lname] += val;
 		}
 	}
 
@@ -67,6 +72,55 @@ struct http_header
 		if(h == m.cend())
 			return false;
 		val = h->second;
+		return true;
+	}
+
+	std::string to_text()
+	{
+		std::string res = is_out ? f + ' ' + s + " HTTP/1.1\r\n" : "HTTP/1.1 " + f + (s.empty() ? "" : ' ' + s) + "\r\n";
+		for(auto e = m.cbegin(); e != m.cend(); ++e)
+		{
+			res += e->first + ": " + e->second + "\r\n";
+		}
+		res += "\r\n";
+		return res;
+	}
+
+	bool data_decode(std::vector<uint8_t> &res) const
+	{
+		std::string fld;
+		if(GetField("transfer-encoding", fld)
+		&& fld == "chunked")
+		{
+			std::size_t sz = res.size();
+			if( !decode::unchunk(res.data(), sz) )
+				return false;
+			res.resize(sz);
+		}
+		if(GetField("content-encoding", fld))
+		{
+			if(fld == "gzip")
+			{
+				br_array br(res.data(), res.size());
+				fl_pr::F_gzip gz;
+				if( !gz.read(&br) )
+					return false;
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				if( !gz.GetData(bw) )
+					return false;
+				res = std::move(tmp);
+			}
+			else if(fld == "deflate")
+			{
+				br_array br(res.data(), res.size());
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				if( !compr::deflate::Decode(br, bw) )
+					return false;
+				res = std::move(tmp);
+			}
+		}
 		return true;
 	}
 };
@@ -118,9 +172,7 @@ public:
 			const auto f = std::search(sb, p, d, d + 2);
 			if(f == p)
 				return false;
-			std::string k(sb, f);
-			std::transform(k.begin(), k.end(), k.begin(), tolower);
-			res.AddField(k, std::string(f + 2, p));
+			res.AddField(std::string(sb, f), std::string(f + 2, p));
 			sb = p + 2;
 		}
 		return true;
@@ -145,41 +197,7 @@ public:
 	{
 		br->set_pos(data_pos);
 		br->readN(data, br->get_rsize());
-
-		std::string fld;
-		if(hdr.GetField("transfer-encoding", fld)
-		&& fld == "chunked")
-		{
-			std::size_t sz = data.size();
-			if( !decode::unchunk(data.data(), sz) )
-				return false;
-			data.resize(sz);
-		}
-		if(hdr.GetField("content-encoding", fld))
-		{
-			if(fld == "gzip")
-			{
-				br_array br(data.data(), data.size());
-				fl_pr::F_gzip gz;
-				if( !gz.read(&br) )
-					return false;
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !gz.GetData(bw) )
-					return false;
-				data = std::move(tmp);
-			}
-			else if(fld == "deflate")
-			{
-				br_array br(data.data(), data.size());
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !compr::deflate::Decode(br, bw) )
-					return false;
-				data = std::move(tmp);
-			}
-		}
-		return true;
+		return hdr.data_decode(data);
 	}
 };
 
@@ -261,7 +279,7 @@ class HTTP2
 	static const unsigned char hdr_size = 24;
 
 	typedef std::pair<std::string, std::string> field;
-	static const unsigned char stat_tbl_sz = 61;
+	static const uint_fast8_t stat_tbl_sz = 61;
 	static const field stat_tbl[stat_tbl_sz];
 
 	class h2_tbl
@@ -437,19 +455,27 @@ public:
 
 	struct frame
 	{
-		static const unsigned char hdr_size = 9;
+		static const uint_fast8_t hdr_size = 9;
 
 		uint_fast8_t type, fl;
 		uint32_t id;
 		std::vector<uint8_t> buf;
 
-		bool Update(byteReader &br)
+		int_fast32_t Update(const uint8_t* d, std::size_t sz)
 		{
+			const uint_fast32_t rd = sz;
+
 			if(buf.size() < hdr_size)
 			{
-				br.addMx(buf, hdr_size - buf.size());
-				if(buf.size() < hdr_size)
-					return false;
+				const auto rsz = hdr_size - buf.size();
+				if(sz < rsz)
+				{
+					buf.insert(buf.end(), d, d + sz);
+					return -1;
+				}
+				buf.insert(buf.end(), d, d + rsz);
+				d += rsz;
+				sz -= rsz;
 			}
 
 			uint_fast32_t frlen = buf[0];
@@ -458,9 +484,14 @@ public:
 			frlen += hdr_size;
 			if(buf.size() < frlen)
 			{
-				br.addMx(buf, frlen - buf.size());
-				if(buf.size() < frlen)
-					return false;
+				const auto rsz = frlen - buf.size();
+				if(sz < rsz)
+				{
+					buf.insert(buf.end(), d, d + sz);
+					return -1;
+				}
+				buf.insert(buf.end(), d, d + rsz);
+				sz -= rsz;
 			}
 
 			type = buf[3];
@@ -468,7 +499,7 @@ public:
 			id = bconv<1, 4, endianness::BIG_ENDIAN>::pack(buf.data() + 5);
 			id &= 0x7fffffff;
 
-			return true;
+			return rd - sz;
 		}
 
 		void Clear()
