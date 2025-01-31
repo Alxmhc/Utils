@@ -75,17 +75,6 @@ struct http_header
 		return true;
 	}
 
-	std::string to_text()
-	{
-		std::string res = is_out ? f + ' ' + s + " HTTP/1.1\r\n" : "HTTP/1.1 " + f + (s.empty() ? "" : ' ' + s) + "\r\n";
-		for(auto e = m.cbegin(); e != m.cend(); ++e)
-		{
-			res += e->first + ": " + e->second + "\r\n";
-		}
-		res += "\r\n";
-		return res;
-	}
-
 	bool data_decode(std::vector<uint8_t> &res) const
 	{
 		std::string fld;
@@ -176,6 +165,17 @@ public:
 			sb = p + 2;
 		}
 		return true;
+	}
+
+	static std::string to_text(const http_header &hdr)
+	{
+		std::string res = hdr.is_out ? hdr.f + ' ' + hdr.s + " HTTP/1.1\r\n" : "HTTP/1.1 " + hdr.f + (hdr.s.empty() ? "" : ' ' + hdr.s) + "\r\n";
+		for(auto e = hdr.m.cbegin(); e != hdr.m.cend(); ++e)
+		{
+			res += e->first + ": " + e->second + "\r\n";
+		}
+		res += "\r\n";
+		return res;
 	}
 
 	bool read(byteReader* b)
