@@ -24,16 +24,16 @@ public:
 	{
 		if(!lib.Read(path))
 			return false;
-		Mul_ = reinterpret_cast<pMul>(lib.get_addr("Mul"));
+		Mul_ = reinterpret_cast<pMul>(lib.get_func("Mul"));
 		if(Mul_ == nullptr)
 			return false;
-		Mod_ = reinterpret_cast<pMod>(lib.get_addr("Mod"));
+		Mod_ = reinterpret_cast<pMod>(lib.get_func("Mod"));
 		if(Mod_ == nullptr)
 			return false;
-		ModInv_ = reinterpret_cast<pModInv>(lib.get_addr("ModInv"));
+		ModInv_ = reinterpret_cast<pModInv>(lib.get_func("ModInv"));
 		if(ModInv_ == nullptr)
 			return false;
-		PowMod_ = reinterpret_cast<pPowMod>(lib.get_addr("PowMod"));
+		PowMod_ = reinterpret_cast<pPowMod>(lib.get_func("PowMod"));
 		if(PowMod_ == nullptr)
 			return false;
 		return true;

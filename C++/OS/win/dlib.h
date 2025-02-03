@@ -28,7 +28,7 @@ public:
 		}
 	}
 
-	void* get_addr(const char* fname) const
+	void* get_func(const char* fname) const
 	{
 		return GetProcAddress(inst, fname);
 	}

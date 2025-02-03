@@ -463,7 +463,7 @@ public:
 
 		int_fast32_t Update(const uint8_t* d, std::size_t sz)
 		{
-			const uint_fast32_t rd = sz;
+			const auto rd = sz;
 
 			if(buf.size() < hdr_size)
 			{
@@ -499,7 +499,7 @@ public:
 			id = bconv<1, 4, endianness::BIG_ENDIAN>::pack(buf.data() + 5);
 			id &= 0x7fffffff;
 
-			return rd - sz;
+			return static_cast<int_fast32_t>(rd - sz);
 		}
 
 		void Clear()
