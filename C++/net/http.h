@@ -226,7 +226,7 @@ class HTTP2
 	static bool int_decode(br_array &br, uint_fast32_t &res, uint_fast8_t nBit)
 	{
 		{
-			const auto p = (1 << nBit) - 1;
+			const uint_fast8_t p = (1 << nBit) - 1;
 			res &= p;
 			if(res != p)
 				return true;
