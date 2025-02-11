@@ -1,11 +1,10 @@
-#ifndef H_B_INT
-#define H_B_INT
-
-#include <vector>
+#ifndef EH_B_INT
+#define EH_B_INT
 
 #include "go.h"
 
 #include "../OS/win/dlib.h"
+#include "../math/b_int.h"
 
 class b_int_BE
 {
@@ -39,44 +38,48 @@ public:
 		return true;
 	}
 
-	std::vector<uint8_t> Mul(const std::vector<uint8_t> &a, const std::vector<uint8_t> &b) const
+	b_uint Mul(const b_uint &a, const b_uint &b) const
 	{
-		std::vector<uint8_t> res(a.size() + b.size());
-		const auto sz = Mul_(GoSlice(const_cast<uint8_t*>(a.data()), a.size()), GoSlice(const_cast<uint8_t*>(b.data()), b.size()), GoSlice(res.data(), res.size()));
-		res.resize(sz);
-		return res;
+		auto av = a.toB();
+		auto bv = b.toB();
+		std::vector<uint8_t> rv(av.size() + bv.size());
+		const auto sz = Mul_(GoSlice(av.data(), av.size()), GoSlice(bv.data(), bv.size()), GoSlice(rv.data(), rv.size()));
+		b_uint r;
+		r.fromB(rv.data(), sz);
+		return r;
 	}
 
-	std::vector<uint8_t> Mod(const std::vector<uint8_t> &a, const std::vector<uint8_t> &m) const
+	b_uint Mod(const b_uint &a, const b_uint &m) const
 	{
-		std::vector<uint8_t> res;
-		if(a.size() < m.size())
-		{
-			res = a;
-		}
-		else
-		{
-			res = m;
-			const auto sz = Mod_(GoSlice(const_cast<uint8_t*>(a.data()), a.size()), GoSlice(res.data(), res.size()));
-			res.resize(sz);
-		}
-		return res;
+		if(a < m)
+			return a;
+		auto av = a.toB();
+		auto mv = m.toB();
+		const auto sz = Mod_(GoSlice(av.data(), av.size()), GoSlice(mv.data(), mv.size()));
+		b_uint r;
+		r.fromB(mv.data(), sz);
+		return r;
 	}
 
-	std::vector<uint8_t> ModInv(const std::vector<uint8_t> &a, const std::vector<uint8_t> &m) const
+	b_uint ModInv(const b_uint &a, const b_uint &m) const
 	{
-		std::vector<uint8_t> res = m;
-		const auto sz = ModInv_(GoSlice(const_cast<uint8_t*>(a.data()), a.size()), GoSlice(res.data(), res.size()));
-		res.resize(sz);
-		return res;
+		auto av = a.toB();
+		auto mv = m.toB();
+		const auto sz = ModInv_(GoSlice(av.data(), av.size()), GoSlice(mv.data(), mv.size()));
+		b_uint r;
+		r.fromB(mv.data(), sz);
+		return r;
 	}
 
-	std::vector<uint8_t> PowMod(const std::vector<uint8_t> &a, const std::vector<uint8_t> &b, const std::vector<uint8_t> &m) const
+	b_uint PowMod(const b_uint &a, const b_uint &b, const b_uint &m) const
 	{
-		std::vector<uint8_t> res = m;
-		const auto sz = PowMod_(GoSlice(const_cast<uint8_t*>(a.data()), a.size()), GoSlice(const_cast<uint8_t*>(b.data()), b.size()), GoSlice(res.data(), res.size()));
-		res.resize(sz);
-		return res;
+		auto av = a.toB();
+		auto bv = b.toB();
+		auto mv = m.toB();
+		const auto sz = PowMod_(GoSlice(av.data(), av.size()), GoSlice(bv.data(), bv.size()), GoSlice(mv.data(), mv.size()));
+		b_uint r;
+		r.fromB(mv.data(), sz);
+		return r;
 	}
 };
 
