@@ -118,19 +118,20 @@ public:
 
 	const b_uint& operator>>=(std::size_t c)
 	{
-		if(c == 0 || *this == 0)
+		if(*this == 0)
 			return *this;
-
-		const auto k = c / BSZ;
-		if(k != 0)
 		{
-			if(k >= n.size())
+			const auto k = c / BSZ;
+			if(k != 0)
 			{
-				*this = 0;
-				return *this;
+				if(k >= n.size())
+				{
+					*this = 0;
+					return *this;
+				}
+				n.erase(n.begin(), n.begin() + k);
+				c %= BSZ;
 			}
-			n.erase(n.begin(), n.begin() + k);
-			c %= BSZ;
 		}
 		if(c == 0)
 			return *this;
@@ -153,9 +154,8 @@ public:
 
 	const b_uint& operator<<=(std::size_t c)
 	{
-		if(c == 0 || *this == 0)
+		if(*this == 0)
 			return *this;
-
 		std::size_t i = 0;
 		{
 			const auto k = c / BSZ;
@@ -192,11 +192,6 @@ public:
 
 	const b_uint& operator+=(const b_uint &c)
 	{
-		if(c == 0)
-			return *this;
-		if(this == &c)
-			return *this <<= 1;
-
 		const auto csz = c.n.size();
 		if(n.size() < csz)
 		{
@@ -204,11 +199,6 @@ public:
 		}
 
 		std::size_t i = 0;
-		while(c.n[i] == 0)
-		{
-			i++;
-		}
-
 		num2 d = 0;
 		for(; i < csz; i++)
 		{

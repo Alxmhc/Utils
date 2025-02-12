@@ -101,6 +101,11 @@ namespace convert
 				pr_string(s, sz, res.data());
 				return res;
 			}
+
+			static std::vector<uint8_t> pr_string(const char* s)
+			{
+				return pr_string(s, strlen(s));
+			}
 		}
 
 		class Decoder : public byteWriterBuf<2>
