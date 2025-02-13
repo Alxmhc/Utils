@@ -13,6 +13,11 @@ protected:
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 
+	std::size_t get_pos() const
+	{
+		return (r->get_pos() * 8) - o;
+	}
+
 	bool skip(std::size_t n)
 	{
 		if(n <= o)
