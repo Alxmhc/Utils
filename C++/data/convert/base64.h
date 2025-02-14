@@ -71,10 +71,9 @@ namespace convert
 			Decoder(byteWriter &b) : bw(&b)
 			{
 				std::fill_n(de, 256, -1);
-				uint8_t sz = 64;
-				while(sz != 0)
+				uint_fast8_t sz = 64;
+				while(sz--)
 				{
-					sz--;
 					de[en[sz]] = sz;
 				}
 			}

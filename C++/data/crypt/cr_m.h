@@ -7,18 +7,16 @@ namespace crypt
 {
 	struct iv_ctr
 	{
-		static void incr(uint8_t* v, const uint_fast8_t sz)
+		static void incr(uint8_t* v, uint_fast8_t n)
 		{
-			uint_fast8_t i = sz;
-			while(i != 0)
+			while(n--)
 			{
-				i--;
-				if(v[i] != 0xff)
+				if(v[n] != 0xff)
 				{
-					v[i]++;
+					v[n]++;
 					break;
 				}
-				v[i] = 0;
+				v[n] = 0;
 			}
 		}
 	};

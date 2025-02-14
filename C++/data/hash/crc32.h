@@ -22,9 +22,9 @@ namespace hash
 	public:
 		static void InitTable(uint32_t* tbl, const uint_fast32_t I)
 		{
-			uint8_t n = 0;
-			do {
-				n--;
+			tbl[0] = 0;
+			for(uint_fast8_t n = 255; n != 0; n--)
+			{
 				uint32_t c = n;
 				for (uint_fast8_t k = 0; k < 8; k++)
 				{
@@ -38,7 +38,7 @@ namespace hash
 					}
 				}
 				tbl[n] = c;
-			} while(n != 0);
+			}
 		}
 
 		CRC32()

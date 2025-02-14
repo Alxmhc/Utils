@@ -49,9 +49,8 @@ public:
 	template<typename T>
 	void writeLE(T c, uint_fast8_t n)
 	{
-		while(n != 0)
+		while(n--)
 		{
-			n--;
 			b |= (c & 1) << (7 - o);
 			c >>= 1;
 			o++;
@@ -65,9 +64,8 @@ public:
 	template<typename T>
 	void writeBE(T c, uint_fast8_t n)
 	{
-		while(n != 0)
+		while(n--)
 		{
-			n--;
 			b |= ((c >> n) & 1) << (7 - o);
 			o++;
 			if(o == 8)
@@ -87,9 +85,8 @@ public:
 	template<typename T>
 	void writeLE(T c, uint_fast8_t n)
 	{
-		while(n != 0)
+		while(n--)
 		{
-			n--;
 			b |= ((c >> n) & 1) << o;
 			o++;
 			if(o == 8)
@@ -102,9 +99,8 @@ public:
 	template<typename T>
 	void writeBE(T c, uint_fast8_t n)
 	{
-		while(n != 0)
+		while(n--)
 		{
-			n--;
 			b |= (c & 1) << o;
 			c >>= 1;
 			o++;

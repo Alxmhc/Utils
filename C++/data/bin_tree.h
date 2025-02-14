@@ -49,9 +49,8 @@ public:
 	void add(uint_fast64_t n, uint_fast8_t nbit, T c)
 	{
 		binTree<T>* a = this;
-		while(nbit != 0)
+		while(nbit--)
 		{
-			nbit--;
 			const auto c = (n >> nbit) & 1;
 			if(c == 0)
 			{

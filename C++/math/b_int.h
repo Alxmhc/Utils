@@ -116,6 +116,12 @@ public:
 		return compare(*this, c) < 0;
 	}
 
+	std::size_t log2i() const
+	{
+		std::size_t res = (n.size() - 1) * BSZ;
+		return res + ::log2i(n.back());
+	}
+
 	const b_uint& operator>>=(std::size_t c)
 	{
 		if(*this == 0)
@@ -184,10 +190,42 @@ public:
 		return *this;
 	}
 
-	std::size_t log2i() const
+	const b_uint& operator*=(num c)
 	{
-		std::size_t res = (n.size() - 1) * BSZ;
-		return res + ::log2i(n.back());
+		if(c == 1)
+			return *this;
+		if(c == 0)
+		{
+			*this = 0;
+			return *this;
+		}
+
+		num d = 0;
+		for(std::size_t i = 0; i < n.size(); i++)
+		{
+			num2 t = n[i];
+			t = t*c + d;
+			n[i] = static_cast<num>(t);
+			d = t >> BSZ;
+		}
+		if(d)
+		{
+			n.push_back(d);
+		}
+		return *this;
+	}
+
+	num operator%(num c) const
+	{
+		if(c == 1)
+			return 0;
+		auto i = n.size();
+		num2 r = 0;
+		while(i--)
+		{
+			r = ((r << BSZ) | n[i]) % c;
+		}
+		return static_cast<num>(r);
 	}
 
 	const b_uint& operator+=(const b_uint &c)
