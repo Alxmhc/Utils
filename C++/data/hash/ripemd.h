@@ -1,8 +1,6 @@
 #ifndef H_RIPEMD
 #define H_RIPEMD
 
-#include <array>
-
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -203,11 +201,11 @@ namespace hash
 				st[0] = c1;
 			}
 
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -228,22 +226,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -512,11 +510,11 @@ namespace hash
 				st[0] = c1;
 			}
 
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -538,22 +536,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -781,11 +779,11 @@ namespace hash
 				st[7] += d2;
 			}
 
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -810,22 +808,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -1108,11 +1106,11 @@ namespace hash
 				st[9] += e2;
 			}
 
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::LITTLE_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -1139,22 +1137,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;

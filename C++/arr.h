@@ -2,13 +2,15 @@
 #define H_ARR
 
 #include <cstdint>
-#include <algorithm>
-#include <numeric>
+#include <cstring>
 
 template<typename T>
 void v_xor(T* a, const T* b, std::size_t sz)
 {
-	std::transform(a, a + sz, b, a, [](T a, T b){return a ^ b;});
+	while(sz--)
+	{
+		a[sz] ^= b[sz];
+	}
 }
 
 template<typename T>

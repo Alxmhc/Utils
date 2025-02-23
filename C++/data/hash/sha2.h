@@ -1,8 +1,6 @@
 #ifndef H_SHA2
 #define H_SHA2
 
-#include <array>
-
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -66,11 +64,11 @@ namespace hash
 			}
 
 			static const uint32_t K[64];
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -88,22 +86,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz>>29);
 				x[15] = static_cast<uint32_t>(sz<<3);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -210,11 +208,11 @@ namespace hash
 			}
 
 			static const uint64_t K[80];
-			std::array<uint64_t, 16> x;
+			uint64_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::BIG_ENDIAN>(v, bsize, x.data());
+				conv::pack<8, endianness::BIG_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -232,23 +230,23 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<8, endianness::BIG_ENDIAN>(data(), bsize, x.data());
+					conv::pack<8, endianness::BIG_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 16)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				sz <<= 3;
 				x[14] = sz.getH();
 				x[15] = sz.getL();
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;

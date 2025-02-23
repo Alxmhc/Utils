@@ -1,6 +1,8 @@
 #ifndef H_CR_M
 #define H_CR_M
 
+#include <algorithm>
+
 #include "../../arr.h"
 
 namespace crypt

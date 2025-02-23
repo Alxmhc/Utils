@@ -1,8 +1,7 @@
 #ifndef H_SM3
 #define H_SM3
 
-#include <array>
-
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -19,7 +18,7 @@ namespace hash
 			void Transform()
 			{
 				uint32_t W[68];
-				std::copy_n(x.data(), x.size(), W);
+				std::copy_n(x, 16, W);
 				for(uint_fast8_t i = 16; i < 68; i++)
 				{
 					uint32_t tmp = W[i-16] ^ W[i-9] ^ rotl(W[i-3], 15);
@@ -64,11 +63,11 @@ namespace hash
 				v_xor(st, tmp, 8);
 			}
 
-			std::array<uint32_t, 16> x;
+			uint32_t x[16];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x.data());
+				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -93,22 +92,22 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x.data());
+					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 16, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 16, 0);
 				}
 				x[14] = static_cast<uint32_t>(sz>>29);
 				x[15] = static_cast<uint32_t>(sz<<3);
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;

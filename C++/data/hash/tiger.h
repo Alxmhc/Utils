@@ -1,8 +1,6 @@
 #ifndef H_TIGER
 #define H_TIGER
 
-#include <array>
-
 #include "../byte_writer.h"
 
 namespace hash
@@ -76,11 +74,11 @@ namespace hash
 			static const uint64_t t2[256];
 			static const uint64_t t3[256];
 			static const uint64_t t4[256];
-			std::array<uint64_t, 8> x;
+			uint64_t x[8];
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::LITTLE_ENDIAN>(v, bsize, x.data());
+				conv::pack<8, endianness::LITTLE_ENDIAN>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -100,21 +98,21 @@ namespace hash
 				if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<8, endianness::LITTLE_ENDIAN>(data(), bsize, x.data());
+					conv::pack<8, endianness::LITTLE_ENDIAN>(data(), bsize, x);
 					if(bsize - size() < 8)
 					{
 						Transform();
-						x.fill(0);
+						std::fill_n(x, 8, 0);
 					}
 					reset();
 				}
 				else
 				{
-					x.fill(0);
+					std::fill_n(x, 8, 0);
 				}
 				x[7] = sz << 3;
 				Transform();
-				x.fill(0);
+				std::fill_n(x, 8, 0);
 			}
 		};
 		tbf buf;
