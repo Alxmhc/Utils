@@ -25,14 +25,12 @@ public:
 		}
 
 		hash::HMAC<H> hs(k, H::hash_size);
-		uint8_t i = 0;
-		for(;;)
+		for(uint8_t i = 1;;i++)
 		{
 			if(inf.size() != 0)
 			{
 				hs.Update(inf.data(), inf.size());
 			}
-			i++;
 			hs.Update(&i, 1);
 			if(ksz <= H::hash_size)
 			{

@@ -259,6 +259,42 @@ public:
 		}
 		return *this;
 	}
+
+	//*this >= c
+	const b_uint& operator-=(const b_uint &c)
+	{
+		std::size_t i = 0;
+
+		bool d = false;
+		for(; i < c.n.size(); i++)
+		{
+			if(d)
+			{
+				d = (n[i] <= c.n[i]);
+				n[i]--;
+			}
+			else
+			{
+				d = (n[i] < c.n[i]);
+			}
+			n[i] -= c.n[i];
+		}
+		while(d)
+		{
+			d = (n[i] == 0);
+			n[i]--;
+			i++;
+		}
+
+		i = n.size() - 1;
+		while(n[i] == 0 && i != 0)
+		{
+			i--;
+		}
+		n.resize(i + 1);
+
+		return *this;
+	}
 };
 
 #endif
