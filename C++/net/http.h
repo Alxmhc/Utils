@@ -126,17 +126,20 @@ public:
 		res.clear();
 		const char* se = sb + sz;
 		{
-			std::vector<const char*> p;
-			p.reserve(2);
+			const char* p[2];
 			const char* f = sb;
+			uint_fast8_t k = 2;
 			for(; *f != '\r'; f++)
 			{
+				if(k == 0)
+					continue;
 				if(*f == ' ')
 				{
-					p.push_back(f);
+					k--;
+					p[1-k] = f;
 				}
 			}
-			if(p.size() != 2 || *(f+1) != '\n')
+			if(k != 0 || *(f+1) != '\n')
 				return false;
 
 			res.is_out = std::memcmp(sb, "HTTP", 4) != 0;
@@ -195,8 +198,14 @@ public:
 
 	bool GetData(std::vector<uint8_t> &data)
 	{
+		const auto sz = br->get_rsize();
+		if(sz == 0)
+		{
+			data.clear();
+			return true;
+		}
 		br->set_pos(data_pos);
-		br->readN(data, br->get_rsize());
+		br->readN(data, sz);
 		return hdr.data_decode(data);
 	}
 };
