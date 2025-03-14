@@ -12,8 +12,6 @@ class b_int_BE
 
 	typedef GoInt(*pMul)(GoSlice a, GoSlice b, GoSlice r);
 	pMul Mul_;
-	typedef GoInt(*pMod)(GoSlice a, GoSlice m);
-	pMod Mod_;
 	typedef GoInt(*pModInv)(GoSlice a, GoSlice m);
 	pModInv ModInv_;
 	typedef GoInt(*pPowMod)(GoSlice a, GoSlice b, GoSlice m);
@@ -25,9 +23,6 @@ public:
 			return false;
 		Mul_ = reinterpret_cast<pMul>(lib.get_func("Mul"));
 		if(Mul_ == nullptr)
-			return false;
-		Mod_ = reinterpret_cast<pMod>(lib.get_func("Mod"));
-		if(Mod_ == nullptr)
 			return false;
 		ModInv_ = reinterpret_cast<pModInv>(lib.get_func("ModInv"));
 		if(ModInv_ == nullptr)
@@ -46,18 +41,6 @@ public:
 		const auto sz = Mul_(GoSlice(av.data(), av.size()), GoSlice(bv.data(), bv.size()), GoSlice(rv.data(), rv.size()));
 		b_uint r;
 		r.fromB(rv.data(), sz);
-		return r;
-	}
-
-	b_uint Mod(const b_uint &a, const b_uint &m) const
-	{
-		if(a < m)
-			return a;
-		auto av = a.toB();
-		auto mv = m.toB();
-		const auto sz = Mod_(GoSlice(av.data(), av.size()), GoSlice(mv.data(), mv.size()));
-		b_uint r;
-		r.fromB(mv.data(), sz);
 		return r;
 	}
 

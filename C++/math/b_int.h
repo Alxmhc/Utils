@@ -295,6 +295,28 @@ public:
 
 		return *this;
 	}
+
+	const b_uint& operator%=(b_uint c)
+	{
+		if(*this < c)
+			return *this;
+		if(c.n.size() == 1)
+		{
+			*this = *this % c.n.front();
+			return *this;
+		}
+
+		std::size_t d = log2i() - c.log2i() + 1;
+		c <<= d;
+		while(d--)
+		{
+			c >>= 1;
+			if(*this < c)
+				continue;
+			*this -= c;
+		}
+		return *this;
+	}
 };
 
 #endif
