@@ -45,10 +45,11 @@ namespace crypt
 
 			for(uint_fast8_t i = 0; i < 32; i+=4)
 			{
-				key[i]   = K[0] ^= kg(K[1] ^ K[2] ^ K[3] ^ ke[i]);
-				key[i+1] = K[1] ^= kg(K[2] ^ K[3] ^ K[0] ^ ke[i+1]);
-				key[i+2] = K[2] ^= kg(K[3] ^ K[0] ^ K[1] ^ ke[i+2]);
-				key[i+3] = K[3] ^= kg(K[0] ^ K[1] ^ K[2] ^ ke[i+3]);
+				K[0] ^= kg(K[1] ^ K[2] ^ K[3] ^ ke[i]);
+				K[1] ^= kg(K[2] ^ K[3] ^ K[0] ^ ke[i+1]);
+				K[2] ^= kg(K[3] ^ K[0] ^ K[1] ^ ke[i+2]);
+				K[3] ^= kg(K[0] ^ K[1] ^ K[2] ^ ke[i+3]);
+				std::copy_n(K, 4, key + i);
 			}
 		}
 

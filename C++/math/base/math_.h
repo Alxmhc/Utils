@@ -99,12 +99,6 @@ namespace vt
 	{
 		return std::abs(a);
 	}
-
-	template<typename T>
-	void nrm(T &a)
-	{
-		a /= abs(a);
-	}
 }
 
 //(a^b)%c

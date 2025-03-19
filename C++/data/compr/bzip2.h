@@ -15,24 +15,26 @@ namespace compr
 		static std::vector<uint8_t> read_map(bitReaderR &br)
 		{
 			std::vector<uint8_t> res;
-			uint_fast16_t u;
-			if( !br.readBE(16, u) )
+			res.reserve(256);
+
+			uint_fast16_t a;
+			if( !br.readLE(16, a) )
 				return res;
-			for(uint_fast8_t i = 0; i < 16; i++)
+			for(uint_fast8_t i = 0; a != 0; i+=16,a>>=1)
 			{
-				if( (u & (0x8000 >> i)) == 0 )
+				if( (a & 1) == 0 )
 					continue;
-				uint_fast16_t c;
-				if( !br.readBE(16, c) )
+				uint_fast16_t b;
+				if( !br.readLE(16, b) )
 				{
 					res.clear();
 					return res;
 				}
-				for (uint_fast8_t j = 0; j < 16; j++)
+				for (uint_fast8_t j = 0; b != 0; j++,b>>=1)
 				{
-					if( (c & (0x8000 >> j)) == 0 )
+					if( (b & 1) == 0 )
 						continue;
-					res.push_back((i<<4) + j);
+					res.push_back(i + j);
 				}
 			}
 			return res;
