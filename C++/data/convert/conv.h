@@ -38,13 +38,6 @@ namespace convert
 				std::rotate(m, m + c, m + c + 1);
 			}
 		}
-
-		void Decode_t(uint8_t* res, std::size_t sz, uint_fast8_t tsz)
-		{
-			std::vector<uint8_t> tmp(tsz);
-			std::iota(tmp.begin(), tmp.end(), 0);
-			Decode(res, sz, tmp.data());
-		}
 	}
 }
 

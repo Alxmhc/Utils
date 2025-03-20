@@ -30,11 +30,11 @@ namespace compr
 					res.clear();
 					return res;
 				}
-				for (uint_fast8_t j = 0; b != 0; j++,b>>=1)
+				for (uint_fast8_t j = i; b != 0; j++,b>>=1)
 				{
 					if( (b & 1) == 0 )
 						continue;
-					res.push_back(i + j);
+					res.push_back(j);
 				}
 			}
 			return res;
@@ -64,8 +64,10 @@ namespace compr
 				}
 				sel[i] = c;
 			}
-
-			convert::MTF::Decode_t(sel.data(), sel.size(), ntrees);
+			{
+				uint8_t t[6] = {0, 1, 2, 3, 4, 5};
+				convert::MTF::Decode(sel.data(), sel.size(), t);
+			}
 			return true;
 		}
 
