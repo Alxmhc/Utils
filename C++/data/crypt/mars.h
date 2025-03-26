@@ -1,6 +1,7 @@
 #ifndef H_MARS
 #define H_MARS
 
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../pack.h"
 
@@ -79,10 +80,7 @@ namespace crypt
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				d[0] += key[0];
-				d[1] += key[1];
-				d[2] += key[2];
-				d[3] += key[3];
+				v_add(d, key, 4);
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[0];
@@ -156,10 +154,7 @@ namespace crypt
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				d[0] += key[36];
-				d[1] += key[37];
-				d[2] += key[38];
-				d[3] += key[39];
+				v_add(d, key + 36, 4);
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[3];

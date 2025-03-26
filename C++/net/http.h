@@ -196,7 +196,12 @@ public:
 		return true;
 	}
 
-	bool GetData(std::vector<uint8_t> &data)
+	const http_header* Get_Header() const
+	{
+		return &hdr;
+	}
+
+	bool Get_Data(std::vector<uint8_t> &data)
 	{
 		const auto sz = br->get_rsize();
 		if(sz == 0)

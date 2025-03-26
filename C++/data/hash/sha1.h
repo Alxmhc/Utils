@@ -1,6 +1,7 @@
 #ifndef H_SHA1
 #define H_SHA1
 
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -50,11 +51,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t;
 				}
-				st[0] += wt[0];
-				st[1] += wt[1];
-				st[2] += wt[2];
-				st[3] += wt[3];
-				st[4] += wt[4];
+				v_add(st, wt, 5);
 			}
 
 			uint32_t x[16];

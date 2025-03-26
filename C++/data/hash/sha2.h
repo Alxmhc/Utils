@@ -1,6 +1,7 @@
 #ifndef H_SHA2
 #define H_SHA2
 
+#include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
 
@@ -57,10 +58,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				for(uint_fast8_t i = 0; i < 8; i++)
-				{
-					st[i] += wt[i];
-				}
+				v_add(st, wt, 8);
 			}
 
 			static const uint32_t K[64];
@@ -201,10 +199,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				for(uint_fast8_t i = 0; i < 8; i++)
-				{
-					st[i] += wt[i];
-				}
+				v_add(st, wt, 8);
 			}
 
 			static const uint64_t K[80];

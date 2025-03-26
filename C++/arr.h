@@ -12,6 +12,14 @@ void v_xor(T* a, const T* b, std::size_t sz)
 		a[sz] ^= b[sz];
 	}
 }
+template<typename T>
+void v_add(T* a, const T* b, std::size_t sz)
+{
+	while(sz--)
+	{
+		a[sz] += b[sz];
+	}
+}
 
 template<typename T>
 std::size_t cnt_b(const T* v, std::size_t sz, const T &c)
