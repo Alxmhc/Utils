@@ -15,6 +15,16 @@ class b_uint
 
 	std::vector<num> n;
 
+	void fix()
+	{
+		auto sz = n.size() - 1;
+		while(sz != 0 && n[sz] == 0)
+		{
+			sz--;
+		}
+		n.resize(sz + 1);
+	}
+
 	static signed char compare(const b_uint &a, const b_uint &b)
 	{
 		auto sz = a.n.size();
@@ -142,18 +152,17 @@ public:
 		if(c == 0)
 			return *this;
 
-		const auto sz = n.size();
-		for(std::size_t i = 0;;)
+		const auto sz = n.size() - 1;
+		for(std::size_t i = 0; i != sz; i++)
 		{
 			n[i] >>= c;
-			i++;
-			if(i == sz)
-				break;
-			n[i-1] |= n[i] << (BSZ - c);
+			n[i] |= n[i+1] << (BSZ - c);
 		}
-		if(n.back() == 0 && sz != 1)
+		n[sz] >>= c;
+
+		if(sz != 0 && n[sz] == 0)
 		{
-			n.resize(sz - 1);
+			n.resize(sz);
 		}
 		return *this;
 	}
@@ -215,10 +224,15 @@ public:
 		return *this;
 	}
 
+	num operator&(num c) const
+	{
+		return n[0] & c;
+	}
+
 	num operator%(num c) const
 	{
-		if(c == 1)
-			return 0;
+		if((c & (c - 1)) == 0)
+			return n[0] & (c - 1);
 		auto i = n.size();
 		num2 r = 0;
 		while(i--)
@@ -286,13 +300,7 @@ public:
 			i++;
 		}
 
-		i = n.size() - 1;
-		while(n[i] == 0 && i != 0)
-		{
-			i--;
-		}
-		n.resize(i + 1);
-
+		fix();
 		return *this;
 	}
 
