@@ -132,6 +132,24 @@ public:
 		return res + ::log2i(n.back());
 	}
 
+	num operator&(num c) const
+	{
+		return n[0] & c;
+	}
+
+	num operator%(num c) const
+	{
+		if((c & (c - 1)) == 0)
+			return n[0] & (c - 1);
+		auto i = n.size();
+		num2 r = 0;
+		while(i--)
+		{
+			r = ((r << BSZ) | n[i]) % c;
+		}
+		return static_cast<num>(r);
+	}
+
 	const b_uint& operator>>=(std::size_t c)
 	{
 		if(*this == 0)
@@ -199,6 +217,44 @@ public:
 		return *this;
 	}
 
+	const b_uint& operator+=(num c)
+	{
+		n[0] += c;
+		if(n[0] < c)
+		{
+			const auto sz = n.size();
+			for(std::size_t i = 1; ;i++)
+			{
+				if(i == sz)
+				{
+					n.push_back(1);
+					break;
+				}
+				n[i]++;
+				if(n[i] != 0)
+					break;
+			}
+		}
+		return *this;
+	}
+
+	//*this >= c
+	const b_uint& operator-=(num c)
+	{
+		bool d = n[0] < c;
+		n[0] -= c;
+		for(std::size_t i = 1; d; i++)
+		{
+			d = n[i] == 0;
+			n[i]--;
+		}
+		if(n.size() != 1 && n.back() == 0)
+		{
+			n.pop_back();
+		}
+		return *this;
+	}
+
 	const b_uint& operator*=(num c)
 	{
 		if(c == 1)
@@ -222,24 +278,6 @@ public:
 			n.push_back(d);
 		}
 		return *this;
-	}
-
-	num operator&(num c) const
-	{
-		return n[0] & c;
-	}
-
-	num operator%(num c) const
-	{
-		if((c & (c - 1)) == 0)
-			return n[0] & (c - 1);
-		auto i = n.size();
-		num2 r = 0;
-		while(i--)
-		{
-			r = ((r << BSZ) | n[i]) % c;
-		}
-		return static_cast<num>(r);
 	}
 
 	const b_uint& operator+=(const b_uint &c)
@@ -310,7 +348,7 @@ public:
 			return *this;
 		if(c.n.size() == 1)
 		{
-			*this = *this % c.n.front();
+			*this = *this % c.n[0];
 			return *this;
 		}
 
