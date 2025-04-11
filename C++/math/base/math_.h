@@ -54,16 +54,10 @@ static uint_fast8_t getBit(T c, uint_fast8_t n)
 	return (c >> n) & 1;
 }
 template<typename T>
-static void setBit0(T &c, uint_fast8_t n)
+static void setBit(T &c, uint_fast8_t n, bool b)
 {
-	const T m = static_cast<T>(1) << n;
-	c &= ~m;
-}
-template<typename T>
-static void setBit1(T &c, uint_fast8_t n)
-{
-	const T m = static_cast<T>(1) << n;
-	c |= m;
+	const T m = T(1) << n;
+	c = b ? c|m : c&~m;
 }
 
 const long double pi = 3.1415926535897932384626;

@@ -19,7 +19,7 @@ namespace crypt
 			{
 				if( getBit(c, t[i]) )
 				{
-					setBit1(r, tsz - 1 - i);
+					setBit(r, tsz - 1 - i, true);
 				}
 			}
 			c = r;

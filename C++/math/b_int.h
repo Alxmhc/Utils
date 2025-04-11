@@ -17,6 +17,8 @@ class b_uint
 
 	void fix()
 	{
+		if(n.back() != 0)
+			return;
 		auto sz = n.size() - 1;
 		while(sz != 0 && n[sz] == 0)
 		{
@@ -124,6 +126,16 @@ public:
 	bool operator<(const b_uint &c) const
 	{
 		return compare(*this, c) < 0;
+	}
+
+	uint_fast8_t getBit(std::size_t p) const
+	{
+		return ::getBit(n[p/BSZ], p%BSZ);
+	}
+	void setBit(std::size_t p, bool b)
+	{
+		::setBit(n[p/BSZ], p%BSZ, b);
+		fix();
 	}
 
 	std::size_t log2i() const
