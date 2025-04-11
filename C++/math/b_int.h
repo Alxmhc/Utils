@@ -130,12 +130,27 @@ public:
 
 	uint_fast8_t getBit(std::size_t p) const
 	{
-		return ::getBit(n[p/BSZ], p%BSZ);
+		const auto k = p/BSZ;
+		if(k < n.size())
+			return ::getBit(n[k], p%BSZ);
+		return 0;
 	}
 	void setBit(std::size_t p, bool b)
 	{
-		::setBit(n[p/BSZ], p%BSZ, b);
-		fix();
+		const auto k = p/BSZ;
+		if(k < n.size())
+		{
+			::setBit(n[k], p%BSZ, b);
+			if(!b)
+			{
+				fix();
+			}
+		}
+		else if(b)
+		{
+			n.resize(k + 1);
+			::setBit(n[k], p%BSZ, true);
+		}
 	}
 
 	std::size_t log2i() const
