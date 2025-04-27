@@ -4,8 +4,8 @@
 #include <map>
 #include <deque>
 
+#include "../str.h"
 #include "../data/convert/hex.h"
-#include "../data/b.h"
 #include "../data/decode.h"
 #include "../fl/fl_gzip.h"
 

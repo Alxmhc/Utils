@@ -92,7 +92,7 @@ namespace crypt
 
 			void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
 			{
-				v_xor(v, b, sz);
+				arr::xor(v, b, sz);
 				std::copy_n(v, sz, b);
 			}
 		public:
@@ -115,7 +115,7 @@ namespace crypt
 			void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
 			{
 				std::swap_ranges(b, b + sz, v);
-				v_xor(v, b, sz);
+				arr::xor(v, b, sz);
 			}
 		public:
 			Decr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
@@ -166,7 +166,7 @@ namespace crypt
 			}
 			void process(uint8_t* v)
 			{
-				v_xor(v, iv, CR::block_size);
+				arr::xor(v, iv, CR::block_size);
 				cr->process(v);
 				std::copy_n(v, CR::block_size, iv);
 			}
@@ -189,7 +189,7 @@ namespace crypt
 				std::copy_n(v, CR::block_size, iv);
 
 				cr->process(v);
-				v_xor(v, iv_tmp, CR::block_size);
+				arr::xor(v, iv_tmp, CR::block_size);
 			}
 		};
 	}

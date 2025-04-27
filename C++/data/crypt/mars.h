@@ -80,7 +80,7 @@ namespace crypt
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				v_add(d, key, 4);
+				arr::add(d, key, 4);
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[0];
@@ -131,10 +131,7 @@ namespace crypt
 					d[2] = (d[3] - S1(t>>16)) ^ S0(t>>8);
 					d[3] = rotl(t, 24);
 				}
-				d[0] -= key[36];
-				d[1] -= key[37];
-				d[2] -= key[38];
-				d[3] -= key[39];
+				arr::sub(d, key + 36, 4);
 				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
 			}
 		};
@@ -154,7 +151,7 @@ namespace crypt
 			{
 				uint32_t d[4];
 				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
-				v_add(d, key + 36, 4);
+				arr::add(d, key + 36, 4);
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{
 					const uint32_t t = d[3];
@@ -205,10 +202,7 @@ namespace crypt
 					d[1] = (d[0] - S1(t >> 16)) ^ S0(t >> 8);
 					d[0] = rotl(t, 24);
 				}
-				d[0] -= key[0];
-				d[1] -= key[1];
-				d[2] -= key[2];
-				d[3] -= key[3];
+				arr::sub(d, key, 4);
 				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
 			}
 		};

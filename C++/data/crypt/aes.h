@@ -84,16 +84,16 @@ namespace crypt
 
 			void process(uint8_t* r) const
 			{
-				v_xor(r, key.data(), 16);
+				arr::xor(r, key.data(), 16);
 				std::size_t i = 16;
 				for(; i < key.size() - 16; i += 16)
 				{
 					SubShift(r);
 					Mix(r);
-					v_xor(r, key.data() + i, 16);
+					arr::xor(r, key.data() + i, 16);
 				}
 				SubShift(r);
-				v_xor(r, key.data() + i, 16);
+				arr::xor(r, key.data() + i, 16);
 			}
 		};
 
@@ -138,16 +138,16 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				std::size_t i = key.size() - 16;
-				v_xor(r, key.data() + i, 16);
+				arr::xor(r, key.data() + i, 16);
 				i -= 16;
 				SubShiftI(r);
 				for(; i > 0; i -= 16)
 				{
-					v_xor(r, key.data() + i, 16);
+					arr::xor(r, key.data() + i, 16);
 					MixI(r);
 					SubShiftI(r);
 				}
-				v_xor(r, key.data(), 16);
+				arr::xor(r, key.data(), 16);
 			}
 		};
 	};

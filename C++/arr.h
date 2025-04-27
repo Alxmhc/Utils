@@ -4,46 +4,32 @@
 #include <cstdint>
 #include <cstring>
 
-template<typename T>
-void v_xor(T* a, const T* b, std::size_t sz)
+namespace arr
 {
-	while(sz--)
+	template<typename T>
+	void xor(T* a, const T* b, std::size_t sz)
 	{
-		a[sz] ^= b[sz];
+		while(sz--)
+		{
+			a[sz] ^= b[sz];
+		}
 	}
-}
-template<typename T>
-void v_add(T* a, const T* b, std::size_t sz)
-{
-	while(sz--)
+	template<typename T>
+	void add(T* a, const T* b, std::size_t sz)
 	{
-		a[sz] += b[sz];
+		while(sz--)
+		{
+			a[sz] += b[sz];
+		}
 	}
-}
-
-template<typename T>
-std::size_t cnt_b(const T* v, std::size_t sz, const T &c)
-{
-	std::size_t k = 0;
-	for(; k < sz; k++)
+	template<typename T>
+	void sub(T* a, const T* b, std::size_t sz)
 	{
-		if(v[k] != c)
-			break;
+		while(sz--)
+		{
+			a[sz] -= b[sz];
+		}
 	}
-	return k;
-}
-
-template<typename T>
-std::size_t cnt_e(const T* v, std::size_t sz, const T &c)
-{
-	std::size_t k = 0;
-	for(; sz != 0; k++)
-	{
-		sz--;
-		if(v[sz] != c)
-			break;
-	}
-	return k;
 }
 
 template<uint8_t SZ>
@@ -64,7 +50,7 @@ protected:
 
 	virtual void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const
 	{
-		v_xor(v, b, sz);
+		arr::xor(v, b, sz);
 	}
 public:
 	void process(uint8_t* v, std::size_t n)

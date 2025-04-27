@@ -63,7 +63,7 @@ public:
 			for(std::size_t j = 1; j < c; j++)
 			{
 				fcr.Calc(tmp);
-				v_xor(key + o, tmp, sz);
+				arr::xor(key + o, tmp, sz);
 			}
 			if(is_fin)
 				break;

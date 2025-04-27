@@ -18,7 +18,7 @@ class scrypt
 		std::copy_n(b + 32*bsize - 16, 16, X);
 		for(uint_fast32_t i = 0; i < 2*bsize; i++)
 		{
-			v_xor(b + 16*i, X, 16);
+			arr::xor(b + 16*i, X, 16);
 			crypt::Salsa20::cr(X, b + 16*i, 8);
 			std::copy_n(X, 16, t + 8*(i + (i&1)*(2*bsize - 1)));
 		}
@@ -54,7 +54,7 @@ public:
 				for(uint_fast64_t e = 0; e < cost; e++)
 				{
 					const auto d = bconv<4, 2, endianness::LITTLE_ENDIAN>::pack(Bp.data() + i*bsz + bsz - 16) & (cost - 1);
-					v_xor(Bp.data() + i*bsz, V.data() + d * bsz, bsz);
+					arr::xor(Bp.data() + i*bsz, V.data() + d * bsz, bsz);
 					Mix(Bp.data() + i*bsz, t);
 				}
 			}
