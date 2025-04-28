@@ -14,6 +14,7 @@ namespace arr
 			a[sz] ^= b[sz];
 		}
 	}
+
 	template<typename T>
 	void add(T* a, const T* b, std::size_t sz)
 	{
@@ -23,11 +24,28 @@ namespace arr
 		}
 	}
 	template<typename T>
+	void add(T* a, const T &b, std::size_t sz)
+	{
+		while(sz--)
+		{
+			a[sz] += b;
+		}
+	}
+
+	template<typename T>
 	void sub(T* a, const T* b, std::size_t sz)
 	{
 		while(sz--)
 		{
 			a[sz] -= b[sz];
+		}
+	}
+	template<typename T>
+	void sub(T* a, const T &b, std::size_t sz)
+	{
+		while(sz--)
+		{
+			a[sz] -= b;
 		}
 	}
 }
