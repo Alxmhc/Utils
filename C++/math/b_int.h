@@ -17,9 +17,10 @@ class b_uint
 
 	void fix()
 	{
-		if(n.back() != 0)
+		if(n.back() != 0
+		|| n.size() == 1)
 			return;
-		auto sz = n.size() - 1;
+		auto sz = n.size() - 2;
 		while(sz != 0 && n[sz] == 0)
 		{
 			sz--;
@@ -73,11 +74,14 @@ public:
 			n[i] = bconv<1, 4, endianness::BIG_ENDIAN>::pack(v + k);
 			i++;
 		}
-		if(k != 0)
+		if(k == 0)
+			return;
+
+		n[i] = 0;
+		while(k--)
 		{
-			uint_fast8_t t[4] = {};
-			std::copy_n(v, k, t + 4 - k);
-			n[i] = bconv<1, 4, endianness::BIG_ENDIAN>::pack(t);
+			n[i] = (n[i] << 8) | *v;
+			v++;
 		}
 	}
 
