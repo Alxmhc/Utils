@@ -4,49 +4,46 @@
 #include <cstdint>
 #include <cstring>
 
-namespace arr
+template<typename T>
+void v_xor(T* a, const T* b, std::size_t sz)
 {
-	template<typename T>
-	void xor(T* a, const T* b, std::size_t sz)
+	while(sz--)
 	{
-		while(sz--)
-		{
-			a[sz] ^= b[sz];
-		}
+		a[sz] ^= b[sz];
 	}
+}
 
-	template<typename T>
-	void add(T* a, const T* b, std::size_t sz)
+template<typename T>
+void v_add(T* a, const T* b, std::size_t sz)
+{
+	while(sz--)
 	{
-		while(sz--)
-		{
-			a[sz] += b[sz];
-		}
+		a[sz] += b[sz];
 	}
-	template<typename T>
-	void add(T* a, const T &b, std::size_t sz)
+}
+template<typename T>
+void v_add(T* a, const T &b, std::size_t sz)
+{
+	while(sz--)
 	{
-		while(sz--)
-		{
-			a[sz] += b;
-		}
+		a[sz] += b;
 	}
+}
 
-	template<typename T>
-	void sub(T* a, const T* b, std::size_t sz)
+template<typename T>
+void v_sub(T* a, const T* b, std::size_t sz)
+{
+	while(sz--)
 	{
-		while(sz--)
-		{
-			a[sz] -= b[sz];
-		}
+		a[sz] -= b[sz];
 	}
-	template<typename T>
-	void sub(T* a, const T &b, std::size_t sz)
+}
+template<typename T>
+void v_sub(T* a, const T &b, std::size_t sz)
+{
+	while(sz--)
 	{
-		while(sz--)
-		{
-			a[sz] -= b;
-		}
+		a[sz] -= b;
 	}
 }
 
@@ -68,7 +65,7 @@ protected:
 
 	virtual void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const
 	{
-		arr::xor(v, b, sz);
+		v_xor(v, b, sz);
 	}
 public:
 	void process(uint8_t* v, std::size_t n)

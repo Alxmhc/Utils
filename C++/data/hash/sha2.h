@@ -58,7 +58,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				arr::add(st, wt, 8);
+				v_add(st, wt, 8);
 			}
 
 			static const uint32_t K[64];
@@ -199,7 +199,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t + fn1(wt);
 				}
-				arr::add(st, wt, 8);
+				v_add(st, wt, 8);
 			}
 
 			static const uint64_t K[80];

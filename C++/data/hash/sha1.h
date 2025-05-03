@@ -51,7 +51,7 @@ namespace hash
 					wt[1] = wt[0];
 					wt[0] = t;
 				}
-				arr::add(st, wt, 5);
+				v_add(st, wt, 5);
 			}
 
 			uint32_t x[16];

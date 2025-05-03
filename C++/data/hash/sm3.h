@@ -60,7 +60,7 @@ namespace hash
 					st[1] = st[0];
 					st[0] = T1;
 				}
-				arr::xor(st, tmp, 8);
+				v_xor(st, tmp, 8);
 			}
 
 			uint32_t x[16];

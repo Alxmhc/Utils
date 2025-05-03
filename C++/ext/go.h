@@ -1,6 +1,7 @@
 #ifndef EXT_GO
 #define EXT_GO
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
