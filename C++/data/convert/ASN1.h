@@ -6,7 +6,7 @@
 
 namespace ASN1
 {
-	bool len_decode(byteReader &br, bool &e, std::size_t &sz)
+	static bool len_decode(byteReader &br, bool &e, std::size_t &sz)
 	{
 		uint8_t k;
 		if(!br.get(k))
@@ -16,7 +16,7 @@ namespace ASN1
 		{
 			sz = k;
 			e = true;
-			return br.get_rsize() >= sz;
+			return true;
 		}
 		k &= 0x7f;
 
@@ -36,31 +36,46 @@ namespace ASN1
 			sz = (sz << 8) | t;
 		}
 
-		return br.get_rsize() >= sz;
+		return true;
 	}
 
-	b_sint Int_decode(byteReader &br, std::size_t sz)
+	static b_sint Int_decode(uint8_t* v, std::size_t sz)
 	{
 		b_uint c;
 		if(sz == 0)
 			return b_sint(c, true);
-
-		std::vector<uint8_t> v(sz);
-		br.readN(v.data(), sz);
-
 		if((v[0] & 0x80) == 0)
 		{
-			c.fromB(v.data(), sz);
+			c.fromB(v, sz);
 			return b_sint(c, true);
 		}
-
 		for(std::size_t i = 0; i < sz; i++)
 		{
 			v[i] = ~v[i];
 		}
-		c.fromB(v.data(), sz);
+		c.fromB(v, sz);
 		c += 1;
 		return b_sint(c, false);
+	}
+
+	static bool get_data(byteReader &br, std::vector<uint8_t> &d)
+	{
+		std::size_t sz;
+		bool e;
+		if(!len_decode(br, e, sz))
+			return false;
+		if(e)
+			return br.readN(d, sz);
+		return false;
+	}
+
+	static bool get_Int(byteReader &br, b_sint &r)
+	{
+		std::vector<uint8_t> v;
+		if(!get_data(br, v))
+			return false;
+		r = Int_decode(v.data(), v.size());
+		return true;
 	}
 }
 

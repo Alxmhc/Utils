@@ -401,6 +401,8 @@ class b_sint
 	b_uint u;
 	bool p; //>=0
 public:
+	b_sint() : p(true) {}
+
 	b_sint(const b_uint &c, bool pos) : u(c)
 	{
 		p = pos ? true : c == 0;
