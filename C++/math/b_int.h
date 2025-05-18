@@ -157,6 +157,27 @@ public:
 		}
 	}
 
+	// % (1<<c)
+	b_uint get_bits(std::size_t c) const
+	{
+		if(c == 0)
+			return b_uint();
+		std::size_t sz = (c-1)/BSZ + 1;
+		if(sz > n.size())
+			return *this;
+
+		b_uint res;
+		res.n.assign(n.cbegin(), n.cbegin() + sz);
+		const uint_fast8_t d = c % BSZ;
+		if(d != 0)
+		{
+			res.n.back() &= (1<<d) - 1;
+		}
+
+		res.fix();
+		return res;
+	}
+
 	std::size_t log2i() const
 	{
 		std::size_t res = (n.size() - 1) * BSZ;
