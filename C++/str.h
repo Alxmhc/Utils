@@ -18,13 +18,13 @@ static bool is_b(const std::string &s, const std::string &t)
 {
 	if(s.length() < t.length())
 		return false;
-	return s.substr(0, t.length()) == t;
+	return std::memcmp(s.c_str(), t.c_str(), t.length()) == 0;
 }
 static bool is_e(const std::string &s, const std::string &t)
 {
 	if(s.length() < t.length())
 		return false;
-	return s.substr(s.length() - t.length()) == t;
+	return std::memcmp(s.c_str() + (s.length() - t.length()), t.c_str(), t.length()) == 0;
 }
 
 #endif
