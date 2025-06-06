@@ -5,20 +5,6 @@ import (
 	"math/big"
 )
 
-//export Mul
-func Mul(a, b, res []byte) int {
-	a1 := new(big.Int)
-	a1.SetBytes(a)
-	b1 := new(big.Int)
-	b1.SetBytes(b)
-
-	r1 := new(big.Int)
-	r1.Mul(a1, b1)
-	r := r1.Bytes()
-	copy(res, r)
-	return len(r)
-}
-
 //export ModInv
 func ModInv(a, m []byte) int {
 	a1 := new(big.Int)

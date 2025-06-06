@@ -43,6 +43,26 @@ class b_uint
 		}
 		return 0;
 	}
+
+	void add(num c, std::size_t p)
+	{
+		n[p] += c;
+		if(n[p] < c)
+		{
+			const auto sz = n.size();
+			for(std::size_t i = p + 1; ;i++)
+			{
+				if(i == sz)
+				{
+					n.push_back(1);
+					break;
+				}
+				n[i]++;
+				if(n[i] != 0)
+					break;
+			}
+		}
+	}
 public:
 	explicit b_uint(num c = 0) : n(1, c) {}
 
@@ -271,22 +291,7 @@ public:
 
 	const b_uint& operator+=(num c)
 	{
-		n[0] += c;
-		if(n[0] < c)
-		{
-			const auto sz = n.size();
-			for(std::size_t i = 1; ;i++)
-			{
-				if(i == sz)
-				{
-					n.push_back(1);
-					break;
-				}
-				n[i]++;
-				if(n[i] != 0)
-					break;
-			}
-		}
+		add(c, 0);
 		return *this;
 	}
 
@@ -362,6 +367,24 @@ public:
 			i++;
 		}
 		return *this;
+	}
+
+	b_uint operator*(const b_uint &c) const
+	{
+		b_uint res;
+		res.n.resize(n.size() + c.n.size());
+		for(std::size_t i = 0; i < c.n.size(); i++)
+		{
+			for(std::size_t j = 0; j < n.size(); j++)
+			{
+				num2 t = c.n[i];
+				t *= n[j];
+				res.add(static_cast<num>(t), i + j);
+				res.add(t >> BSZ, i + j + 1);
+			}
+		}
+		res.fix();
+		return res;
 	}
 
 	//*this >= c

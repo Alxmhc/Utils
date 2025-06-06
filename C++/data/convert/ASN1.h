@@ -39,23 +39,20 @@ namespace ASN1
 		return true;
 	}
 
-	static b_sint Int_decode(uint8_t* v, std::size_t sz)
+	static b_sint Int_decode(const uint8_t* v, std::size_t sz)
 	{
 		b_uint c;
-		if(sz == 0)
-			return b_sint(c, true);
-		if((v[0] & 0x80) == 0)
-		{
-			c.fromB(v, sz);
-			return b_sint(c, true);
-		}
-		for(std::size_t i = 0; i < sz; i++)
-		{
-			v[i] = ~v[i];
-		}
 		c.fromB(v, sz);
-		c += 1;
-		return b_sint(c, false);
+		if(sz == 0
+		|| (v[0] & 0x80) == 0)
+			return b_sint(c, true);
+
+		const auto p = (sz << 3) - 1;
+		c.setBit(p, false);
+		b_uint t;
+		t.setBit(p, true);
+		t -= c;
+		return b_sint(t, false);
 	}
 
 	static bool get_data(byteReader &br, std::vector<uint8_t> &d)

@@ -10,8 +10,6 @@ class b_int_BE
 {
 	dlib lib;
 
-	typedef GoInt(*pMul)(GoSlice a, GoSlice b, GoSlice r);
-	pMul Mul_;
 	typedef GoInt(*pModInv)(GoSlice a, GoSlice m);
 	pModInv ModInv_;
 	typedef GoInt(*pPowMod)(GoSlice a, GoSlice b, GoSlice m);
@@ -21,9 +19,6 @@ public:
 	{
 		if(!lib.Read(path))
 			return false;
-		Mul_ = reinterpret_cast<pMul>(lib.get_func("Mul"));
-		if(Mul_ == nullptr)
-			return false;
 		ModInv_ = reinterpret_cast<pModInv>(lib.get_func("ModInv"));
 		if(ModInv_ == nullptr)
 			return false;
@@ -31,17 +26,6 @@ public:
 		if(PowMod_ == nullptr)
 			return false;
 		return true;
-	}
-
-	b_uint Mul(const b_uint &a, const b_uint &b) const
-	{
-		auto av = a.toB();
-		auto bv = b.toB();
-		std::vector<uint8_t> rv(av.size() + bv.size());
-		const auto sz = Mul_(GoSlice(av.data(), av.size()), GoSlice(bv.data(), bv.size()), GoSlice(rv.data(), rv.size()));
-		b_uint r;
-		r.fromB(rv.data(), sz);
-		return r;
 	}
 
 	b_uint ModInv(const b_uint &a, const b_uint &m) const
