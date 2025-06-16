@@ -51,7 +51,7 @@ namespace crypt
 		{
 			uint32_t t[4];
 			conv::pack<4, endianness::BIG_ENDIAN>(r, 16, t);
-			for(uint_fast8_t i = 0; i < 16; i++)
+			for(uint_fast8_t i = 0; ; i++)
 			{
 				uint32_t f0 = t[2] ^ (key[i] >> 32);
 				uint32_t f1 = t[3] ^ static_cast<uint32_t>(key[i]);
@@ -60,11 +60,10 @@ namespace crypt
 				f1 = G(f0 + f1);
 				t[0] ^= f0 + f1;
 				t[1] ^= f1;
-				if(i != 15)
-				{
-					std::swap(t[0], t[2]);
-					std::swap(t[1], t[3]);
-				}
+				if(i == 15)
+					break;
+				std::swap(t[0], t[2]);
+				std::swap(t[1], t[3]);
 			}
 			conv::unpack<4, endianness::BIG_ENDIAN>(t, 4, r);
 		}

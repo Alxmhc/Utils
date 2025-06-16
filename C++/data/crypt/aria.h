@@ -164,15 +164,11 @@ namespace crypt
 			{
 				Init(k, ksz, key);
 
-				const uint_fast8_t nr = (ksz >> 2) + 8;
-				std::swap(key[0], key[nr]);
-				for(uint_fast8_t i = 1; i < nr/2; i++)
+				std::reverse(key.begin(), key.end());
+				for(uint_fast8_t i = 1; i < key.size() - 1; i++)
 				{
-					std::swap(key[i], key[nr - i]);
 					A(key[i]);
-					A(key[nr - i]);
 				}
-				A(key[nr/2]);
 			}
 
 			void process(uint8_t* r) const
