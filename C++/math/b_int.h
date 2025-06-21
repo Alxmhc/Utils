@@ -417,14 +417,26 @@ public:
 		return *this;
 	}
 
-	const b_uint& operator%=(b_uint c)
+	const b_uint& ModDiv(b_uint c, b_uint* r)
 	{
+		if(r != nullptr)
+		{
+			*r = 0;
+		}
 		if(*this < c)
 			return *this;
 		if(c.n.size() == 1)
 		{
-			*this = *this % c.n[0];
-			return *this;
+			if(r == nullptr)
+			{
+				*this = *this % c.n[0];
+				return *this;
+			}
+			else if(c.n[0] == 1)
+			{
+				std::swap(*this, *r);
+				return *this;
+			}
 		}
 
 		std::size_t d = log2i() - c.log2i() + 1;
@@ -434,9 +446,18 @@ public:
 			c >>= 1;
 			if(*this < c)
 				continue;
+			if(r != nullptr)
+			{
+				r->setBit(d, true);
+			}
 			*this -= c;
 		}
 		return *this;
+	}
+
+	const b_uint& operator%=(const b_uint &c)
+	{
+		return ModDiv(c, nullptr);
 	}
 };
 
@@ -455,6 +476,69 @@ public:
 	const b_uint& abs() const
 	{
 		return u;
+	}
+
+	b_uint mod(const b_uint &m) const
+	{
+		b_uint res(u);
+		res %= m;
+		if(!p && res != 0)
+		{
+			res = m - res;
+		}
+		return res;
+	}
+
+	const b_sint& operator+=(const b_uint &c)
+	{
+		if(p)
+		{
+			u += c;
+		}
+		else if(u > c)
+		{
+			u -= c;
+		}
+		else
+		{
+			u = c - u;
+			p = true;
+		}
+		return *this;
+	}
+
+	const b_sint& operator-=(const b_uint &c)
+	{
+		if(!p)
+		{
+			u += c;
+		}
+		else if(u < c)
+		{
+			u = c - u;
+			p = false;
+		}
+		else
+		{
+			u -= c;
+		}
+		return *this;
+	}
+
+	const b_sint& operator+=(const b_sint &c)
+	{
+		return c.p ? *this += c.u : *this -= c.u;
+	}
+
+	const b_sint& operator-=(const b_sint &c)
+	{
+		return c.p ? *this -= c.u : *this += c.u;
+	}
+
+	b_sint operator*(const b_sint &c) const
+	{
+		const bool s = (p && c.p) || (!p && !c.p);
+		return b_sint(u * c.u, s);
 	}
 };
 

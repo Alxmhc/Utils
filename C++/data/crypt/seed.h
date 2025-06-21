@@ -51,7 +51,7 @@ namespace crypt
 		{
 			uint32_t t[4];
 			conv::pack<4, endianness::BIG_ENDIAN>(r, 16, t);
-			for(uint_fast8_t i = 0; ; i++)
+			for(uint_fast8_t i = 0;;i++)
 			{
 				uint32_t f0 = t[2] ^ (key[i] >> 32);
 				uint32_t f1 = t[3] ^ static_cast<uint32_t>(key[i]);
