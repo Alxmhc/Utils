@@ -9,7 +9,7 @@
 #include "../data/decode.h"
 #include "../fl/fl_gzip.h"
 
-namespace URL
+struct URL
 {
 	static std::vector<uint8_t> Decode(const char* s, std::size_t sz)
 	{
@@ -31,7 +31,7 @@ namespace URL
 		r.shrink_to_fit();
 		return r;
 	}
-}
+};
 
 struct http_header
 {
@@ -74,11 +74,19 @@ struct http_header
 		val = h->second;
 		return true;
 	}
+};
 
-	bool data_decode(std::vector<uint8_t> &res) const
+class HTTP1
+{
+	byteReader* br;
+
+	http_header hdr;
+	std::size_t data_pos;
+
+	static bool Decode_Data(const http_header &hdr, std::vector<uint8_t> &res)
 	{
 		std::string fld;
-		if(GetField("transfer-encoding", fld)
+		if(hdr.GetField("transfer-encoding", fld)
 		&& fld == "chunked")
 		{
 			std::size_t sz = res.size();
@@ -86,7 +94,7 @@ struct http_header
 				return false;
 			res.resize(sz);
 		}
-		if(GetField("content-encoding", fld))
+		if(hdr.GetField("content-encoding", fld))
 		{
 			if(fld == "gzip")
 			{
@@ -112,14 +120,6 @@ struct http_header
 		}
 		return true;
 	}
-};
-
-class HTTP1
-{
-	byteReader* br;
-
-	http_header hdr;
-	std::size_t data_pos;
 public:
 	static bool parse_hdr(const char* sb, std::size_t sz, http_header &res)
 	{
@@ -211,7 +211,7 @@ public:
 		}
 		br->set_pos(data_pos);
 		br->readN(data, sz);
-		return hdr.data_decode(data);
+		return Decode_Data(hdr, data);
 	}
 };
 

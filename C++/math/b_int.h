@@ -537,8 +537,7 @@ public:
 
 	b_sint operator*(const b_sint &c) const
 	{
-		const bool s = (p && c.p) || (!p && !c.p);
-		return b_sint(u * c.u, s);
+		return b_sint(u * c.u, p == c.p);
 	}
 };
 
