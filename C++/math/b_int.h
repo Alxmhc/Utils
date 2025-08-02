@@ -46,6 +46,15 @@ class b_uint
 
 	void add(num c, std::size_t p)
 	{
+		if(c == 0)
+			return;
+		if(p >= n.size())
+		{
+			n.resize(p + 1);
+			n[p] = c;
+			return;
+		}
+
 		n[p] += c;
 		if(n[p] < c)
 		{
@@ -150,6 +159,10 @@ public:
 	bool operator<(const b_uint &c) const
 	{
 		return compare(*this, c) < 0;
+	}
+	bool operator>=(const b_uint &c) const
+	{
+		return !operator<(c);
 	}
 
 	uint_fast8_t getBit(std::size_t p) const
@@ -379,6 +392,8 @@ public:
 			{
 				num2 t = c.n[i];
 				t *= n[j];
+				if(t == 0)
+					continue;
 				res.add(static_cast<num>(t), i + j);
 				res.add(t >> BSZ, i + j + 1);
 			}
@@ -432,7 +447,7 @@ public:
 				*this = *this % c.n[0];
 				return *this;
 			}
-			else if(c.n[0] == 1)
+			if(c.n[0] == 1)
 			{
 				std::swap(*this, *r);
 				return *this;
@@ -458,6 +473,34 @@ public:
 	const b_uint& operator%=(const b_uint &c)
 	{
 		return ModDiv(c, nullptr);
+	}
+
+	b_uint Pow_Mod(const b_uint &p, const b_uint &m) const
+	{
+		if(m == 1)
+			return b_uint(0);
+		if(p == 0)
+			return b_uint(1);
+		b_uint t(*this);
+		t %= m;
+		b_uint res(1);
+		for(std::size_t i = 0; i < p.log2i(); i++)
+		{
+			if(p.getBit(i) != 0)
+			{
+				res = t * res;
+				res %= m;
+				if(res == 0)
+					return res;
+			}
+			t = t * t;
+			t %= m;
+			if(t == 1)
+				return res;
+		}
+		res = t * res;
+		res %= m;
+		return res;
 	}
 };
 

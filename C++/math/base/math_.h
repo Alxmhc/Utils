@@ -103,7 +103,7 @@ static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
 	if(b == 0)
 		return 1;
 	a %= c;
-	if(a < 2 || b == 1)
+	if(a < 2)
 		return static_cast<uint32_t>(a);
 	uint_fast64_t r = 1;
 	for(;;)
@@ -112,7 +112,7 @@ static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
 		{
 			r *= a;
 			r %= c;
-			if(b == 1)
+			if(b == 1 || r == 0)
 				break;
 		}
 		a *= a;
