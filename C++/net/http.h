@@ -203,13 +203,13 @@ public:
 
 	bool Get_Data(std::vector<uint8_t> &data)
 	{
+		br->set_pos(data_pos);
 		const auto sz = br->get_rsize();
 		if(sz == 0)
 		{
 			data.clear();
 			return true;
 		}
-		br->set_pos(data_pos);
 		br->readN(data, sz);
 		return Decode_Data(hdr, data);
 	}
