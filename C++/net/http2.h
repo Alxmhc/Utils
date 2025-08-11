@@ -1,6 +1,8 @@
 #ifndef H_HTTP2
 #define H_HTTP2
 
+#include <deque>
+
 #include "http.h"
 
 static const unsigned char http2_hcode[257] = {

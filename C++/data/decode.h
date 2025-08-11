@@ -2,6 +2,8 @@
 #define H_DECODE
 
 #include "convert/hex.h"
+#include "byte_reader.h"
+#include "byte_writer.h"
 
 namespace decode
 {
@@ -16,7 +18,10 @@ namespace decode
 			{
 				if(*p == '\r')
 					break;
-				sz = (sz << 4) | convert::hex::Dec::pr_char(*p);
+				const uint8_t c = convert::hex::Dec::pr_char(*p);
+				if(c == 16)
+					return false;
+				sz = (sz << 4) | c;
 				p++;
 				n--;
 			}
@@ -35,6 +40,38 @@ namespace decode
 			p += sz + 2;
 		}
 		return false;
+	}
+
+	static bool chunk_read(byteReader &br, byteWriter &bw)
+	{
+		for(;;)
+		{
+			std::size_t sz = 0;
+			for(;;)
+			{
+				uint8_t c;
+				if(!br.get(c))
+					return false;
+				if(c == '\r')
+					break;
+				c = convert::hex::Dec::pr_char(c);
+				if(c == 16)
+					return false;
+				sz = (sz << 4) | c;
+			}
+			if(sz == 0)
+				return true;
+			if(!br.skip(1))
+				return false;
+			{
+				std::vector<uint8_t> tmp;
+				if(!br.readN(tmp, sz))
+					return false;
+				bw.writeN(tmp.data(), sz);
+			}
+			if(!br.skip(2))
+				return false;
+		}
 	}
 }
 

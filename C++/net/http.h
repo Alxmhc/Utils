@@ -2,7 +2,6 @@
 #define H_HTTP
 
 #include <map>
-#include <deque>
 
 #include "../str.h"
 #include "../data/convert/hex.h"
@@ -86,14 +85,6 @@ class HTTP1
 	static bool Decode_Data(const http_header &hdr, std::vector<uint8_t> &res)
 	{
 		std::string fld;
-		if(hdr.GetField("transfer-encoding", fld)
-		&& fld == "chunked")
-		{
-			std::size_t sz = res.size();
-			if( !decode::unchunk(res.data(), sz) )
-				return false;
-			res.resize(sz);
-		}
 		if(hdr.GetField("content-encoding", fld))
 		{
 			if(fld == "gzip")
@@ -203,14 +194,25 @@ public:
 
 	bool Get_Data(std::vector<uint8_t> &data)
 	{
+		data.clear();
 		br->set_pos(data_pos);
-		const auto sz = br->get_rsize();
-		if(sz == 0)
+
+		std::string fld;
+		if(hdr.GetField("content-length", fld))
 		{
-			data.clear();
-			return true;
+			const auto sz = std::stoul(fld);
+			if(!br->readN(data, sz))
+				return false;
 		}
-		br->readN(data, sz);
+		else if(hdr.GetField("transfer-encoding", fld) && fld == "chunked")
+		{
+			bw_array bw(data);
+			if(!decode::chunk_read(*br, bw))
+				return false;
+		}
+		else
+			return true;
+
 		return Decode_Data(hdr, data);
 	}
 };
