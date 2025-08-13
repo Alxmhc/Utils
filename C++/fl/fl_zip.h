@@ -164,7 +164,7 @@ namespace fl_pr
 			switch(inf.method)
 			{
 			case cNO:
-				copy(br, bw);
+				copy(br, bw, inf.data_size);
 				break;
 			case cDeflate:
 			case cDeflate64:

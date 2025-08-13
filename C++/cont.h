@@ -4,11 +4,12 @@
 #include "data/byte_reader.h"
 #include "data/byte_writer.h"
 
-static bool copy(byteReader &br, byteWriter &bw)
+static bool copy(byteReader &br, byteWriter &bw, std::size_t sz)
 {
 	std::vector<uint8_t> data;
-	br.readN(data, br.get_rsize());
-	bw.writeN(data.data(), data.size());
+	if( !br.readN(data, sz) )
+		return false;
+	bw.writeN(data.data(), sz);
 	return true;
 }
 

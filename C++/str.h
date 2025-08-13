@@ -27,4 +27,12 @@ static bool is_e(const std::string &s, const std::string &t)
 	return std::memcmp(s.c_str() + (s.length() - t.length()), t.c_str(), t.length()) == 0;
 }
 
+static void str_lower(std::string &s)
+{
+	for(std::size_t i = 0; i < s.size(); i++)
+	{
+		s[i] = tolower(s[i]);
+	}
+}
+
 #endif

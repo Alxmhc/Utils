@@ -75,9 +75,7 @@ namespace fl_pr
 		bool GetData(std::size_t n, byteWriter &bw)
 		{
 			br->set_pos(infFs[n].data_pos);
-			br->set_rsize(infFs[n].data_size);
-
-			copy(*br, bw);
+			copy(*br, bw, infFs[n].data_size);
 			return true;
 		}
 	};

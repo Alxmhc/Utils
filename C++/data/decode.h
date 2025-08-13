@@ -2,8 +2,7 @@
 #define H_DECODE
 
 #include "convert/hex.h"
-#include "byte_reader.h"
-#include "byte_writer.h"
+#include "../cont.h"
 
 namespace decode
 {
@@ -63,12 +62,8 @@ namespace decode
 				return true;
 			if(!br.skip(1))
 				return false;
-			{
-				std::vector<uint8_t> tmp;
-				if(!br.readN(tmp, sz))
-					return false;
-				bw.writeN(tmp.data(), sz);
-			}
+			if(!copy(br, bw, sz))
+				return false;
 			if(!br.skip(2))
 				return false;
 		}

@@ -213,7 +213,7 @@ class HTTP2
 			{
 				if(name == ":authority")
 				{
-					hdr.AddField("host", val);
+					hdr.h.AddField("host", val);
 				}
 				else if(name == ":method")
 				{
@@ -232,7 +232,7 @@ class HTTP2
 				}
 				continue;
 			}
-			hdr.AddField(name, val);
+			hdr.h.AddField(name, val);
 		}
 		return true;
 	}

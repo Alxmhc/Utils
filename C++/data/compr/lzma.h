@@ -224,8 +224,8 @@ namespace compr
 			}
 		};
 
-		static const unsigned int Len_sz = 2*(16*8 + 16*8 + 256 + 2);
-		static const unsigned int Pos_sz = 16 + 115 + 4*64;
+		static const unsigned int Len_sz = 2*(512 + 2);
+		static const unsigned int Pos_sz = 16 + 115 + 256;
 		static const unsigned int Rep_sz = 240 + 192;
 	public:
 		static bool Decode(byteReader &br, byteWriter &bw, uint64_t fsize = -1)

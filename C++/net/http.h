@@ -8,6 +8,68 @@
 #include "../data/decode.h"
 #include "../fl/fl_gzip.h"
 
+class net_header
+{
+	std::map<std::string, std::string> m;
+public:
+	void clear()
+	{
+		m.clear();
+	}
+
+	void AddField(const std::string &name, const std::string &val, bool replace = false)
+	{
+		std::string lname(name);
+		str_lower(lname);
+		if(replace || m.find(name) == m.end())
+		{
+			m[lname] = val;
+		}
+		else
+		{
+			m[lname] += "; ";
+			m[lname] += val;
+		}
+	}
+
+	bool GetField(const std::string &name, std::string &val) const
+	{
+		std::string lname(name);
+		str_lower(lname);
+		const auto h = m.find(lname);
+		if(h == m.cend())
+			return false;
+		val = h->second;
+		return true;
+	}
+
+	bool From_Text(const char* cb, const char* ce)
+	{
+		static const char* rn = "\r\n";
+		static const char* d = ": ";
+		while(cb != ce)
+		{
+			const auto p = std::search(cb, ce, rn, rn + 2);
+			const auto f = std::search(cb, p, d, d + 2);
+			if(f == p)
+				return false;
+			AddField(std::string(cb, f), std::string(f + 2, p));
+			cb = p + 2;
+		}
+		return true;
+	}
+
+	std::string To_Text() const
+	{
+		std::string res;
+		for(auto e = m.cbegin(); e != m.cend(); ++e)
+		{
+			res += e->first + ": " + e->second + "\r\n";
+		}
+		return res;
+	}
+};
+
 struct URL
 {
 	static std::vector<uint8_t> Decode(const char* s, std::size_t sz)
@@ -38,40 +100,13 @@ struct http_header
 	std::string f;
 	std::string s;
 
-	std::map<std::string, std::string> m;
+	net_header h;
 
 	void clear()
 	{
 		f.clear();
 		s.clear();
-		m.clear();
-	}
-
-	void AddField(const std::string &name, const std::string &val, bool replace = false)
-	{
-		std::string lname(name);
-		for(std::size_t i = 0; i < lname.size(); i++)
-		{
-			lname[i] = tolower(lname[i]);
-		}
-		if(replace || m.find(name) == m.end())
-		{
-			m[lname] = val;
-		}
-		else
-		{
-			m[lname] += "; ";
-			m[lname] += val;
-		}
-	}
-
-	bool GetField(const std::string &name, std::string &val) const
-	{
-		const auto h = m.find(name);
-		if(h == m.cend())
-			return false;
-		val = h->second;
-		return true;
+		h.clear();
 	}
 };
 
@@ -82,105 +117,45 @@ class HTTP1
 	http_header hdr;
 	std::size_t data_pos;
 
-	static bool Decode_Data(const http_header &hdr, std::vector<uint8_t> &res)
+	static bool parse_s(const std::string &s, http_header &res)
 	{
-		std::string fld;
-		if(hdr.GetField("content-encoding", fld))
+		const auto p1 = s.find(' ');
+		if(p1 == std::string::npos)
+			return false;
+		const auto p2 = s.find(' ', p1 + 1);
+		if(p2 == std::string::npos)
+			return false;
+
+		res.is_out = !is_b(s, "HTTP/");
+		if(res.is_out)
 		{
-			if(fld == "gzip")
-			{
-				br_array br(res.data(), res.size());
-				fl_pr::F_gzip gz;
-				if( !gz.read(&br) )
-					return false;
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !gz.GetData(bw) )
-					return false;
-				res = std::move(tmp);
-			}
-			else if(fld == "deflate")
-			{
-				br_array br(res.data(), res.size());
-				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
-				if( !compr::deflate::Decode(br, bw) )
-					return false;
-				res = std::move(tmp);
-			}
+			res.f = s.substr(0, p1);
+			res.s = s.substr(p1 + 1, p2 - p1 - 1);
 		}
+		else
+		{
+			res.f = s.substr(p1 + 1, p2 - p1 - 1);
+			res.s = s.substr(p2 + 1);
+		}
+
 		return true;
 	}
 public:
-	static bool parse_hdr(const char* sb, std::size_t sz, http_header &res)
-	{
-		res.clear();
-		const char* se = sb + sz;
-		{
-			const char* p[2];
-			const char* f = sb;
-			uint_fast8_t k = 2;
-			for(; *f != '\r'; f++)
-			{
-				if(k == 0)
-					continue;
-				if(*f == ' ')
-				{
-					k--;
-					p[1-k] = f;
-				}
-			}
-			if(k != 0 || *(f+1) != '\n')
-				return false;
-
-			res.is_out = std::memcmp(sb, "HTTP", 4) != 0;
-			if(res.is_out)
-			{
-				res.f.assign(sb, p[0]);
-				res.s.assign(p[0]+1, p[1]);
-			}
-			else
-			{
-				res.f.assign(p[0]+1, p[1]);
-				res.s.assign(p[1]+1, f);
-			}
-			sb = f + 2;
-		}
-
-		static const char* rn = "\r\n";
-		static const char* d = ": ";
-		while(sb != se)
-		{
-			const auto p = std::search(sb, se, rn, rn + 2);
-			const auto f = std::search(sb, p, d, d + 2);
-			if(f == p)
-				return false;
-			res.AddField(std::string(sb, f), std::string(f + 2, p));
-			sb = p + 2;
-		}
-		return true;
-	}
-
-	static std::string to_text(const http_header &hdr)
-	{
-		std::string res = hdr.is_out ? hdr.f + ' ' + hdr.s + " HTTP/1.1\r\n" : "HTTP/1.1 " + hdr.f + (hdr.s.empty() ? "" : ' ' + hdr.s) + "\r\n";
-		for(auto e = hdr.m.cbegin(); e != hdr.m.cend(); ++e)
-		{
-			res += e->first + ": " + e->second + "\r\n";
-		}
-		res += "\r\n";
-		return res;
-	}
-
 	bool read(byteReader* b)
 	{
 		br = b;
+		hdr.clear();
 		
 		std::string h;
 		if(!br->read_string(bytes("\r\n\r\n"), 4, h))
 			return false;
 		h += "\r\n";
-		if(!parse_hdr(h.c_str(), h.length(), hdr))
+
+		const auto p = h.find("\r\n");
+		if(!parse_s(h.substr(0, p), hdr))
+			return false;
+		const auto s = h.c_str();
+		if(!hdr.h.From_Text(s + p + 2, s + h.length()))
 			return false;
 
 		data_pos = br->get_pos();
@@ -192,19 +167,26 @@ public:
 		return &hdr;
 	}
 
+	std::string Get_Hdr_Text() const
+	{
+		std::string res = hdr.is_out ? hdr.f + ' ' + hdr.s + " HTTP/1.1\r\n" : "HTTP/1.1 " + hdr.f + (hdr.s.empty() ? "" : ' ' + hdr.s) + "\r\n";
+		res += hdr.h.To_Text() + "\r\n";
+		return res;
+	}
+
 	bool Get_Data(std::vector<uint8_t> &data)
 	{
 		data.clear();
 		br->set_pos(data_pos);
 
 		std::string fld;
-		if(hdr.GetField("content-length", fld))
+		if(hdr.h.GetField("content-length", fld))
 		{
 			const auto sz = std::stoul(fld);
 			if(!br->readN(data, sz))
 				return false;
 		}
-		else if(hdr.GetField("transfer-encoding", fld) && fld == "chunked")
+		else if(hdr.h.GetField("transfer-encoding", fld) && fld == "chunked")
 		{
 			bw_array bw(data);
 			if(!decode::chunk_read(*br, bw))
@@ -213,7 +195,32 @@ public:
 		else
 			return true;
 
-		return Decode_Data(hdr, data);
+		if(hdr.h.GetField("content-encoding", fld))
+		{
+			if(fld == "gzip")
+			{
+				br_array br(data.data(), data.size());
+				fl_pr::F_gzip gz;
+				if( !gz.read(&br) )
+					return false;
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				if( !gz.GetData(bw) )
+					return false;
+				data = std::move(tmp);
+			}
+			else if(fld == "deflate")
+			{
+				br_array br(data.data(), data.size());
+				std::vector<uint8_t> tmp;
+				bw_array bw(tmp);
+				if( !compr::deflate::Decode(br, bw) )
+					return false;
+				data = std::move(tmp);
+			}
+		}
+
+		return true;
 	}
 };
 
