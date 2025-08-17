@@ -19,7 +19,11 @@ namespace decode
 					break;
 				const uint8_t c = convert::hex::Dec::pr_char(*p);
 				if(c == 16)
+				{
+					if(sz == 0)
+						break;
 					return false;
+				}
 				sz = (sz << 4) | c;
 				p++;
 				n--;
@@ -55,7 +59,7 @@ namespace decode
 					break;
 				c = convert::hex::Dec::pr_char(c);
 				if(c == 16)
-					return false;
+					return sz == 0;
 				sz = (sz << 4) | c;
 			}
 			if(sz == 0)
