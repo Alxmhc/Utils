@@ -41,17 +41,18 @@ namespace crypt
 			conv::pack<2, endianness::BIG_ENDIAN>(r, 8, d);
 			for(uint_fast8_t i = 0; i < 48; i += 6)
 			{
-				uint16_t A = mul(d[0], key[i]);
-				uint16_t B = d[1] + key[i + 1];
-				uint16_t C = d[2] + key[i + 2];
-				uint16_t D = mul(d[3], key[i + 3]);
-				uint16_t E = mul(A ^ C, key[i + 4]);
-				uint16_t F = mul((B ^ D) + E, key[i + 5]);
-				E += F;
-				d[0] = A ^ F;
-				d[1] = C ^ F;
-				d[2] = B ^ E;
-				d[3] = D ^ E;
+				d[0] = mul(d[0], key[i]);
+				d[1] += key[i + 1];
+				d[2] += key[i + 2];
+				d[3] = mul(d[3], key[i + 3]);
+				std::swap(d[1], d[2]);
+				auto A = mul(d[0] ^ d[1], key[i + 4]);
+				auto B = mul((d[2] ^ d[3]) + A, key[i + 5]);
+				A += B;
+				d[0] ^= B;
+				d[1] ^= B;
+				d[2] ^= A;
+				d[3] ^= A;
 			}
 			std::swap(d[1], d[2]);
 			d[0] = mul(d[0], key[48]);

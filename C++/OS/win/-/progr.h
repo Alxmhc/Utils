@@ -73,6 +73,28 @@ std::vector<PROCESSENTRY32> processList()
 	return res;
 }
 
+std::string processName(DWORD id)
+{
+	std::string res;
+	HANDLE sns = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (sns == INVALID_HANDLE_VALUE)
+		return res;
+	PROCESSENTRY32 inf;
+	inf.dwSize = sizeof(PROCESSENTRY32);
+	if (Process32First(sns, &inf))
+	{
+		do {
+			if(inf.th32ProcessID == id)
+			{
+				res = inf.szExeFile;
+				break;
+			}
+		} while ( Process32Next(sns, &inf) );
+	}
+	CloseHandle(sns);
+	return res;
+}
+
 std::vector<MODULEENTRY32> moduleList(DWORD id)
 {
 	std::vector<MODULEENTRY32> res;
