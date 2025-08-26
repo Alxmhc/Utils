@@ -2,6 +2,7 @@
 #define H_STR
 
 #include <cstdint>
+#include <cstring>
 #include <string>
 
 static const uint8_t* bytes(const char* s)
