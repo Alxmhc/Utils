@@ -68,6 +68,45 @@ public:
 		pos += n;
 		return true;
 	}
+
+	std::size_t find(uint8_t e)
+	{
+		auto r = get_rsize();
+		const auto p = pos;
+		while(pos < csize)
+		{
+			const auto c = read1();
+			if(c == e)
+			{
+				r = pos - 1 - p;
+				break;
+			}
+		}
+		set_pos(p);
+		return r;
+	}
+	std::size_t find(const uint8_t* e, uint_fast8_t k)
+	{
+		if(k == 1)
+			return find(*e);
+		auto r = get_rsize();
+		const auto p = pos;
+		k--;
+		while(pos + k < csize)
+		{
+			const auto c = read1();
+			if(c != *e)
+				continue;
+			if(std::memcmp(get_data(k), e+1, k) == 0)
+			{
+				r = pos - 1 - k - p;
+				break;
+			}
+			set_pos(pos - k);
+		}
+		set_pos(p);
+		return r;
+	}
 };
 
 class bw_fstream : public byteWriter
