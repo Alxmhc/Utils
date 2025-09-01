@@ -144,7 +144,7 @@ namespace fl_s
 	}
 
 	template<typename C, class T>
-	void proc_dir(const C* p, T &st, int depth = -1)
+	void proc_dir(const C* p, T &st)
 	{
 		typedef std::basic_string<C> S;
 
@@ -154,24 +154,24 @@ namespace fl_s
 			pth.push_back('/');
 		}
 
-		std::vector<std::pair<S, int>> pths;
-		pths.push_back(std::pair<S, int>(pth, depth));
+		std::vector<S> pths;
+		pths.push_back(pth);
 		dInf<S> g;
 		while(!pths.empty())
 		{
 			const auto p = std::move(pths.back());
 			pths.pop_back();
-			g.Init(p.first);
+			g.Init(p);
 
 			S name;
 			while(g.nxt(name))
 			{
 				if(g.is_pass(name))
 					continue;
-				name = p.first + name;
-				if(name.back() == '/' && p.second != 0)
+				name = p + name;
+				if(name.back() == '/')
 				{
-					pths.push_back(std::pair<S, int>(name, p.second - 1));
+					pths.push_back(name);
 				}
 				st(name);
 			}
@@ -179,13 +179,13 @@ namespace fl_s
 	}
 
 	template<typename C, class T>
-	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr, int depth = -1)
+	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr)
 	{
 		typedef std::basic_string<C> S;
 
 		std::vector<S> res;
 		auto fnc = [&](const S &s){if(fltr(s)){res.push_back(s);}};
-		proc_dir(pth, fnc, depth);
+		proc_dir(pth, fnc);
 		return res;
 	}
 

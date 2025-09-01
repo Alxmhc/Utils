@@ -1,34 +1,33 @@
 package fls
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
-func dirAll(d string, f func(string, bool) bool, n int) []string {
+func DirAll(d string, fltr func(os.DirEntry) bool) []string {
 	var res []string
-	fls, err := ioutil.ReadDir(d)
-	if err != nil {
-		return res
-	}
-	for _, o := range fls {
-		pth := filepath.Join(d, o.Name())
-		isDir := o.IsDir()
-		if f(pth, isDir) {
-			res = append(res, pth)
+	pths := []string{d}
+	for {
+		sz := len(pths)
+		if sz == 0 {
+			break
 		}
-		if isDir && n != 0 {
-			tmp := dirAll(pth, f, n-1)
-			res = append(res, tmp...)
+		pth := pths[0]
+		fls, err := os.ReadDir(pth)
+		pths = pths[1:]
+		if err != nil {
+			continue
+		}
+		for _, fl := range fls {
+			fpth := filepath.Join(pth, fl.Name())
+			if fltr(fl) {
+				res = append(res, fpth)
+			}
+			if fl.IsDir() {
+				pths = append(pths, fpth)
+			}
 		}
 	}
 	return res
-}
-
-func DirFiles(d string, f func(string) bool, n int) []string {
-	return dirAll(d, func(pth string, isDir bool) bool { return !isDir && f(pth) }, n)
-}
-
-func DirFolders(d string, f func(string) bool, n int) []string {
-	return dirAll(d, func(pth string, isDir bool) bool { return isDir && f(pth) }, n)
 }
