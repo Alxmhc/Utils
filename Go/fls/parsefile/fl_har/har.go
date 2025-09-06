@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -48,7 +48,7 @@ func (e entrie) getReq() *http.Request {
 		if name[0] == ':' {
 			continue
 		}
-		req.Header.Set(strings.Title(name), hdr.Value)
+		req.Header.Set(name, hdr.Value)
 	}
 	return req
 }
@@ -71,7 +71,7 @@ func (e entrie) getResp() *http.Response {
 			data = []byte(body)
 		}
 		res.ContentLength = int64(len(data))
-		res.Body = ioutil.NopCloser(bytes.NewReader(data))
+		res.Body = io.NopCloser(bytes.NewReader(data))
 	}
 
 	for _, hdr := range rs.Headers {
@@ -81,7 +81,7 @@ func (e entrie) getResp() *http.Response {
 			name == "transfer-encoding" {
 			continue
 		}
-		res.Header.Set(strings.Title(name), hdr.Value)
+		res.Header.Set(name, hdr.Value)
 	}
 	res.Header.Set("Content-Length", strconv.FormatInt(res.ContentLength, 10))
 	return res
