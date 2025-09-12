@@ -32,7 +32,7 @@ static void str_lower(std::string &s)
 {
 	for(std::size_t i = 0; i < s.size(); i++)
 	{
-		s[i] = tolower(s[i]);
+		s[i] = static_cast<char>(tolower(s[i]));
 	}
 }
 
