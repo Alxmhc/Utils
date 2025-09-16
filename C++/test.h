@@ -46,10 +46,4 @@ bool compare(const uint8_t* v, std::size_t sz, const char* fname)
 	return true;
 }
 
-template<std::size_t BSIZE>
-bool compare(const std::vector<uint8_t> &t, const char* fname)
-{
-	return compare<BSIZE>(t.data(), t.size(), fname);
-}
-
 #endif

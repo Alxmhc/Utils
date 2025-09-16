@@ -11,10 +11,17 @@ namespace convert
 {
 	class PEM
 	{
+		std::istream &st;
+	protected:
+		PEM(std::istream &s) : st(s){}
+	public:
 		typedef std::pair<std::string, std::vector<uint8_t>> crt;
 
-		static bool read_1(std::istream &st, crt &res)
+		bool read(crt &res)
 		{
+			res.first.clear();
+			res.second.clear();
+
 			if(!std::getline(st, res.first))
 				return false;
 			if(!is_b(res.first, "-----BEGIN ")
@@ -49,27 +56,31 @@ namespace convert
 			de.Fin();
 			return true;
 		}
+	};
 
-		static std::vector<crt> read_s(std::istream &st)
-		{
-			std::vector<crt> res;
-			crt tmp;
-			while(read_1(st, tmp))
-			{
-				res.push_back(std::move(tmp));
-			}
-			return res;
-		}
+	class PEM_string : public PEM
+	{
+		std::istringstream s;
 	public:
-		static std::vector<crt> read_string(const char* str)
+		PEM_string() : PEM(s){}
+
+		void open(const char* str)
 		{
-			std::istringstream s(str);
-			return read_s(s);
+			s.clear();
+			s.str(str);
 		}
-		static std::vector<crt> read_file(const char* fname)
+	};
+
+	class PEM_file : public PEM
+	{
+		std::ifstream s;
+	public:
+		PEM_file() : PEM(s){}
+
+		void open(const char* fname)
 		{
-			std::ifstream fl(fname);
-			return read_s(fl);
+			s.close();
+			s.open(fname);
 		}
 	};
 }
