@@ -71,15 +71,6 @@ namespace BER
 		t -= c;
 		return b_sint(t, false);
 	}
-
-	static bool get_Int(byteReader &br, b_sint &r)
-	{
-		std::vector<uint8_t> v;
-		if(!get_data(br, v))
-			return false;
-		r = Int_decode(v.data(), v.size());
-		return true;
-	}
 }
 
 #endif

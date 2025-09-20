@@ -28,17 +28,17 @@ namespace crypt
 		template<class CR, class INCR>
 		class Encr : public byteProcBuf<CR::block_size>
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 			uint8_t iv[CR::block_size];
 
 			void gen()
 			{
 				std::copy_n(iv, CR::block_size, this->buf);
-				cr->process(this->buf);
+				cr.process(this->buf);
 				INCR::incr(iv, CR::block_size);
 			}
 		public:
-			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
+			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, iv);
 			}
@@ -57,14 +57,14 @@ namespace crypt
 		template<class CR>
 		class Encr : public byteProcBuf<CR::block_size>
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 
 			void gen()
 			{
-				cr->process(this->buf);
+				cr.process(this->buf);
 			}
 		public:
-			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
+			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, this->buf);
 			}
@@ -83,11 +83,11 @@ namespace crypt
 		template<class CR>
 		class Encr : public byteProcBuf<CR::block_size>
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 
 			void gen()
 			{
-				cr->process(this->buf);
+				cr.process(this->buf);
 			}
 
 			void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
@@ -96,7 +96,7 @@ namespace crypt
 				std::copy_n(v, sz, b);
 			}
 		public:
-			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
+			Encr(const typename CR::Enc &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, this->buf);
 			}
@@ -105,11 +105,11 @@ namespace crypt
 		template<class CR>
 		class Decr : public byteProcBuf<CR::block_size>
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 
 			void gen()
 			{
-				cr->process(this->buf);
+				cr.process(this->buf);
 			}
 
 			void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const override
@@ -118,7 +118,7 @@ namespace crypt
 				v_xor(v, b, sz);
 			}
 		public:
-			Decr(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
+			Decr(const typename CR::Enc &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, this->buf);
 			}
@@ -130,24 +130,24 @@ namespace crypt
 		template<class CR>
 		class Enc
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 		public:
-			Enc(const typename CR::Enc &c) : cr(&c) {}
+			Enc(const typename CR::Enc &c) : cr(c) {}
 			void process(uint8_t* v) const
 			{
-				cr->process(v);
+				cr.process(v);
 			}
 		};
 
 		template<class CR>
 		class Dec
 		{
-			const typename CR::Dec* cr;
+			const typename CR::Dec &cr;
 		public:
-			Dec(const typename CR::Dec &c) : cr(&c) {}
+			Dec(const typename CR::Dec &c) : cr(c) {}
 			void process(uint8_t* v) const
 			{
-				cr->process(v);
+				cr.process(v);
 			}
 		};
 	}
@@ -157,17 +157,17 @@ namespace crypt
 		template<class CR>
 		class Enc
 		{
-			const typename CR::Enc* cr;
+			const typename CR::Enc &cr;
 			uint8_t iv[CR::block_size];
 		public:
-			Enc(const typename CR::Enc &c, const uint8_t* v) : cr(&c)
+			Enc(const typename CR::Enc &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, iv);
 			}
 			void process(uint8_t* v)
 			{
 				v_xor(v, iv, CR::block_size);
-				cr->process(v);
+				cr.process(v);
 				std::copy_n(v, CR::block_size, iv);
 			}
 		};
@@ -175,10 +175,10 @@ namespace crypt
 		template<class CR>
 		class Dec
 		{
-			const typename CR::Dec* cr;
+			const typename CR::Dec &cr;
 			uint8_t iv[CR::block_size];
 		public:
-			Dec(const typename CR::Dec &c, const uint8_t* v) : cr(&c)
+			Dec(const typename CR::Dec &c, const uint8_t* v) : cr(c)
 			{
 				std::copy_n(v, CR::block_size, iv);
 			}
@@ -188,7 +188,7 @@ namespace crypt
 				std::copy_n(iv, CR::block_size, iv_tmp);
 				std::copy_n(v, CR::block_size, iv);
 
-				cr->process(v);
+				cr.process(v);
 				v_xor(v, iv_tmp, CR::block_size);
 			}
 		};
