@@ -143,6 +143,14 @@ public:
 	{
 		return !operator==(a);
 	}
+	bool operator>(num a) const
+	{
+		return (n.size() > 1) || (n[0] > a);
+	}
+	bool operator<(num a) const
+	{
+		return (n.size() == 1) && (n[0] < a);
+	}
 
 	bool operator==(const b_uint &c) const
 	{
