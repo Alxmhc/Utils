@@ -514,6 +514,8 @@ public:
 
 class b_sint
 {
+	typedef int32_t num;
+
 	b_uint u;
 	bool p; //>=0
 public:
@@ -524,20 +526,58 @@ public:
 		p = pos ? true : c == 0;
 	}
 
+	const b_sint& operator=(num a)
+	{
+		p = (a >= 0);
+		u = p ? a : -a;
+		return *this;
+	}
+
 	const b_uint& abs() const
 	{
 		return u;
 	}
 
-	b_uint mod(const b_uint &m) const
+	bool operator<(num a) const
 	{
-		b_uint res(u);
-		res %= m;
-		if(!p && res != 0)
+		if(a == 0)
+			return !p;
+		if(a < 0)
 		{
-			res = m - res;
+			if(p)
+				return false;
+			return u > -a;
 		}
-		return res;
+		if(!p)
+			return true;
+		return u < a;
+	}
+
+	bool operator==(const b_sint &c) const
+	{
+		return (u == c.u) && (p == c.p);
+	}
+
+	const b_sint& operator*=(num c)
+	{
+		if(u == 0)
+			return *this;
+		if(c == 0)
+		{
+			*this = 0;
+			return *this;
+		}
+
+		if(c > 0)
+		{
+			u *= c;
+		}
+		else
+		{
+			p = !p;
+			u *= -c;
+		}
+		return *this;
 	}
 
 	const b_sint& operator+=(const b_uint &c)
@@ -589,6 +629,17 @@ public:
 	b_sint operator*(const b_sint &c) const
 	{
 		return b_sint(u * c.u, p == c.p);
+	}
+
+	b_uint mod(const b_uint &m) const
+	{
+		b_uint res(u);
+		res %= m;
+		if(!p && res != 0)
+		{
+			res = m - res;
+		}
+		return res;
 	}
 };
 
