@@ -335,7 +335,7 @@ public:
 
 	const b_uint& operator*=(num c)
 	{
-		if(c == 1)
+		if(*this == 0 || c == 1)
 			return *this;
 		if(c == 0)
 		{
@@ -440,47 +440,53 @@ public:
 		return *this;
 	}
 
-	const b_uint& ModDiv(b_uint c, b_uint* r)
+	const b_uint& ModDiv(const b_uint &m, b_uint* r)
 	{
 		if(r != nullptr)
 		{
 			*r = 0;
 		}
-		if(*this < c)
+		if(*this < m)
 			return *this;
-		if(c.n.size() == 1)
+		if(m.n.size() == 1)
 		{
 			if(r == nullptr)
 			{
-				*this = *this % c.n[0];
+				*this = *this % m.n[0];
 				return *this;
 			}
-			if(c.n[0] == 1)
+			if(m.n[0] == 1)
 			{
 				std::swap(*this, *r);
 				return *this;
 			}
 		}
 
-		std::size_t d = log2i() - c.log2i() + 1;
-		c <<= d;
-		while(d--)
+		std::size_t d = log2i() - m.log2i();
+		const b_uint t = get_bits(d);
+		*this >>= d;
+		for(;;)
 		{
-			c >>= 1;
-			if(*this < c)
-				continue;
-			if(r != nullptr)
+			if(*this >= m)
 			{
-				r->setBit(d, true);
+				*this -= m;
+				if(r != nullptr)
+				{
+					r->setBit(d, true);
+				}
 			}
-			*this -= c;
+			if(d == 0)
+				break;
+			d--;
+			*this <<= 1;
+			n[0] |= t.getBit(d);
 		}
 		return *this;
 	}
 
-	const b_uint& operator%=(const b_uint &c)
+	const b_uint& operator%=(const b_uint &m)
 	{
-		return ModDiv(c, nullptr);
+		return ModDiv(m, nullptr);
 	}
 
 	b_uint Pow_Mod(const b_uint &p, const b_uint &m) const
