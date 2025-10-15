@@ -1,4 +1,4 @@
-//Secur32.lib
+//secur32.lib
 
 #include <vector>
 #include <string>
