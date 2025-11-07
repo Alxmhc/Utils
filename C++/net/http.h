@@ -17,26 +17,24 @@ public:
 		m.clear();
 	}
 
-	void AddField(const std::string &name, const std::string &val, bool replace = false)
+	void AddField(std::string name, const std::string &val, bool replace = false)
 	{
-		std::string lname(name);
-		str_lower(lname);
+		str_lower(name);
 		if(replace || m.find(name) == m.end())
 		{
-			m[lname] = val;
+			m[name] = val;
 		}
 		else
 		{
-			m[lname] += "; ";
-			m[lname] += val;
+			m[name] += "; ";
+			m[name] += val;
 		}
 	}
 
-	bool GetField(const std::string &name, std::string &val) const
+	bool GetField(std::string name, std::string &val) const
 	{
-		std::string lname(name);
-		str_lower(lname);
-		const auto h = m.find(lname);
+		str_lower(name);
+		const auto h = m.find(name);
 		if(h == m.cend())
 			return false;
 		val = h->second;

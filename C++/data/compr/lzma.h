@@ -41,7 +41,7 @@ namespace compr
 
 		class RangeDecoder
 		{
-			byteReader* br;
+			byteReader &br;
 
 			uint32_t Range;
 			uint32_t Code;
@@ -51,7 +51,7 @@ namespace compr
 				if(Range < 0x1000000)
 				{
 					uint8_t c;
-					if( !br->get(c) )
+					if( !br.get(c) )
 						return false;
 					Range <<= 8;
 					Code = (Code << 8) | c;
@@ -59,22 +59,21 @@ namespace compr
 				return true;
 			}
 		public:
-			bool Init(byteReader &brd)
-			{
-				br = &brd;
+			RangeDecoder(byteReader &brd) : br(brd), Range(0xffffffff) {}
 
+			bool Init()
+			{
 				uint8_t b;
-				if( !brd.get(b) )
+				if( !br.get(b) )
 					return false;
 				if( b != 0 )
 					return false;
 
-				if( !brd.readC<4, endianness::BIG_ENDIAN>(Code) )
+				if( !br.readC<4, endianness::BIG_ENDIAN>(Code) )
 					return false;
 				if( Code == 0xffffffff )
 					return false;
 
-				Range = 0xffffffff;
 				return true;
 			}
 
@@ -244,8 +243,8 @@ namespace compr
 					return false;
 			}
 
-			RangeDecoder rd;
-			if( !rd.Init(br) )
+			RangeDecoder rd(br);
+			if( !rd.Init() )
 				return false;
 
 			std::vector<uint16_t> probs(Len_sz + Pos_sz + Rep_sz + (0x300 << (pr.lc + pr.lp)), 1024);

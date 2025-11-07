@@ -6,16 +6,16 @@
 class bitReader
 {
 protected:
-	byteReader* r;
+	byteReader &r;
 	uint_fast8_t o, b;
 
-	bitReader(byteReader &d) : r(&d), o(0) {}
+	bitReader(byteReader &d) : r(d), o(0) {}
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 
 	std::size_t get_pos() const
 	{
-		return (r->get_pos() * 8) - o;
+		return (r.get_pos() * 8) - o;
 	}
 
 	bool skip(std::size_t n)
@@ -28,12 +28,12 @@ public:
 		n -= o;
 		o = 0;
 
-		if( !r->skip(n >> 3) )
+		if( !r.skip(n >> 3) )
 			return false;
 		const uint_fast8_t k = n & 7;
 		if(k != 0)
 		{
-			if( !r->get(b) )
+			if( !r.get(b) )
 				return false;
 			o = 8 - k;
 		}
@@ -43,24 +43,24 @@ public:
 	bool readB(uint8_t* v, std::size_t n)
 	{
 		o = 0;
-		return r->readN(v, n);
+		return r.readN(v, n);
 	}
 	bool addB(std::vector<uint8_t> &v, std::size_t n)
 	{
 		o = 0;
-		return r->addN(v, n);
+		return r.addN(v, n);
 	}
 	bool skipB(std::size_t n)
 	{
 		o = 0;
-		return r->skip(n);
+		return r.skip(n);
 	}
 
 	template<unsigned char SZ, char E>
 	bool readB_C(typename UINT_<SZ>::uint &c)
 	{
 		o = 0;
-		return r->readC<SZ, E>(c);
+		return r.readC<SZ, E>(c);
 	}
 };
 
@@ -72,7 +72,7 @@ public:
 	{
 		if(o == 0)
 		{
-			if( !r->get(b) )
+			if( !r.get(b) )
 				return false;
 			o = 8;
 		}
@@ -124,7 +124,7 @@ public:
 	{
 		if(o == 0)
 		{
-			if( !r->get(b) )
+			if( !r.get(b) )
 				return false;
 			o = 8;
 		}
