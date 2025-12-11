@@ -7,33 +7,51 @@ namespace compr
 {
 	class brotli
 	{
-	public:
-		static bool wbit(bitReaderL &br, uint_fast8_t &r)
+		static bool wbit(bitReaderL &br, uint_fast8_t &p)
 		{
-			if(!br.get(r))
+			if(!br.get(p))
 				return false;
-			if(r == 0)
+			if(p == 0)
 			{
-				r = 16;
+				p = 16;
 				return true;
 			}
-			if(!br.readBE(3, r))
+			if(!br.readBE(3, p))
 				return false;
-			if(r != 0)
+			if(p != 0)
 			{
-				r += 17;
+				p += 17;
 				return true;
 			}
-			if(!br.readBE(3, r))
+			if(!br.readBE(3, p))
 				return false;
-			if(r != 0)
+			if(p == 0)
 			{
-				if(r == 1)
-					return false;
-				r += 8;
+				p = 17;
 				return true;
 			}
-			r = 17;
+			if(p == 1)
+				return false;
+			p += 8;
+			return true;
+		}
+
+		static bool read_nbt(bitReaderL &br, uint_fast16_t &t)
+		{
+			uint_fast8_t n;
+			if(!br.get(n))
+				return false;
+			if(n == 0)
+			{
+				t = 1;
+				return true;
+			}
+			if(!br.readBE(3, n))
+				return false;
+			if(!br.readBE(n, t))
+				return false;
+			t += 1 << n;
+			t++;
 			return true;
 		}
 	};

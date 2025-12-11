@@ -17,10 +17,10 @@ public:
 		m.clear();
 	}
 
-	void AddField(std::string name, const std::string &val, bool replace = false)
+	void AddField(std::string name, const std::string &val)
 	{
 		str_lower(name);
-		if(replace || m.find(name) == m.end())
+		if(m.find(name) == m.end())
 		{
 			m[name] = val;
 		}
