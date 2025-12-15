@@ -34,23 +34,23 @@ namespace convert
 
 		class Encoder : public byteWriter
 		{
-			byteWriter* bw;
+			byteWriter &bw;
 			const char* dict;
 		public:
-			Encoder(byteWriter &b, bool isU = false) : bw(&b), dict(isU ? dct_uc : dct_lc) {}
+			Encoder(byteWriter &b, bool isU = false) : bw(b), dict(isU ? dct_uc : dct_lc) {}
 
 			void writeN(const uint8_t* v, std::size_t n)
 			{
 				for(std::size_t i = 0; i < n; i++)
 				{
-					const uint8_t t[2] = {dict[v[i]>>4], dict[v[i]&0x0f]};
-					bw->writeN(t, 2);
+					bw.write(dict[v[i] >> 4]);
+					bw.write(dict[v[i] & 0x0f]);
 				}
 			}
 
 			void Fin()
 			{
-				bw->Fin();
+				bw.Fin();
 			}
 		};
 

@@ -46,6 +46,11 @@ class bw_array : public byteWriter
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
+	void write(uint8_t c)
+	{
+		d.push_back(c);
+	}
+
 	void writeN(const uint8_t* v, std::size_t n)
 	{
 		d.insert(d.end(), v, v + n);

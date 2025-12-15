@@ -67,11 +67,14 @@ namespace crypt
 			{
 				for(uint_fast8_t i = 0; i < 16; i += 4)
 				{
-					const uint8_t d[4] = {r[i]^r[i+1], r[i+1]^r[i+2], r[i+2]^r[i+3], r[i+3]^r[i]};
-					r[i]   ^= d[2] ^ Mul3[d[0]];
-					r[i+1] ^= d[3] ^ Mul3[d[1]];
-					r[i+2] ^= d[0] ^ Mul3[d[2]];
-					r[i+3] ^= d[1] ^ Mul3[d[3]];
+					const uint8_t d0 = r[i] ^ r[i + 1];
+					const uint8_t d1 = r[i + 1] ^ r[i + 2];
+					const uint8_t d2 = r[i + 2] ^ r[i + 3];
+					const uint8_t d3 = r[i + 3] ^ r[i];
+					r[i]   ^= d2 ^ Mul3[d0];
+					r[i+1] ^= d3 ^ Mul3[d1];
+					r[i+2] ^= d0 ^ Mul3[d2];
+					r[i+3] ^= d1 ^ Mul3[d3];
 				}
 			}
 		public:
