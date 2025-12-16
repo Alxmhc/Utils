@@ -6,6 +6,42 @@
 
 #include <windows.h>
 
+DWORD GetFileAttributes_(LPCSTR pth)
+{
+	return GetFileAttributesA(pth);
+}
+DWORD GetFileAttributes_(LPCWSTR pth)
+{
+	return GetFileAttributesW(pth);
+}
+
+BOOL CreateDirectory_(LPCSTR pth, LPSECURITY_ATTRIBUTES attr)
+{
+	return CreateDirectoryA(pth, attr);
+}
+BOOL CreateDirectory_(LPCWSTR pth, LPSECURITY_ATTRIBUTES attr)
+{
+	return CreateDirectoryW(pth, attr);
+}
+
+BOOL DeleteFile_(LPCSTR pth)
+{
+	return DeleteFileA(pth);
+}
+BOOL DeleteFile_(LPCWSTR pth)
+{
+	return DeleteFileW(pth);
+}
+
+BOOL RemoveDirectory_(LPCSTR pth)
+{
+	return RemoveDirectoryA(pth);
+}
+BOOL RemoveDirectory_(LPCWSTR pth)
+{
+	return RemoveDirectoryW(pth);
+}
+
 namespace fl_s
 {
 	template<typename S>
@@ -93,21 +129,15 @@ namespace fl_s
 		}
 	};
 
+	template<typename C>
+	bool create_dir(const C* pth)
+	{
+		const auto inf = GetFileAttributes_(pth);
+		if(inf == INVALID_FILE_ATTRIBUTES)
+			return CreateDirectory_(pth, nullptr) == TRUE;
+		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
+	}
 
-	bool create_dir(const char* pth)
-	{
-		const auto inf = GetFileAttributesA(pth);
-		if(inf == INVALID_FILE_ATTRIBUTES)
-			return CreateDirectoryA(pth, nullptr) == TRUE;
-		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
-	}
-	bool create_dir(const wchar_t* pth)
-	{
-		const auto inf = GetFileAttributesW(pth);
-		if(inf == INVALID_FILE_ATTRIBUTES)
-			return CreateDirectoryW(pth, nullptr) == TRUE;
-		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
-	}
 	template<typename C>
 	bool create_dirs(const C* pth)
 	{
@@ -125,22 +155,19 @@ namespace fl_s
 		return create_dir(pth);
 	}
 
-	bool del_file(const char* pth)
+	bool del(const char* pth)
 	{
-		return DeleteFileA(pth) == TRUE;
+		const auto l = pth[strlen(pth)-1];
+		if(l == '/')
+			return RemoveDirectory_(pth) == TRUE;
+		return DeleteFile_(pth) == TRUE;
 	}
-	bool del_file(const wchar_t* pth)
+	bool del(const wchar_t* pth)
 	{
-		return DeleteFileW(pth) == TRUE;
-	}
-
-	bool del_dir(const char* pth)
-	{
-		return RemoveDirectoryA(pth) == TRUE;
-	}
-	bool del_dir(const wchar_t* pth)
-	{
-		return RemoveDirectoryW(pth) == TRUE;
+		const auto l = pth[wcslen(pth)-1];
+		if(l == '/')
+			return RemoveDirectory_(pth) == TRUE;
+		return DeleteFile_(pth) == TRUE;
 	}
 
 	template<typename C, class T>
@@ -149,11 +176,6 @@ namespace fl_s
 		typedef std::basic_string<C> S;
 
 		S pth(p);
-		if(pth.back() != '/')
-		{
-			pth.push_back('/');
-		}
-
 		std::vector<S> pths;
 		pths.push_back(pth);
 		dInf<S> g;
@@ -195,11 +217,6 @@ namespace fl_s
 		typedef std::basic_string<C> S;
 
 		S pth(p);
-		if(pth.back() != '/')
-		{
-			pth.push_back('/');
-		}
-
 		std::vector<S> pths;
 		pths.push_back(pth);
 		std::vector<S> d(pths);
@@ -218,7 +235,7 @@ namespace fl_s
 				name = p + name;
 				if(name.back() != '/')
 				{
-					del_file(name.c_str());
+					DeleteFile_(name.c_str());
 					continue;
 				}
 				pths.push_back(name);
@@ -227,7 +244,7 @@ namespace fl_s
 		}
 		while(!d.empty())
 		{
-			del_dir(d.back().c_str());
+			RemoveDirectory_(d.back().c_str());
 			d.pop_back();
 		}
 	}
