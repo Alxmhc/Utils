@@ -6,22 +6,34 @@
 namespace fl_s
 {
 	template<typename C>
+	bool create_dir(const C* pth)
+	{
+		return std::filesystem::create_directory(pth);
+	}
+
+	template<typename C>
+	bool create_dirs(const C* pth)
+	{
+		return std::filesystem::create_directories(pth);
+	}
+
+	template<typename C>
 	bool del(const C* pth)
 	{
 		return std::filesystem::remove(pth);
 	}
 
 	template<typename C>
-	std::basic_string<C> to_string(const std::filesystem::path& p);
+	std::basic_string<C> to_string(const std::filesystem::path&);
 	template<>
-	std::basic_string<char> to_string(const std::filesystem::path& p)
+	std::basic_string<char> to_string(const std::filesystem::path &p)
 	{
-		return p.string();
+		return p.generic_string();
 	}
 	template<>
-	std::basic_string<wchar_t> to_string(const std::filesystem::path& p)
+	std::basic_string<wchar_t> to_string(const std::filesystem::path &p)
 	{
-		return p.wstring();
+		return p.generic_wstring();
 	}
 
 	template<typename C, class T>
@@ -30,7 +42,6 @@ namespace fl_s
 		for (const auto &e : std::filesystem::recursive_directory_iterator(p))
 		{
 			auto name = to_string<C>(e.path());
-			std::replace(name.begin(), name.end(), '\\', '/');
 			if (e.is_directory())
 			{
 				name.push_back('/');
@@ -48,6 +59,12 @@ namespace fl_s
 		auto fnc = [&](const S &s){if(fltr(s)){res.push_back(s);}};
 		proc_dir(pth, fnc);
 		return res;
+	}
+
+	template<typename C>
+	void del_dirs(const C* pth)
+	{
+		std::filesystem::remove_all(pth);
 	}
 }
 
