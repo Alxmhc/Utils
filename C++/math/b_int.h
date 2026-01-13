@@ -396,18 +396,26 @@ public:
 		res.n.resize(n.size() + c.n.size());
 		for(std::size_t i = 0; i < c.n.size(); i++)
 		{
+			const num2 k = c.n[i];
+			if(k == 0)
+				continue;
 			for(std::size_t j = 0; j < n.size(); j++)
 			{
-				num2 t = c.n[i];
-				t *= n[j];
-				if(t == 0)
-					continue;
+				if(n[j] == 0)
+					continue;			
+				const num2 t = k * n[j];
 				res.add(static_cast<num>(t), i + j);
 				res.add(t >> BSZ, i + j + 1);
 			}
 		}
 		res.fix();
 		return res;
+	}
+
+	const b_uint& operator*=(const b_uint &c)
+	{
+		*this = *this * c;
+		return *this;
 	}
 
 	//*this >= c
@@ -487,6 +495,34 @@ public:
 	const b_uint& operator%=(const b_uint &m)
 	{
 		return ModDiv(m, nullptr);
+	}
+
+	b_uint Mod_Inv(const b_uint &m) const
+	{
+		if(*this < 2)
+			return *this;
+		b_uint a1(*this), a2(m);
+		b_uint r, t(1);
+		for(;;)
+		{
+			b_uint k;
+			a2 = a2.ModDiv(a1, &k);
+			if(a2 == 0)
+				return a2;
+
+			k *= t;
+			k %= m;
+			if(r < k)
+			{
+				r += m;
+			}
+			r -= k;
+			if(a2 == 1)
+				return r;
+
+			std::swap(r, t);
+			std::swap(a2, a1);
+		}
 	}
 
 	b_uint Pow_Mod(const b_uint &p, const b_uint &m) const
