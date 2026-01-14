@@ -3,7 +3,6 @@
 
 #include "../htree.h"
 #include "decompr.h"
-#include "../byte_writer.h"
 
 namespace compr
 {
@@ -256,11 +255,7 @@ namespace compr
 				}
 				if(isFin)
 					break;
-				if(out.size() > d_sz)
-				{
-					bw.writeN(out.data(), out.size() - d_sz);
-					out.erase(out.begin(), out.end() - d_sz);
-				}
+				write_part(out, d_sz, bw);
 			}
 			bw.writeN(out.data(), out.size());
 			bw.Fin();

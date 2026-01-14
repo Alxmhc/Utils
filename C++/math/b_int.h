@@ -392,6 +392,16 @@ public:
 
 	b_uint operator*(const b_uint &c) const
 	{
+		if(c.n.size() == 1)
+		{
+			b_uint res(*this);
+			return res *= c.n[0];
+		}
+		if(n.size() == 1)
+		{
+			b_uint res(c);
+			return res *= n[0];
+		}
 		b_uint res;
 		res.n.resize(n.size() + c.n.size());
 		for(std::size_t i = 0; i < c.n.size(); i++)
@@ -414,6 +424,8 @@ public:
 
 	const b_uint& operator*=(const b_uint &c)
 	{
+		if(c.n.size() == 1)
+			return *this *= c.n[0];
 		*this = *this * c;
 		return *this;
 	}
@@ -503,6 +515,7 @@ public:
 			return *this;
 		b_uint a1(*this), a2(m);
 		b_uint r, t(1);
+		bool sgn = true;
 		for(;;)
 		{
 			b_uint k;
@@ -510,16 +523,11 @@ public:
 			if(a2 == 0)
 				return a2;
 
-			k *= t;
-			k %= m;
-			if(r < k)
-			{
-				r += m;
-			}
-			r -= k;
+			r += t * k;
 			if(a2 == 1)
-				return r;
+				return sgn ? m - r : r;
 
+			sgn = !sgn;
 			std::swap(r, t);
 			std::swap(a2, a1);
 		}
@@ -538,17 +546,17 @@ public:
 		{
 			if(p.getBit(i) != 0)
 			{
-				res = t * res;
+				res *= t;
 				res %= m;
 				if(res == 0)
 					return res;
 			}
-			t = t * t;
+			t *= t;
 			t %= m;
 			if(t == 1)
 				return res;
 		}
-		res = t * res;
+		res *= t;
 		res %= m;
 		return res;
 	}
@@ -558,12 +566,12 @@ class b_sint
 {
 	typedef int32_t num;
 
-	b_uint u;
 	bool p; //>=0
+	b_uint u;
 public:
 	b_sint() : p(true) {}
 
-	b_sint(const b_uint &c, bool pos) : u(c)
+	b_sint(const b_uint &c, bool pos = true) : u(c)
 	{
 		p = pos ? true : c == 0;
 	}

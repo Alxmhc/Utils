@@ -1,9 +1,7 @@
 #ifndef H_DECOMPR
 #define H_DECOMPR
 
-#include <cstdint>
-#include <vector>
-#include <algorithm>
+#include "../byte_writer.h"
 
 static bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &out)
 {
@@ -23,6 +21,15 @@ static bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &
 	}
 	std::copy_n(out.begin() + beg, sz, out.begin() + osz);
 	return true;
+}
+
+static void write_part(std::vector<uint8_t> &v, std::size_t d_sz, byteWriter &bw)
+{
+	if(v.size() > d_sz)
+	{
+		bw.writeN(v.data(), v.size() - d_sz);
+		v.erase(v.begin(), v.end() - d_sz);
+	}
 }
 
 #endif

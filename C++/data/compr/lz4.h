@@ -3,12 +3,13 @@
 
 #include "../compr/decompr.h"
 #include "../byte_reader.h"
-#include "../byte_writer.h"
 
 namespace compr
 {
 	class lz4
 	{
+		static const std::size_t d_sz = 65535;
+
 		static bool get_size(byteReader &br, std::size_t &sz)
 		{
 			if(sz != 15)
@@ -23,7 +24,7 @@ namespace compr
 					return true;
 			}
 		}
-		static bool decode_block(byteReader &br, std::vector<uint8_t> &out)
+		static bool decode_block(byteReader &br, std::vector<uint8_t> &out, byteWriter &bw)
 		{
 			for(;;)
 			{
@@ -43,13 +44,14 @@ namespace compr
 					return false;
 				if(!LZ77_repeat(len + 4, offset, out))
 					return false;
+				write_part(out, d_sz, bw);
 			}
 		}
 	public:
 		static bool Decode(byteReader &br, byteWriter &bw)
 		{
 			std::vector<uint8_t> out;
-			if(!decode_block(br, out))
+			if(!decode_block(br, out, bw))
 				return false;
 			bw.writeN(out.data(), out.size());
 			bw.Fin();
