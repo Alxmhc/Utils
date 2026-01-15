@@ -72,6 +72,28 @@ class b_uint
 			}
 		}
 	}
+
+	static b_uint mul(const b_uint &a, const b_uint &b)
+	{
+		b_uint res;
+		res.n.resize(a.n.size() + b.n.size());
+		for(std::size_t i = 0; i < a.n.size(); i++)
+		{
+			const num2 k = a.n[i];
+			if(k == 0)
+				continue;
+			for(std::size_t j = 0; j < b.n.size(); j++)
+			{
+				if(b.n[j] == 0)
+					continue;			
+				const num2 t = k * b.n[j];
+				res.add(static_cast<num>(t), i + j);
+				res.add(t >> BSZ, i + j + 1);
+			}
+		}
+		res.fix();
+		return res;
+	}
 public:
 	explicit b_uint(num c = 0) : n(1, c) {}
 
@@ -335,11 +357,24 @@ public:
 
 	const b_uint& operator*=(num c)
 	{
-		if(*this == 0 || c == 1)
-			return *this;
-		if(c == 0)
+		if(n.size() == 1)
 		{
-			*this = 0;
+			num2 t = n[0];
+			t *= c;
+			n[0] = static_cast<num>(t);
+			t >>= BSZ;
+			if(t != 0)
+			{
+				n.push_back(static_cast<num>(t));
+			}
+			return *this;
+		}
+		if(c < 2)
+		{
+			if(c == 0)
+			{
+				*this = 0;
+			}
 			return *this;
 		}
 
@@ -402,31 +437,20 @@ public:
 			b_uint res(c);
 			return res *= n[0];
 		}
-		b_uint res;
-		res.n.resize(n.size() + c.n.size());
-		for(std::size_t i = 0; i < c.n.size(); i++)
-		{
-			const num2 k = c.n[i];
-			if(k == 0)
-				continue;
-			for(std::size_t j = 0; j < n.size(); j++)
-			{
-				if(n[j] == 0)
-					continue;			
-				const num2 t = k * n[j];
-				res.add(static_cast<num>(t), i + j);
-				res.add(t >> BSZ, i + j + 1);
-			}
-		}
-		res.fix();
-		return res;
+		return mul(*this, c);
 	}
 
 	const b_uint& operator*=(const b_uint &c)
 	{
 		if(c.n.size() == 1)
 			return *this *= c.n[0];
-		*this = *this * c;
+		if(n.size() == 1)
+		{
+			const num t = n[0];
+			*this = c;
+			return *this *= t;
+		}
+		*this = mul(*this, c);
 		return *this;
 	}
 
