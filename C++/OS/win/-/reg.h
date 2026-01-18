@@ -4,12 +4,30 @@
 
 #include <windows.h>
 
+LSTATUS RegOpenKeyEx_(HKEY key, LPCSTR pth, REGSAM acc, PHKEY res)
+{
+	return RegOpenKeyExA(key, pth, 0, acc, res);
+}
+LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR pth, DWORD opt, REGSAM acc, PHKEY res)
+{
+	return RegOpenKeyExW(key, pth, 0, acc, res);
+}
+
+LSTATUS RegQueryValueEx_(HKEY key, LPCSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
+{
+	return RegQueryValueExA(key, name, nullptr, type, d, sz);
+}
+LSTATUS RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
+{
+	return RegQueryValueExW(key, name, nullptr, type, d, sz);
+}
+
 namespace reg
 {
 	HKEY Open(HKEY key, const char* path)
 	{
 		HKEY res;
-		if(RegOpenKeyExA(key, path, 0, KEY_READ, &res) != ERROR_SUCCESS)
+		if(RegOpenKeyEx_(key, path, KEY_READ, &res) != ERROR_SUCCESS)
 			return nullptr;
 		return res;
 	}
@@ -21,11 +39,11 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
 		&& type == REG_SZ)
 		{
 			res.resize(size);
-			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size) == ERROR_SUCCESS;
 		}
 		RegCloseKey(k);
 		return r;
@@ -38,10 +56,10 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
 		&& type == REG_DWORD)
 		{
-			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
 		}
 		RegCloseKey(k);
 		return r;
@@ -54,11 +72,11 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueExA(k, name, nullptr, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
 		&& type == REG_BINARY)
 		{
 			res.resize(size);
-			r = RegQueryValueExA(k, name, nullptr, nullptr, reinterpret_cast<LPBYTE>(res.data()), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(res.data()), &size) == ERROR_SUCCESS;
 		}
 		RegCloseKey(k);
 		return r;
