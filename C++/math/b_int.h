@@ -543,7 +543,7 @@ public:
 		for(;;)
 		{
 			b_uint k;
-			a2 = a2.ModDiv(a1, &k);
+			a2.ModDiv(a1, &k);
 			if(a2 == 0)
 				return a2;
 

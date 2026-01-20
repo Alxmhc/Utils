@@ -1,7 +1,6 @@
 #ifndef H_AES
 #define H_AES
 
-#include <cstdint>
 #include <vector>
 
 #include "../../arr.h"
@@ -11,40 +10,42 @@ namespace crypt
 	//key sz = 16, 24, 32
 	class AES
 	{
+		static const uint8_t Sbox[256];
+
 		static void Init(const uint8_t* k, uint_fast8_t ksz, std::vector<uint8_t> &key)
 		{
 			key.resize((ksz + 28) << 2);
 			std::copy_n(k, ksz, key.begin());
-			for(std::size_t i = ksz; i < key.size(); i += 4)
+			static const uint8_t Rcon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
+			uint8_t* t = key.data() + ksz - 4;
+			for(uint_fast8_t i = 0; i < key.size() - ksz; i += 4)
 			{
-				uint8_t t[4];
-				std::copy_n(key.data() + i - 4, 4, t);
-				const std::size_t o = i % ksz;
+				const uint_fast8_t o = i % ksz;
 				if(o == 0)
 				{
-					uint8_t x = t[0];
-					t[0] = Sbox[t[1]] ^ Rcon[i/ksz - 1];
-					t[1] = Sbox[t[2]];
-					t[2] = Sbox[t[3]];
-					t[3] = Sbox[x];
+					t[4] = Sbox[t[1]] ^ Rcon[i/ksz];
+					t[5] = Sbox[t[2]];
+					t[6] = Sbox[t[3]];
+					t[7] = Sbox[t[0]];
 				}
 				else if((ksz > 24) && (o == 16))
 				{
-					t[0] = Sbox[t[0]];
-					t[1] = Sbox[t[1]];
-					t[2] = Sbox[t[2]];
-					t[3] = Sbox[t[3]];
+					t[4] = Sbox[t[0]];
+					t[5] = Sbox[t[1]];
+					t[6] = Sbox[t[2]];
+					t[7] = Sbox[t[3]];
 				}
-				key[i]   = t[0] ^ key[i-ksz];
-				key[i+1] = t[1] ^ key[i+1-ksz];
-				key[i+2] = t[2] ^ key[i+2-ksz];
-				key[i+3] = t[3] ^ key[i+3-ksz];
+				else
+				{
+					std::copy(t, t + 4, t + 4);
+				}
+				t += 4;
+				t[0] ^= key[i];
+				t[1] ^= key[i+1];
+				t[2] ^= key[i+2];
+				t[3] ^= key[i+3];
 			}
 		}
-
-		static const uint8_t Rcon[10];
-		static const uint8_t Sbox[256];
-
 	public:
 		static const uint_fast8_t block_size = 16;
 
