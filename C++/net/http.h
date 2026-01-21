@@ -43,6 +43,7 @@ public:
 
 	bool From_Text(const char* cb, const char* ce)
 	{
+		clear();
 		static const char* rn = "\r\n";
 		static const char* d = ": ";
 		while(cb != ce)
@@ -115,7 +116,7 @@ class HTTP1
 	http_header hdr;
 	std::size_t data_pos;
 
-	static bool parse_s(const std::string &s, http_header &res)
+	static bool parse_l(const std::string &s, http_header &res)
 	{
 		const auto p1 = s.find(' ');
 		if(p1 == std::string::npos)
@@ -139,21 +140,33 @@ class HTTP1
 		return true;
 	}
 public:
+	static bool Hdr_From_Text(const std::string &s, http_header &h)
+	{
+		const auto p = s.find("\r\n");
+		if (!parse_l(s.substr(0, p), h))
+			return false;
+		if (!h.h.From_Text(s.c_str() + p + 2, s.c_str() + s.length()))
+			return false;
+		return true;
+	}
+
+	static std::string Hdr_To_Text(const http_header &h)
+	{
+		std::string res = h.is_out ? h.f + ' ' + h.s + " HTTP/1.1\r\n" : "HTTP/1.1 " + h.f + (h.s.empty() ? "" : ' ' + h.s) + "\r\n";
+		res += h.h.To_Text() + "\r\n";
+		return res;
+	}
+
 	bool read(byteReader* b)
 	{
 		br = b;
-		hdr.clear();
-		
+
 		std::string h;
 		if(!br->read_string(bytes("\r\n\r\n"), 4, h))
 			return false;
 		h += "\r\n";
 
-		const auto p = h.find("\r\n");
-		if(!parse_s(h.substr(0, p), hdr))
-			return false;
-		const auto s = h.c_str();
-		if(!hdr.h.From_Text(s + p + 2, s + h.length()))
+		if(!Hdr_From_Text(h, hdr))
 			return false;
 
 		data_pos = br->get_pos();
@@ -163,13 +176,6 @@ public:
 	const http_header* Get_Header() const
 	{
 		return &hdr;
-	}
-
-	std::string Get_Hdr_Text() const
-	{
-		std::string res = hdr.is_out ? hdr.f + ' ' + hdr.s + " HTTP/1.1\r\n" : "HTTP/1.1 " + hdr.f + (hdr.s.empty() ? "" : ' ' + hdr.s) + "\r\n";
-		res += hdr.h.To_Text() + "\r\n";
-		return res;
 	}
 
 	bool Get_Data(std::vector<uint8_t> &data)

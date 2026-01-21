@@ -18,6 +18,12 @@ namespace fl_s
 	}
 
 	template<typename C>
+	void move(const C* p1, const C* p2)
+	{
+		std::filesystem::rename(p1, p2);
+	}
+
+	template<typename C>
 	bool del(const C* pth)
 	{
 		return std::filesystem::remove(pth);
