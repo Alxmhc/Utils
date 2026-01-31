@@ -484,6 +484,12 @@ public:
 		return *this;
 	}
 
+	b_uint operator-(const b_uint &c) const
+	{
+		b_uint res(*this);
+		return res -= c;
+	}
+
 	const b_uint& ModDiv(const b_uint &m, b_uint* r)
 	{
 		if(r != nullptr)

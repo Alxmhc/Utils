@@ -18,36 +18,43 @@ class net_header:
 			p = h.find(': ')
 			self.add_fld(h[:p], h[p+2:])
 	def to_text(self):
-		res = ""
+		res = ''
 		for n, v in self.h.items():
 			res += n + ': ' + v + '\r\n'
 		return res;
 
 class http_hdr:
-	def __init__(self):
+	def __init__(self, is_out):
+		self.is_out = is_out
+		self.s1 = ''
+		self.s2 = ''
 		self.hdr = net_header()
-	def set_req(self, m, u):
-		self.is_out = True
-		self.method = m.upper()
-		self.URL = u
-	def set_resp(self, c, ct):
-		self.is_out = False
-		self.code = int(c)
-		self.code_text = ct
 	def add_fld(self, name, val):
 		self.hdr.add_fld(name, val)
-	def from_text(self, t):
+	def get_fld(self, name):
+		return self.hdr.get_fld(name)
+
+class HTTP1:
+	def __init__(self, is_out):
+		self.hdr = http_hdr(is_out)
+		self.body = b''
+	@staticmethod
+	def hdr_from_text(t):
+		h = http_hdr(not t.startswith('HTTP/'))
 		p = t.find('\r\n')
-		self.hdr.from_text(t[p+2:])
-		t = t[:p].split(' ', 2)
-		if t[0].startswith('HTTP/'):
-			self.set_resp(t[1], t[2])
+		l = t[:p].split(' ', 2)
+		if h.is_out:
+			h.s1 = l[0]
+			h.s2 = l[1]
 		else:
-			self.set_req(t[0], t[1])
-	def to_text(self):
-		res = ""
-		if self.is_out:
-			res = self.method + ' ' + self.URL + ' HTTP/1.1\r\n'
+			h.s1 = l[1]
+			h.s2 = l[2]
+		h.hdr.from_text(t[p+2:])
+		return h
+	@staticmethod
+	def hdr_to_text(h):
+		if h.is_out:
+			res = h.s1 + ' ' + h.s2 + ' HTTP/1.1\r\n'
 		else:
-			res = 'HTTP/1.1 ' + str(self.code) + ' ' + self.code_text + '\r\n'
-		return res + self.hdr.to_text() + '\r\n'
+			res = 'HTTP/1.1 ' + h.s1 + ' ' + h.s2 + '\r\n'
+		return res + h.hdr.to_text() + '\r\n'

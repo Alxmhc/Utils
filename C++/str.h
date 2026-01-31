@@ -36,4 +36,12 @@ static void str_lower(std::string &s)
 	}
 }
 
+static void str_upper(std::string &s)
+{
+	for(std::size_t i = 0; i < s.size(); i++)
+	{
+		s[i] = static_cast<char>(toupper(s[i]));
+	}
+}
+
 #endif

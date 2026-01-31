@@ -157,20 +157,22 @@ public:
 		return res;
 	}
 
+	static std::size_t Read_hdr(byteReader &br, http_header &h)
+	{
+		std::string s;
+		if(!br.read_string(bytes("\r\n\r\n"), 4, s))
+			return 0;
+		s += "\r\n";
+		if(!Hdr_From_Text(s, h))
+			return 0;
+		return br.get_pos();
+	}
+
 	bool read(byteReader* b)
 	{
 		br = b;
-
-		std::string h;
-		if(!br->read_string(bytes("\r\n\r\n"), 4, h))
-			return false;
-		h += "\r\n";
-
-		if(!Hdr_From_Text(h, hdr))
-			return false;
-
-		data_pos = br->get_pos();
-		return true;
+		data_pos = Read_hdr(*br, hdr);
+		return data_pos != 0;
 	}
 
 	const http_header* Get_Header() const

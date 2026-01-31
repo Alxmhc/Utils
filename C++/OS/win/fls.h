@@ -44,31 +44,31 @@ struct WIN32_FIND_DATA_<std::wstring>
 	}
 };
 
-BOOL CreateDirectory_(LPCSTR pth, LPSECURITY_ATTRIBUTES attr)
+bool CreateDirectory_(LPCSTR pth, LPSECURITY_ATTRIBUTES attr)
 {
-	return CreateDirectoryA(pth, attr);
+	return CreateDirectoryA(pth, attr) == TRUE;
 }
-BOOL CreateDirectory_(LPCWSTR pth, LPSECURITY_ATTRIBUTES attr)
+bool CreateDirectory_(LPCWSTR pth, LPSECURITY_ATTRIBUTES attr)
 {
-	return CreateDirectoryW(pth, attr);
-}
-
-BOOL DeleteFile_(LPCSTR pth)
-{
-	return DeleteFileA(pth);
-}
-BOOL DeleteFile_(LPCWSTR pth)
-{
-	return DeleteFileW(pth);
+	return CreateDirectoryW(pth, attr) == TRUE;
 }
 
-BOOL RemoveDirectory_(LPCSTR pth)
+bool DeleteFile_(LPCSTR pth)
 {
-	return RemoveDirectoryA(pth);
+	return DeleteFileA(pth) == TRUE;
 }
-BOOL RemoveDirectory_(LPCWSTR pth)
+bool DeleteFile_(LPCWSTR pth)
 {
-	return RemoveDirectoryW(pth);
+	return DeleteFileW(pth) == TRUE;
+}
+
+bool RemoveDirectory_(LPCSTR pth)
+{
+	return RemoveDirectoryA(pth) == TRUE;
+}
+bool RemoveDirectory_(LPCWSTR pth)
+{
+	return RemoveDirectoryW(pth) == TRUE;
 }
 
 namespace fl_s

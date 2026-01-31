@@ -36,6 +36,11 @@ public:
 		return *this;
 	}
 
+	vt3 operator-(const vt3 &c) const
+	{
+		return vt3(x-c.x, y-c.y, z-c.z);
+	}
+
 	const vt3& operator*=(long double k)
 	{
 		x *= k;
