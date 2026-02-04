@@ -13,6 +13,9 @@ namespace hash
 	private:
 		class tbf : public byteWriterBuf<block_size>
 		{
+			uint8_t l;
+			uint8_t h[16];
+
 			static const uint8_t tbl[256];
 
 			void process(const uint8_t* v)
@@ -36,8 +39,6 @@ namespace hash
 				}
 			}
 		public:
-			uint8_t l;
-			uint8_t h[16];
 			uint8_t st[48];
 
 			void Init()

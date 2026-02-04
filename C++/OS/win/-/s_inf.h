@@ -9,31 +9,31 @@
 #define SECURITY_WIN32
 #include <Security.h>
 
-BOOL GetComputerName_(LPSTR buf, LPDWORD sz)
+bool GetComputerName_(LPSTR buf, LPDWORD sz)
 {
-	return GetComputerNameA(buf, sz);
+	return GetComputerNameA(buf, sz) != 0;
 }
-BOOL GetComputerName_(LPWSTR buf, LPDWORD sz)
+bool GetComputerName_(LPWSTR buf, LPDWORD sz)
 {
-	return GetComputerNameW(buf, sz);
-}
-
-BOOL GetUserName_(LPSTR buf, LPDWORD sz)
-{
-	return GetUserNameA(buf, sz);
-}
-BOOL GetUserName_(LPWSTR buf, LPDWORD sz)
-{
-	return GetUserNameW(buf, sz);
+	return GetComputerNameW(buf, sz) != 0;
 }
 
-BOOL GetUserNameEx_(EXTENDED_NAME_FORMAT format, LPSTR buf, LPDWORD sz)
+bool GetUserName_(LPSTR buf, LPDWORD sz)
 {
-	return GetUserNameExA(format, buf, sz);
+	return GetUserNameA(buf, sz) != 0;
 }
-BOOL GetUserNameEx_(EXTENDED_NAME_FORMAT format, LPWSTR buf, LPDWORD sz)
+bool GetUserName_(LPWSTR buf, LPDWORD sz)
 {
-	return GetUserNameExW(format, buf, sz);
+	return GetUserNameW(buf, sz) != 0;
+}
+
+bool GetUserNameEx_(EXTENDED_NAME_FORMAT format, LPSTR buf, LPDWORD sz)
+{
+	return GetUserNameExA(format, buf, sz) != 0;
+}
+bool GetUserNameEx_(EXTENDED_NAME_FORMAT format, LPWSTR buf, LPDWORD sz)
+{
+	return GetUserNameExW(format, buf, sz) != 0;
 }
 
 #undef GetEnvironmentStrings
@@ -47,13 +47,13 @@ template<> LPWCH GetEnvironmentStrings_<wchar_t>()
 	return GetEnvironmentStringsW();
 }
 
-BOOL FreeEnvironmentStrings_(LPCH env)
+bool FreeEnvironmentStrings_(LPCH env)
 {
-	return FreeEnvironmentStringsA(env);
+	return FreeEnvironmentStringsA(env) != 0;
 }
-BOOL FreeEnvironmentStrings_(LPWCH env)
+bool FreeEnvironmentStrings_(LPWCH env)
 {
-	return FreeEnvironmentStringsW(env);
+	return FreeEnvironmentStringsW(env) != 0;
 }
 
 template<typename C>

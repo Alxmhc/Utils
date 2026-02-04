@@ -27,7 +27,7 @@ struct WIN32_FIND_DATA_<std::string>
 	}
 	bool NextFile(HANDLE hf)
 	{
-		return FindNextFileA(hf, &fd) == TRUE;
+		return FindNextFileA(hf, &fd) != 0;
 	}
 };
 template<>
@@ -40,35 +40,44 @@ struct WIN32_FIND_DATA_<std::wstring>
 	}
 	bool NextFile(HANDLE hf)
 	{
-		return FindNextFileW(hf, &fd) == TRUE;
+		return FindNextFileW(hf, &fd) != 0;
 	}
 };
 
 bool CreateDirectory_(LPCSTR pth, LPSECURITY_ATTRIBUTES attr)
 {
-	return CreateDirectoryA(pth, attr) == TRUE;
+	return CreateDirectoryA(pth, attr) != 0;
 }
 bool CreateDirectory_(LPCWSTR pth, LPSECURITY_ATTRIBUTES attr)
 {
-	return CreateDirectoryW(pth, attr) == TRUE;
+	return CreateDirectoryW(pth, attr) != 0;
+}
+
+bool MoveFile_(LPCSTR p1, LPCSTR p2)
+{
+	return MoveFileA(p1, p2) != 0;
+}
+bool MoveFile_(LPCWSTR p1, LPCWSTR p2)
+{
+	return MoveFileW(p1, p2) != 0;
 }
 
 bool DeleteFile_(LPCSTR pth)
 {
-	return DeleteFileA(pth) == TRUE;
+	return DeleteFileA(pth) != 0;
 }
 bool DeleteFile_(LPCWSTR pth)
 {
-	return DeleteFileW(pth) == TRUE;
+	return DeleteFileW(pth) != 0;
 }
 
 bool RemoveDirectory_(LPCSTR pth)
 {
-	return RemoveDirectoryA(pth) == TRUE;
+	return RemoveDirectoryA(pth) != 0;
 }
 bool RemoveDirectory_(LPCWSTR pth)
 {
-	return RemoveDirectoryW(pth) == TRUE;
+	return RemoveDirectoryW(pth) != 0;
 }
 
 namespace fl_s
@@ -78,7 +87,7 @@ namespace fl_s
 	{
 		const auto inf = GetFileAttributes_(pth);
 		if(inf == INVALID_FILE_ATTRIBUTES)
-			return CreateDirectory_(pth, nullptr) == TRUE;
+			return CreateDirectory_(pth, nullptr) != 0;
 		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
 	}
 
@@ -99,19 +108,25 @@ namespace fl_s
 		return create_dir(pth);
 	}
 
+	template<typename C>
+	void move(const C* p1, const C* p2)
+	{
+		MoveFile_(p1, p2);
+	}
+
 	bool del(const char* pth)
 	{
 		const auto l = pth[strlen(pth)-1];
 		if(l == '/')
-			return RemoveDirectory_(pth) == TRUE;
-		return DeleteFile_(pth) == TRUE;
+			return RemoveDirectory_(pth) != 0;
+		return DeleteFile_(pth) != 0;
 	}
 	bool del(const wchar_t* pth)
 	{
 		const auto l = pth[wcslen(pth)-1];
 		if(l == '/')
-			return RemoveDirectory_(pth) == TRUE;
-		return DeleteFile_(pth) == TRUE;
+			return RemoveDirectory_(pth) != 0;
+		return DeleteFile_(pth) != 0;
 	}
 
 	template<typename S>
