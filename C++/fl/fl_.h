@@ -11,13 +11,19 @@ class br_fstream : public byteReader
 	std::ifstream fst;
 	uint8_t buf[256];
 protected:
+	void pos_set(std::size_t p)
+	{
+		fst.seekg(p);
+		pos = p;
+	}
+
 	uint8_t read1()
 	{
 		uint8_t r = static_cast<uint8_t>(fst.get());
 		pos++;
 		return r;
 	}
-	const uint8_t* get_data(uint_fast8_t n) override
+	const uint8_t* get_data(uint_fast8_t n)
 	{
 		if (pos + n > csize)
 			return nullptr;
@@ -42,31 +48,12 @@ public:
 		pos = 0;
 		size = static_cast<std::size_t>(fst.tellg());
 		csize = size;
-		fst.seekg(0, std::ios_base::beg);
+		fst.seekg(0);
 		return true;
 	}
 	void close()
 	{
 		fst.close();
-	}
-
-	void set_pos(std::size_t p)
-	{
-		if(p != pos)
-		{
-			fst.seekg(p, std::ios_base::beg);
-			pos = p;
-		}
-	}
-	bool skip(std::size_t n)
-	{
-		if(n == 0)
-			return true;
-		if (pos + n > csize)
-			return false;
-		fst.seekg(n, std::ios_base::cur);
-		pos += n;
-		return true;
 	}
 
 	std::size_t find(uint8_t e)

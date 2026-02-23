@@ -153,7 +153,7 @@ namespace compr
 					}
 					if(c == sztr - 1)
 						return true;
-					res.push_back(c - 1);
+					res.push_back(static_cast<uint8_t>(c - 1));
 				}
 			}
 			return false;

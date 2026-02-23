@@ -72,7 +72,7 @@ class HTTP2
 				break;
 			if(r == 256)
 				return false;
-			out_str.push_back(r);
+			out_str.push_back(static_cast<char>(r));
 		}
 		if(br.get_rsize() != 0)
 			return false;

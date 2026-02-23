@@ -146,7 +146,7 @@ namespace compr
 					break;
 				if(c < 256)
 				{
-					out.push_back(c);
+					out.push_back(static_cast<uint8_t>(c));
 					continue;
 				}
 				if(c == 256)
@@ -173,7 +173,7 @@ namespace compr
 				return false;
 			const uint_fast16_t HLIT = (hdr & 0x1f) + 257;
 			const uint_fast8_t HDIST = ((hdr >> 5) & 0x1f) + 1;
-			const uint_fast8_t HCLEN = (hdr >> 10) + 4;
+			const uint_fast8_t HCLEN = static_cast<uint_fast8_t>((hdr >> 10) + 4);
 
 			const uint_fast8_t csz = 19;
 			static const uint_fast8_t co[csz] = {16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15};
@@ -205,7 +205,7 @@ namespace compr
 					break;
 				if(c < 256)
 				{
-					out.push_back(c);
+					out.push_back(static_cast<uint8_t>(c));
 					continue;
 				}
 				if(c == 256)

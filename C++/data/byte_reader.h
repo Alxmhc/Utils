@@ -14,6 +14,8 @@ protected:
 	std::size_t size, csize;
 	byteReader() : pos(0), size(0), csize(0) {}
 
+	virtual void pos_set(std::size_t) = 0;
+
 	virtual uint8_t read1() = 0;
 	virtual const uint8_t* get_data(uint_fast8_t) = 0;
 	virtual void readAll(uint8_t*, const std::size_t) = 0;
@@ -47,8 +49,22 @@ public:
 		return pos;
 	}
 
-	virtual void set_pos(std::size_t) = 0;
-	virtual bool skip(std::size_t) = 0;
+	bool set_pos(std::size_t p)
+	{
+		if(p > csize)
+			return false;
+		pos_set(p);
+		return true;
+	}
+	bool skip(std::size_t n)
+	{
+		if(n == 0)
+			return true;
+		if(n > csize - pos)
+			return false;
+		pos_set(pos + n);
+		return true;
+	}
 
 	bool get(uint8_t &c)
 	{
@@ -105,20 +121,6 @@ public:
 		readAll(d, n);
 		return n;
 	}
-	std::size_t addMx(std::vector<uint8_t> &v, std::size_t n)
-	{
-		if(pos + n > csize)
-		{
-			n = csize - pos;
-		}
-		if(n != 0)
-		{
-			const auto sz = v.size();
-			v.resize(sz + n);
-			readAll(v.data() + sz, n);
-		}
-		return n;
-	}
 
 	template<unsigned char SZ, char E>
 	bool readC(typename UINT_<SZ>::uint &c)
@@ -127,6 +129,22 @@ public:
 		if(t == nullptr)
 			return false;
 		c = bconv<1, SZ, E>::pack(t);
+		return true;
+	}
+	template<typename T>
+	bool readC_LE(uint_fast8_t sz, T &c)
+	{
+		c = 0;
+		if(sz == 0)
+			return true;
+		auto t = get_data(sz);
+		if(t == nullptr)
+			return false;
+		while(sz--)
+		{
+			c <<= 8;
+			c |= t[sz];
+		}
 		return true;
 	}
 
@@ -140,7 +158,7 @@ public:
 		if(n == get_rsize())
 			return false;
 		readN(s, n);
-		skip(k);
+		pos_set(pos + k);
 		return true;
 	}
 
@@ -154,13 +172,18 @@ class br_array : public byteReader
 {
 	const uint8_t* d;
 protected:
+	void pos_set(std::size_t p)
+	{
+		pos = p;
+	}
+
 	uint8_t read1()
 	{
 		uint8_t r = d[pos];
 		pos++;
 		return r;
 	}
-	const uint8_t* get_data(uint_fast8_t n) override
+	const uint8_t* get_data(uint_fast8_t n)
 	{
 		if (pos + n > csize)
 			return nullptr;
@@ -190,18 +213,6 @@ public:
 		pos = 0;
 		size = sz;
 		csize = size;
-	}
-
-	void set_pos(std::size_t p)
-	{
-		pos = p;
-	}
-	bool skip(std::size_t n)
-	{
-		if (pos + n > csize)
-			return false;
-		pos += n;
-		return true;
 	}
 
 	std::size_t find(uint8_t e)

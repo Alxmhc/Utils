@@ -32,7 +32,7 @@ namespace crypt
 		}
 		static uint16_t mulI(uint16_t x)
 		{
-			return pw_m(x, 0xffff, 0x10001);
+			return static_cast<uint16_t>(pw_m(x, 0xffff, 0x10001));
 		}
 
 		static void Process(const uint16_t* key, uint8_t* r)

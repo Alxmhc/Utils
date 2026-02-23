@@ -8,7 +8,7 @@ LSTATUS RegOpenKeyEx_(HKEY key, LPCSTR pth, REGSAM acc, PHKEY res)
 {
 	return RegOpenKeyExA(key, pth, 0, acc, res);
 }
-LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR pth, DWORD opt, REGSAM acc, PHKEY res)
+LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR pth, REGSAM acc, PHKEY res)
 {
 	return RegOpenKeyExW(key, pth, 0, acc, res);
 }
