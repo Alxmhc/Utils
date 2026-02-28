@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
 
 namespace endianness
 {
@@ -55,17 +56,22 @@ template<> struct UINT_<16>
 	public:
 		explicit uint(UINT_<8>::uint ln = 0, UINT_<8>::uint hn = 0) : l(ln), h(hn) {}
 
-		const uint& operator=(const uint &c)
+		uint& operator=(UINT_<8>::uint c)
+		{
+			l = c;
+			h = 0;
+			return *this;
+		}
+		uint& operator=(const uint &c)
 		{
 			l = c.l;
 			h = c.h;
 			return *this;
 		}
-		const uint& operator=(UINT_<8>::uint c)
+
+		explicit operator UINT_<8>::uint() const
 		{
-			l = c;
-			h = 0;
-			return *this;
+			return l;
 		}
 
 		UINT_<8>::uint getL() const
@@ -87,18 +93,25 @@ template<> struct UINT_<16>
 			return *this;
 		}
 
+		const uint& operator|=(UINT_<8>::uint c)
+		{
+			l |= c;
+			return *this;
+		}
 		const uint& operator|=(const uint &c)
 		{
 			l |= c.l;
 			h |= c.h;
 			return *this;
 		}
+
 		const uint& operator^=(const uint &c)
 		{
 			l ^= c.l;
 			h ^= c.h;
 			return *this;
 		}
+
 		const uint& operator>>=(uint_fast8_t n)
 		{
 			if(n < 64)
@@ -151,95 +164,102 @@ template<> struct UINT_<16>
 		}
 	};
 };
-
-template<unsigned char sz>
-inline typename UINT_<sz>::uint uint_from(typename UINT_<sz/2>::uint l, typename UINT_<sz/2>::uint h)
+static UINT_<16>::uint rotl(UINT_<16>::uint x, unsigned char d)
 {
-	typename UINT_<sz>::uint res = h;
-	return (res<<(4*sz)) | l;
+	d %= 128;
+	auto l = x.getL();
+	auto h = x.getH();
+	if(d >= 64)
+	{
+		std::swap(l, h);
+		d -= 64;
+	}
+	if (d == 0)
+		return UINT_<16>::uint(l, h);
+	return UINT_<16>::uint((l << d) | (h >> (64 - d)), (h << d) | (l >> (64 - d)));
 }
-template<>
-inline UINT_<16>::uint uint_from<16>(UINT_<8>::uint l, UINT_<8>::uint h)
+static UINT_<16>::uint rotr(UINT_<16>::uint x, unsigned char d)
 {
-	return UINT_<16>::uint(l, h);
-}
-
-template<unsigned char sz>
-inline typename UINT_<sz/2>::uint uint_getL(typename UINT_<sz>::uint c)
-{
-	return static_cast<typename UINT_<sz/2>::uint>(c);
-}
-template<>
-inline UINT_<8>::uint uint_getL<16>(UINT_<16>::uint c)
-{
-	return c.getL();
-}
-
-template<unsigned char sz>
-inline typename UINT_<sz/2>::uint uint_getH(typename UINT_<sz>::uint c)
-{
-	return static_cast<typename UINT_<sz/2>::uint>(c>>(4*sz));
-}
-template<>
-inline UINT_<8>::uint uint_getH<16>(UINT_<16>::uint c)
-{
-	return c.getH();
+	d %= 128;
+	auto l = x.getL();
+	auto h = x.getH();
+	if(d >= 64)
+	{
+		std::swap(l, h);
+		d -= 64;
+	}
+	if (d == 0)
+		return UINT_<16>::uint(l, h);
+	return UINT_<16>::uint((l >> d) | (h << (64 - d)), (h >> d) | (l << (64 - d)));
 }
 
-template <unsigned char sz, unsigned char k, char E>
+template <unsigned char SZ, unsigned char k, char E>
 struct bconv{};
 
-template <unsigned char sz, unsigned char k>
-struct bconv<sz, k, endianness::LITTLE_ENDIAN>
+template <unsigned char SZ, unsigned char k>
+struct bconv<SZ, k, endianness::LITTLE_ENDIAN>
 {
-	static typename UINT_<k*sz>::uint pack(const typename UINT_<sz>::uint* a)
+	static typename UINT_<k*SZ>::uint pack(const typename UINT_<SZ>::uint* a)
 	{
-		const auto l = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a);
-		const auto h = bconv<sz, k/2, endianness::LITTLE_ENDIAN>::pack(a + k/2);
-		return uint_from<k*sz>(l, h);
+		typename UINT_<k*SZ>::uint res(bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::pack(a + k/2));
+		res <<= 4*k*SZ;
+		res |= bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::pack(a);
+		return res;
 	}
-	static void unpack(typename UINT_<k*sz>::uint c, typename UINT_<sz>::uint* a)
+	static void unpack(typename UINT_<k*SZ>::uint c, typename UINT_<SZ>::uint* a)
 	{
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(uint_getL<k*sz>(c), a);
-		bconv<sz, k/2, endianness::LITTLE_ENDIAN>::unpack(uint_getH<k*sz>(c), a + k/2);
+		bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c), a);
+		bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c >> (4*k*SZ)), a + k/2);
 	}
 };
-template<unsigned char sz>
-struct bconv<sz, 1, endianness::LITTLE_ENDIAN>
+template<unsigned char SZ>
+struct bconv<SZ, 1, endianness::LITTLE_ENDIAN>
 {
-	static typename UINT_<sz>::uint pack(const typename UINT_<sz>::uint* a)
+	static typename UINT_<SZ>::uint pack(const typename UINT_<SZ>::uint* a)
 	{
 		return *a;
 	}
-	static void unpack(typename UINT_<sz>::uint c, typename UINT_<sz>::uint* a)
+	static void unpack(typename UINT_<SZ>::uint c, typename UINT_<SZ>::uint* a)
 	{
 		*a = c;
 	}
 };
 
-template<unsigned char sz, unsigned char k>
-struct bconv<sz, k, endianness::BIG_ENDIAN>
+template<unsigned char SZ, typename T>
+static void packLE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
 {
-	static typename UINT_<k*sz>::uint pack(const typename UINT_<sz>::uint* a)
+	c = 0;
+	while(k--)
 	{
-		const auto l = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a + k/2);
-		const auto h = bconv<sz, k/2, endianness::BIG_ENDIAN>::pack(a);
-		return uint_from<k*sz>(l, h);
+		c <<= (SZ << 3);
+		c |= a[k];
 	}
-	static void unpack(typename UINT_<k*sz>::uint c, typename UINT_<sz>::uint* a)
+}
+
+template<unsigned char SZ, unsigned char k>
+struct bconv<SZ, k, endianness::BIG_ENDIAN>
+{
+	static typename UINT_<k*SZ>::uint pack(const typename UINT_<SZ>::uint* a)
 	{
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(uint_getL<k*sz>(c), a + k/2);
-		bconv<sz, k/2, endianness::BIG_ENDIAN>::unpack(uint_getH<k*sz>(c), a);
+		typename UINT_<k*SZ>::uint res(bconv<SZ, k/2, endianness::BIG_ENDIAN>::pack(a));
+		res <<= 4*k*SZ;
+		res |= bconv<SZ, k/2, endianness::BIG_ENDIAN>::pack(a + k/2);
+		return res;
+	}
+	static void unpack(typename UINT_<k*SZ>::uint c, typename UINT_<SZ>::uint* a)
+	{
+		bconv<SZ, k/2, endianness::BIG_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c), a + k/2);
+		bconv<SZ, k/2, endianness::BIG_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c >> (4*k*SZ)), a);
 	}
 };
-template<unsigned char sz>
-struct bconv<sz, 1, endianness::BIG_ENDIAN>
+template<unsigned char SZ>
+struct bconv<SZ, 1, endianness::BIG_ENDIAN>
 {
-	static typename UINT_<sz>::uint pack(const typename UINT_<sz>::uint* a)
+	static typename UINT_<SZ>::uint pack(const typename UINT_<SZ>::uint* a)
 	{
 		return *a;
 	}
-	static void unpack(typename UINT_<sz>::uint c, typename UINT_<sz>::uint* a)
+	static void unpack(typename UINT_<SZ>::uint c, typename UINT_<SZ>::uint* a)
 	{
 		*a = c;
 	}

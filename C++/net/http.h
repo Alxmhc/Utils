@@ -205,9 +205,9 @@ public:
 		{
 			if(fld == "gzip")
 			{
-				br_array br(data.data(), data.size());
+				br_array rd(data.data(), data.size());
 				fl_pr::F_gzip gz;
-				if( !gz.read(&br) )
+				if( !gz.read(&rd) )
 					return false;
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
@@ -217,10 +217,10 @@ public:
 			}
 			else if(fld == "deflate")
 			{
-				br_array br(data.data(), data.size());
+				br_array rd(data.data(), data.size());
 				std::vector<uint8_t> tmp;
 				bw_array bw(tmp);
-				if( !compr::deflate::Decode(br, bw) )
+				if( !compr::deflate::Decode(rd, bw) )
 					return false;
 				data = std::move(tmp);
 			}

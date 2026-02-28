@@ -1,8 +1,6 @@
 #ifndef H_DES
 #define H_DES
 
-#include <algorithm>
-
 #include "../../math/base/math_.h"
 #include "../pack.h"
 

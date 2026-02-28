@@ -2,7 +2,6 @@
 #define H_B_INT
 
 #include <vector>
-#include <algorithm>
 
 #include "base/math_.h"
 #include "../data/pack.h"
@@ -97,7 +96,7 @@ class b_uint
 public:
 	explicit b_uint(num c = 0) : n(1, c) {}
 
-	const b_uint& operator=(num a)
+	b_uint& operator=(num a)
 	{
 		n.resize(1);
 		n[0] = a;
@@ -606,7 +605,7 @@ public:
 		p = pos ? true : c == 0;
 	}
 
-	const b_sint& operator=(num a)
+	b_sint& operator=(num a)
 	{
 		p = (a >= 0);
 		u = p ? a : -a;

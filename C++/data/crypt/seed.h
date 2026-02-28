@@ -1,8 +1,6 @@
 #ifndef H_SEED
 #define H_SEED
 
-#include <algorithm>
-
 #include "../../math/base/math_.h"
 #include "../pack.h"
 

@@ -46,7 +46,7 @@ public:
 		delete right;
 	}
 
-	void add(uint_fast64_t n, uint_fast8_t nbit, T c)
+	void add(uint_fast64_t n, uint_fast8_t nbit, T v)
 	{
 		binTree<T>* a = this;
 		while(nbit--)
@@ -69,7 +69,7 @@ public:
 				a = a->right;
 			}
 		}
-		a->val = c;
+		a->val = v;
 		a->fin = true;
 	}
 

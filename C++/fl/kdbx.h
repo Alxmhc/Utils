@@ -154,12 +154,12 @@ namespace fl_pr
 					{
 						if(sz != 4)
 							return false;
-						uint32_t t;
-						if(!br.readC<4, endianness::LITTLE_ENDIAN>(t))
+						uint32_t c;
+						if(!br.readC<4, endianness::LITTLE_ENDIAN>(c))
 							return false;
-						if(t > 1)
+						if(c > 1)
 							return false;
-						compressed = t == 1;
+						compressed = c == 1;
 						break;
 					}
 					case 4:
@@ -341,7 +341,7 @@ namespace fl_pr
 				hs.Final(key);
 				g = Decrypt2(br);
 			}
-			std::fill_n(key, 32, 0);
+			std::fill_n(key, 32, uint8_t(0));
 		}
 
 		bool GetData(byteWriter &bw)

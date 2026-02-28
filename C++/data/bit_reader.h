@@ -5,11 +5,12 @@
 
 class bitReader
 {
+	bitReader& operator=(const bitReader&);
 protected:
 	byteReader &r;
 	uint_fast8_t o, b;
 
-	bitReader(byteReader &d) : r(d), o(0) {}
+	bitReader(byteReader &d) : r(d), o(0), b(0) {}
 public:
 	virtual bool get(uint_fast8_t&) = 0;
 

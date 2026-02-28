@@ -2,7 +2,6 @@
 #define H_ETH
 
 #include <vector>
-#include <algorithm>
 
 #include "../data/pack.h"
 

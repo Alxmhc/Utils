@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <algorithm>
 
 #include "pack.h"
 
@@ -42,7 +41,7 @@ public:
 class bw_array : public byteWriter
 {
 	std::vector<uint8_t> &d;
-	void operator=(const bw_array&);
+	bw_array& operator=(const bw_array&);
 public:
 	bw_array(std::vector<uint8_t> &v) : d(v) {}
 
@@ -91,7 +90,7 @@ protected:
 
 	void pad_PKCS()
 	{
-		std::fill(buf + offset, buf + SZ, SZ - offset);
+		std::fill(buf + offset, buf + SZ, uint8_t(SZ - offset));
 		process(buf);
 		offset = 0;
 	}

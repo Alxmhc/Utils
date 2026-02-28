@@ -6,14 +6,14 @@
 class bitWriter
 {
 protected:
-	byteWriter* r;
+	byteWriter* w;
 	uint_fast8_t o, b;
 
-	bitWriter(byteWriter &d) : r(&d), o(0), b(0) {}
+	bitWriter(byteWriter &d) : w(&d), o(0), b(0) {}
 
 	void wre()
 	{
-		r->write(b);
+		w->write(b);
 		b = 0;
 		o = 0;
 	}
@@ -24,19 +24,6 @@ public:
 		{
 			wre();
 		}
-	}
-
-	void writeN(const uint8_t* v, std::size_t n)
-	{
-		r->writeN(v, n);
-	}
-
-	template<unsigned char SZ, char E>
-	void writeC(typename UINT_<SZ>::uint c)
-	{
-		uint8_t t[SZ];
-		bconv<1, SZ, E>::unpack(c, t);
-		r->writeN(t, SZ);
 	}
 };
 

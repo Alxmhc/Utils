@@ -2,7 +2,6 @@
 #define H_ARIA
 
 #include <vector>
-#include <algorithm>
 
 #include "../../math/base/math_.h"
 #include "../pack.h"

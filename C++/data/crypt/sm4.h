@@ -1,8 +1,6 @@
 #ifndef H_SM4
 #define H_SM4
 
-#include <algorithm>
-
 #include "../../math/base/math_.h"
 #include "../pack.h"
 

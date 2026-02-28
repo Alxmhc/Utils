@@ -184,13 +184,12 @@ namespace fl_s
 	};
 
 	template<typename C, class T>
-	void proc_dir(const C* p, T &st)
+	void proc_dir(const C* pth, T &st)
 	{
 		typedef std::basic_string<C> S;
 
-		S pth(p);
 		std::vector<S> pths;
-		pths.push_back(pth);
+		pths.emplace_back(pth);
 		dInf<S> g;
 		while(!pths.empty())
 		{
@@ -211,17 +210,6 @@ namespace fl_s
 				st(name);
 			}
 		}
-	}
-
-	template<typename C, class T>
-	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr)
-	{
-		typedef std::basic_string<C> S;
-
-		std::vector<S> res;
-		auto fnc = [&](const S &s){if(fltr(s)){res.push_back(s);}};
-		proc_dir(pth, fnc);
-		return res;
 	}
 
 	template<typename C>

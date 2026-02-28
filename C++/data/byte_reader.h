@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <algorithm>
 
 #include "pack.h"
 
@@ -122,8 +121,8 @@ public:
 		return n;
 	}
 
-	template<unsigned char SZ, char E>
-	bool readC(typename UINT_<SZ>::uint &c)
+	template<unsigned char SZ, char E, typename T>
+	bool readC(T &c)
 	{
 		auto t = get_data(SZ);
 		if(t == nullptr)
@@ -140,11 +139,7 @@ public:
 		auto t = get_data(sz);
 		if(t == nullptr)
 			return false;
-		while(sz--)
-		{
-			c <<= 8;
-			c |= t[sz];
-		}
+		packLE<1>(t, sz, c);
 		return true;
 	}
 

@@ -21,7 +21,7 @@ namespace crypt
 				{
 					T[i] ^= rotl(T[(i+8)%15] ^ T[(i+13)%15], 3) ^ (4*i + j);
 				}
-				for(uint_fast8_t k = 0; k < 4; k++)
+				for(uint_fast8_t t = 0; t < 4; t++)
 				{
 					for(uint_fast8_t i = 0; i < 15; i++)
 					{

@@ -129,6 +129,10 @@ namespace fl_pr
 				return false;
 			return true;
 		}
+		void close()
+		{
+			f.close();
+		}
 	};
 }
 

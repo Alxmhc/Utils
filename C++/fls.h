@@ -56,17 +56,6 @@ namespace fl_s
 		}
 	}
 
-	template<typename C, class T>
-	std::vector<std::basic_string<C>> list_dir(const C* pth, T &fltr)
-	{
-		typedef std::basic_string<C> S;
-
-		std::vector<S> res;
-		auto fnc = [&](const S &s){if(fltr(s)){res.push_back(s);}};
-		proc_dir(pth, fnc);
-		return res;
-	}
-
 	template<typename C>
 	void del_dirs(const C* pth)
 	{

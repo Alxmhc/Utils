@@ -44,8 +44,8 @@ namespace hash
 			void Init()
 			{
 				l = 0;
-				std::fill_n(h, 16, 0);
-				std::fill_n(st, 48, 0);
+				std::fill_n(h, 16, uint8_t(0));
+				std::fill_n(st, 48, uint8_t(0));
 			}
 			void Fin()
 			{
