@@ -140,26 +140,8 @@ public:
 		}
 		if(sz > get_rsize())
 			return false;
-
 		auto t = get_data(sz);
-		switch(sz)
-		{
-		case 1:
-			c = *t;
-			break;
-		case 2:
-			c = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(t);
-			break;
-		case 4:
-			c = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(t);
-			break;
-		case 8:
-			c = bconv<1, 8, endianness::LITTLE_ENDIAN>::pack(t);
-			break;
-		default:
-			packLE<1>(t, sz, c);
-			break;
-		}
+		packLE<1>(t, sz, c);
 		return true;
 	}
 

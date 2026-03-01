@@ -228,11 +228,28 @@ struct bconv<SZ, 1, endianness::LITTLE_ENDIAN>
 template<unsigned char SZ, typename T>
 static void packLE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
 {
-	c = 0;
-	while(k--)
+	switch(k)
 	{
-		c <<= (SZ << 3);
-		c |= a[k];
+	case 1:
+		c = *a;
+		break;
+	case 2:
+		c = bconv<SZ, 2, endianness::LITTLE_ENDIAN>::pack(a);
+		break;
+	case 4:
+		c = bconv<SZ, 4, endianness::LITTLE_ENDIAN>::pack(a);
+		break;
+	case 8:
+		c = bconv<SZ, 8, endianness::LITTLE_ENDIAN>::pack(a);
+		break;
+	default:
+		c = 0;
+		while(k--)
+		{
+			c <<= (SZ << 3);
+			c |= a[k];
+		}		
+		break;
 	}
 }
 
