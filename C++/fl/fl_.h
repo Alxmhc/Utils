@@ -25,8 +25,6 @@ protected:
 	}
 	const uint8_t* get_data(uint_fast8_t n)
 	{
-		if (pos + n > csize)
-			return nullptr;
 		fst.read(reinterpret_cast<char*>(buf), n);
 		pos += n;
 		return buf;

@@ -2,6 +2,7 @@
 #define H_AES
 
 #include <vector>
+#include <algorithm>
 
 #include "../../arr.h"
 

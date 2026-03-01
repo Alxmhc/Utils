@@ -59,7 +59,7 @@ public:
 	{
 		if(n == 0)
 			return true;
-		if(n > csize - pos)
+		if(n > get_rsize())
 			return false;
 		pos_set(pos + n);
 		return true;
@@ -75,14 +75,14 @@ public:
 
 	bool readN(uint8_t* d, std::size_t n)
 	{
-		if(pos + n > csize)
+		if(n > get_rsize())
 			return false;
 		readAll(d, n);
 		return true;
 	}
 	bool readN(std::vector<uint8_t> &v, std::size_t n)
 	{
-		if(pos + n > csize)
+		if(n > get_rsize())
 			return false;
 		v.resize(n);
 		readAll(v.data(), n);
@@ -90,7 +90,7 @@ public:
 	}
 	bool readN(std::string &s, std::size_t n)
 	{
-		if(pos + n > csize)
+		if(n > get_rsize())
 			return false;
 		s.resize(n);
 		char* t = const_cast<char*>(s.data());
@@ -100,7 +100,7 @@ public:
 
 	bool addN(std::vector<uint8_t> &v, std::size_t n)
 	{
-		if(pos + n > csize)
+		if(n > get_rsize())
 			return false;
 		if(n != 0)
 		{
@@ -113,9 +113,9 @@ public:
 
 	std::size_t readMx(uint8_t* d, std::size_t n)
 	{
-		if(pos + n > csize)
+		if(n > get_rsize())
 		{
-			n = csize - pos;
+			n = get_rsize();
 		}
 		readAll(d, n);
 		return n;
@@ -124,22 +124,42 @@ public:
 	template<unsigned char SZ, char E, typename T>
 	bool readC(T &c)
 	{
-		auto t = get_data(SZ);
-		if(t == nullptr)
+		if(SZ > get_rsize())
 			return false;
+		auto t = get_data(SZ);
 		c = bconv<1, SZ, E>::pack(t);
 		return true;
 	}
 	template<typename T>
 	bool readC_LE(uint_fast8_t sz, T &c)
 	{
-		c = 0;
 		if(sz == 0)
+		{
+			c = 0;
 			return true;
-		auto t = get_data(sz);
-		if(t == nullptr)
+		}
+		if(sz > get_rsize())
 			return false;
-		packLE<1>(t, sz, c);
+
+		auto t = get_data(sz);
+		switch(sz)
+		{
+		case 1:
+			c = *t;
+			break;
+		case 2:
+			c = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(t);
+			break;
+		case 4:
+			c = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(t);
+			break;
+		case 8:
+			c = bconv<1, 8, endianness::LITTLE_ENDIAN>::pack(t);
+			break;
+		default:
+			packLE<1>(t, sz, c);
+			break;
+		}
 		return true;
 	}
 
@@ -180,8 +200,6 @@ protected:
 	}
 	const uint8_t* get_data(uint_fast8_t n)
 	{
-		if (pos + n > csize)
-			return nullptr;
 		const uint8_t* res = d + pos;
 		pos += n;
 		return res;
