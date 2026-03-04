@@ -224,7 +224,6 @@ struct bconv<SZ, 1, endianness::LITTLE_ENDIAN>
 		*a = c;
 	}
 };
-
 template<unsigned char SZ, typename T>
 static void packLE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
 {
@@ -281,6 +280,33 @@ struct bconv<SZ, 1, endianness::BIG_ENDIAN>
 		*a = c;
 	}
 };
+template<unsigned char SZ, typename T>
+static void packBE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
+{
+	switch(k)
+	{
+	case 1:
+		c = *a;
+		break;
+	case 2:
+		c = bconv<SZ, 2, endianness::BIG_ENDIAN>::pack(a);
+		break;
+	case 4:
+		c = bconv<SZ, 4, endianness::BIG_ENDIAN>::pack(a);
+		break;
+	case 8:
+		c = bconv<SZ, 8, endianness::BIG_ENDIAN>::pack(a);
+		break;
+	default:
+		c = 0;
+		for(uint_fast8_t i = 0; i < k; i++)
+		{
+			c <<= (SZ << 3);
+			c |= a[i];
+		}
+		break;
+	}
+}
 
 namespace conv
 {

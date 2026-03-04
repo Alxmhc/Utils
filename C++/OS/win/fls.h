@@ -87,7 +87,7 @@ namespace fl_s
 	{
 		const auto inf = GetFileAttributes_(pth);
 		if(inf == INVALID_FILE_ATTRIBUTES)
-			return CreateDirectory_(pth, nullptr) != 0;
+			return CreateDirectory_(pth, nullptr);
 		return (inf & FILE_ATTRIBUTE_DIRECTORY) != 0;
 	}
 
@@ -118,15 +118,15 @@ namespace fl_s
 	{
 		const auto l = pth[strlen(pth)-1];
 		if(l == '/')
-			return RemoveDirectory_(pth) != 0;
-		return DeleteFile_(pth) != 0;
+			return RemoveDirectory_(pth);
+		return DeleteFile_(pth);
 	}
 	bool del(const wchar_t* pth)
 	{
 		const auto l = pth[wcslen(pth)-1];
 		if(l == '/')
-			return RemoveDirectory_(pth) != 0;
-		return DeleteFile_(pth) != 0;
+			return RemoveDirectory_(pth);
+		return DeleteFile_(pth);
 	}
 
 	template<typename S>
