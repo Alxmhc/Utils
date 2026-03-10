@@ -124,7 +124,7 @@ namespace compr
 				{
 					if( !read_tree(br, tree) )
 						return false;
-					htrs.push_back(Tree(tree.data(), static_cast<uint_fast16_t>(tree.size())));
+					htrs.emplace_back(tree.data(), static_cast<uint_fast16_t>(tree.size()));
 				}
 			}
 

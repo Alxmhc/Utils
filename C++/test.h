@@ -7,21 +7,24 @@ template<std::size_t BSIZE>
 bool compare(const char* fl1, const char* fl2)
 {
 	br_fstream fs1, fs2;
-	if(!fs1.open(fl1)
-	|| !fs2.open(fl2))
+	if(!fs1.open(fl1) || !fs2.open(fl2))
 		return false;
-	if(fs1.get_size() != fs2.get_size())
+	std::size_t sz = fs1.get_size();
+	if(fs2.get_size() != sz)
 		return false;
 	uint8_t buf1[BSIZE], buf2[BSIZE];
-	for(;;)
+	while (sz > BSIZE)
 	{
-		const auto sz = fs1.readMx(buf1, BSIZE);
-		fs2.readN(buf2, sz);
-		if(std::memcmp(buf1, buf2, sz) != 0)
+		fs1.readN(buf1, BSIZE);
+		fs2.readN(buf2, BSIZE);
+		if(std::memcmp(buf1, buf2, BSIZE) != 0)
 			return false;
-		if(sz != BSIZE)
-			break;
+		sz -= BSIZE;
 	}
+	fs1.readN(buf1, sz);
+	fs2.readN(buf2, sz);
+	if (std::memcmp(buf1, buf2, sz) != 0)
+		return false;
 	return true;
 }
 
@@ -34,15 +37,17 @@ bool compare(const uint8_t* v, std::size_t sz, const char* fname)
 	if(fs.get_size() != sz)
 		return false;
 	uint8_t buf[BSIZE];
-	for(;;)
+	while(sz > BSIZE)
 	{
-		const auto s = fs.readMx(buf, BSIZE);
-		if(std::memcmp(v, buf, s) != 0)
+		fs.readN(buf, BSIZE);
+		if(std::memcmp(v, buf, BSIZE) != 0)
 			return false;
-		if(s != BSIZE)
-			break;
 		v += BSIZE;
+		sz -= BSIZE;
 	}
+	fs.readN(buf, sz);
+	if (std::memcmp(v, buf, sz) != 0)
+		return false;
 	return true;
 }
 

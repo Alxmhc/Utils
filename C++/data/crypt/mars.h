@@ -112,7 +112,7 @@ namespace crypt
 					d[0] = (i<8) ? d[1] + L : d[1] ^ R;
 					d[1] = d[2] + M;
 					d[2] = (i<8) ? d[3] ^ R : d[3] + L;
-					d[3] = rotl(t, 13);;
+					d[3] = rotl(t, 13);
 				}
 				for(uint_fast8_t i = 0; i < 8; i++)
 				{

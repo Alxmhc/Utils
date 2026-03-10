@@ -111,16 +111,6 @@ public:
 		return true;
 	}
 
-	std::size_t readMx(uint8_t* d, std::size_t n)
-	{
-		if(n > get_rsize())
-		{
-			n = get_rsize();
-		}
-		readAll(d, n);
-		return n;
-	}
-
 	template<unsigned char SZ, char E, typename T>
 	bool readC(T &c)
 	{

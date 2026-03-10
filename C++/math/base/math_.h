@@ -38,7 +38,7 @@ uint_fast8_t log2i(T c)
 	uint_fast8_t res = 0;
 	for(uint_fast8_t p = sizeof(T) * 4; p != 0; p >>= 1)
 	{
-		const auto t = c >> p;
+		const T t = c >> p;
 		if(t == 0)
 			continue;
 		c = t;
