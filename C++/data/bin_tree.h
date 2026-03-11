@@ -46,11 +46,13 @@ public:
 		delete right;
 	}
 
-	void add(uint_fast64_t n, uint_fast8_t nbit, T v)
+	bool add(uint_fast64_t n, uint_fast8_t nbit, const T &v)
 	{
 		binTree<T>* a = this;
 		while(nbit--)
 		{
+			if (a->fin)
+				return false;
 			const auto c = (n >> nbit) & 1;
 			if(c == 0)
 			{
@@ -69,38 +71,31 @@ public:
 				a = a->right;
 			}
 		}
+		if (a->fin || a->left != nullptr || a->right != nullptr)
+			return false;
 		a->val = v;
 		a->fin = true;
-	}
-
-	const binTree* nxt(uint_fast8_t b) const
-	{
-		return b == 0 ? left : right;
-	}
-
-	bool get_val(T &res) const
-	{
-		if(!fin)
-			return false;
-		res = val;
 		return true;
 	}
-};
 
-template<typename T>
-bool btree_decode(const binTree<T>* tr, bitReader &rd, T &res)
-{
-	for(;;)
+	bool decode(bitReader &rd, T &res) const
 	{
-		if(tr == nullptr)
-			return false;
-		if(tr->get_val(res))
-			return true;
-		uint8_t b;
-		if( !rd.get(b) )
-			return false;
-		tr = tr->nxt(b);
+		const binTree<T>* tr = this;
+		for(;;)
+		{
+			if (tr->fin)
+			{
+				res = tr->val;
+				return true;
+			}
+			uint_fast8_t b;
+			if( !rd.get(b) )
+				return false;
+			tr = b == 0 ? tr->left : tr->right;
+			if(tr == nullptr)
+				return false;
+		}
 	}
-}
+};
 
 #endif

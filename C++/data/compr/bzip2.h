@@ -133,11 +133,11 @@ namespace compr
 			uint_fast8_t l = 0;
 			for(uint_fast16_t i = 0; i < sel.size(); i++)
 			{
-				const auto tr = &htrs[sel[i]];
+				const Tree &tr = htrs[sel[i]];
 				for(uint_fast8_t n = 0; n < 50; n++)
 				{
 					uint_fast16_t c;
-					if( !btree_decode(tr, br, c) )
+					if( !tr.decode(br, c) )
 						return false;
 					if(c < 2)
 					{

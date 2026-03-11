@@ -68,7 +68,7 @@ class HTTP2
 		for(;;)
 		{
 			unsigned int r;
-			if(!btree_decode(&http2_htr, br1, r))
+			if(!http2_htr.decode(br1, r))
 				break;
 			if(r == 256)
 				return false;

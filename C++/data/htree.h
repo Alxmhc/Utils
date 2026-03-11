@@ -4,11 +4,10 @@
 #include "bin_tree.h"
 
 template<typename T>
-class hTree : public binTree<T>
+class hTree
 {
+	binTree<T> tr;
 public:
-	hTree(hTree &&t) : binTree<T>(std::move(t)) {}
-
 	hTree(const uint_fast8_t* m, T n)
 	{
 		typedef std::pair<uint_fast8_t, T> pr;
@@ -34,9 +33,14 @@ public:
 				k <<= s - p;
 				p = s;
 			}
-			this->add(k, s, tmp[i].second);
+			tr.add(k, s, tmp[i].second);
 			k++;
 		}
+	}
+
+	bool decode(bitReader &rd, T &res) const
+	{
+		return tr.decode(rd, res);
 	}
 };
 #endif
