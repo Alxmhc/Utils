@@ -111,19 +111,10 @@ public:
 		return true;
 	}
 
-	template<unsigned char SZ, char E, typename T>
-	bool readC(T &c)
+	template<char E, typename T>
+	bool readC(uint_fast8_t sz, T &c)
 	{
-		if(SZ > get_rsize())
-			return false;
-		auto t = get_data(SZ);
-		c = bconv<1, SZ, E>::pack(t);
-		return true;
-	}
-	template<typename T>
-	bool readC_LE(uint_fast8_t sz, T &c)
-	{
-		if(sz == 0)
+		if (sz == 0)
 		{
 			c = 0;
 			return true;
@@ -131,7 +122,7 @@ public:
 		if(sz > get_rsize())
 			return false;
 		auto t = get_data(sz);
-		packLE<1>(t, sz, c);
+		bconv<1, E>::pack(t, sz, c);
 		return true;
 	}
 

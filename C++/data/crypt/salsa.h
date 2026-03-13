@@ -72,8 +72,8 @@ namespace crypt
 					key[10] = 0x79622d32;
 					conv::pack<4, endianness::LITTLE_ENDIAN>(k + 16, 16, key + 11);
 				}
-				key[6] = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(iv);
-				key[7] = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(iv + 4);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(iv, 4, key[6]);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(iv + 4, 4, key[7]);
 				key[8] = 0;
 				key[9] = 0;
 			}

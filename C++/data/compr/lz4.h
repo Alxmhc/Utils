@@ -37,7 +37,7 @@ namespace compr
 				if(!br.addN(out, size))
 					return false;
 				uint16_t offset;
-				if( !br.readC<2, endianness::LITTLE_ENDIAN>(offset) )
+				if( !br.readC<endianness::LITTLE_ENDIAN>(2, offset) )
 					return br.get_rsize() == 0;
 				std::size_t len = b & 0xf;
 				if(!get_size(br, len))

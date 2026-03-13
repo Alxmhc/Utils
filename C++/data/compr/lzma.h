@@ -29,7 +29,7 @@ namespace compr
 				if( !Decode_Props(h[0]) )
 					return false;
 
-				dict_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h + 1);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h + 1, 4, dict_size);
 				if(dict_size < 4096)
 				{
 					dict_size = 4096;
@@ -68,7 +68,7 @@ namespace compr
 				if( b != 0 )
 					return false;
 
-				if( !br.readC<4, endianness::BIG_ENDIAN>(Code) )
+				if( !br.readC<endianness::BIG_ENDIAN>(4, Code) )
 					return false;
 				if( Code == 0xffffffff )
 					return false;
@@ -238,7 +238,7 @@ namespace compr
 			}
 			if(fsize == static_cast<uint64_t>(-1))
 			{
-				if( !br.readC<8, endianness::LITTLE_ENDIAN>(fsize) )
+				if( !br.readC<endianness::LITTLE_ENDIAN>(8, fsize) )
 					return false;
 			}
 

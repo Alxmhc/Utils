@@ -12,12 +12,14 @@ namespace crypt
 		static uint32_t sb(uint32_t c)
 		{
 			uint8_t t[4];
-			bconv<1, 4, endianness::LITTLE_ENDIAN>::unpack(c, t);
+			bconv<1, endianness::LITTLE_ENDIAN>::unpack(c, 4, t);
 			t[0] = Sbox[t[0]];
 			t[1] = Sbox[t[1]];
 			t[2] = Sbox[t[2]];
 			t[3] = Sbox[t[3]];
-			return bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(t);
+			uint32_t r;
+			bconv<1, endianness::LITTLE_ENDIAN>::pack(t, 4, r);
+			return r;
 		}
 
 		static uint32_t kg(uint32_t c)
@@ -65,10 +67,10 @@ namespace crypt
 				e[2] ^= cr(e[3] ^ e[0] ^ e[1] ^ key[i+2]);
 				e[3] ^= cr(e[0] ^ e[1] ^ e[2] ^ key[i+3]);
 			}
-			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(e[3], r);
-			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(e[2], r + 4);
-			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(e[1], r + 8);
-			bconv<1, 4, endianness::BIG_ENDIAN>::unpack(e[0], r + 12);
+			bconv<1, endianness::BIG_ENDIAN>::unpack(e[3], 4, r);
+			bconv<1, endianness::BIG_ENDIAN>::unpack(e[2], 4, r + 4);
+			bconv<1, endianness::BIG_ENDIAN>::unpack(e[1], 4, r + 8);
+			bconv<1, endianness::BIG_ENDIAN>::unpack(e[0], 4, r + 12);
 		}
 
 	public:

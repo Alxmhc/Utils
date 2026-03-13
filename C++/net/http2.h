@@ -300,7 +300,7 @@ public:
 
 			type = buf[3];
 			fl = buf[4];
-			id = bconv<1, 4, endianness::BIG_ENDIAN>::pack(buf.data() + 5);
+			bconv<1, endianness::BIG_ENDIAN>::pack(buf.data() + 5, 4, id);
 			id &= 0x7fffffff;
 
 			return static_cast<int_fast32_t>(rd - sz);
@@ -335,7 +335,7 @@ public:
 			if(!br.get(t) || t != 1)
 				break;
 			uint32_t nsz;
-			if(br.readC<4, endianness::BIG_ENDIAN>(nsz))
+			if(br.readC<endianness::BIG_ENDIAN>(4, nsz))
 			{
 				tbl.set_msize(nsz);
 			}

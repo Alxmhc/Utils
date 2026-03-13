@@ -29,7 +29,7 @@ public:
 	void writeC(typename UINT_<SZ>::uint c)
 	{
 		uint8_t t[SZ];
-		bconv<1, SZ, E>::unpack(c, t);
+		bconv<1, E>::unpack(c, SZ, t);
 		writeN(t, SZ);
 	}
 

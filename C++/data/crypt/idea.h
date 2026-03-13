@@ -2,7 +2,7 @@
 #define H_IDEA
 
 #include "../../math/base/math_.h"
-#include "../pack.h"
+#include "../u128.h"
 
 namespace crypt
 {
@@ -11,13 +11,14 @@ namespace crypt
 	{
 		static void Init(const uint8_t* k, uint16_t* key)
 		{
-			auto c = bconv<1, 16, endianness::BIG_ENDIAN>::pack(k);
+			UINT_<16>::uint c;
+			c.pack<1, endianness::BIG_ENDIAN>(k);
 			for(uint_fast8_t i = 0; i < 6; i++)
 			{
-				bconv<2, 8, endianness::BIG_ENDIAN>::unpack(c, key + 8*i);
+				c.unpack<2, endianness::BIG_ENDIAN>(key + 8 * i);
 				c = rotl(c, 25);
 			}
-			bconv<2, 4, endianness::BIG_ENDIAN>::unpack(c.getH(), key + 48);
+			bconv<2, endianness::BIG_ENDIAN>::unpack(c.getH(), 4, key + 48);
 		}
 
 		static uint16_t mul(uint16_t a, uint16_t b)

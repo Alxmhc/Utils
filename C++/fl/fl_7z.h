@@ -125,11 +125,13 @@ namespace fl_pr
 			if(std::memcmp(hash, header + 8, hash::CRC32::hash_size) != 0)
 				return false;
 
-			const auto NHoffset = bconv<1, 8, endianness::LITTLE_ENDIAN>::pack(header + 12);
+			uint_fast64_t NHoffset;
+			bconv<1, endianness::LITTLE_ENDIAN>::pack(header + 12, 8, NHoffset);
 			if(!br.skip(static_cast<size_t>(NHoffset)))
 				return false;
 
-			const auto NHsize = bconv<1, 8, endianness::LITTLE_ENDIAN>::pack(header + 20);
+			uint_fast64_t NHsize;
+			bconv<1, endianness::LITTLE_ENDIAN>::pack(header + 20, 8, NHsize);
 			if(NHsize == 0)
 				return false;
 			if(!br.readN(hdr, static_cast<size_t>(NHsize)))

@@ -26,7 +26,7 @@ namespace net
 				return false;
 			std::copy_n(v.data(), 6, src);
 			std::copy_n(v.data() + 6, 6, dst);
-			type = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data() + 12);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 12, 2, type);
 			v.erase(v.begin(), v.begin() + 14);
 			return true;
 		}
@@ -61,7 +61,7 @@ namespace net
 				return false;
 			std::copy_n(v.data() + 12, 4, src);
 			std::copy_n(v.data() + 16, 4, dst);
-			ID = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data() + 4);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 4, 2, ID);
 			type = v[9];
 			v.erase(v.begin(), v.begin() + s);
 			return true;
@@ -110,10 +110,10 @@ namespace net
 			const uint_fast8_t s = (v[12] >> 4) << 2;
 			if(v.size() < s || s < 20)
 				return false;
-			src = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data());
-			dst = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data() + 2);
-			num = bconv<1, 4, endianness::BIG_ENDIAN>::pack(v.data() + 4);
-			numAck = bconv<1, 4, endianness::BIG_ENDIAN>::pack(v.data() + 8);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data(), 2, src);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 2, 2, dst);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 4, 4, num);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 8, 4, numAck);
 			flag = v[13];
 			v.erase(v.begin(), v.begin() + s);
 			return true;
@@ -134,8 +134,8 @@ namespace net
 		{
 			if(v.size() < 8)
 				return false;
-			src = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data());
-			dst = bconv<1, 2, endianness::BIG_ENDIAN>::pack(v.data() + 2);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data(), 2, src);
+			bconv<1, endianness::BIG_ENDIAN>::pack(v.data() + 2, 2, dst);
 			v.erase(v.begin(), v.begin() + 8);
 			return true;
 		}

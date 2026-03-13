@@ -57,11 +57,11 @@ public:
 		return r.skip(n);
 	}
 
-	template<unsigned char SZ, char E>
-	bool readB_C(typename UINT_<SZ>::uint &c)
+	template<char E, typename T>
+	bool readB_C(uint_fast8_t sz, T &c)
 	{
 		o = 0;
-		return r.readC<SZ, E>(c);
+		return r.readC<E>(sz, c);
 	}
 };
 

@@ -46,7 +46,7 @@ namespace fl_pr
 			uint_fast8_t  encryption;
 
 			std::size_t data_pos;
-			std::size_t data_size;
+			uint_fast32_t data_size;
 		};
 		std::vector<infF> infFs;
 
@@ -197,12 +197,13 @@ namespace fl_pr
 				if(!br->readN(h, 26))
 					return false;
 				inf.encryption = h[2] & 1;
-				inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+4);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h+4, 2, inf.method);
 				std::copy_n(h+10, 4, inf.crc32);
-				inf.data_size = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+14);
-				inf.fsize = bconv<1, 4, endianness::LITTLE_ENDIAN>::pack(h+18);
-				szex = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+24);
-				const auto szfn = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(h+22);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h+14, 4, inf.data_size);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h+18, 4, inf.fsize);
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h+24, 2, szex);
+				uint_fast16_t szfn;
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h+22, 2, szfn);
 				if( !br->readN(inf.fname, szfn) )
 					return false;
 			}
@@ -216,7 +217,7 @@ namespace fl_pr
 					if( !br->readN(ext, 11) )
 						return false;
 					inf.encryption = ext[8] + 1;
-					inf.method = bconv<1, 2, endianness::LITTLE_ENDIAN>::pack(ext + 9);
+					bconv<1, endianness::LITTLE_ENDIAN>::pack(ext + 9, 2, inf.method);
 					szex -= 11;
 				}
 				if( !br->skip(szex) )

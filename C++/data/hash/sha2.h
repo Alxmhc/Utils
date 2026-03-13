@@ -4,6 +4,7 @@
 #include "../../arr.h"
 #include "../../math/base/math_.h"
 #include "../byte_writer.h"
+#include "../u128.h"
 
 namespace hash
 {

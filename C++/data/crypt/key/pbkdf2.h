@@ -54,7 +54,7 @@ public:
 			{
 				i++;
 				uint8_t num[4];
-				bconv<1, 4, endianness::BIG_ENDIAN>::unpack(i, num);
+				bconv<1, endianness::BIG_ENDIAN>::unpack(i, 4, num);
 				fcr.Calc(salt, ssz, num, tmp);
 			}
 			const bool is_fin = (ksz - o <= F::out_size);

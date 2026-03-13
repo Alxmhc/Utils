@@ -9,22 +9,9 @@ namespace endianness
 {
 	enum
 	{
-		UNKNOWN,
 		LITTLE_ENDIAN,
 		BIG_ENDIAN
 	};
-	static char get_endianness()
-	{
-		const char a[4] = {1,2,3,4};
-		uint32_t t;
-		memcpy(&t, a, 4);
-		if(t == 0x04030201)
-			return LITTLE_ENDIAN;
-		if(t == 0x01020304)
-			return BIG_ENDIAN;
-		return UNKNOWN;
-	}
-	const char current = get_endianness();
 }
 
 template<unsigned char SZ> struct UINT_{};
@@ -48,282 +35,167 @@ template<> struct UINT_<8>
 	typedef uint64_t uint;
 	typedef uint_fast64_t uint_f;
 };
-template<> struct UINT_<16>
+
+template <unsigned char SZ, char E>
+struct bconv {};
+
+template <unsigned char SZ>
+struct bconv<SZ, endianness::LITTLE_ENDIAN>
 {
-	class uint
+	template<typename T>
+	static void pack(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
 	{
-		UINT_<8>::uint l, h;
-	public:
-		explicit uint(UINT_<8>::uint ln = 0, UINT_<8>::uint hn = 0) : l(ln), h(hn) {}
-
-		uint& operator=(UINT_<8>::uint c)
-		{
-			l = c;
-			h = 0;
-			return *this;
-		}
-		uint& operator=(const uint &c)
-		{
-			l = c.l;
-			h = c.h;
-			return *this;
-		}
-
-		explicit operator UINT_<8>::uint() const
-		{
-			return l;
-		}
-
-		UINT_<8>::uint getL() const
-		{
-			return l;
-		}
-		UINT_<8>::uint getH() const
-		{
-			return h;
-		}
-
-		const uint& operator+=(UINT_<8>::uint c)
-		{
-			l += c;
-			if(l < c)
-			{
-				h++;
-			}
-			return *this;
-		}
-
-		const uint& operator|=(UINT_<8>::uint c)
-		{
-			l |= c;
-			return *this;
-		}
-		const uint& operator|=(const uint &c)
-		{
-			l |= c.l;
-			h |= c.h;
-			return *this;
-		}
-
-		const uint& operator^=(const uint &c)
-		{
-			l ^= c.l;
-			h ^= c.h;
-			return *this;
-		}
-
-		const uint& operator>>=(uint_fast8_t n)
-		{
-			if(n < 64)
-			{
-				l = (l>>n)|(h<<(64-n));
-				h >>= n;
-			}
-			else
-			{
-				l = n < 128 ? h>>(n-64) : 0;
-				h = 0;
-			}
-			return *this;
-		}
-		const uint& operator<<=(uint_fast8_t n)
-		{
-			if(n < 64)
-			{
-				h = (h<<n)|(l>>(64-n));
-				l <<= n;
-			}
-			else
-			{
-				h = n < 128 ? l<<(n-64) : 0;
-				l = 0;
-			}
-			return *this;
-		}
-
-		uint operator|(const uint &c) const
-		{
-			uint r(*this);
-			return r |= c;
-		}
-		uint operator^(const uint &c) const
-		{
-			uint r(*this);
-			return r ^= c;
-		}
-
-		uint operator>>(uint_fast8_t n) const
-		{
-			uint r(*this);
-			return r >>= n;
-		}
-		uint operator<<(uint_fast8_t n) const
-		{
-			uint r(*this);
-			return r <<= n;
-		}
-	};
-};
-static UINT_<16>::uint rotl(UINT_<16>::uint x, unsigned char d)
-{
-	d %= 128;
-	auto l = x.getL();
-	auto h = x.getH();
-	if(d >= 64)
-	{
-		std::swap(l, h);
-		d -= 64;
-	}
-	if (d == 0)
-		return UINT_<16>::uint(l, h);
-	return UINT_<16>::uint((l << d) | (h >> (64 - d)), (h << d) | (l >> (64 - d)));
-}
-static UINT_<16>::uint rotr(UINT_<16>::uint x, unsigned char d)
-{
-	d %= 128;
-	auto l = x.getL();
-	auto h = x.getH();
-	if(d >= 64)
-	{
-		std::swap(l, h);
-		d -= 64;
-	}
-	if (d == 0)
-		return UINT_<16>::uint(l, h);
-	return UINT_<16>::uint((l >> d) | (h << (64 - d)), (h >> d) | (l << (64 - d)));
-}
-
-template <unsigned char SZ, unsigned char k, char E>
-struct bconv{};
-
-template <unsigned char SZ, unsigned char k>
-struct bconv<SZ, k, endianness::LITTLE_ENDIAN>
-{
-	static typename UINT_<k*SZ>::uint pack(const typename UINT_<SZ>::uint* a)
-	{
-		typename UINT_<k*SZ>::uint res(bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::pack(a + k/2));
-		res <<= 4*k*SZ;
-		res |= bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::pack(a);
-		return res;
-	}
-	static void unpack(typename UINT_<k*SZ>::uint c, typename UINT_<SZ>::uint* a)
-	{
-		bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c), a);
-		bconv<SZ, k/2, endianness::LITTLE_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c >> (4*k*SZ)), a + k/2);
-	}
-};
-template<unsigned char SZ>
-struct bconv<SZ, 1, endianness::LITTLE_ENDIAN>
-{
-	static typename UINT_<SZ>::uint pack(const typename UINT_<SZ>::uint* a)
-	{
-		return *a;
-	}
-	static void unpack(typename UINT_<SZ>::uint c, typename UINT_<SZ>::uint* a)
-	{
-		*a = c;
-	}
-};
-template<unsigned char SZ, typename T>
-static void packLE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
-{
-	switch(k)
-	{
-	case 1:
-		c = *a;
-		break;
-	case 2:
-		c = static_cast<T>(bconv<SZ, 2, endianness::LITTLE_ENDIAN>::pack(a));
-		break;
-	case 4:
-		c = static_cast<T>(bconv<SZ, 4, endianness::LITTLE_ENDIAN>::pack(a));
-		break;
-	case 8:
-		c = static_cast<T>(bconv<SZ, 8, endianness::LITTLE_ENDIAN>::pack(a));
-		break;
-	default:
 		c = 0;
-		while(k--)
+		switch (k)
 		{
-			c <<= (SZ << 3);
-			c |= a[k];
-		}		
-		break;
-	}
-}
-
-template<unsigned char SZ, unsigned char k>
-struct bconv<SZ, k, endianness::BIG_ENDIAN>
-{
-	static typename UINT_<k*SZ>::uint pack(const typename UINT_<SZ>::uint* a)
-	{
-		typename UINT_<k*SZ>::uint res(bconv<SZ, k/2, endianness::BIG_ENDIAN>::pack(a));
-		res <<= 4*k*SZ;
-		res |= bconv<SZ, k/2, endianness::BIG_ENDIAN>::pack(a + k/2);
-		return res;
-	}
-	static void unpack(typename UINT_<k*SZ>::uint c, typename UINT_<SZ>::uint* a)
-	{
-		bconv<SZ, k/2, endianness::BIG_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c), a + k/2);
-		bconv<SZ, k/2, endianness::BIG_ENDIAN>::unpack(static_cast<typename UINT_<k*SZ/2>::uint>(c >> (4*k*SZ)), a);
-	}
-};
-template<unsigned char SZ>
-struct bconv<SZ, 1, endianness::BIG_ENDIAN>
-{
-	static typename UINT_<SZ>::uint pack(const typename UINT_<SZ>::uint* a)
-	{
-		return *a;
-	}
-	static void unpack(typename UINT_<SZ>::uint c, typename UINT_<SZ>::uint* a)
-	{
-		*a = c;
-	}
-};
-template<unsigned char SZ, typename T>
-static void packBE(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
-{
-	switch(k)
-	{
-	case 1:
-		c = *a;
-		break;
-	case 2:
-		c = static_cast<T>(bconv<SZ, 2, endianness::BIG_ENDIAN>::pack(a));
-		break;
-	case 4:
-		c = static_cast<T>(bconv<SZ, 4, endianness::BIG_ENDIAN>::pack(a));
-		break;
-	case 8:
-		c = static_cast<T>(bconv<SZ, 8, endianness::BIG_ENDIAN>::pack(a));
-		break;
-	default:
-		c = 0;
-		for(uint_fast8_t i = 0; i < k; i++)
-		{
-			c <<= (SZ << 3);
-			c |= a[i];
+		case 8:
+			c = a[7];
+			c <<= SZ * 8;
+		case 7:
+			c |= a[6];
+			c <<= SZ * 8;
+		case 6:
+			c |= a[5];
+			c <<= SZ * 8;
+		case 5:
+			c |= a[4];
+			c <<= SZ * 8;
+		case 4:
+			c |= a[3];
+			c <<= SZ * 8;
+		case 3:
+			c |= a[2];
+			c <<= SZ * 8;
+		case 2:
+			c |= a[1];
+			c <<= SZ * 8;
+		case 1:
+			c |= a[0];
+		default:
+			break;
 		}
-		break;
 	}
-}
+
+	template<typename T>
+	static void unpack(T c, uint_fast8_t k, typename UINT_<SZ>::uint* a)
+	{
+		switch (k)
+		{
+		case 8:
+			a[k - 8] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 7:
+			a[k - 7] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 6:
+			a[k - 6] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 5:
+			a[k - 5] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 4:
+			a[k - 4] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 3:
+			a[k - 3] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 2:
+			a[k - 2] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 1:
+			a[k - 1] = static_cast<typename UINT_<SZ>::uint>(c);
+		default:
+			break;
+		}
+	}
+};
+template <unsigned char SZ>
+struct bconv<SZ, endianness::BIG_ENDIAN>
+{
+	template<typename T>
+	static void pack(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
+	{
+		c = 0;
+		switch (k)
+		{
+		case 8:
+			c = a[k - 8];
+			c <<= SZ * 8;
+		case 7:
+			c |= a[k - 7];
+			c <<= SZ * 8;
+		case 6:
+			c |= a[k - 6];
+			c <<= SZ * 8;
+		case 5:
+			c |= a[k - 5];
+			c <<= SZ * 8;
+		case 4:
+			c |= a[k - 4];
+			c <<= SZ * 8;
+		case 3:
+			c |= a[k - 3];
+			c <<= SZ * 8;
+		case 2:
+			c |= a[k - 2];
+			c <<= SZ * 8;
+		case 1:
+			c |= a[k - 1];
+		default:
+			break;
+		}
+	}
+
+	template<typename T>
+	static void unpack(T c, uint_fast8_t k, typename UINT_<SZ>::uint* a)
+	{
+		switch (k)
+		{
+		case 8:
+			a[7] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 7:
+			a[6] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 6:
+			a[5] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 5:
+			a[4] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 4:
+			a[3] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 3:
+			a[2] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 2:
+			a[1] = static_cast<typename UINT_<SZ>::uint>(c);
+			c >>= SZ * 8;
+		case 1:
+			a[0] = static_cast<typename UINT_<SZ>::uint>(c);
+		default:
+			break;
+		}
+	}
+};
 
 namespace conv
 {
-	template<unsigned char SZ, char E, typename m>
-	void pack(const uint8_t* a, const std::size_t n, m* r)
+	template<unsigned char SZ, char E>
+	void pack(const uint8_t* a, const std::size_t n, typename UINT_<SZ>::uint* r)
 	{
 		for(std::size_t i = 0; i < n / SZ; i++)
 		{
-			r[i] = bconv<1, SZ, E>::pack(a + i*SZ);
+			bconv<1, E>::pack(a + i*SZ, SZ, r[i]);
 		}
 	}
-	template<unsigned char SZ, char E, typename m>
-	void unpack(const m* a, std::size_t n, uint8_t* r)
+	template<unsigned char SZ, char E>
+	void unpack(const typename UINT_<SZ>::uint* a, std::size_t n, uint8_t* r)
 	{
 		for(std::size_t i = 0; i < n; i++)
 		{
-			bconv<1, SZ, E>::unpack(a[i], r + i*SZ);
+			bconv<1, E>::unpack(a[i], SZ, r + i*SZ);
 		}
 	}
 }

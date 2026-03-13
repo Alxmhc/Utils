@@ -53,7 +53,9 @@ public:
 				}
 				for(uint_fast64_t e = 0; e < cost; e++)
 				{
-					const auto d = bconv<4, 2, endianness::LITTLE_ENDIAN>::pack(Bp.data() + i*bsz + bsz - 16) & (cost - 1);
+					uint_fast64_t d;
+					bconv<4, endianness::LITTLE_ENDIAN>::pack(Bp.data() + i*bsz + bsz - 16, 2, d);
+					d &= cost - 1;
 					v_xor(Bp.data() + i*bsz, V.data() + d * bsz, bsz);
 					Mix(Bp.data() + i*bsz, t);
 				}

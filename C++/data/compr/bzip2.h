@@ -224,7 +224,9 @@ namespace compr
 			{
 				hash[i] = bitRevT[hash[i]];
 			}
-			return bconv<1, 4, endianness::BIG_ENDIAN>::pack(hash);
+			uint_fast32_t h;
+			bconv<1, endianness::BIG_ENDIAN>::pack(hash, 4, h);
+			return h;
 		}
 	public:
 		static bool Decode(byteReader &br, byteWriter &bw)
