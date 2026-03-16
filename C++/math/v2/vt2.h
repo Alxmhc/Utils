@@ -14,28 +14,33 @@ public:
 		return vt2(-x, -y);
 	}
 
-	const vt2& operator+=(const vt2 &a)
+	const vt2& operator+=(const vt2 &c)
 	{
-		x += a.x;
-		y += a.y;
+		x += c.x;
+		y += c.y;
 		return *this;
 	}
-	const vt2& operator-=(const vt2 &a)
+	vt2 operator+(const vt2 &c) const
 	{
-		x -= a.x;
-		y -= a.y;
-		return *this;
-	}
-	const vt2& operator*=(const vt2 &a)
-	{
-		x *= a.x;
-		y *= a.y;
-		return *this;
+		return vt2(x + c.x, y + c.y);
 	}
 
+	const vt2& operator-=(const vt2 &c)
+	{
+		x -= c.x;
+		y -= c.y;
+		return *this;
+	}
 	vt2 operator-(const vt2 &c) const
 	{
-		return vt2(x-c.x, y-c.y);
+		return vt2(x - c.x, y - c.y);
+	}
+
+	const vt2& operator*=(const vt2 &c)
+	{
+		x *= c.x;
+		y *= c.y;
+		return *this;
 	}
 
 	const vt2& operator*=(long double k)
@@ -44,15 +49,16 @@ public:
 		y *= k;
 		return *this;
 	}
+	vt2 operator*(long double k) const
+	{
+		return vt2(x*k, y*k);
+	}
+
 	const vt2& operator/=(long double k)
 	{
 		x /= k;
 		y /= k;
 		return *this;
-	}
-	vt2 operator*(long double k) const
-	{
-		return vt2(k*x, k*y);
 	}
 	vt2 operator/(long double k) const
 	{

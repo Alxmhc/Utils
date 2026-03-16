@@ -14,31 +14,36 @@ public:
 		return vt3(-x, -y, -z);
 	}
 
-	const vt3& operator+=(const vt3 &a)
+	const vt3& operator+=(const vt3 &c)
 	{
-		x += a.x;
-		y += a.y;
-		z += a.z;
+		x += c.x;
+		y += c.y;
+		z += c.z;
 		return *this;
 	}
-	const vt3& operator-=(const vt3 &a)
+	vt3 operator+(const vt3 &c) const
 	{
-		x -= a.x;
-		y -= a.y;
-		z -= a.z;
-		return *this;
-	}
-	const vt3& operator*=(const vt3 &a)
-	{
-		x *= a.x;
-		y *= a.y;
-		z *= a.z;
-		return *this;
+		return vt3(x + c.x, y + c.y, z + c.z);
 	}
 
+	const vt3& operator-=(const vt3 &c)
+	{
+		x -= c.x;
+		y -= c.y;
+		z -= c.z;
+		return *this;
+	}
 	vt3 operator-(const vt3 &c) const
 	{
-		return vt3(x-c.x, y-c.y, z-c.z);
+		return vt3(x - c.x, y - c.y, z - c.z);
+	}
+
+	const vt3& operator*=(const vt3 &c)
+	{
+		x *= c.x;
+		y *= c.y;
+		z *= c.z;
+		return *this;
 	}
 
 	const vt3& operator*=(long double k)
@@ -48,16 +53,17 @@ public:
 		z *= k;
 		return *this;
 	}
+	vt3 operator*(long double k) const
+	{
+		return vt3(x*k, y*k, z*k);
+	}
+
 	const vt3& operator/=(long double k)
 	{
 		x /= k;
 		y /= k;
 		z /= k;
 		return *this;
-	}
-	vt3 operator*(long double k) const
-	{
-		return vt3(k*x, k*y, k*z);
 	}
 	vt3 operator/(long double k) const
 	{
