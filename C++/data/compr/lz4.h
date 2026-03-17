@@ -24,6 +24,7 @@ namespace compr
 					return true;
 			}
 		}
+	public:
 		static bool decode_block(byteReader &br, std::vector<uint8_t> &out, byteWriter &bw)
 		{
 			for(;;)
@@ -36,9 +37,14 @@ namespace compr
 					return false;
 				if(!br.addN(out, size))
 					return false;
-				uint16_t offset;
+				uint_fast16_t offset;
 				if( !br.readC<endianness::LITTLE_ENDIAN>(2, offset) )
-					return br.get_rsize() == 0;
+				{
+					if (br.get_rsize() != 0)
+						return false;
+					write_part(out, d_sz, bw);
+					return true;
+				}
 				std::size_t len = b & 0xf;
 				if(!get_size(br, len))
 					return false;
@@ -46,16 +52,6 @@ namespace compr
 					return false;
 				write_part(out, d_sz, bw);
 			}
-		}
-	public:
-		static bool Decode(byteReader &br, byteWriter &bw)
-		{
-			std::vector<uint8_t> out;
-			if(!decode_block(br, out, bw))
-				return false;
-			bw.writeN(out.data(), out.size());
-			bw.Fin();
-			return true;
 		}
 	};
 }
