@@ -44,19 +44,11 @@ namespace fl_pr
 					uint8_t f;
 					if (!br->get(f))
 						return false;
-					uint_fast8_t sk = 2;
-					if (((f >> 3) & 1) != 0)
-					{
-						sk += 8;
-					}
-					if ((f & 1) != 0)
-					{
-						sk += 4;
-					}
+					const uint_fast8_t sk = 2 + (f & 8) + 4*(f & 1);
 					if (!br->skip(sk))
 						return false;
-					bcs = ((f >> 4) & 1) != 0;
-					ccs = ((f >> 2) & 1) != 0;
+					bcs = (f & 16) != 0;
+					ccs = (f & 4) != 0;
 				}
 
 				for (;;)
@@ -66,18 +58,19 @@ namespace fl_pr
 						return false;
 					if (bsz == 0)
 						break;
-					if ((bsz & 0x80000000) != 0)
+					if ((bsz & 0x80000000) == 0)
+					{
+						if (!br->set_rsize(bsz))
+							return false;
+						if (!compr::lz4::decode_block(*br, out, bw))
+							return false;
+						br->reset_size();
+					}
+					else
 					{
 						bsz &= 0x7fffffff;
 						if (!br->readN(out, bsz))
 							return false;
-					}
-					else
-					{
-						br->set_rsize(bsz);
-						if (!compr::lz4::decode_block(*br, out, bw))
-							return false;
-						br->reset_size();
 					}
 					if (bcs)
 					{
