@@ -86,13 +86,18 @@ protected:
 	void fill_e(uint8_t c)
 	{
 		std::fill(buf + offset, buf + SZ, c);
+		offset = 0;
 	}
 
-	void pad_PKCS()
+	void pad_Const(uint8_t c)
 	{
-		std::fill(buf + offset, buf + SZ, uint8_t(SZ - offset));
+		std::fill(buf + offset, buf + SZ, c);
 		process(buf);
 		offset = 0;
+	}
+	void pad_PKCS()
+	{
+		pad_Const(SZ - offset);
 	}
 public:
 	void write(uint8_t c)

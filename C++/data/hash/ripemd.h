@@ -223,16 +223,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 16, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 16, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -241,7 +240,6 @@ namespace hash
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -533,16 +531,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 16, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 16, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -551,7 +548,6 @@ namespace hash
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -805,16 +801,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 16, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 16, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -823,7 +818,6 @@ namespace hash
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;
@@ -1134,16 +1128,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 16, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<4, endianness::LITTLE_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 16, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -1152,7 +1145,6 @@ namespace hash
 				x[14] = static_cast<uint32_t>(sz<<3);
 				x[15] = static_cast<uint32_t>(sz>>29);
 				Transform();
-				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;

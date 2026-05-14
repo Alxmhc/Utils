@@ -21,8 +21,8 @@ namespace hash
 				std::copy_n(x, 16, W);
 				for(uint_fast8_t i = 16; i < 68; i++)
 				{
-					uint32_t tmp = W[i-16] ^ W[i-9] ^ rotl(W[i-3], 15);
-					W[i] = tmp ^ rotl(tmp, 15) ^ rotl(tmp, 23) ^ rotl(W[i-13], 7) ^ W[i-6];
+					const uint32_t t = W[i-16] ^ W[i-9] ^ rotl(W[i-3], 15);
+					W[i] = t ^ rotl(t, 15) ^ rotl(t, 23) ^ rotl(W[i-13], 7) ^ W[i-6];
 				}
 				uint32_t tmp[8];
 				std::copy_n(st, 8, tmp);
@@ -89,16 +89,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 16, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 16, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -107,7 +106,6 @@ namespace hash
 				x[14] = static_cast<uint32_t>(sz>>29);
 				x[15] = static_cast<uint32_t>(sz<<3);
 				Transform();
-				std::fill_n(x, 16, 0);
 			}
 		};
 		tbf buf;

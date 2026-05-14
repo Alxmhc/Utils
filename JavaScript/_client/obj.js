@@ -49,9 +49,6 @@ class dom_el{
 	crd(c){
 		return [c[0]-this.o.offsetLeft, c[1]-this.o.offsetTop];
 	}
-	get size(){
-		return [this.o.width, this.o.height];
-	}
 	get szx(){
 		return this.o.width;
 	}

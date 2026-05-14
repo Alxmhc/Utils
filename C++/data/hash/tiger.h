@@ -95,16 +95,15 @@ namespace hash
 			void Fin()
 			{
 				write(0x01);
-				if(size() != 0)
+				if(bsize - size() < 8)
+				{
+					pad_Const(0);
+					std::fill_n(x, 8, 0);
+				}
+				else if(size() != 0)
 				{
 					fill_e(0);
 					conv::pack<8, endianness::LITTLE_ENDIAN>(data(), bsize, x);
-					if(bsize - size() < 8)
-					{
-						Transform();
-						std::fill_n(x, 8, 0);
-					}
-					reset();
 				}
 				else
 				{
@@ -112,7 +111,6 @@ namespace hash
 				}
 				x[7] = sz << 3;
 				Transform();
-				std::fill_n(x, 8, 0);
 			}
 		};
 		tbf buf;

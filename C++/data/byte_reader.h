@@ -119,7 +119,7 @@ public:
 			c = 0;
 			return true;
 		}
-		if(sz > get_rsize())
+		if(sz > get_rsize() || sz > sizeof(T))
 			return false;
 		auto t = get_data(sz);
 		bconv<1, E>::pack(t, sz, c);

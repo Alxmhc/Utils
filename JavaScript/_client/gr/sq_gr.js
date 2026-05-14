@@ -1,11 +1,15 @@
 class f_sqr extends fld_2d{
+	#csx;
+	#csy;
 	#resz(){
-		this.csz = [this.size[0]/this.cn[0], this.size[1]/this.cn[1]];
+		this.#csx = this.szx/this.cnx;
+		this.#csy = this.szy/this.cny;
 	}
 
 	constructor(id,n){
 		super(id);
-		this.cn = n;
+		this.cnx = n[0];
+		this.cny = n[1];
 		this.#resz();
 	}
 	resize(sz){
@@ -13,30 +17,23 @@ class f_sqr extends fld_2d{
 		this.#resz();
 	}
 
-	get csx(){
-		return this.cn[0];
-	}
-	get csy(){
-		return this.cn[1];
-	}
-
-	//cell from coordinates
-	crd_e(c){
-		const icr = this.crd(c);
-		return this.crd_c(icr);
-	}
 	//cell from internal coordinates
+	crdi_c(c){
+		return [Math.floor(c[0]/this.#csx), Math.floor(c[1]/this.#csy)];
+	}
+	//cell from coordinates
 	crd_c(c){
-		return [Math.floor(c[0]/this.csz[0]), Math.floor(c[1]/this.csz[1])];
+		const icr = this.crd(c);
+		return this.crdi_c(icr);
 	}
 
-	del(cr){
-		this.c.clearRect(this.csz[0]*cr[0], this.csz[1]*cr[1], this.csz[0], this.csz[1]);
+	clear_c(cr){
+		this.clear(this.#csx*cr[0], this.#csy*cr[1], this.#csx, this.#csy);
 	}
-	pct(cr,p){
-		this.draw(p, [this.csz[0]*cr[0], this.csz[1]*cr[1]], [this.csz[0], this.csz[1]]);
+	fill_c(cr){
+		this.fill(this.#csx*cr[0], this.#csy*cr[1], this.#csx, this.#csy);
 	}
-	fll(cr){
-		this.c.fillRect(this.csz[0]*cr[0], this.csz[1]*cr[1], this.csz[0], this.csz[1]);
+	draw_c(cr,p){
+		this.draw(p, this.#csx*cr[0], this.#csy*cr[1], this.#csx, this.#csy);
 	}
 }

@@ -65,11 +65,6 @@ protected:
 
 	byteProcBuf() : offset(0) {}
 
-	void reset()
-	{
-		offset = 0;
-	}
-
 	virtual void gen() = 0;
 
 	virtual void post_proc(uint8_t* v, uint8_t* b, std::size_t sz) const
