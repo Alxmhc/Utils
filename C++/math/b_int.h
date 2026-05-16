@@ -93,6 +93,19 @@ class b_uint
 		res.fix();
 		return res;
 	}
+
+	static uint_fast8_t b8_size(num c)
+	{
+		if ((c >> 16) != 0)
+		{
+			if ((c >> 24) != 0)
+				return 4;
+			return 3;
+		}
+		if ((c >> 8) != 0)
+			return 2;
+		return 1;
+	}
 public:
 	explicit b_uint(num c = 0) : n(1, c) {}
 
@@ -101,6 +114,11 @@ public:
 		n.resize(1);
 		n[0] = a;
 		return *this;
+	}
+
+	std::size_t b8_sz() const
+	{
+		return (n.size() - 1) * 4 + b8_size(n.back());
 	}
 
 	void fromB(const uint8_t* v, std::size_t k)
@@ -130,25 +148,39 @@ public:
 		}
 	}
 
-	std::vector<uint8_t> toB() const
+	bool toB(uint8_t* v, std::size_t sz) const
 	{
-		const std::size_t k = n.size();
-		std::vector<uint8_t> res(k * 4);
-		for(std::size_t i = 0; i < k; i++)
+		const std::size_t nsz = 4 * n.size();
+		if (sz < nsz)
 		{
-			bconv<1, endianness::BIG_ENDIAN>::unpack(n[i], 4, res.data() + 4*(k-i-1));
+			if (nsz - sz > 3)
+				return false;
+			const uint_fast8_t d = sz % 4;
+			const num c = n.back();
+			if ((c >> 8 * d) != 0)
+				return false;
+			uint8_t t[4];
+			bconv<1, endianness::BIG_ENDIAN>::unpack(c, 4, t);
+			std::copy(t + 4 - d, t + 4, v);
+			v += d;
+			sz = n.size() - 1;
 		}
-		std::size_t c = 0;
-		for(; c < res.size() - 1; c++)
+		else
 		{
-			if(res[c] != 0)
-				break;
+			sz -= nsz;
+			if (sz != 0)
+			{
+				std::fill(v, v + sz, 0);
+				v += sz;
+			}
+			sz = n.size();
 		}
-		if(c != 0)
+		while (sz--)
 		{
-			res.erase(res.begin(), res.begin() + c);
+			bconv<1, endianness::BIG_ENDIAN>::unpack(n[sz], 4, v);
+			v += 4;
 		}
-		return res;
+		return true;
 	}
 
 	bool operator==(num a) const
