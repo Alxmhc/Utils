@@ -16,20 +16,24 @@ B rotr(B x, unsigned char d)
 	return (x>>d) | (x<<((sizeof(B)<<3)-d));
 }
 
+template<typename T>
+T getBits(const T c, uint_fast8_t n)
+{
+	return c & ((T(1) << n) - 1);
+}
+
 template <typename B>
 B rotl(B x, unsigned char d, unsigned char sz)
 {
-	B m(1);
-	m = (m << sz) - 1;
-	return ((x<<d) | (x>>(sz-d))) & m;
+	B r = (x << d) | (x >> (sz - d));
+	return getBits(r, sz);
 }
 
 template <typename B>
 B rotr(B x, unsigned char d, unsigned char sz)
 {
-	B m(1);
-	m = (m << sz) - 1;
-	return ((x>>d) | (x<<(sz-d))) & m;
+	B r = (x >> d) | (x << (sz - d));
+	return getBits(r, sz);
 }
 
 template<typename T>

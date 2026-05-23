@@ -82,7 +82,7 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(bsize - size() < 8)
+				if(rsize() < 8)
 				{
 					pad_Const(0);
 					std::fill_n(x, 16, 0);
@@ -221,7 +221,7 @@ namespace hash
 			void Fin()
 			{
 				write(0x80);
-				if(bsize - size() < 16)
+				if(rsize() < 16)
 				{
 					pad_Const(0);
 					std::fill_n(x, 16, 0);

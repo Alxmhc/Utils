@@ -23,9 +23,10 @@ static bool LZ77_repeat(std::size_t sz, std::size_t dist, std::vector<uint8_t> &
 	return true;
 }
 
-static void write_part(std::vector<uint8_t> &v, std::size_t d_sz, byteWriter &bw)
+static void write_part(std::vector<uint8_t> &v, std::size_t d_sz, byteWriter &bw, std::size_t buf_sz = 1024*1024)
 {
-	if(v.size() > d_sz)
+	const auto sz = v.size();
+	if(sz > d_sz && sz - d_sz > buf_sz)
 	{
 		bw.writeN(v.data(), v.size() - d_sz);
 		v.erase(v.begin(), v.end() - d_sz);

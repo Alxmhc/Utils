@@ -170,7 +170,7 @@ public:
 			sz -= nsz;
 			if (sz != 0)
 			{
-				std::fill(v, v + sz, 0);
+				std::fill(v, v + sz, uint8_t(0));
 				v += sz;
 			}
 			sz = n.size();

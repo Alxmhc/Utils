@@ -11,7 +11,7 @@ namespace compr
 		struct props
 		{
 			uint_fast8_t lc, lp, pb;
-			uint32_t dict_size;
+			uint32_t d_sz;
 
 			bool Decode_Props(uint_fast8_t p)
 			{
@@ -29,10 +29,10 @@ namespace compr
 				if( !Decode_Props(h[0]) )
 					return false;
 
-				bconv<1, endianness::LITTLE_ENDIAN>::pack(h + 1, 4, dict_size);
-				if(dict_size < 4096)
+				bconv<1, endianness::LITTLE_ENDIAN>::pack(h + 1, 4, d_sz);
+				if(d_sz < 4096)
 				{
-					dict_size = 4096;
+					d_sz = 4096;
 				}
 				return true;
 			}
@@ -135,11 +135,11 @@ namespace compr
 				return true;
 			}
 
-			bool DecodeLit(uint16_t* probs, unsigned char state, uint32_t rep, const props &pr, std::vector<uint8_t> &out)
+			bool DecodeLit(uint16_t* probs, unsigned char state, uint32_t rep, const props &pr, const std::size_t size, std::vector<uint8_t> &out)
 			{
 				if( !out.empty() )
 				{
-					const unsigned int litState = ((out.size() & ((1 << pr.lp) - 1)) << pr.lc) + (out.back() >> (8 - pr.lc));
+					const unsigned int litState = ((size & ((1 << pr.lp) - 1)) << pr.lc) + (out.back() >> (8 - pr.lc));
 					probs += litState * 0x300;
 				}
 				unsigned int symbol = 1;
@@ -147,7 +147,7 @@ namespace compr
 				{
 					if(rep >= out.size())
 						return false;
-					uint_fast8_t mByte = out[out.size() - (rep + 1)];
+					uint_fast8_t mByte = out[out.size() - rep - 1];
 					while (symbol < 0x100)
 					{
 						uint_fast8_t mBit = (mByte >> 7) & 1;
@@ -253,9 +253,10 @@ namespace compr
 			uint16_t* Probs = Rep + Rep_sz;
 
 			std::vector<uint8_t> out;
+			std::size_t size = 0;
 			if(fsize != static_cast<uint64_t>(-1))
 			{
-				out.reserve(static_cast<std::size_t>(fsize));
+				out.reserve(pr.d_sz < fsize ? pr.d_sz : static_cast<std::size_t>(fsize));
 			}
 
 			uint32_t rep0 = 0, rep1 = 0, rep2 = 0, rep3 = 0;
@@ -263,10 +264,15 @@ namespace compr
 
 			for(;;)
 			{
-				if(fsize == 0 && rd.IsFin())
-					break;
+				if (fsize != static_cast<uint64_t>(-1))
+				{
+					if (size > fsize)
+						return false;
+					if (size == fsize && rd.IsFin())
+						break;
+				}
 
-				unsigned char posState = out.size() & ((1 << pr.pb) - 1);
+				unsigned char posState = size & ((1 << pr.pb) - 1);
 				const auto state2 = (state << 4) + posState;
 
 				uint_fast8_t bit;
@@ -274,12 +280,11 @@ namespace compr
 					return false;
 				if(bit == 0)
 				{
-					if (fsize == 0)
+					if( !rd.DecodeLit(Probs, state, rep0, pr, size, out) )
 						return false;
-					if( !rd.DecodeLit(Probs, state, rep0, pr, out) )
-						return false;
+					write_part(out, pr.d_sz, bw);
+					size++;
 					state = state < 4 ? 0 : state < 10 ? state - 3 : state - 6;
-					fsize--;
 					continue;
 				}
 
@@ -305,10 +310,6 @@ namespace compr
 				}
 				else
 				{
-					if(fsize == 0)
-						return false;
-					if(out.empty())
-						return false;
 					if( !rd.DecodeBit(Rep[state + 12], bit) )
 						return false;
 					if(bit == 0)
@@ -318,8 +319,11 @@ namespace compr
 						if(bit == 0)
 						{
 							state = state < 7 ? 9 : 11;
-							out.push_back(out[out.size() - (rep0 + 1)]);
-							fsize--;
+							if (out.size() <= rep0)
+								return false;
+							out.push_back(out[out.size() - rep0 - 1]);
+							write_part(out, pr.d_sz, bw);
+							size++;
 							continue;
 						}
 					}
@@ -357,11 +361,10 @@ namespace compr
 					state = state < 7 ? 8 : 11;
 				}
 				len += 2;
-				if(fsize < len)
-					return false;
 				if( !LZ77_repeat(len, rep0 + 1, out) )
 					return false;
-				fsize -= len;
+				write_part(out, pr.d_sz, bw);
+				size += len;
 			}
 
 			bw.writeN(out.data(), out.size());

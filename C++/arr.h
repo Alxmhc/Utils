@@ -56,6 +56,39 @@ void v_sub(T* a, const T &b, std::size_t sz)
 	}
 }
 
+class v_LE
+{
+public:
+	static void incr(uint8_t* v, uint_fast8_t sz)
+	{
+		uint_fast8_t i = 0;
+		while (v[i] == 0xff)
+		{
+			v[i] = 0;
+			i++;
+			if (i == sz)
+				return;
+		}
+		v[i]++;
+	};
+};
+class v_BE
+{
+public:
+	static void incr(uint8_t* v, uint_fast8_t sz)
+	{
+		uint_fast8_t i = sz - 1;
+		while (v[i] == 0xff)
+		{
+			v[i] = 0;
+			if (i == 0)
+				return;
+			i--;
+		}
+		v[i]++;
+	};
+};
+
 template<uint8_t SZ>
 class byteProcBuf
 {

@@ -10,64 +10,39 @@
 template<class H>
 class PBKDF2_HMAC
 {
-	hash::HMAC<H> h;
-public:
-	static const uint_fast8_t out_size = H::hash_size;
-
-	PBKDF2_HMAC(const uint8_t* passw, std::size_t sz) : h(passw, sz) {}
-
-	void Calc(const uint8_t* salt, std::size_t ssize, const uint8_t* nm, uint8_t* res)
-	{
-		if(ssize != 0)
-		{
-			h.Update(salt, ssize);
-		}
-		h.Update(nm, 4);
-		h.Final(res);
-	}
-
-	void Calc(uint8_t* res)
-	{
-		h.Update(res, H::hash_size);
-		h.Final(res);
-	}
-};
-
-//rfc 2898
-template<class F>
-class PBKDF2
-{
 	const std::size_t c;
 public:
-	PBKDF2(std::size_t k) : c(k) {}
+	PBKDF2_HMAC(std::size_t k) : c(k) {}
 
 	void gen(const uint8_t* passw, std::size_t psz, const uint8_t* salt, std::size_t ssz, uint8_t* key, std::size_t ksz) const
 	{
 		if(ksz == 0)
 			return;
-		F fcr(passw, psz);
-		uint_fast32_t i = 0;
-		std::size_t o = 0;
+		hash::HMAC<H> h(passw, psz);
+		uint8_t num[4] = {};
 		for(;;)
 		{
-			uint8_t tmp[F::out_size];
+			if (ssz != 0)
 			{
-				i++;
-				uint8_t num[4];
-				bconv<1, endianness::BIG_ENDIAN>::unpack(i, 4, num);
-				fcr.Calc(salt, ssz, num, tmp);
+				h.Update(salt, ssz);
 			}
-			const bool is_fin = (ksz - o <= F::out_size);
-			const uint_fast8_t sz = is_fin ? static_cast<uint_fast8_t>(ksz - o) : F::out_size;
-			std::copy_n(tmp, sz, key + o);
+			v_BE::incr(num, 4);
+			h.Update(num, 4);
+			uint8_t tmp[H::hash_size];
+			h.Final(tmp);
+			const bool is_fin = ksz <= H::hash_size;
+			const uint_fast8_t sz = is_fin ? static_cast<uint_fast8_t>(ksz) : H::hash_size;
+			std::copy_n(tmp, sz, key);
 			for(std::size_t j = 1; j < c; j++)
 			{
-				fcr.Calc(tmp);
-				v_xor(key + o, tmp, sz);
+				h.Update(tmp, H::hash_size);
+				h.Final(tmp);
+				v_xor(key, tmp, sz);
 			}
 			if(is_fin)
 				break;
-			o += F::out_size;
+			key += H::hash_size;
+			ksz -= H::hash_size;
 		}
 	}
 };

@@ -139,7 +139,7 @@ namespace crypt
 
 		static void Init(const uint8_t* k, uint64_t* key)
 		{
-			uint_fast32_t C = 0, D = 0;
+			uint_fast32_t C, D;
 			{
 				static const uint8_t PC1[] = {
 					 7, 15, 23, 31, 39, 47, 55, 63,  6, 14, 22, 30, 38, 46,
@@ -151,7 +151,7 @@ namespace crypt
 				bconv<1, endianness::BIG_ENDIAN>::pack(k, 8, t);
 				prm(t, PC1, 56);
 				C = static_cast<uint_fast32_t>(t >> 28);
-				D = t & 0xfffffff;
+				D = static_cast<uint_fast32_t>(getBits(t, 28));
 			}
 			{
 				static const uint8_t PC2[] = {

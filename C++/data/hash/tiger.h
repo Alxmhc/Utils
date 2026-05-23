@@ -95,7 +95,7 @@ namespace hash
 			void Fin()
 			{
 				write(0x01);
-				if(bsize - size() < 8)
+				if(rsize() < 8)
 				{
 					pad_Const(0);
 					std::fill_n(x, 8, 0);

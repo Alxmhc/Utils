@@ -7,22 +7,6 @@
 
 namespace crypt
 {
-	struct iv_ctr
-	{
-		static void incr(uint8_t* v, uint_fast8_t n)
-		{
-			while(n--)
-			{
-				if(v[n] != 0xff)
-				{
-					v[n]++;
-					break;
-				}
-				v[n] = 0;
-			}
-		}
-	};
-
 	namespace CR_CTR
 	{
 		template<class CR, class INCR>

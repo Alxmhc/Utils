@@ -85,21 +85,6 @@ namespace fl_pr
 			return true;
 		}
 
-		struct iv_zip
-		{
-			static void incr(uint8_t* v, const uint_fast8_t sz)
-			{
-				for(uint_fast8_t i = 0; i < sz; i++)
-				{
-					if(v[i] != 255)
-					{
-						v[i]++;
-						break;
-					}
-					v[i] = 0;
-				}
-			}
-		};
 		bool decryptAES(uint_fast8_t ssz, std::vector<uint8_t> &data) const
 		{
 			if(br->get_rsize() < static_cast<uint_fast8_t>(ssz + 12))
@@ -109,7 +94,7 @@ namespace fl_pr
 			{
 				std::vector<uint8_t> s(ssz + 2);
 				br->readN(s.data(), s.size());
-				const PBKDF2<PBKDF2_HMAC<hash::SHA1>> kg(1000);
+				const PBKDF2_HMAC<hash::SHA1> kg(1000);
 				kg.gen(psw.data(), psw.size(), s.data(), ssz, key.data(), key.size());
 				if(key[ssz*4] != s[ssz] || key[ssz*4+1] != s[ssz+1])
 					return false;
@@ -128,7 +113,7 @@ namespace fl_pr
 
 			const uint8_t iv[] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 			crypt::AES::Enc de(key.data(), ssz*2);
-			crypt::CR_CTR::Decr<crypt::AES, iv_zip> cr(de, iv);
+			crypt::CR_CTR::Decr<crypt::AES, v_LE> cr(de, iv);
 			cr.process(data.data(), data.size());
 			return true;
 		}

@@ -9,7 +9,7 @@ namespace crypt
 	//key sz = 16
 	class SM4
 	{
-		static uint32_t sb(uint32_t c)
+		static void sb(uint32_t &c)
 		{
 			uint8_t t[4];
 			bconv<1, endianness::LITTLE_ENDIAN>::unpack(c, 4, t);
@@ -17,21 +17,19 @@ namespace crypt
 			t[1] = Sbox[t[1]];
 			t[2] = Sbox[t[2]];
 			t[3] = Sbox[t[3]];
-			uint32_t r;
-			bconv<1, endianness::LITTLE_ENDIAN>::pack(t, 4, r);
-			return r;
+			bconv<1, endianness::LITTLE_ENDIAN>::pack(t, 4, c);
 		}
 
 		static uint32_t kg(uint32_t c)
 		{
-			auto k = sb(c);
-			return k ^ rotl(k, 13) ^ rotl(k, 23);
+			sb(c);
+			return c ^ rotl(c, 13) ^ rotl(c, 23);
 		}
 
 		static uint32_t cr(uint32_t c)
 		{
-			auto k = sb(c);
-			return k ^ rotl(k, 2) ^ rotl(k, 10) ^ rotl(k, 18) ^ rotl(k, 24);
+			sb(c);
+			return c ^ rotl(c, 2) ^ rotl(c, 10) ^ rotl(c, 18) ^ rotl(c, 24);
 		}
 
 		static void Init(const uint8_t* k, uint32_t* key)

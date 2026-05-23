@@ -72,6 +72,10 @@ protected:
 	{
 		return offset;
 	}
+	uint8_t rsize() const
+	{
+		return SZ - offset;
+	}
 
 	const uint8_t* data() const
 	{

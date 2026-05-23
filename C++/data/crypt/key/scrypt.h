@@ -33,7 +33,7 @@ public:
 			return;
 
 		const auto bsz = bsize * 32;
-		const PBKDF2<PBKDF2_HMAC<hash::SHA2_256>> k(1);
+		const PBKDF2_HMAC<hash::SHA2_256> k(1);
 
 		std::vector<uint8_t> B(4*bsz*par);
 		k.gen(passw, psz, salt, ssz, B.data(), B.size());

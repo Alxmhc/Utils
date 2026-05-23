@@ -27,24 +27,30 @@ template<> struct UINT_<16>
 		template <unsigned char SZ, char E>
 		void pack(const typename UINT_<SZ>::uint* a)
 		{
-			bconv<SZ, E>::pack(a + 8 / SZ, 8 / SZ, h);
-			bconv<SZ, E>::pack(a, 8 / SZ, l);
 			if (E == endianness::BIG_ENDIAN)
 			{
-				std::swap(l, h);
+				bconv<SZ, E>::pack(a + 8 / SZ, 8 / SZ, l);
+				bconv<SZ, E>::pack(a, 8 / SZ, h);
+			}
+			else
+			{
+				bconv<SZ, E>::pack(a + 8 / SZ, 8 / SZ, h);
+				bconv<SZ, E>::pack(a, 8 / SZ, l);
 			}
 		}
 		template <unsigned char SZ, char E>
 		void unpack(typename UINT_<SZ>::uint* a) const
 		{
-			UINT_<8>::uint l1 = l;
-			UINT_<8>::uint h1 = h;
 			if (E == endianness::BIG_ENDIAN)
 			{
-				std::swap(l1, h1);
+				bconv<SZ, E>::unpack(h, 8 / SZ, a);
+				bconv<SZ, E>::unpack(l, 8 / SZ, a + 8 / SZ);
 			}
-			bconv<SZ, E>::unpack(l1, 8 / SZ, a);
-			bconv<SZ, E>::unpack(h1, 8 / SZ, a + 8 / SZ);
+			else
+			{
+				bconv<SZ, E>::unpack(l, 8 / SZ, a);
+				bconv<SZ, E>::unpack(h, 8 / SZ, a + 8 / SZ);
+			}
 		}
 
 		UINT_<8>::uint getL() const
