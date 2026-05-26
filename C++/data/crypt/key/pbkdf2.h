@@ -22,10 +22,7 @@ public:
 		uint8_t num[4] = {};
 		for(;;)
 		{
-			if (ssz != 0)
-			{
-				h.Update(salt, ssz);
-			}
+			h.Update(salt, ssz);
 			v_BE::incr(num, 4);
 			h.Update(num, 4);
 			uint8_t tmp[H::hash_size];

@@ -14,44 +14,26 @@ namespace BER
 			return false;
 		if((k & 0x80) == 0)
 		{
-			e = true;
 			sz = k;
+			e = true;
 			return true;
 		}
 		k &= 0x7f;
 
 		if(k == 0)
 		{
+			sz = br.find(bytes("\x00\x00"), 2);
+			if (sz == br.get_rsize())
+				return false;
 			e = false;
 			return true;
 		}
 
+		if(!br.readC<endianness::BIG_ENDIAN>(k, sz))
+			return false;
+		if(sz > br.get_rsize())
+			return false;
 		e = true;
-		sz = 0;
-		while(k--)
-		{
-			uint8_t t;
-			if(!br.get(t))
-				return false;
-			sz = (sz << 8) | t;
-		}
-
-		return true;
-	}
-
-	static bool get_data(byteReader &br, std::vector<uint8_t> &d)
-	{
-		std::size_t sz;
-		bool e;
-		if(!len_decode(br, e, sz))
-			return false;
-		if(e)
-			return br.readN(d, sz);
-		sz = br.find(bytes("\x00\x00"), 2);
-		if(sz == br.get_rsize())
-			return false;
-		br.readN(d, sz);
-		br.skip(2);
 		return true;
 	}
 
