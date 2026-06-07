@@ -6,9 +6,8 @@
 #include "eq.h"
 
 //y = a + bx
-vt2 appr_lin(const std::vector<vt2> &v)
+vt2 appr_lin(const vt2* v, std::size_t n)
 {
-	auto n = v.size();
 	vt3 a,b;
 	a.x = static_cast<long double>(n);
 	while(n--)
@@ -23,9 +22,8 @@ vt2 appr_lin(const std::vector<vt2> &v)
 }
 
 //y = a + b/x
-vt2 appr_hyp(const std::vector<vt2> &v)
+vt2 appr_hyp(const vt2* v, std::size_t n)
 {
-	auto n = v.size();
 	vt3 a,b;
 	a.x = static_cast<long double>(n);
 	while(n--)
