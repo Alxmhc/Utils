@@ -58,25 +58,39 @@ namespace crypt
 
 			static void SubShift(uint8_t* r)
 			{
-				const uint8_t t[16] = {
-				Sbox[r[0]],  Sbox[r[5]],  Sbox[r[10]], Sbox[r[15]],
-				Sbox[r[4]],  Sbox[r[9]],  Sbox[r[14]], Sbox[r[3]],
-				Sbox[r[8]],  Sbox[r[13]], Sbox[r[2]],  Sbox[r[7]],
-				Sbox[r[12]], Sbox[r[1]],  Sbox[r[6]],  Sbox[r[11]]};
-				std::copy_n(t, 16, r);
+				uint8_t t[16];
+				std::copy_n(r, 16, t);
+
+				r[0]  = Sbox[t[0]];
+				r[1]  = Sbox[t[5]];
+				r[2]  = Sbox[t[10]];
+				r[3]  = Sbox[t[15]];
+				r[4]  = Sbox[t[4]];
+				r[5]  = Sbox[t[9]];
+				r[6]  = Sbox[t[14]];
+				r[7]  = Sbox[t[3]];
+				r[8]  = Sbox[t[8]];
+				r[9]  = Sbox[t[13]];
+				r[10] = Sbox[t[2]];
+				r[11] = Sbox[t[7]];
+				r[12] = Sbox[t[12]];
+				r[13] = Sbox[t[1]];
+				r[14] = Sbox[t[6]];
+				r[15] = Sbox[t[11]];
 			}
-			static void Mix(uint8_t* r)
+			static void ShiftMix(uint8_t* r)
 			{
+				SubShift(r);
 				for(uint_fast8_t i = 0; i < 16; i += 4)
 				{
-					const uint8_t d0 = r[i] ^ r[i + 1];
-					const uint8_t d1 = r[i + 1] ^ r[i + 2];
-					const uint8_t d2 = r[i + 2] ^ r[i + 3];
-					const uint8_t d3 = r[i + 3] ^ r[i];
-					r[i]   ^= d2 ^ Mul3[d0];
-					r[i+1] ^= d3 ^ Mul3[d1];
-					r[i+2] ^= d0 ^ Mul3[d2];
-					r[i+3] ^= d1 ^ Mul3[d3];
+					const uint8_t t0 = r[i]   ^ Mul3[r[i+2]];
+					const uint8_t t1 = r[i+1] ^ Mul3[r[i+3]];
+					const uint8_t t2 = r[i+2] ^ Mul3[r[i]];
+					const uint8_t t3 = r[i+3] ^ Mul3[r[i+1]];
+					r[i]   ^= t2 ^ t3;
+					r[i+1] ^= t3 ^ t0;
+					r[i+2] ^= t0 ^ t1;
+					r[i+3] ^= t1 ^ t2;
 				}
 			}
 		public:
@@ -93,8 +107,7 @@ namespace crypt
 				std::size_t i = 16;
 				for(; i < key.size() - 16; i += 16)
 				{
-					SubShift(r);
-					Mix(r);
+					ShiftMix(r);
 					v_xor(r, key.data() + i, 16);
 				}
 				SubShift(r);
@@ -114,23 +127,40 @@ namespace crypt
 
 			static void SubShiftI(uint8_t* r)
 			{
-				const uint8_t t[16] = {
-				SboxI[r[0]],  SboxI[r[13]], SboxI[r[10]], SboxI[r[7]],
-				SboxI[r[4]],  SboxI[r[1]],  SboxI[r[14]], SboxI[r[11]],
-				SboxI[r[8]],  SboxI[r[5]],  SboxI[r[2]],  SboxI[r[15]],
-				SboxI[r[12]], SboxI[r[9]],  SboxI[r[6]],  SboxI[r[3]]};
-				std::copy_n(t, 16, r);
+				uint8_t t[16];
+				std::copy_n(r, 16, t);
+
+				r[0]  = SboxI[t[0]];
+				r[1]  = SboxI[t[13]];
+				r[2]  = SboxI[t[10]];
+				r[3]  = SboxI[t[7]];
+				r[4]  = SboxI[t[4]];
+				r[5]  = SboxI[t[1]];
+				r[6]  = SboxI[t[14]];
+				r[7]  = SboxI[t[11]];
+				r[8]  = SboxI[t[8]];
+				r[9]  = SboxI[t[5]];
+				r[10] = SboxI[t[2]];
+				r[11] = SboxI[t[15]];
+				r[12] = SboxI[t[12]];
+				r[13] = SboxI[t[9]];
+				r[14] = SboxI[t[6]];
+				r[15] = SboxI[t[3]];
 			}
-			static void MixI(uint8_t* r)
+			static void MixShiftI(uint8_t* r)
 			{
 				for(uint_fast8_t i = 0; i < 16; i += 4)
 				{
-					const uint8_t d[4] = {r[i], r[i+1], r[i+2], r[i+3]};
-					r[i]   = Mule[d[0]] ^ Mulb[d[1]] ^ Muld[d[2]] ^ Mul9[d[3]];
-					r[i+1] = Mul9[d[0]] ^ Mule[d[1]] ^ Mulb[d[2]] ^ Muld[d[3]];
-					r[i+2] = Muld[d[0]] ^ Mul9[d[1]] ^ Mule[d[2]] ^ Mulb[d[3]];
-					r[i+3] = Mulb[d[0]] ^ Muld[d[1]] ^ Mul9[d[2]] ^ Mule[d[3]];
+					const uint8_t t0 = r[i];
+					const uint8_t t1 = r[i+1];
+					const uint8_t t2 = r[i+2];
+					const uint8_t t3 = r[i+3];
+					r[i]   = Mule[t0] ^ Mulb[t1] ^ Muld[t2] ^ Mul9[t3];
+					r[i+1] = Mul9[t0] ^ Mule[t1] ^ Mulb[t2] ^ Muld[t3];
+					r[i+2] = Muld[t0] ^ Mul9[t1] ^ Mule[t2] ^ Mulb[t3];
+					r[i+3] = Mulb[t0] ^ Muld[t1] ^ Mul9[t2] ^ Mule[t3];
 				}
+				SubShiftI(r);
 			}
 		public:
 			static const uint_fast8_t block_size = 16;
@@ -144,13 +174,12 @@ namespace crypt
 			{
 				std::size_t i = key.size() - 16;
 				v_xor(r, key.data() + i, 16);
-				i -= 16;
 				SubShiftI(r);
+				i -= 16;
 				for(; i > 0; i -= 16)
 				{
 					v_xor(r, key.data() + i, 16);
-					MixI(r);
-					SubShiftI(r);
+					MixShiftI(r);
 				}
 				v_xor(r, key.data(), 16);
 			}

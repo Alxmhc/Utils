@@ -38,12 +38,29 @@ public:
 	}
 };
 
-class bw_array : public byteWriter
+class bw_vector : public byteWriter
 {
 	std::vector<uint8_t> &d;
-	bw_array& operator=(const bw_array&);
+	bw_vector& operator=(const bw_vector&);
 public:
-	bw_array(std::vector<uint8_t> &v) : d(v) {}
+	bw_vector(std::vector<uint8_t> &v) : d(v) {}
+
+	void write(uint8_t c)
+	{
+		d.push_back(c);
+	}
+
+	void writeN(const uint8_t* v, std::size_t n)
+	{
+		d.insert(d.end(), v, v + n);
+	}
+};
+class bw_string : public byteWriter
+{
+	std::string &d;
+	bw_string& operator=(const bw_string&);
+public:
+	bw_string(std::string &s) : d(s) {}
 
 	void write(uint8_t c)
 	{

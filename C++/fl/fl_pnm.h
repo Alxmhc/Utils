@@ -36,13 +36,13 @@ namespace fl_pr
 
 			static const char* d = "0123456789";
 			bw.write('\n');
-			bw.writeS(convert::base::Enc::pr_num(sx, d, 10));
+			bw.writeS(convert::base::Enc::pr_num<10>(sx, d));
 			bw.write(' ');
-			bw.writeS(convert::base::Enc::pr_num(sy, d, 10));
+			bw.writeS(convert::base::Enc::pr_num<10>(sy, d));
 			bw.write('\n');
 			if(t != tGr1)
 			{
-				bw.writeS(convert::base::Enc::pr_num(mx, d, 10));
+				bw.writeS(convert::base::Enc::pr_num<10>(mx, d));
 				bw.write('\n');
 			}
 			return true;

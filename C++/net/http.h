@@ -84,7 +84,7 @@ struct URL
 				r.push_back(c);
 				continue;
 			}
-			const uint8_t n = convert::hex::Dec::pr_byte(s + i);
+			const uint8_t n = convert::hex::Decoder::pr_byte(s + i);
 			r.push_back(n);
 			i += 2;
 		}
@@ -194,7 +194,7 @@ public:
 		}
 		else if(hdr.h.GetField("transfer-encoding", fld) && fld == "chunked")
 		{
-			bw_array bw(data);
+			bw_vector bw(data);
 			if(!decode::chunk_read(*br, bw))
 				return false;
 		}
@@ -210,7 +210,7 @@ public:
 				if( !gz.read(&rd) )
 					return false;
 				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
+				bw_vector bw(tmp);
 				if( !gz.GetData(bw) )
 					return false;
 				data = std::move(tmp);
@@ -219,7 +219,7 @@ public:
 			{
 				br_array rd(data.data(), data.size());
 				std::vector<uint8_t> tmp;
-				bw_array bw(tmp);
+				bw_vector bw(tmp);
 				if( !compr::deflate::Decode(rd, bw) )
 					return false;
 				data = std::move(tmp);

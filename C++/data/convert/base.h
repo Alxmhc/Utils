@@ -10,15 +10,16 @@ namespace convert
 	{
 		namespace Enc
 		{
-			static std::string pr_num(std::size_t n, const char* dict, uint_fast8_t base)
+			template<uint_fast8_t BASE>
+			static std::string pr_num(std::size_t n, const char* dict)
 			{
 				if(n == 0)
 					return std::string(dict, dict + 1);
 				std::string res;
 				while(n != 0)
 				{
-					res += dict[n % base];
-					n /= base;
+					res += dict[n % BASE];
+					n /= BASE;
 				}
 				std::reverse(res.begin(), res.end());
 				return res;

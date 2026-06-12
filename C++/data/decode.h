@@ -17,7 +17,7 @@ namespace decode
 			{
 				if(*p == '\r')
 					break;
-				const uint8_t c = convert::hex::Dec::pr_char(*p);
+				const uint8_t c = convert::hex::Decoder::pr_char(*p);
 				if(c == 16)
 				{
 					if(sz == 0)
@@ -57,7 +57,7 @@ namespace decode
 					return false;
 				if(c == '\r')
 					break;
-				c = convert::hex::Dec::pr_char(c);
+				c = convert::hex::Decoder::pr_char(c);
 				if(c == 16)
 					return sz == 0;
 				sz = (sz << 4) | c;

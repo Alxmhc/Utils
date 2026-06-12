@@ -306,7 +306,7 @@ namespace fl_pr
 					sz -= 16;
 
 					std::vector<uint8_t> tmp;
-					bw_array bw(tmp);
+					bw_vector bw(tmp);
 					convert::base64::Decoder de(bw);
 					de.writeN(&(*e) + 17, sz);
 					de.Fin();
@@ -365,7 +365,7 @@ namespace fl_pr
 				fl_pr::F_gzip gz;
 				if(!gz.read(&bgz))
 					return false;
-				bw_array bwz(out);
+				bw_vector bwz(out);
 				if(!gz.GetData(bwz))
 					return false;
 				data.clear();

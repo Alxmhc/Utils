@@ -12,16 +12,6 @@ void v_xor(T* a, const T* b, std::size_t sz)
 		a[sz] ^= b[sz];
 	}
 }
-
-template<typename T>
-void v_and(T* a, const T &b, std::size_t sz)
-{
-	while(sz--)
-	{
-		a[sz] &= b;
-	}
-}
-
 template<typename T>
 void v_add(T* a, const T* b, std::size_t sz)
 {
@@ -31,20 +21,28 @@ void v_add(T* a, const T* b, std::size_t sz)
 	}
 }
 template<typename T>
-void v_add(T* a, const T &b, std::size_t sz)
-{
-	while(sz--)
-	{
-		a[sz] += b;
-	}
-}
-
-template<typename T>
 void v_sub(T* a, const T* b, std::size_t sz)
 {
 	while(sz--)
 	{
 		a[sz] -= b[sz];
+	}
+}
+
+template<typename T>
+void v_and(T* a, const T &b, std::size_t sz)
+{
+	while(sz--)
+	{
+		a[sz] &= b;
+	}
+}
+template<typename T>
+void v_add(T* a, const T &b, std::size_t sz)
+{
+	while(sz--)
+	{
+		a[sz] += b;
 	}
 }
 template<typename T>

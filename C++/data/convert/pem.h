@@ -29,7 +29,7 @@ namespace convert
 				return false;
 			res.first = res.first.substr(11, res.first.length() - 16);
 
-			bw_array bw(res.second);
+			bw_vector bw(res.second);
 			convert::base64::Decoder de(bw);
 			std::string tmp;
 			while(std::getline(st, tmp))
