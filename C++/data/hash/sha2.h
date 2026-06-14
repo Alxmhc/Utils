@@ -67,7 +67,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::BIG_ENDIAN>(v, bsize, x);
+				conv::pack<4, endianness::BIG_ENDIAN>(v, this->bsize, x);
 				Transform();
 			}
 		public:
@@ -81,16 +81,16 @@ namespace hash
 			}
 			void Fin()
 			{
-				write(0x80);
-				if(rsize() < 8)
+				this->write(0x80);
+				if(this->rsize() < 8)
 				{
-					pad_Const(0);
+					this->pad_Const(0);
 					std::fill_n(x, 16, 0);
 				}
-				else if(size() != 0)
+				else if(this->size() != 0)
 				{
-					fill_e(0);
-					conv::pack<4, endianness::BIG_ENDIAN>(data(), bsize, x);
+					this->fill_e(0);
+					conv::pack<4, endianness::BIG_ENDIAN>(this->data(), this->bsize, x);
 				}
 				else
 				{
@@ -206,7 +206,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::BIG_ENDIAN>(v, bsize, x);
+				conv::pack<8, endianness::BIG_ENDIAN>(v, this->bsize, x);
 				Transform();
 			}
 		public:
@@ -220,16 +220,16 @@ namespace hash
 			}
 			void Fin()
 			{
-				write(0x80);
-				if(rsize() < 16)
+				this->write(0x80);
+				if(this->rsize() < 16)
 				{
-					pad_Const(0);
+					this->pad_Const(0);
 					std::fill_n(x, 16, 0);
 				}
-				else if(size() != 0)
+				else if(this->size() != 0)
 				{
-					fill_e(0);
-					conv::pack<8, endianness::BIG_ENDIAN>(data(), bsize, x);
+					this->fill_e(0);
+					conv::pack<8, endianness::BIG_ENDIAN>(this->data(), this->bsize, x);
 				}
 				else
 				{

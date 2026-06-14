@@ -27,7 +27,7 @@ template<> struct UINT_<16>
 		template <unsigned char SZ, char E>
 		void pack(const typename UINT_<SZ>::uint* a)
 		{
-			if (E == endianness::BIG_ENDIAN)
+			if constexpr (E == endianness::BIG_ENDIAN)
 			{
 				bconv<SZ, E>::pack(a + 8 / SZ, 8 / SZ, l);
 				bconv<SZ, E>::pack(a, 8 / SZ, h);
@@ -41,7 +41,7 @@ template<> struct UINT_<16>
 		template <unsigned char SZ, char E>
 		void unpack(typename UINT_<SZ>::uint* a) const
 		{
-			if (E == endianness::BIG_ENDIAN)
+			if constexpr (E == endianness::BIG_ENDIAN)
 			{
 				bconv<SZ, E>::unpack(h, 8 / SZ, a);
 				bconv<SZ, E>::unpack(l, 8 / SZ, a + 8 / SZ);
