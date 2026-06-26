@@ -2,6 +2,8 @@
 #define H_DLIB
 
 #include <windows.h>
+#undef min
+#undef max
 
 class dlib
 {

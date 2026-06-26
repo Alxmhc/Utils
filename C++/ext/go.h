@@ -1,9 +1,8 @@
 #ifndef EXT_GO
 #define EXT_GO
 
-#include <cstddef>
 #include <cstdint>
-#include <string>
+#include <cstring>
 
 typedef int8_t  GoInt8;
 typedef int16_t GoInt16;
@@ -35,7 +34,6 @@ class GoString
 public:
 	GoString(const char* s) : p(s), n(strlen(s)) {}
 	GoString(const char* s, std::size_t k) : p(s), n(k) {}
-	GoString(const std::string &s) : p(s.c_str()), n(s.length()) {}
 };
 
 #endif

@@ -12,6 +12,11 @@ namespace geom
 	public:
 		p_sph(long double c) : r(c) {}
 
+		long double get_r() const
+		{
+			return r;
+		}
+
 		static long double vl(long double r)
 		{
 			return 4.0*(pi/3.0)*r*r*r;
@@ -36,6 +41,11 @@ namespace geom
 		vt3 cnt;
 	public:
 		sph(const vt3 &c, long double r) : p_sph(r), cnt(c) {}
+
+		const vt3& get_c() const
+		{
+			return cnt;
+		}
 	};
 }
 
