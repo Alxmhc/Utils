@@ -8,9 +8,6 @@ namespace convert
 {
 	namespace hex
 	{
-		static const char* dct_lc = "0123456789abcdef";
-		static const char* dct_uc = "0123456789ABCDEF";
-
 		class Encoder : public byteWriter
 		{
 			byteWriter &bw;
@@ -25,7 +22,7 @@ namespace convert
 				}
 			}
 		public:
-			Encoder(byteWriter &b, bool isU = false) : bw(b), dict(isU ? dct_uc : dct_lc) {}
+			Encoder(byteWriter &b, bool isU = false) : bw(b), dict(isU ? base::dct_h_u : base::dct_h_l) {}
 
 			void writeN(const uint8_t* v, std::size_t n)
 			{
@@ -37,17 +34,12 @@ namespace convert
 				bw.Fin();
 			}
 
-			static std::string pr_num(std::size_t n, bool isU = false)
-			{
-				return base::Enc::pr_num<16>(n, isU ? dct_uc : dct_lc);
-			}
-
 			static std::string pr_string(const uint8_t* v, std::size_t n, bool isU = false)
 			{
 				std::string res;
 				res.reserve(n*2);
 				bw_string bw(res);
-				write_v(bw, v, n, isU ? dct_uc : dct_lc);
+				write_v(bw, v, n, isU ? base::dct_h_u : base::dct_h_l);
 				return res;
 			}
 		};

@@ -8,6 +8,10 @@ namespace convert
 {
 	namespace base
 	{
+		static const char* dict_d = "0123456789";
+		static const char* dct_h_l = "0123456789abcdef";
+		static const char* dct_h_u = "0123456789ABCDEF";
+
 		namespace Enc
 		{
 			template<uint_fast8_t BASE>

@@ -34,15 +34,14 @@ namespace fl_pr
 				return false;
 			}
 
-			static const char* d = "0123456789";
 			bw.write('\n');
-			bw.writeS(convert::base::Enc::pr_num<10>(sx, d));
+			bw.writeS(convert::base::Enc::pr_num<10>(sx, convert::base::dict_d));
 			bw.write(' ');
-			bw.writeS(convert::base::Enc::pr_num<10>(sy, d));
+			bw.writeS(convert::base::Enc::pr_num<10>(sy, convert::base::dict_d));
 			bw.write('\n');
 			if(t != tGr1)
 			{
-				bw.writeS(convert::base::Enc::pr_num<10>(mx, d));
+				bw.writeS(convert::base::Enc::pr_num<10>(mx, convert::base::dict_d));
 				bw.write('\n');
 			}
 			return true;
