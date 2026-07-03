@@ -91,6 +91,27 @@ struct URL
 		r.shrink_to_fit();
 		return r;
 	}
+
+	static bool Parse_params(const std::string &s, std::map<std::string, std::string> &par)
+	{
+		par.clear();
+		std::size_t b = 0;
+		for (;;)
+		{
+			const auto p1 = s.find('=', b);
+			if (p1 == std::string::npos)
+				return false;
+			const auto p2 = s.find('&', p1 + 1);
+			if (p2 == std::string::npos)
+			{
+				par[s.substr(b, p1 - b)] = s.substr(p1 + 1);
+				break;
+			}
+			par[s.substr(b, p1 - b)] = s.substr(p1 + 1, p2 - p1 - 1);
+			b = p2 + 1;
+		}
+		return true;
+	}
 };
 
 struct http_header

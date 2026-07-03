@@ -7,6 +7,7 @@ namespace compr
 {
 	class brotli
 	{
+	public:
 		static bool wbit(bitReaderL &br, uint_fast8_t &p)
 		{
 			if(!br.get(p))

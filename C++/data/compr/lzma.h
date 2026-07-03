@@ -57,8 +57,10 @@ namespace compr
 				}
 				return true;
 			}
+
+			RangeDecoder& operator=(const RangeDecoder&);
 		public:
-			RangeDecoder(byteReader &brd) : br(brd), Range(0xffffffff) {}
+			RangeDecoder(byteReader &brd) : br(brd), Range(0xffffffff), Code(0xffffffff) {}
 
 			bool Init()
 			{

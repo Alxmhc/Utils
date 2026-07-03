@@ -76,8 +76,8 @@ namespace fl_pr
 			for(std::size_t i = 0; i < data.size(); i++)
 			{
 				uint32_t tmp = key[2] | 2;
-				tmp = (tmp * (tmp ^ 1)) >> 8;
-				data[i] ^= tmp & 0xff;
+				tmp *= tmp ^ 1;
+				data[i] ^= (tmp >> 8) & 0xff;
 
 				keyUpd(key, data[i], crcTbl);
 			}

@@ -18,15 +18,47 @@ namespace fl_s
 	}
 
 	template<typename C>
-	void move(const C* p1, const C* p2)
+	bool copy(const C* p1, const C* p2)
 	{
-		std::filesystem::rename(p1, p2);
+		const std::filesystem::path npth(p2);
+		std::filesystem::create_directories(npth.parent_path());
+		try
+		{
+			std::filesystem::copy(p1, npth, std::filesystem::copy_options::recursive);
+		}
+		catch (...)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	template<typename C>
+	bool move(const C* p1, const C* p2)
+	{
+		const std::filesystem::path npth(p2);
+		std::filesystem::create_directories(npth.parent_path());
+		try
+		{
+			std::filesystem::rename(p1, npth);
+		}
+		catch (...)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	template<typename C>
 	bool del(const C* pth)
 	{
 		return std::filesystem::remove(pth);
+	}
+
+	template<typename C>
+	void del_dirs(const C* pth)
+	{
+		std::filesystem::remove_all(pth);
 	}
 
 	template<typename C>
@@ -54,12 +86,6 @@ namespace fl_s
 			}
 			st(name);
 		}
-	}
-
-	template<typename C>
-	void del_dirs(const C* pth)
-	{
-		std::filesystem::remove_all(pth);
 	}
 }
 

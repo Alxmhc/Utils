@@ -8,6 +8,7 @@ namespace compr
 {
 	class zstd
 	{
+	public:
 		static bool Init(byteReader &br, bool &ch, std::size_t &dict_sz, uint_fast64_t &fr_sz)
 		{
 			uint8_t hd;

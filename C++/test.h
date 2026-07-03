@@ -4,28 +4,36 @@
 #include "fl/fl_.h"
 
 template<std::size_t BSIZE>
+bool compare(byteReader &br1, byteReader &br2)
+{
+	std::size_t sz = br1.get_rsize();
+	if (br2.get_rsize() != sz)
+		return false;
+	if (sz == 0)
+		return true;
+	uint8_t buf1[BSIZE], buf2[BSIZE];
+	while (sz > BSIZE)
+	{
+		br1.readN(buf1, BSIZE);
+		br2.readN(buf2, BSIZE);
+		if (std::memcmp(buf1, buf2, BSIZE) != 0)
+			return false;
+		sz -= BSIZE;
+	}
+	br1.readN(buf1, sz);
+	br2.readN(buf2, sz);
+	if (std::memcmp(buf1, buf2, sz) != 0)
+		return false;
+	return true;
+}
+
+template<std::size_t BSIZE>
 bool compare(const char* fl1, const char* fl2)
 {
 	br_fstream fs1, fs2;
 	if(!fs1.open(fl1) || !fs2.open(fl2))
 		return false;
-	std::size_t sz = fs1.get_size();
-	if(fs2.get_size() != sz)
-		return false;
-	uint8_t buf1[BSIZE], buf2[BSIZE];
-	while (sz > BSIZE)
-	{
-		fs1.readN(buf1, BSIZE);
-		fs2.readN(buf2, BSIZE);
-		if(std::memcmp(buf1, buf2, BSIZE) != 0)
-			return false;
-		sz -= BSIZE;
-	}
-	fs1.readN(buf1, sz);
-	fs2.readN(buf2, sz);
-	if (std::memcmp(buf1, buf2, sz) != 0)
-		return false;
-	return true;
+	return compare<BSIZE>(fs1, fs2);
 }
 
 template<std::size_t BSIZE>

@@ -84,7 +84,7 @@ namespace nnet
 		{
 			sockaddr_in addr = {};
 			addr.sin_family = AF_INET;
-			addr.sin_port = htons(port);
+			addr.sin_port = htons(static_cast<u_short>(port));
 			bconv<1, endianness::LITTLE_ENDIAN>::pack(ip, 4, addr.sin_addr.s_addr);
 			return connect(s, reinterpret_cast<const sockaddr*>(&addr), sizeof(sockaddr)) != SOCKET_ERROR;
 		}
