@@ -71,6 +71,15 @@ _arr = {
 		}
 	},
 
+	get_ind(arr, ind){
+		return Array.from(ind, k => arr[k])
+	},
+	set_ind(arr, ind, d){
+		for(let i=0, n=ind.length; i<n; ++i){
+			arr[ind[i]] = d[i];
+		}
+	},
+
 	m_and(v, m){
 		for(let i=0, n=v.length; i<n; ++i){
 			if(v[i] !== m[i]){
