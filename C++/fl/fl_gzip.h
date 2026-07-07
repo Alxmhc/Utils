@@ -79,6 +79,11 @@ namespace fl_pr
 			return comment;
 		}
 
+		const uint8_t* get_hash() const
+		{
+			return crc32;
+		}
+
 		bool GetData(byteWriter &bw)
 		{
 			br->set_pos(data_pos);

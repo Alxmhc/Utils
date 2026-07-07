@@ -35,13 +35,20 @@ namespace fl_pr
 			}
 
 			bw.write('\n');
-			bw.writeS(convert::base::Enc::pr_num<10>(sx, convert::base::dict_d));
+			{
+				const std::string str = convert::base::Enc::pr_num<10>(sx, convert::base::dict_d);
+				bw.writeS(str.c_str(), str.length());
+			}
 			bw.write(' ');
-			bw.writeS(convert::base::Enc::pr_num<10>(sy, convert::base::dict_d));
+			{
+				const std::string str = convert::base::Enc::pr_num<10>(sy, convert::base::dict_d);
+				bw.writeS(str.c_str(), str.length());
+			}
 			bw.write('\n');
 			if(t != tGr1)
 			{
-				bw.writeS(convert::base::Enc::pr_num<10>(mx, convert::base::dict_d));
+				const std::string str = convert::base::Enc::pr_num<10>(mx, convert::base::dict_d);
+				bw.writeS(str.c_str(), str.length());
 				bw.write('\n');
 			}
 			return true;

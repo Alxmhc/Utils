@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <vector>
-#include <numeric>
 
 namespace convert
 {

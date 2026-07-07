@@ -48,7 +48,8 @@ namespace hash
 		}
 		void Update(uint8_t c)
 		{
-			crc = tbl[(crc & 0xff) ^ c] ^ (crc >> 8);
+			c ^= crc & 0xff;
+			crc = tbl[c] ^ (crc >> 8);
 		}
 		void Update(const uint8_t* v, const std::size_t n)
 		{
