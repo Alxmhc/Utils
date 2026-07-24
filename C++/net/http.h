@@ -8,6 +8,25 @@
 #include "../data/decode.h"
 #include "../fl/fl_gzip.h"
 
+class dict_reader
+{
+	const std::string d, e;
+public:
+	dict_reader(const char* f, const char* p) : d(f), e(p) {}
+
+	bool nxt(const char* &sb, const char* se, std::pair<std::string, std::string> &res) const
+	{
+		const auto f = std::search(sb, se, d.cbegin(), d.cend());
+		const auto p = std::search(sb, f, e.cbegin(), e.cend());
+		if (p == f)
+			return false;
+		res.first.assign(sb, p);
+		res.second.assign(p + e.length(), f);
+		sb = f != se ? f + d.length() : se;
+		return true;
+	}
+};
+
 class net_header
 {
 	std::map<std::string, std::string> m;
@@ -44,16 +63,13 @@ public:
 	bool From_Text(const char* cb, const char* ce)
 	{
 		clear();
-		static const char* rn = "\r\n";
-		static const char* d = ": ";
+		static const dict_reader rd("\r\n", ": ");
+		std::pair<std::string, std::string> e;
 		while(cb != ce)
 		{
-			const auto p = std::search(cb, ce, rn, rn + 2);
-			const auto f = std::search(cb, p, d, d + 2);
-			if(f == p)
+			if (!rd.nxt(cb, ce, e))
 				return false;
-			AddField(std::string(cb, f), std::string(f + 2, p));
-			cb = p + 2;
+			AddField(e.first, e.second);
 		}
 		return true;
 	}
@@ -94,21 +110,16 @@ struct URL
 
 	static bool Parse_params(const std::string &s, std::map<std::string, std::string> &par)
 	{
+		const char* cb = s.c_str();
+		const char* ce = cb + s.length();
 		par.clear();
-		std::size_t b = 0;
-		for (;;)
+		static const dict_reader rd("&", "=");
+		std::pair<std::string, std::string> e;
+		while(cb != ce)
 		{
-			const auto p1 = s.find('=', b);
-			if (p1 == std::string::npos)
+			if (!rd.nxt(cb, ce, e))
 				return false;
-			const auto p2 = s.find('&', p1 + 1);
-			if (p2 == std::string::npos)
-			{
-				par[s.substr(b, p1 - b)] = s.substr(p1 + 1);
-				break;
-			}
-			par[s.substr(b, p1 - b)] = s.substr(p1 + 1, p2 - p1 - 1);
-			b = p2 + 1;
+			par[e.first] = e.second;
 		}
 		return true;
 	}
@@ -161,12 +172,32 @@ class HTTP1
 		return true;
 	}
 public:
+	static bool Read_hdr(byteReader &br, std::string &s)
+	{
+		const auto p = br.find(bytes("\r\n\r\n"), 4);
+		if (p == br.get_rsize())
+			return false;
+		br.readN(s, p + 2);
+		br.skip(2);
+		return true;
+	}
+
 	static bool Hdr_From_Text(const std::string &s, http_header &h)
 	{
 		const auto p = s.find("\r\n");
 		if (!parse_l(s.substr(0, p), h))
 			return false;
 		if (!h.h.From_Text(s.c_str() + p + 2, s.c_str() + s.length()))
+			return false;
+		return true;
+	}
+
+	static bool Read_hdr(byteReader &br, http_header &hdr)
+	{
+		std::string s;
+		if (!Read_hdr(br, s))
+			return false;
+		if(!Hdr_From_Text(s, hdr))
 			return false;
 		return true;
 	}
@@ -178,22 +209,13 @@ public:
 		return res;
 	}
 
-	static std::size_t Read_hdr(byteReader &br, http_header &h)
-	{
-		std::string s;
-		if(!br.read_string(bytes("\r\n\r\n"), 4, s))
-			return 0;
-		s += "\r\n";
-		if(!Hdr_From_Text(s, h))
-			return 0;
-		return br.get_pos();
-	}
-
 	bool read(byteReader* b)
 	{
 		br = b;
-		data_pos = Read_hdr(*br, hdr);
-		return data_pos != 0;
+		if (!Read_hdr(*br, hdr))
+			return false;
+		data_pos = br->get_pos();
+		return true;
 	}
 
 	const http_header* Get_Header() const
@@ -204,18 +226,21 @@ public:
 	bool Get_Data(std::vector<uint8_t> &data)
 	{
 		data.clear();
-		br->set_pos(data_pos);
 
 		std::string fld;
 		if(hdr.h.GetField("content-length", fld))
 		{
 			const auto sz = std::stoul(fld);
+			if (sz == 0)
+				return true;
+			br->set_pos(data_pos);
 			if(!br->readN(data, sz))
 				return false;
 		}
 		else if(hdr.h.GetField("transfer-encoding", fld) && fld == "chunked")
 		{
 			bw_vector bw(data);
+			br->set_pos(data_pos);
 			if(!decode::chunk_read(*br, bw))
 				return false;
 		}
