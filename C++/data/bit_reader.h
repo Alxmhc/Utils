@@ -5,7 +5,7 @@
 
 class bitReader
 {
-	bitReader& operator=(const bitReader&);
+	bitReader& operator=(const bitReader&) = delete;
 protected:
 	byteReader &r;
 	uint_fast8_t o, b;

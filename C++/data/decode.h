@@ -1,8 +1,8 @@
 #ifndef H_DECODE
 #define H_DECODE
 
+#include "byte_reader.h"
 #include "convert/hex.h"
-#include "../cont.h"
 
 namespace decode
 {
@@ -66,8 +66,12 @@ namespace decode
 				return true;
 			if(!br.skip(1))
 				return false;
-			if(!copy(br, bw, sz))
-				return false;
+			{
+				std::vector<uint8_t> data;
+				if (!br.readN(data, sz))
+					return false;
+				bw.writeN(data.data(), data.size());
+			}
 			if(!br.skip(2))
 				return false;
 		}

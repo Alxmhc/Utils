@@ -1,7 +1,6 @@
 #ifndef H_FL_ZIP
 #define H_FL_ZIP
 
-#include "../cont.h"
 #include "../data/hash/sha1.h"
 #include "../data/crypt/key/pbkdf2.h"
 #include "../data/crypt/aes.h"
@@ -149,8 +148,13 @@ namespace fl_pr
 			switch(inf.method)
 			{
 			case cNO:
-				copy(br, bw, inf.data_size);
+			{
+				std::vector<uint8_t> data;
+				if (!br.readN(data, inf.data_size))
+					return false;
+				bw.writeN(data.data(), data.size());
 				break;
+			}
 			case cDeflate:
 			case cDeflate64:
 				if( !compr::deflate::Decode(br, bw) )

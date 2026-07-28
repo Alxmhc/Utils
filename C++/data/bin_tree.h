@@ -12,12 +12,13 @@ class binTree
 	T val;
 
 public:
-	binTree() : left(nullptr), right(nullptr), fin(false){}
+	binTree() : left(nullptr), right(nullptr), fin(false) {}
 
 	binTree(binTree &&t) : left(t.left), right(t.right), fin(t.fin), val(t.val)
 	{
 		t.left = nullptr;
 		t.right = nullptr;
+		t.fin = false;
 	}
 
 	binTree& operator=(binTree &&t)
@@ -33,9 +34,11 @@ public:
 			t.right = nullptr;
 
 			fin = t.fin;
-			t.fin = false;
-
-			val = t.val;
+			if (fin)
+			{
+				val = t.val;
+				t.fin = false;
+			}
 		}
 		return *this;
 	}

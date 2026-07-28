@@ -37,7 +37,7 @@ public:
 class bw_vector : public byteWriter
 {
 	std::vector<uint8_t> &d;
-	bw_vector& operator=(const bw_vector&);
+	bw_vector& operator=(const bw_vector&) = delete;
 public:
 	bw_vector(std::vector<uint8_t> &v) : d(v) {}
 
@@ -54,7 +54,7 @@ public:
 class bw_string : public byteWriter
 {
 	std::string &d;
-	bw_string& operator=(const bw_string&);
+	bw_string& operator=(const bw_string&) = delete;
 public:
 	bw_string(std::string &s) : d(s) {}
 

@@ -30,7 +30,7 @@ class GoString
 {
 	const char* p;
 	const ptrdiff_t n;
-	GoString& operator=(const GoString&);
+	GoString& operator=(const GoString&) = delete;
 public:
 	GoString(const char* s) : p(s), n(strlen(s)) {}
 	GoString(const char* s, std::size_t k) : p(s), n(k) {}

@@ -1,7 +1,8 @@
 #ifndef H_FL_TAR
 #define H_FL_TAR
 
-#include "../cont.h"
+#include "../data/byte_reader.h"
+#include "../data/byte_writer.h"
 
 namespace fl_pr
 {
@@ -75,7 +76,10 @@ namespace fl_pr
 		bool GetData(std::size_t n, byteWriter &bw)
 		{
 			br->set_pos(infFs[n].data_pos);
-			copy(*br, bw, infFs[n].data_size);
+			std::vector<uint8_t> data;
+			if (!br->readN(data, infFs[n].data_size))
+				return false;
+			bw.writeN(data.data(), data.size());
 			return true;
 		}
 	};

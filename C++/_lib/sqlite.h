@@ -1,3 +1,5 @@
+#include <sqlite3.h>
+
 class sq3
 {
 	sqlite3* db;

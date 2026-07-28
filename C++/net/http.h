@@ -171,6 +171,33 @@ class HTTP1
 
 		return true;
 	}
+
+	bool Decode(byteReader &brd, byteWriter &bw) const
+	{
+		std::string fld;
+		if (hdr.h.GetField("content-encoding", fld))
+		{
+			if (fld == "gzip")
+			{
+				fl_pr::F_gzip gz;
+				if (!gz.read(&brd))
+					return false;
+				if (!gz.GetData(bw))
+					return false;
+				return true;
+			}
+			else if (fld == "deflate")
+			{
+				if (!compr::deflate::Decode(brd, bw))
+					return false;
+				return true;
+			}
+		}
+		std::vector<uint8_t> data;
+		brd.readN(data, brd.get_rsize());
+		bw.writeN(data.data(), data.size());
+		return true;
+	}
 public:
 	static bool Read_hdr(byteReader &br, std::string &s)
 	{
@@ -223,10 +250,8 @@ public:
 		return &hdr;
 	}
 
-	bool Get_Data(std::vector<uint8_t> &data)
+	bool Get_Data(byteWriter &bw)
 	{
-		data.clear();
-
 		std::string fld;
 		if(hdr.h.GetField("content-length", fld))
 		{
@@ -234,44 +259,25 @@ public:
 			if (sz == 0)
 				return true;
 			br->set_pos(data_pos);
-			if(!br->readN(data, sz))
+			if(!br->set_rsize(sz))
 				return false;
-		}
-		else if(hdr.h.GetField("transfer-encoding", fld) && fld == "chunked")
-		{
-			bw_vector bw(data);
-			br->set_pos(data_pos);
-			if(!decode::chunk_read(*br, bw))
+			if (!Decode(*br, bw))
 				return false;
-		}
-		else
 			return true;
-
-		if(hdr.h.GetField("content-encoding", fld))
-		{
-			if(fld == "gzip")
-			{
-				br_array rd(data.data(), data.size());
-				fl_pr::F_gzip gz;
-				if( !gz.read(&rd) )
-					return false;
-				std::vector<uint8_t> tmp;
-				bw_vector bw(tmp);
-				if( !gz.GetData(bw) )
-					return false;
-				data = std::move(tmp);
-			}
-			else if(fld == "deflate")
-			{
-				br_array rd(data.data(), data.size());
-				std::vector<uint8_t> tmp;
-				bw_vector bw(tmp);
-				if( !compr::deflate::Decode(rd, bw) )
-					return false;
-				data = std::move(tmp);
-			}
 		}
-
+		if(hdr.h.GetField("transfer-encoding", fld) && fld == "chunked")
+		{
+			br->set_pos(data_pos);
+			std::vector<uint8_t> data;
+			data.reserve(br->get_rsize());
+			bw_vector bwd(data);
+			if(!decode::chunk_read(*br, bwd))
+				return false;
+			br_array brd(data.data(), data.size());
+			if (!Decode(brd, bw))
+				return false;
+			return true;
+		}
 		return true;
 	}
 };

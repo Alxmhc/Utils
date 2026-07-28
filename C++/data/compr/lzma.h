@@ -58,7 +58,7 @@ namespace compr
 				return true;
 			}
 
-			RangeDecoder& operator=(const RangeDecoder&);
+			RangeDecoder& operator=(const RangeDecoder&) = delete;
 		public:
 			RangeDecoder(byteReader &brd) : br(brd), Range(0xffffffff), Code(0xffffffff) {}
 
