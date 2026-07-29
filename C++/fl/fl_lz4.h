@@ -9,9 +9,9 @@ namespace fl_pr
 	{
 		byteReader* br;
 	public:
-		bool read(byteReader* r)
+		bool read(byteReader &r)
 		{
-			br = r;
+			br = &r;
 			return true;
 		}
 

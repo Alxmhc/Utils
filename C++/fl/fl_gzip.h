@@ -17,9 +17,9 @@ namespace fl_pr
 		std::size_t data_pos;
 		std::size_t data_size;
 	public:
-		bool read(byteReader* r)
+		bool read(byteReader &r)
 		{
-			br = r;
+			br = &r;
 
 			uint8_t flg;
 			{

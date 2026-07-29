@@ -216,9 +216,9 @@ namespace fl_pr
 			return true;
 		}
 	public:
-		bool read(byteReader* r)
+		bool read(byteReader &r)
 		{
-			br = r;
+			br = &r;
 
 			infFs.clear();
 			for(;;)

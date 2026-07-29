@@ -123,7 +123,7 @@ namespace fl_pr
 		{
 			if( !f.open(fl) )
 				return false;
-			if( !this->read(&f) )
+			if( !this->read(f) )
 				return false;
 			return true;
 		}

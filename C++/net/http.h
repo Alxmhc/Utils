@@ -180,7 +180,7 @@ class HTTP1
 			if (fld == "gzip")
 			{
 				fl_pr::F_gzip gz;
-				if (!gz.read(&brd))
+				if (!gz.read(brd))
 					return false;
 				if (!gz.GetData(bw))
 					return false;
@@ -236,9 +236,9 @@ public:
 		return res;
 	}
 
-	bool read(byteReader* b)
+	bool read(byteReader &b)
 	{
-		br = b;
+		br = &b;
 		if (!Read_hdr(*br, hdr))
 			return false;
 		data_pos = br->get_pos();

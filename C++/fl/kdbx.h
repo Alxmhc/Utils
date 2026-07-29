@@ -363,7 +363,7 @@ namespace fl_pr
 			{
 				br_array bgz(data.data(), data.size());
 				fl_pr::F_gzip gz;
-				if(!gz.read(&bgz))
+				if(!gz.read(bgz))
 					return false;
 				bw_vector bwz(out);
 				if(!gz.GetData(bwz))
