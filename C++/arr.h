@@ -57,7 +57,7 @@ void v_sub(T* a, const T &b, std::size_t sz)
 class v_LE
 {
 public:
-	static void incr(uint8_t* v, uint_fast8_t sz)
+	static bool incr(uint8_t* v, uint_fast8_t sz)
 	{
 		uint_fast8_t i = 0;
 		while (v[i] == 0xff)
@@ -65,25 +65,27 @@ public:
 			v[i] = 0;
 			i++;
 			if (i == sz)
-				return;
+				return false;
 		}
 		v[i]++;
+		return true;
 	};
 };
 class v_BE
 {
 public:
-	static void incr(uint8_t* v, uint_fast8_t sz)
+	static bool incr(uint8_t* v, uint_fast8_t sz)
 	{
 		uint_fast8_t i = sz - 1;
 		while (v[i] == 0xff)
 		{
 			v[i] = 0;
 			if (i == 0)
-				return;
+				return false;
 			i--;
 		}
 		v[i]++;
+		return true;
 	};
 };
 
