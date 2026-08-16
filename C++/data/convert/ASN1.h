@@ -22,16 +22,11 @@ namespace BER
 
 		if(k == 0)
 		{
-			sz = br.find(bytes("\x00\x00"), 2);
-			if (sz == br.get_rsize())
-				return false;
 			e = false;
 			return true;
 		}
 
 		if(!br.readC<endianness::BIG_ENDIAN>(k, sz))
-			return false;
-		if(sz > br.get_rsize())
 			return false;
 		e = true;
 		return true;
