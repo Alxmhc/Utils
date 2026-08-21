@@ -5,60 +5,59 @@
 
 namespace fl_s
 {
-	template<typename C>
-	bool create_dir(const C* pth)
+	bool create_dir(const std::filesystem::path &pth)
 	{
-		return std::filesystem::create_directory(pth);
+		std::error_code err;
+		std::filesystem::create_directory(pth, err);
+		return !err;
 	}
 
-	template<typename C>
-	bool create_dirs(const C* pth)
+	bool create_dirs(const std::filesystem::path &pth)
 	{
-		return std::filesystem::create_directories(pth);
+		std::error_code err;
+		std::filesystem::create_directories(pth, err);
+		return !err;
 	}
 
-	template<typename C>
-	bool copy(const C* p1, const C* p2)
+	bool copy_file(const std::filesystem::path &p1, const std::filesystem::path &p2)
 	{
-		const std::filesystem::path npth(p2);
-		std::filesystem::create_directories(npth.parent_path());
-		try
-		{
-			std::filesystem::copy(p1, npth, std::filesystem::copy_options::recursive);
-		}
-		catch (...)
-		{
+		if (!create_dirs(p2.parent_path()))
 			return false;
-		}
-		return true;
+		std::error_code err;
+		std::filesystem::copy_file(p1, p2, err);
+		return !err;
 	}
 
-	template<typename C>
-	bool move(const C* p1, const C* p2)
+	bool copy_dir(const std::filesystem::path &p1, const std::filesystem::path &p2)
 	{
-		const std::filesystem::path npth(p2);
-		std::filesystem::create_directories(npth.parent_path());
-		try
-		{
-			std::filesystem::rename(p1, npth);
-		}
-		catch (...)
-		{
+		if (!create_dirs(p2.parent_path()))
 			return false;
-		}
-		return true;
+		std::error_code err;
+		std::filesystem::copy(p1, p2, std::filesystem::copy_options::recursive, err);
+		return !err;
 	}
 
-	template<typename C>
-	bool del(const C* pth)
+	bool move(const std::filesystem::path &p1, const std::filesystem::path &p2)
 	{
-		return std::filesystem::remove(pth);
+		if (!create_dirs(p2.parent_path()))
+			return false;
+		std::error_code err;
+		std::filesystem::rename(p1, p2, err);
+		return !err;
 	}
 
-	template<typename C>
-	void del_dirs(const C* pth)
+	bool del(const std::filesystem::path &pth)
 	{
-		std::filesystem::remove_all(pth);
+		std::error_code err;
+		std::filesystem::remove(pth, err);
+		return !err;
+	}
+
+	bool del_dirs(const std::filesystem::path &pth)
+	{
+		std::error_code err;
+		std::filesystem::remove_all(pth, err);
+		return !err;
 	}
 
 	template<typename C>

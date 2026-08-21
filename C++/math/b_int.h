@@ -571,21 +571,21 @@ public:
 			return *this;
 		b_uint a1(*this), a2(m);
 		b_uint r, t(1);
-		bool sgn = true;
 		for(;;)
 		{
 			b_uint k;
 			a2.ModDiv(a1, &k);
 			if(a2 == 0)
 				return a2;
-
 			r += t * k;
 			if(a2 == 1)
-				return sgn ? m - r : r;
-
-			sgn = !sgn;
-			std::swap(r, t);
-			std::swap(a2, a1);
+				return m - r;
+			a1.ModDiv(a2, &k);
+			if (a1 == 0)
+				return a1;
+			t += r * k;
+			if (a1 == 1)
+				return t;
 		}
 	}
 
