@@ -1,33 +1,34 @@
-#include <cstdint>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include <windows.h>
 
-LSTATUS RegOpenKeyEx_(HKEY key, LPCSTR pth, REGSAM acc, PHKEY res)
+bool RegOpenKeyEx_(HKEY key, LPCSTR pth, REGSAM acc, PHKEY res)
 {
-	return RegOpenKeyExA(key, pth, 0, acc, res);
+	return RegOpenKeyExA(key, pth, 0, acc, res) == ERROR_SUCCESS;
 }
-LSTATUS RegOpenKeyEx_(HKEY key, LPCWSTR pth, REGSAM acc, PHKEY res)
+bool RegOpenKeyEx_(HKEY key, LPCWSTR pth, REGSAM acc, PHKEY res)
 {
-	return RegOpenKeyExW(key, pth, 0, acc, res);
+	return RegOpenKeyExW(key, pth, 0, acc, res) == ERROR_SUCCESS;
 }
 
-LSTATUS RegQueryValueEx_(HKEY key, LPCSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
+bool RegQueryValueEx_(HKEY key, LPCSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
 {
-	return RegQueryValueExA(key, name, nullptr, type, d, sz);
+	return RegQueryValueExA(key, name, nullptr, type, d, sz) == ERROR_SUCCESS;
 }
-LSTATUS RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
+bool RegQueryValueEx_(HKEY key, LPCWSTR name, LPDWORD type, LPBYTE d, LPDWORD sz)
 {
-	return RegQueryValueExW(key, name, nullptr, type, d, sz);
+	return RegQueryValueExW(key, name, nullptr, type, d, sz) == ERROR_SUCCESS;
 }
 
 namespace reg
 {
-	HKEY Open(HKEY key, const char* path)
+	HKEY Open(HKEY key, std::string path)
 	{
+		std::replace(path.begin(), path.end(), '/', '\\');
 		HKEY res;
-		if(RegOpenKeyEx_(key, path, KEY_READ, &res) != ERROR_SUCCESS)
+		if(!RegOpenKeyEx_(key, path.c_str(), KEY_READ, &res))
 			return nullptr;
 		return res;
 	}
@@ -39,11 +40,11 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size)
 		&& type == REG_SZ)
 		{
 			res.resize(size);
-			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res[0]), &size);
 		}
 		RegCloseKey(k);
 		return r;
@@ -56,10 +57,10 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size)
 		&& type == REG_DWORD)
 		{
-			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(&res), &size);
 		}
 		RegCloseKey(k);
 		return r;
@@ -72,11 +73,11 @@ namespace reg
 			return false;
 		DWORD type, size;
 		bool r = false;
-		if(RegQueryValueEx_(k, name, &type, nullptr, &size) == ERROR_SUCCESS
+		if(RegQueryValueEx_(k, name, &type, nullptr, &size)
 		&& type == REG_BINARY)
 		{
 			res.resize(size);
-			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(res.data()), &size) == ERROR_SUCCESS;
+			r = RegQueryValueEx_(k, name, nullptr, reinterpret_cast<LPBYTE>(res.data()), &size);
 		}
 		RegCloseKey(k);
 		return r;

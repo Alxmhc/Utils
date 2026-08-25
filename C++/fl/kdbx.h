@@ -64,8 +64,6 @@ namespace fl_pr
 			uint8_t iv[16];
 			uint8_t hash[32];
 			{
-				uint8_t t_seed[32];
-				uint32_t tr_rnd;
 				uint8_t m_seed[16];
 				if(!br.readN(m_seed, 16))
 					return false;
@@ -75,8 +73,10 @@ namespace fl_pr
 					return false;
 				if(!br.readN(hash, 32))
 					return false;
+				uint8_t t_seed[32];
 				if(!br.readN(t_seed, 32))
 					return false;
+				uint32_t tr_rnd;
 				if(!br.readC<endianness::LITTLE_ENDIAN>(4, tr_rnd))
 					return false;
 				make_key(t_seed, tr_rnd, m_seed, 16);
