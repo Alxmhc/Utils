@@ -16,9 +16,13 @@ public:
 		writeN(&c, 1);
 	}
 
-	void writeS(const char* s, std::size_t n)
+	void writeS(std::string_view s, std::size_t n)
 	{
-		writeN(reinterpret_cast<const uint8_t*>(s), n);
+		writeN(reinterpret_cast<const uint8_t*>(s.data()), n);
+	}
+	void writeS(std::string_view s)
+	{
+		writeN(reinterpret_cast<const uint8_t*>(s.data()), s.size());
 	}
 
 	template<unsigned char SZ, char E>

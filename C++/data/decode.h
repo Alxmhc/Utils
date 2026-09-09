@@ -2,7 +2,8 @@
 #define H_DECODE
 
 #include "byte_reader.h"
-#include "convert/hex.h"
+#include "byte_writer.h"
+#include "convert/base.h"
 
 namespace decode
 {
@@ -17,8 +18,8 @@ namespace decode
 			{
 				if(*p == '\r')
 					break;
-				const uint8_t c = convert::hex::Decoder::pr_char(*p);
-				if(c == 16)
+				uint8_t c;
+				if(!convert::base::Dec::pr_char<16>(*p, c))
 				{
 					if(sz == 0)
 						break;
@@ -57,8 +58,7 @@ namespace decode
 					return false;
 				if(c == '\r')
 					break;
-				c = convert::hex::Decoder::pr_char(c);
-				if(c == 16)
+				if(!convert::base::Dec::pr_char<16>(c, c))
 					return sz == 0;
 				sz = (sz << 4) | c;
 			}

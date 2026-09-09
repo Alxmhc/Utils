@@ -87,25 +87,28 @@ public:
 
 struct URL
 {
-	static std::vector<uint8_t> Decode(const char* s, std::size_t sz)
+	static bool Decode(const char* s, std::size_t sz, std::vector<uint8_t> &res)
 	{
-		std::vector<uint8_t> r;
-		r.reserve(sz);
-		for(std::size_t i = 0; i < sz;)
+		res.clear();
+		res.reserve(sz);
+		while(sz != 0)
 		{
-			const char c = s[i];
-			i++;
+			const char c = *s;
+			s++;
+			sz--;
 			if(c != '%')
 			{
-				r.push_back(c);
+				res.push_back(c);
 				continue;
 			}
-			const uint8_t n = convert::hex::Decoder::pr_byte(s + i);
-			r.push_back(n);
-			i += 2;
+			if (sz < 2)
+				return false;
+			const uint8_t n = convert::hex::Decoder::pr_byte(s);
+			res.push_back(n);
+			s += 2;
+			sz -= 2;
 		}
-		r.shrink_to_fit();
-		return r;
+		return true;
 	}
 
 	static bool Parse_params(const std::string &s, std::map<std::string, std::string> &par)

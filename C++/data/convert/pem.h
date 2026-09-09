@@ -34,20 +34,18 @@ namespace convert
 			std::string tmp;
 			while(std::getline(st, tmp))
 			{
-				if(tmp.empty() || tmp[0] == '-')
+				if(tmp.empty() || tmp.front() == '-')
 					break;
-				auto sz = tmp.size();
-				if(tmp[sz-1] != '=')
+				if(tmp.back() != '=')
 				{
-					de.writeS(tmp.c_str(), sz);
+					de.writeS(tmp);
 					continue;
 				}
-				sz--;
-				while(sz != 0 && tmp[sz-1] == '=')
+				const auto p = tmp.find_last_not_of('=');
+				if (p != std::string::npos)
 				{
-					sz--;
+					de.writeS(tmp, p + 1);
 				}
-				de.writeS(tmp.c_str(), sz);
 				std::getline(st, tmp);
 				break;
 			}

@@ -62,68 +62,12 @@ namespace convert
 				bw.Fin();
 			}
 
-			static uint8_t pr_char(char c)
-			{
-				switch (c)
-				{
-				case '0':
-					return 0;
-				case '1':
-					return 1;
-				case '2':
-					return 2;
-				case '3':
-					return 3;
-				case '4':
-					return 4;
-				case '5':
-					return 5;
-				case '6':
-					return 6;
-				case '7':
-					return 7;
-				case '8':
-					return 8;
-				case '9':
-					return 9;
-				case 'a':
-				case 'A':
-					return 10;
-				case 'b':
-				case 'B':
-					return 11;
-				case 'c':
-				case 'C':
-					return 12;
-				case 'd':
-				case 'D':
-					return 13;
-				case 'e':
-				case 'E':
-					return 14;
-				case 'f':
-				case 'F':
-					return 15;
-				default:
-					return 16;
-				}
-			}
-
 			static uint8_t pr_byte(const char* s)
 			{
-				const uint8_t r = pr_char(s[0]);
-				return (r << 4) | pr_char(s[1]);
-			}
-
-			template<unsigned char sz>
-			static typename UINT_<sz>::uint pr_num(const char* s, uint_fast8_t n)
-			{
-				typename UINT_<sz>::uint res = 0;
-				for(unsigned char i = 0; i < n; i++)
-				{
-					res = (res<<4) | pr_char(s[i]);
-				}
-				return res;
+				uint8_t r0, r1;
+				base::Dec::pr_char<16>(s[0], r0);
+				base::Dec::pr_char<16>(s[1], r1);
+				return (r0 << 4) | r1;
 			}
 
 			static void pr_string(const char* s, std::size_t sz, uint8_t* out)
