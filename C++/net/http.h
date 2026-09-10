@@ -14,14 +14,15 @@ class dict_reader
 public:
 	dict_reader(const char* f, const char* p) : d(f), e(p) {}
 
-	bool nxt(const char* &sb, const char* se, std::pair<std::string, std::string> &res) const
+	bool nxt(const char* &sb, const char* se, std::string_view &s1, std::string_view &s2) const
 	{
 		const auto f = std::search(sb, se, d.cbegin(), d.cend());
-		const auto p = std::search(sb, f, e.cbegin(), e.cend());
+		auto p = std::search(sb, f, e.cbegin(), e.cend());
 		if (p == f)
 			return false;
-		res.first.assign(sb, p);
-		res.second.assign(p + e.length(), f);
+		s1 = std::string_view(sb, p - sb);
+		p += e.length();
+		s2 = std::string_view(p, f - p);
 		sb = f != se ? f + d.length() : se;
 		return true;
 	}
@@ -36,7 +37,7 @@ public:
 		m.clear();
 	}
 
-	void AddField(std::string name, const std::string &val)
+	void AddField(std::string name, std::string_view val)
 	{
 		str_lower(name);
 		if(m.find(name) == m.end())
@@ -50,10 +51,10 @@ public:
 		}
 	}
 
-	bool GetField(std::string name, std::string &val) const
+	bool GetField(std::string name, std::string_view &val) const
 	{
 		str_lower(name);
-		const auto h = m.find(name);
+		const auto &h = m.find(name);
 		if(h == m.cend())
 			return false;
 		val = h->second;
@@ -64,12 +65,12 @@ public:
 	{
 		clear();
 		static const dict_reader rd("\r\n", ": ");
-		std::pair<std::string, std::string> e;
+		std::string_view s1, s2;
 		while(cb != ce)
 		{
-			if (!rd.nxt(cb, ce, e))
+			if (!rd.nxt(cb, ce, s1, s2))
 				return false;
-			AddField(e.first, e.second);
+			AddField(std::string(s1), s2);
 		}
 		return true;
 	}
@@ -103,7 +104,9 @@ struct URL
 			}
 			if (sz < 2)
 				return false;
-			const uint8_t n = convert::hex::Decoder::pr_byte(s);
+			uint8_t n;
+			if (!convert::hex::Decoder::pr_byte(s, n))
+				return false;
 			res.push_back(n);
 			s += 2;
 			sz -= 2;
@@ -117,12 +120,12 @@ struct URL
 		const char* ce = cb + s.length();
 		par.clear();
 		static const dict_reader rd("&", "=");
-		std::pair<std::string, std::string> e;
+		std::string_view s1, s2;
 		while(cb != ce)
 		{
-			if (!rd.nxt(cb, ce, e))
+			if (!rd.nxt(cb, ce, s1, s2))
 				return false;
-			par[e.first] = e.second;
+			par[std::string(s1)] = s2;
 		}
 		return true;
 	}
@@ -157,14 +160,18 @@ class HTTP1
 		if(p1 == std::string::npos)
 			return false;
 		const auto p2 = s.find(' ', p1 + 1);
-		if(p2 == std::string::npos)
-			return false;
-
 		res.is_out = !is_b(s, "HTTP/");
 		if(res.is_out)
 		{
+			if(p2 == std::string::npos)
+				return false;
 			res.f = s.substr(0, p1);
 			res.s = s.substr(p1 + 1, p2 - p1 - 1);
+		}
+		else if (p2 == std::string::npos)
+		{
+			res.f = s.substr(p1 + 1);
+			res.s.clear();
 		}
 		else
 		{
@@ -177,7 +184,7 @@ class HTTP1
 
 	bool Decode(byteReader &brd, byteWriter &bw) const
 	{
-		std::string fld;
+		std::string_view fld;
 		if (hdr.h.GetField("content-encoding", fld))
 		{
 			if (fld == "gzip")
@@ -189,7 +196,7 @@ class HTTP1
 					return false;
 				return true;
 			}
-			else if (fld == "deflate")
+			if (fld == "deflate")
 			{
 				if (!compr::deflate::Decode(brd, bw))
 					return false;
@@ -255,10 +262,10 @@ public:
 
 	bool Get_Data(byteWriter &bw)
 	{
-		std::string fld;
+		std::string_view fld;
 		if(hdr.h.GetField("content-length", fld))
 		{
-			const auto sz = std::stoul(fld);
+			const auto sz = std::stoul(fld.data());
 			if (sz == 0)
 				return true;
 			br->set_pos(data_pos);

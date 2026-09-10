@@ -50,7 +50,8 @@ namespace convert
 
 			void process(const uint8_t* v)
 			{
-				const uint8_t c = pr_byte(reinterpret_cast<const char*>(v));
+				uint8_t c;
+				pr_byte(reinterpret_cast<const char*>(v), c);
 				bw.write(c);
 			}
 		public:
@@ -62,19 +63,21 @@ namespace convert
 				bw.Fin();
 			}
 
-			static uint8_t pr_byte(const char* s)
+			static bool pr_byte(const char* s, uint8_t &r)
 			{
-				uint8_t r0, r1;
-				base::Dec::pr_char<16>(s[0], r0);
-				base::Dec::pr_char<16>(s[1], r1);
-				return (r0 << 4) | r1;
+				uint8_t r0;
+				if(!base::Dec::pr_char(s[0], 16, r0)
+				|| !base::Dec::pr_char(s[1], 16, r))
+					return false;
+				r |= r0 << 4;
+				return true;
 			}
 
 			static void pr_string(const char* s, std::size_t sz, uint8_t* out)
 			{
 				for(std::size_t i = 0; i < (sz >> 1); i++)
 				{
-					out[i] = pr_byte(s);
+					pr_byte(s, out[i]);
 					s += 2;
 				}
 			}

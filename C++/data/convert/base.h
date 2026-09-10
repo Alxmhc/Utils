@@ -32,8 +32,7 @@ namespace convert
 
 		namespace Dec
 		{
-			template<uint_fast8_t BASE>
-			bool pr_char(char c, uint8_t &r)
+			static bool pr_char(char c, uint_fast8_t base, uint8_t &r)
 			{
 				switch (c)
 				{
@@ -94,19 +93,19 @@ namespace convert
 				default:
 					return false;
 				}
-				return r < BASE;
+				return r < base;
 			}
 
-			template<uint_fast8_t N, typename T>
+			template<uint_fast8_t BASE, typename T>
 			static bool pr_num(const char* s, uint_fast8_t n, T &res)
 			{
 				res = 0;
 				for (uint_fast8_t i = 0; i < n; i++)
 				{
 					uint8_t k;
-					if (!pr_char<N>(s[i], k))
+					if (!pr_char(s[i], BASE, k))
 						return false;
-					res = (res * N) + k;
+					res = (res * BASE) + k;
 				}
 				return true;
 			}

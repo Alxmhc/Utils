@@ -56,7 +56,7 @@ public:
 		{
 			if (a->fin)
 				return false;
-			const auto c = (n >> nbit) & 1;
+			const uint_fast8_t c = (n >> nbit) & 1;
 			if(c == 0)
 			{
 				if(a->left == nullptr)

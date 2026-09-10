@@ -19,7 +19,7 @@ namespace decode
 				if(*p == '\r')
 					break;
 				uint8_t c;
-				if(!convert::base::Dec::pr_char<16>(*p, c))
+				if(!convert::base::Dec::pr_char(*p, 16, c))
 				{
 					if(sz == 0)
 						break;
@@ -58,7 +58,7 @@ namespace decode
 					return false;
 				if(c == '\r')
 					break;
-				if(!convert::base::Dec::pr_char<16>(c, c))
+				if(!convert::base::Dec::pr_char(c, 16, c))
 					return sz == 0;
 				sz = (sz << 4) | c;
 			}
