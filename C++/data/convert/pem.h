@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <filesystem>
 
 #include "../../str.h"
 #include "base64.h"
@@ -75,7 +76,7 @@ namespace convert
 	public:
 		PEM_file() : PEM(s){}
 
-		void open(const char* fname)
+		void open(const std::filesystem::path &fname)
 		{
 			s.close();
 			s.open(fname);

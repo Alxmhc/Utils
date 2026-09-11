@@ -2,6 +2,7 @@
 #define H_FL_
 
 #include <fstream>
+#include <filesystem>
 
 #include "../data/byte_reader.h"
 #include "../data/byte_writer.h"
@@ -37,10 +38,10 @@ protected:
 		pos += n;
 	}
 public:
-	bool open(const char* fl)
+	bool open(const std::filesystem::path &pth)
 	{
 		fst.close();
-		fst.open(fl, std::ios_base::binary | std::ios_base::ate);
+		fst.open(pth, std::ios_base::binary | std::ios_base::ate);
 		if(fst.fail())
 			return false;
 		pos = 0;
@@ -98,8 +99,7 @@ class bw_fstream : public byteWriter
 {
 	std::ofstream fst;
 public:
-	template<typename C>
-	bw_fstream(const C* fl, bool append = false) : fst(fl, std::ios_base::binary | (append ? std::ios_base::app : 0)) {}
+	bw_fstream(const std::filesystem::path &pth, bool append = false) : fst(pth, std::ios_base::binary | (append ? std::ios_base::app : 0)) {}
 
 	void writeN(const uint8_t* v, std::size_t n)
 	{
@@ -119,7 +119,7 @@ namespace fl_pr
 	{
 		br_fstream f;
 	public:
-		bool open(const char* fl)
+		bool open(const std::filesystem::path &fl)
 		{
 			if( !f.open(fl) )
 				return false;

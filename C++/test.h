@@ -28,7 +28,7 @@ bool compare(byteReader &br1, byteReader &br2)
 }
 
 template<std::size_t BSIZE>
-bool compare(const char* fl1, const char* fl2)
+bool compare(const std::filesystem::path &fl1, const std::filesystem::path &fl2)
 {
 	br_fstream fs1, fs2;
 	if(!fs1.open(fl1) || !fs2.open(fl2))
@@ -37,7 +37,7 @@ bool compare(const char* fl1, const char* fl2)
 }
 
 template<std::size_t BSIZE>
-bool compare(const uint8_t* v, std::size_t sz, const char* fname)
+bool compare(const uint8_t* v, std::size_t sz, const std::filesystem::path &fname)
 {
 	br_fstream fs;
 	if( !fs.open(fname) )
