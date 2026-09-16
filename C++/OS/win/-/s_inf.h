@@ -92,10 +92,8 @@ std::vector<std::basic_string<C>> get_env()
 	auto s = env;
 	while(*s != 0)
 	{
-		std::basic_string<C> str(s);
-		res.push_back(str);
-		s += str.length();
-		s++;
+		res.emplace_back(s);
+		s += res.back().length() + 1;
 	}
 	FreeEnvironmentStrings_(env);
 	return res;

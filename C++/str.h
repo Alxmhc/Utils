@@ -15,17 +15,17 @@ static uint8_t* bytes(char* s)
 	return reinterpret_cast<uint8_t*>(s);
 }
 
-static bool is_b(const std::string &s, const std::string &t)
+static bool is_b(std::string_view s, std::string_view t)
 {
-	if(s.length() < t.length())
+	if(s.size() < t.size())
 		return false;
-	return std::memcmp(s.c_str(), t.c_str(), t.length()) == 0;
+	return std::memcmp(s.data(), t.data(), t.size()) == 0;
 }
-static bool is_e(const std::string &s, const std::string &t)
+static bool is_e(std::string_view s, std::string_view t)
 {
-	if(s.length() < t.length())
+	if(s.size() < t.size())
 		return false;
-	return std::memcmp(s.c_str() + (s.length() - t.length()), t.c_str(), t.length()) == 0;
+	return std::memcmp(s.data() + (s.size() - t.size()), t.data(), t.size()) == 0;
 }
 
 static void str_lower(std::string &s)

@@ -2,8 +2,15 @@
 #define H_DLIB
 
 #include <windows.h>
-#undef min
-#undef max
+
+HMODULE LoadLibrary_(LPCSTR pth)
+{
+	return LoadLibraryA(pth);
+}
+HMODULE LoadLibrary_(LPCWSTR pth)
+{
+	return LoadLibraryW(pth);
+}
 
 class dlib
 {
@@ -18,7 +25,7 @@ public:
 	bool Read(const char* pth)
 	{
 		Close();
-		inst = LoadLibraryA(pth);
+		inst = LoadLibrary_(pth);
 		return inst != nullptr;
 	}
 	void Close()
