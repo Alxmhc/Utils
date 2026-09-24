@@ -59,33 +59,6 @@ namespace fl_s
 		std::filesystem::remove_all(pth, err);
 		return !err;
 	}
-
-	template<typename C>
-	std::basic_string<C> to_string(const std::filesystem::path&);
-	template<>
-	std::basic_string<char> to_string(const std::filesystem::path &p)
-	{
-		return p.generic_string();
-	}
-	template<>
-	std::basic_string<wchar_t> to_string(const std::filesystem::path &p)
-	{
-		return p.generic_wstring();
-	}
-
-	template<typename C, class T>
-	void proc_dir(const C* p, T &st)
-	{
-		for (const auto &e : std::filesystem::recursive_directory_iterator(p))
-		{
-			auto name = to_string<C>(e.path());
-			if (e.is_directory())
-			{
-				name.push_back('/');
-			}
-			st(name);
-		}
-	}
 }
 
 #endif
