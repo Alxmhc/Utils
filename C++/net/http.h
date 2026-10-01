@@ -209,6 +209,8 @@ class HTTP1
 		return true;
 	}
 public:
+	HTTP1() : br(nullptr), data_pos(0) {}
+
 	static bool Read_hdr(byteReader &br, std::string &s)
 	{
 		const auto p = br.find(bytes("\r\n\r\n"), 4);
@@ -255,9 +257,9 @@ public:
 		return true;
 	}
 
-	const http_header* Get_Header() const
+	const http_header& Get_Header() const
 	{
-		return &hdr;
+		return hdr;
 	}
 
 	bool Get_Data(byteWriter &bw)

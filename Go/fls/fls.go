@@ -8,14 +8,10 @@ import (
 func DirAll(d string, fltr func(os.DirEntry) bool) []string {
 	var res []string
 	pths := []string{d}
-	for {
-		sz := len(pths)
-		if sz == 0 {
-			break
-		}
+	for len(pths) != 0 {
 		pth := pths[0]
-		fls, err := os.ReadDir(pth)
 		pths = pths[1:]
+		fls, err := os.ReadDir(pth)
 		if err != nil {
 			continue
 		}

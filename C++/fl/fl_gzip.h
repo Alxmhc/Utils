@@ -69,12 +69,12 @@ namespace fl_pr
 			return true;
 		}
 
-		std::string get_name() const
+		const std::string& get_name() const
 		{
 			return fname;
 		}
 
-		std::string get_comment() const
+		const std::string& get_comment() const
 		{
 			return comment;
 		}
