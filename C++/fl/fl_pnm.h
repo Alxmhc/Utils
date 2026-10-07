@@ -36,18 +36,18 @@ namespace fl_pr
 
 			bw.write('\n');
 			{
-				const std::string str = convert::base::Enc::pr_num<10>(sx, convert::base::dict_d);
+				const std::string str = convert::base::Enc::pr_num<10>(sx, convert::base::dict);
 				bw.writeS(str);
 			}
 			bw.write(' ');
 			{
-				const std::string str = convert::base::Enc::pr_num<10>(sy, convert::base::dict_d);
+				const std::string str = convert::base::Enc::pr_num<10>(sy, convert::base::dict);
 				bw.writeS(str);
 			}
 			bw.write('\n');
 			if(t != tGr1)
 			{
-				const std::string str = convert::base::Enc::pr_num<10>(mx, convert::base::dict_d);
+				const std::string str = convert::base::Enc::pr_num<10>(mx, convert::base::dict);
 				bw.writeS(str);
 				bw.write('\n');
 			}

@@ -93,8 +93,7 @@ public:
 		if(n > get_rsize())
 			return false;
 		s.resize(n);
-		char* t = const_cast<char*>(s.data());
-		readAll(reinterpret_cast<uint8_t*>(t), n);
+		readAll(reinterpret_cast<uint8_t*>(s.data()), n);
 		return true;
 	}
 
@@ -121,8 +120,7 @@ public:
 		}
 		if(sz > get_rsize() || sz > sizeof(T))
 			return false;
-		auto t = get_data(sz);
-		bconv<1, E>::pack(t, sz, c);
+		bconv<1, E>::pack(get_data(sz), sz, c);
 		return true;
 	}
 

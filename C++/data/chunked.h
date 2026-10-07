@@ -1,13 +1,13 @@
-#ifndef H_DECODE
-#define H_DECODE
+#ifndef H_CHUNKED
+#define H_CHUNKED
 
 #include "byte_reader.h"
 #include "byte_writer.h"
 #include "convert/base.h"
 
-namespace decode
+namespace chunked
 {
-	static bool unchunk(uint8_t* v, std::size_t &n)
+	bool decode(uint8_t* v, std::size_t &n)
 	{
 		const uint8_t* b = v;
 		uint8_t* p = v;
@@ -46,7 +46,7 @@ namespace decode
 		return false;
 	}
 
-	static bool chunk_read(byteReader &br, byteWriter &bw)
+	bool read(byteReader &br, byteWriter &bw)
 	{
 		for(;;)
 		{
@@ -76,6 +76,31 @@ namespace decode
 				return false;
 		}
 	}
+
+	class Writer : public byteWriter
+	{
+	protected:
+		byteWriter* bw;
+	public:
+		Writer(byteWriter &w) : bw(&w) {}
+
+		void writeN(const uint8_t* v, std::size_t n)
+		{
+			if (n == 0)
+				return;
+			const auto s = convert::base::Enc::pr_num<16>(n, convert::base::dict);
+			bw->writeS(s);
+			bw->writeS("\r\n");
+			bw->writeN(v, n);
+			bw->writeS("\r\n");
+		}
+
+		void Fin()
+		{
+			bw->writeS("0\r\n\r\n");
+			bw->Fin();
+		}
+	};
 }
 
 #endif

@@ -5,7 +5,7 @@
 
 #include "../str.h"
 #include "../data/convert/hex.h"
-#include "../data/decode.h"
+#include "../data/chunked.h"
 #include "../fl/fl_gzip.h"
 
 class dict_reader
@@ -283,7 +283,7 @@ public:
 			std::vector<uint8_t> data;
 			data.reserve(br->get_rsize());
 			bw_vector bwd(data);
-			if(!decode::chunk_read(*br, bwd))
+			if(!chunked::read(*br, bwd))
 				return false;
 			br_array brd(data.data(), data.size());
 			if (!Decode(brd, bw))

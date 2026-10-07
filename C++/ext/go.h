@@ -2,7 +2,7 @@
 #define EXT_GO
 
 #include <cstdint>
-#include <cstring>
+#include <string_view>
 
 typedef int8_t  GoInt8;
 typedef int16_t GoInt16;
@@ -32,8 +32,7 @@ class GoString
 	const ptrdiff_t n;
 	GoString& operator=(const GoString&) = delete;
 public:
-	GoString(const char* s) : p(s), n(strlen(s)) {}
-	GoString(const char* s, std::size_t k) : p(s), n(k) {}
+	GoString(std::string_view s) : p(s.data()), n(s.size()) {}
 };
 
 #endif

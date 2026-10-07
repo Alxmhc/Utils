@@ -3,8 +3,18 @@ package img
 import (
 	"image"
 	"image/color"
+	"image/png"
 	"io"
+	"os"
 )
+
+func Save_File_PNG(img image.Image, fout string) {
+	fl, err := os.Create(fout)
+	if err == nil {
+		png.Encode(fl, img)
+		fl.Close()
+	}
+}
 
 func ReadImgGr(dat io.Reader, szx, szy int) image.Image {
 	img := image.NewGray(image.Rect(0, 0, szx, szy))

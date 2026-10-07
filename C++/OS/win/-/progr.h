@@ -9,11 +9,12 @@
 std::filesystem::path get_pr_path(DWORD id)
 {
 	std::filesystem::path res;
-	HANDLE Handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, id);
+	HANDLE Handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, id);
 	if (!Handle)
 		return res;
 	TCHAR path[MAX_PATH];
-	if (GetModuleFileNameEx(Handle, 0, path, MAX_PATH) != 0)
+	DWORD sz = MAX_PATH;
+	if (QueryFullProcessImageName(Handle, 0, path, &sz) == TRUE)
 	{
 		res = path;
 	}
@@ -55,4 +56,14 @@ void pr_module(F &fnc, DWORD id)
 		} while ( Module32Next(sns, &inf) );
 	}
 	CloseHandle(sns);
+}
+
+bool terminate_ID(DWORD id, UINT ec = 0)
+{
+	HANDLE Handle = OpenProcess(PROCESS_TERMINATE, FALSE, id);
+	if (!Handle)
+		return false;
+	const bool res = TerminateProcess(Handle, ec) == TRUE;
+	CloseHandle(Handle);
+	return res;
 }

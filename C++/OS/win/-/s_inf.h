@@ -79,7 +79,7 @@ std::basic_string<C> get_username_f()
 {
 	C username[UNLEN + 1];
 	DWORD sz = UNLEN + 1;
-	GetUserNameEx_(NameSamCompatible, username, &sz);
+	GetUserNameEx_(NameUserPrincipal, username, &sz);
 	return std::basic_string<C>(username);
 }
 
@@ -89,8 +89,7 @@ std::vector<std::basic_string<C>> get_env()
 {
 	std::vector<std::basic_string<C>> res;
 	auto env = GetEnvironmentStrings_<C>();
-	auto s = env;
-	while(*s != 0)
+	for(auto s = env; *s != 0;)
 	{
 		res.emplace_back(s);
 		s += res.back().length() + 1;

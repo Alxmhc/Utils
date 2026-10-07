@@ -22,7 +22,7 @@ namespace convert
 				}
 			}
 		public:
-			Encoder(byteWriter &b, bool isU = false) : bw(b), dict(isU ? base::dct_h_u : base::dct_h_l) {}
+			Encoder(byteWriter &b, bool isU = false) : bw(b), dict(isU ? base::dict_u : base::dict) {}
 
 			void writeN(const uint8_t* v, std::size_t n)
 			{
@@ -39,7 +39,7 @@ namespace convert
 				std::string res;
 				res.reserve(n*2);
 				bw_string bw(res);
-				write_v(bw, v, n, isU ? base::dct_h_u : base::dct_h_l);
+				write_v(bw, v, n, isU ? base::dict_u : base::dict);
 				return res;
 			}
 		};
