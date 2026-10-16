@@ -36,7 +36,7 @@ namespace compr
 			const uint_fast8_t fsz = hd >> 6;
 			if (fsz != 0 || s_sg)
 			{
-				if (!br.readC<endianness::LITTLE_ENDIAN>(1 << fsz, fr_sz))
+				if (!br.readC<endianness::LE>(1 << fsz, fr_sz))
 					return false;
 				if (fsz == 1)
 				{
@@ -63,7 +63,7 @@ namespace compr
 				}
 				else
 				{
-					if (!br.readC<endianness::LITTLE_ENDIAN>((t & 8) == 0 ? 1 : 2, r_sz))
+					if (!br.readC<endianness::LE>((t & 8) == 0 ? 1 : 2, r_sz))
 						return false;
 					r_sz = (r_sz << 4) | (t >> 4);
 				}
@@ -78,7 +78,7 @@ namespace compr
 			}
 
 			uint_fast64_t k;
-			if (!br.readC<endianness::LITTLE_ENDIAN>(sz_f + 1, k))
+			if (!br.readC<endianness::LE>(sz_f + 1, k))
 				return false;
 			k = (k << 4) | (t >> 4);
 

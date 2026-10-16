@@ -60,7 +60,7 @@ namespace hash
 		}
 		void Final(uint8_t* r)
 		{
-			bconv<1, endianness::LITTLE_ENDIAN>::unpack(~crc, 4,  r);
+			bconv<1, endianness::LE>::unpack(~crc, 4,  r);
 			Init();
 		}
 	};

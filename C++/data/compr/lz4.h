@@ -38,7 +38,7 @@ namespace compr
 				if(!br.addN(out, size))
 					return false;
 				uint_fast16_t offset;
-				if( !br.readC<endianness::LITTLE_ENDIAN>(2, offset) )
+				if( !br.readC<endianness::LE>(2, offset) )
 				{
 					if (br.get_rsize() != 0)
 						return false;

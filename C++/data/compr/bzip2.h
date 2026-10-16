@@ -225,7 +225,7 @@ namespace compr
 				hash[i] = bitRevT[hash[i]];
 			}
 			uint_fast32_t h;
-			bconv<1, endianness::BIG_ENDIAN>::pack(hash, 4, h);
+			bconv<1, endianness::BE>::pack(hash, 4, h);
 			return h;
 		}
 	public:

@@ -26,7 +26,7 @@ namespace BER
 			return true;
 		}
 
-		if(!br.readC<endianness::BIG_ENDIAN>(k, sz))
+		if(!br.readC<endianness::BE>(k, sz))
 			return false;
 		e = true;
 		return true;

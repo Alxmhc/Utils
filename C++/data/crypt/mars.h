@@ -12,7 +12,7 @@ namespace crypt
 		static void Init(const uint8_t* k, uint_fast8_t ksz, uint32_t* key)
 		{
 			uint32_t T[15] = {};
-			conv::pack<4, endianness::LITTLE_ENDIAN>(k, ksz, T);
+			conv::pack<4, endianness::LE>(k, ksz, T);
 			T[ksz/4] = ksz/4;
 			for(uint_fast8_t j = 0; j < 4; j++)
 			{
@@ -78,7 +78,7 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				uint32_t d[4];
-				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
+				conv::pack<4, endianness::LE>(r, 16, d);
 				d[0] += key[0];
 				d[1] += key[1];
 				d[2] += key[2];
@@ -137,7 +137,7 @@ namespace crypt
 				d[1] -= key[37];
 				d[2] -= key[38];
 				d[3] -= key[39];
-				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
+				conv::unpack<4, endianness::LE>(d, 4, r);
 			}
 		};
 
@@ -155,7 +155,7 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				uint32_t d[4];
-				conv::pack<4, endianness::LITTLE_ENDIAN>(r, 16, d);
+				conv::pack<4, endianness::LE>(r, 16, d);
 				d[0] += key[36];
 				d[1] += key[37];
 				d[2] += key[38];
@@ -214,7 +214,7 @@ namespace crypt
 				d[1] -= key[1];
 				d[2] -= key[2];
 				d[3] -= key[3];
-				conv::unpack<4, endianness::LITTLE_ENDIAN>(d, 4, r);
+				conv::unpack<4, endianness::LE>(d, 4, r);
 			}
 		};
 	};

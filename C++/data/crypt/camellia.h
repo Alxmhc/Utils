@@ -14,17 +14,17 @@ namespace crypt
 		static void Init(const uint8_t* k, uint_fast8_t ksz, UINT_<16>::uint* key)
 		{
 			UINT_<16>::uint KL;
-			KL.pack<1, endianness::BIG_ENDIAN>(k);
+			KL.pack<1, endianness::BE>(k);
 			UINT_<16>::uint KR;
 			if(ksz == 24)
 			{
 				uint64_t t;
-				bconv<1, endianness::BIG_ENDIAN>::pack(k + 16, 8, t);
+				bconv<1, endianness::BE>::pack(k + 16, 8, t);
 				KR = UINT_<16>::uint(~t, t);
 			}
 			else if(ksz == 32)
 			{
-				KR.pack<1, endianness::BIG_ENDIAN>(k + 16);
+				KR.pack<1, endianness::BE>(k + 16);
 			}
 
 			UINT_<16>::uint KA = KL ^ KR;
@@ -97,44 +97,44 @@ namespace crypt
 		{
 			D ^= K;
 			uint8_t x[16];
-			D.unpack<1, endianness::BIG_ENDIAN>(x);
+			D.unpack<1, endianness::BE>(x);
 			F(x, x + 8);
 			F(x + 8, x);
-			D.pack<1, endianness::BIG_ENDIAN>(x);
+			D.pack<1, endianness::BE>(x);
 			D ^= K;
 		}
 		static void F2(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			D ^= K;
 			uint8_t x[16];
-			D.unpack<1, endianness::BIG_ENDIAN>(x);
+			D.unpack<1, endianness::BE>(x);
 			F(x + 8, x);
 			F(x, x + 8);
-			D.pack<1, endianness::BIG_ENDIAN>(x);
+			D.pack<1, endianness::BE>(x);
 			D ^= K;
 		}
 
 		static void FL1(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			uint32_t x[4], k[4];
-			D.unpack<4, endianness::BIG_ENDIAN>(x);
-			K.unpack<4, endianness::BIG_ENDIAN>(k);
+			D.unpack<4, endianness::BE>(x);
+			K.unpack<4, endianness::BE>(k);
 			x[1] ^= rotl(x[0] & k[0], 1);
 			x[0] ^= (x[1] | k[1]);
 			x[2] ^= (x[3] | k[3]);
 			x[3] ^= rotl(x[2] & k[2], 1);
-			D.pack<4, endianness::BIG_ENDIAN>(x);
+			D.pack<4, endianness::BE>(x);
 		}
 		static void FL2(UINT_<16>::uint &D, UINT_<16>::uint K)
 		{
 			uint32_t x[4], k[4];
-			D.unpack<4, endianness::BIG_ENDIAN>(x);
-			K.unpack<4, endianness::BIG_ENDIAN>(k);
+			D.unpack<4, endianness::BE>(x);
+			K.unpack<4, endianness::BE>(k);
 			x[3] ^= rotl(x[2] & k[2], 1);
 			x[2] ^= (x[3] | k[3]);
 			x[0] ^= (x[1] | k[1]);
 			x[1] ^= rotl(x[0] & k[0], 1);
-			D.pack<4, endianness::BIG_ENDIAN>(x);
+			D.pack<4, endianness::BE>(x);
 		}
 
 	public:
@@ -156,7 +156,7 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				UINT_<16>::uint D;
-				D.pack<1, endianness::BIG_ENDIAN>(r);
+				D.pack<1, endianness::BE>(r);
 				D ^= key[0];
 				F1(D, key[2]);
 				F1(D, key[3]);
@@ -178,7 +178,7 @@ namespace crypt
 				}
 				D = UINT_<16>::uint(D.getH(), D.getL());
 				D ^= key[1];
-				D.unpack<1, endianness::BIG_ENDIAN>(r);
+				D.unpack<1, endianness::BE>(r);
 			}
 		};
 
@@ -198,7 +198,7 @@ namespace crypt
 			void process(uint8_t* r) const
 			{
 				UINT_<16>::uint D;
-				D.pack<1, endianness::BIG_ENDIAN>(r);
+				D.pack<1, endianness::BE>(r);
 				D ^= key[1];
 				D = UINT_<16>::uint(D.getH(), D.getL());
 				if(e)
@@ -220,7 +220,7 @@ namespace crypt
 				F2(D, key[3]);
 				F2(D, key[2]);
 				D ^= key[0];
-				D.unpack<1, endianness::BIG_ENDIAN>(r);
+				D.unpack<1, endianness::BE>(r);
 			}
 		};
 	};

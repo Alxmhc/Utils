@@ -12,13 +12,13 @@ namespace crypt
 		static void Init(const uint8_t* k, uint16_t* key)
 		{
 			UINT_<16>::uint c;
-			c.pack<1, endianness::BIG_ENDIAN>(k);
+			c.pack<1, endianness::BE>(k);
 			for(uint_fast8_t i = 0; i < 6; i++)
 			{
-				c.unpack<2, endianness::BIG_ENDIAN>(key + 8 * i);
+				c.unpack<2, endianness::BE>(key + 8 * i);
 				c = rotl(c, 25);
 			}
-			bconv<2, endianness::BIG_ENDIAN>::unpack(c.getH(), 4, key + 48);
+			bconv<2, endianness::BE>::unpack(c.getH(), 4, key + 48);
 		}
 
 		static uint16_t mul(uint16_t a, uint16_t b)
@@ -37,7 +37,7 @@ namespace crypt
 		static void Process(const uint16_t* key, uint8_t* r)
 		{
 			uint16_t d[4];
-			conv::pack<2, endianness::BIG_ENDIAN>(r, 8, d);
+			conv::pack<2, endianness::BE>(r, 8, d);
 			for(uint_fast8_t i = 0; i < 48; i += 6)
 			{
 				d[0] = mul(d[0], key[i]);
@@ -58,7 +58,7 @@ namespace crypt
 			d[1] += key[49];
 			d[2] += key[50];
 			d[3] = mul(d[3], key[51]);
-			conv::unpack<2, endianness::BIG_ENDIAN>(d, 4, r);
+			conv::unpack<2, endianness::BE>(d, 4, r);
 		}
 
 	public:

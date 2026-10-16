@@ -24,12 +24,12 @@ namespace fl_pr
 			{
 				{
 					uint_fast32_t num;
-					if (!br->readC<endianness::LITTLE_ENDIAN>(4, num))
+					if (!br->readC<endianness::LE>(4, num))
 						return false;
 					if ((num & 0xfffffff0) == 0x184d2a50)
 					{
 						uint_fast32_t sz;
-						if (!br->readC<endianness::LITTLE_ENDIAN>(4, sz))
+						if (!br->readC<endianness::LE>(4, sz))
 							return false;
 						if (!br->skip(sz))
 							return false;
@@ -54,7 +54,7 @@ namespace fl_pr
 				for (;;)
 				{
 					uint_fast32_t bsz;
-					if (!br->readC<endianness::LITTLE_ENDIAN>(4, bsz))
+					if (!br->readC<endianness::LE>(4, bsz))
 						return false;
 					if (bsz == 0)
 						break;

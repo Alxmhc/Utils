@@ -38,7 +38,7 @@ public:
 		std::vector<uint8_t> B(4*bsz*par);
 		k.gen(passw, psz, salt, ssz, B.data(), B.size());
 		std::vector<uint32_t> Bp(bsz*par);
-		conv::pack<4,endianness::LITTLE_ENDIAN>(B.data(), B.size(), Bp.data());
+		conv::pack<4,endianness::LE>(B.data(), B.size(), Bp.data());
 		{
 			std::vector<uint32_t> T(bsz);
 			uint32_t* t = T.data();
@@ -54,14 +54,14 @@ public:
 				for(uint_fast64_t e = 0; e < cost; e++)
 				{
 					uint_fast64_t d;
-					bconv<4, endianness::LITTLE_ENDIAN>::pack(Bp.data() + i*bsz + bsz - 16, 2, d);
+					bconv<4, endianness::LE>::pack(Bp.data() + i*bsz + bsz - 16, 2, d);
 					d &= cost - 1;
 					v_xor(Bp.data() + i*bsz, V.data() + d * bsz, bsz);
 					Mix(Bp.data() + i*bsz, t);
 				}
 			}
 		}
-		conv::unpack<4,endianness::LITTLE_ENDIAN>(Bp.data(), Bp.size(), B.data());
+		conv::unpack<4,endianness::LE>(Bp.data(), Bp.size(), B.data());
 		k.gen(passw, psz, B.data(), B.size(), key, ksz);
 	}
 };

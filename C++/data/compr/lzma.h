@@ -29,7 +29,7 @@ namespace compr
 				if( !Decode_Props(h[0]) )
 					return false;
 
-				bconv<1, endianness::LITTLE_ENDIAN>::pack(h + 1, 4, d_sz);
+				bconv<1, endianness::LE>::pack(h + 1, 4, d_sz);
 				if(d_sz < 4096)
 				{
 					d_sz = 4096;
@@ -70,7 +70,7 @@ namespace compr
 				if( b != 0 )
 					return false;
 
-				if( !br.readC<endianness::BIG_ENDIAN>(4, Code) )
+				if( !br.readC<endianness::BE>(4, Code) )
 					return false;
 				if( Code == 0xffffffff )
 					return false;
@@ -240,7 +240,7 @@ namespace compr
 			}
 			if(fsize == static_cast<uint64_t>(-1))
 			{
-				if( !br.readC<endianness::LITTLE_ENDIAN>(8, fsize) )
+				if( !br.readC<endianness::LE>(8, fsize) )
 					return false;
 			}
 

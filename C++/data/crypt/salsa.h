@@ -46,7 +46,7 @@ namespace crypt
 			{
 				uint32_t tmp[16];
 				cr(tmp, key, rounds);
-				conv::unpack<4, endianness::LITTLE_ENDIAN>(tmp, 16, buf);
+				conv::unpack<4, endianness::LE>(tmp, 16, buf);
 
 				key[8]++;
 				if(key[8] == 0)
@@ -59,7 +59,7 @@ namespace crypt
 			{
 				key[0] = 0x61707865;
 				key[15] = 0x6b206574;
-				conv::pack<4, endianness::LITTLE_ENDIAN>(k, 16, key + 1);
+				conv::pack<4, endianness::LE>(k, 16, key + 1);
 				if(ksz == 16)
 				{
 					key[5] = 0x3120646e;
@@ -70,10 +70,10 @@ namespace crypt
 				{
 					key[5] = 0x3320646e;
 					key[10] = 0x79622d32;
-					conv::pack<4, endianness::LITTLE_ENDIAN>(k + 16, 16, key + 11);
+					conv::pack<4, endianness::LE>(k + 16, 16, key + 11);
 				}
-				bconv<1, endianness::LITTLE_ENDIAN>::pack(iv, 4, key[6]);
-				bconv<1, endianness::LITTLE_ENDIAN>::pack(iv + 4, 4, key[7]);
+				bconv<1, endianness::LE>::pack(iv, 4, key[6]);
+				bconv<1, endianness::LE>::pack(iv + 4, 4, key[7]);
 				key[8] = 0;
 				key[9] = 0;
 			}

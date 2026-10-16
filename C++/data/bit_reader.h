@@ -57,7 +57,7 @@ public:
 		return r.skip(n);
 	}
 
-	template<char E, typename T>
+	template<endianness E, typename T>
 	bool readB_C(uint_fast8_t sz, T &c)
 	{
 		o = 0;

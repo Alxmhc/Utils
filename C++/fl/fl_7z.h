@@ -126,12 +126,12 @@ namespace fl_pr
 				return false;
 
 			uint_fast64_t NHoffset;
-			bconv<1, endianness::LITTLE_ENDIAN>::pack(header + 12, 8, NHoffset);
+			bconv<1, endianness::LE>::pack(header + 12, 8, NHoffset);
 			if(!br.skip(static_cast<size_t>(NHoffset)))
 				return false;
 
 			uint_fast64_t NHsize;
-			bconv<1, endianness::LITTLE_ENDIAN>::pack(header + 20, 8, NHsize);
+			bconv<1, endianness::LE>::pack(header + 20, 8, NHsize);
 			if(NHsize == 0)
 				return false;
 			if(!br.readN(hdr, static_cast<size_t>(NHsize)))

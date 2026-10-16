@@ -5,14 +5,11 @@
 #include <cstring>
 #include <algorithm>
 
-namespace endianness
+enum class endianness
 {
-	enum
-	{
-		LITTLE_ENDIAN,
-		BIG_ENDIAN
-	};
-}
+	LE,
+	BE
+};
 
 template<unsigned char SZ> struct UINT_{};
 template<> struct UINT_<1>
@@ -36,11 +33,11 @@ template<> struct UINT_<8>
 	typedef uint_fast64_t uint_f;
 };
 
-template <unsigned char SZ, char E>
+template <unsigned char SZ, endianness E>
 struct bconv {};
 
 template <unsigned char SZ>
-struct bconv<SZ, endianness::LITTLE_ENDIAN>
+struct bconv<SZ, endianness::LE>
 {
 	template<typename T>
 	static void pack(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
@@ -110,7 +107,7 @@ struct bconv<SZ, endianness::LITTLE_ENDIAN>
 	}
 };
 template <unsigned char SZ>
-struct bconv<SZ, endianness::BIG_ENDIAN>
+struct bconv<SZ, endianness::BE>
 {
 	template<typename T>
 	static void pack(const typename UINT_<SZ>::uint* a, uint_fast8_t k, T &c)
@@ -182,7 +179,7 @@ struct bconv<SZ, endianness::BIG_ENDIAN>
 
 namespace conv
 {
-	template<unsigned char SZ, char E>
+	template<unsigned char SZ, endianness E>
 	void pack(const uint8_t* a, const std::size_t n, typename UINT_<SZ>::uint* r)
 	{
 		for(std::size_t i = 0; i < n / SZ; i++)
@@ -190,7 +187,7 @@ namespace conv
 			bconv<1, E>::pack(a + i*SZ, SZ, r[i]);
 		}
 	}
-	template<unsigned char SZ, char E>
+	template<unsigned char SZ, endianness E>
 	void unpack(const typename UINT_<SZ>::uint* a, std::size_t n, uint8_t* r)
 	{
 		for(std::size_t i = 0; i < n; i++)

@@ -27,8 +27,8 @@ namespace crypt
 
 				uint8_t r[16] = {};
 				std::copy_n(k + 16, ksz - 16, r);
-				W[0].pack<1, endianness::BIG_ENDIAN>(k);
-				W[1].pack<1, endianness::BIG_ENDIAN>(r);
+				W[0].pack<1, endianness::BE>(k);
+				W[1].pack<1, endianness::BE>(r);
 				W[1] ^= FO(W[0] ^ CK[(n+0)%3]);
 				W[2] = W[1] ^ CK[(n+1)%3];
 				SL(W[2]);
@@ -86,18 +86,18 @@ namespace crypt
 			vo[13] = vi[0] ^ vi[3] ^ vi[6] ^ vi[7]  ^ vi[8]  ^ vi[10] ^ vi[13];
 			vo[14] = vi[0] ^ vi[3] ^ vi[4] ^ vi[5]  ^ vi[9]  ^ vi[11] ^ vi[14];
 			vo[15] = vi[1] ^ vi[2] ^ vi[4] ^ vi[5]  ^ vi[8]  ^ vi[10] ^ vi[15];
-			c.pack<1, endianness::BIG_ENDIAN>(vo);
+			c.pack<1, endianness::BE>(vo);
 		}
 		static void A(UINT_<16>::uint &c)
 		{
 			uint8_t v[16];
-			c.unpack<1, endianness::BIG_ENDIAN>(v);
+			c.unpack<1, endianness::BE>(v);
 			Av(v, c);
 		}
 		static void SL(UINT_<16>::uint &c)
 		{
 			uint8_t v[16];
-			c.unpack<1, endianness::BIG_ENDIAN>(v);
+			c.unpack<1, endianness::BE>(v);
 			v[0] = SB3[v[0]];
 			v[1] = SB4[v[1]];
 			v[2] = SB1[v[2]];
@@ -114,12 +114,12 @@ namespace crypt
 			v[13] = SB4[v[13]];
 			v[14] = SB1[v[14]];
 			v[15] = SB2[v[15]];
-			c.pack<1, endianness::BIG_ENDIAN>(v);
+			c.pack<1, endianness::BE>(v);
 		}
 		static UINT_<16>::uint FO(const UINT_<16>::uint &c)
 		{
 			uint8_t v[16];
-			c.unpack<1, endianness::BIG_ENDIAN>(v);
+			c.unpack<1, endianness::BE>(v);
 			v[0] = SB1[v[0]];
 			v[1] = SB2[v[1]];
 			v[2] = SB3[v[2]];
@@ -144,7 +144,7 @@ namespace crypt
 		static void Process(const std::vector<UINT_<16>::uint> &key, uint8_t* r)
 		{
 			UINT_<16>::uint P;
-			P.pack<1, endianness::BIG_ENDIAN>(r);
+			P.pack<1, endianness::BE>(r);
 			const uint_fast8_t n = static_cast<uint_fast8_t>(key.size() - 1);
 			uint_fast8_t i = 0;
 			for(;;)
@@ -158,7 +158,7 @@ namespace crypt
 				A(P);
 			}
 			P ^= key[i];
-			P.unpack<1, endianness::BIG_ENDIAN>(r);
+			P.unpack<1, endianness::BE>(r);
 		}
 
 	public:

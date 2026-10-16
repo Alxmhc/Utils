@@ -110,7 +110,7 @@ public:
 		return true;
 	}
 
-	template<char E, typename T>
+	template<endianness E, typename T>
 	bool readC(uint_fast8_t sz, T &c)
 	{
 		if (sz == 0)

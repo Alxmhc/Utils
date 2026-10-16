@@ -37,7 +37,7 @@ namespace fl_pr
 			if( (flg & 4) != 0 )
 			{
 				uint16_t sz;
-				if (!br->readC<endianness::LITTLE_ENDIAN>(2, sz))
+				if (!br->readC<endianness::LE>(2, sz))
 					return false;
 				if (!br->skip(sz))
 					return false;
@@ -65,7 +65,7 @@ namespace fl_pr
 
 			br->set_pos(ef);
 			br->readN(crc32, 4);
-			br->readC<endianness::LITTLE_ENDIAN>(4, fsize);
+			br->readC<endianness::LE>(4, fsize);
 			return true;
 		}
 

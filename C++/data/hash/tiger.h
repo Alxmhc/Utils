@@ -78,7 +78,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::LITTLE_ENDIAN>(v, bsize, x);
+				conv::pack<8, endianness::LE>(v, bsize, x);
 				Transform();
 			}
 		public:
@@ -103,7 +103,7 @@ namespace hash
 				else if(size() != 0)
 				{
 					fill_e(0);
-					conv::pack<8, endianness::LITTLE_ENDIAN>(data(), bsize, x);
+					conv::pack<8, endianness::LE>(data(), bsize, x);
 				}
 				else
 				{
@@ -127,7 +127,7 @@ namespace hash
 		void Final(uint8_t* r)
 		{
 			buf.Fin();
-			conv::unpack<8, endianness::LITTLE_ENDIAN>(buf.st, 3, r);
+			conv::unpack<8, endianness::LE>(buf.st, 3, r);
 			buf.Init();
 		}
 	};

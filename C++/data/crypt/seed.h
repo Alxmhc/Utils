@@ -24,7 +24,7 @@ namespace crypt
 		static void Init(const uint8_t* k, uint64_t* key)
 		{
 			uint64_t t[2];
-			conv::pack<8, endianness::BIG_ENDIAN>(k, 16, t);
+			conv::pack<8, endianness::BE>(k, 16, t);
 
 			static const uint32_t KC[16] = {
 				0x9e3779b9, 0x3c6ef373, 0x78dde6e6, 0xf1bbcdcc, 0xe3779b99, 0xc6ef3733, 0x8dde6e67, 0x1bbcdccf,
@@ -48,7 +48,7 @@ namespace crypt
 		static void Process(const uint64_t* key, uint8_t* r)
 		{
 			uint32_t t[4];
-			conv::pack<4, endianness::BIG_ENDIAN>(r, 16, t);
+			conv::pack<4, endianness::BE>(r, 16, t);
 			for(uint_fast8_t i = 0;;i++)
 			{
 				uint32_t f0 = t[2] ^ (key[i] >> 32);
@@ -63,7 +63,7 @@ namespace crypt
 				std::swap(t[0], t[2]);
 				std::swap(t[1], t[3]);
 			}
-			conv::unpack<4, endianness::BIG_ENDIAN>(t, 4, r);
+			conv::unpack<4, endianness::BE>(t, 4, r);
 		}
 	public:
 		static const uint_fast8_t block_size = 16;

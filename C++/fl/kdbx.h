@@ -56,7 +56,7 @@ namespace fl_pr
 		bool Decrypt1(byteReader &br)
 		{
 			uint32_t f;
-			if(!br.readC<endianness::LITTLE_ENDIAN>(4, f))
+			if(!br.readC<endianness::LE>(4, f))
 				return false;
 			if(!br.skip(4))
 				return false;
@@ -77,7 +77,7 @@ namespace fl_pr
 				if(!br.readN(t_seed, 32))
 					return false;
 				uint32_t tr_rnd;
-				if(!br.readC<endianness::LITTLE_ENDIAN>(4, tr_rnd))
+				if(!br.readC<endianness::LE>(4, tr_rnd))
 					return false;
 				make_key(t_seed, tr_rnd, m_seed, 16);
 			}
@@ -123,7 +123,7 @@ namespace fl_pr
 					if(!br.get(t))
 						return false;
 					uint16_t sz;
-					if(!br.readC<endianness::LITTLE_ENDIAN>(2, sz))
+					if(!br.readC<endianness::LE>(2, sz))
 						return false;
 					if(t == 0)
 					{
@@ -155,7 +155,7 @@ namespace fl_pr
 						if(sz != 4)
 							return false;
 						uint32_t c;
-						if(!br.readC<endianness::LITTLE_ENDIAN>(4, c))
+						if(!br.readC<endianness::LE>(4, c))
 							return false;
 						if(c > 1)
 							return false;
@@ -182,7 +182,7 @@ namespace fl_pr
 					{
 						if(sz != 8)
 							return false;
-						if(!br.readC<endianness::LITTLE_ENDIAN>(8, tr_rnd))
+						if(!br.readC<endianness::LE>(8, tr_rnd))
 							return false;
 						break;
 					}
@@ -214,7 +214,7 @@ namespace fl_pr
 					{
 						if(sz != 4)
 							return false;
-						if(!br.readC<endianness::LITTLE_ENDIAN>(4, s_id))
+						if(!br.readC<endianness::LE>(4, s_id))
 							return false;
 						break;
 					}
@@ -256,7 +256,7 @@ namespace fl_pr
 					if(he > data.size())
 						return false;
 					uint32_t sz;
-					bconv<1, endianness::LITTLE_ENDIAN>::pack(data.data() + hb + 36, 4, sz);
+					bconv<1, endianness::LE>::pack(data.data() + hb + 36, 4, sz);
 					if(sz == 0)
 					{
 						data.resize(hb);

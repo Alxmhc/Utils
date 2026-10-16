@@ -25,7 +25,7 @@ public:
 		writeN(reinterpret_cast<const uint8_t*>(s.data()), s.size());
 	}
 
-	template<unsigned char SZ, char E>
+	template<unsigned char SZ, endianness E>
 	void writeC(typename UINT_<SZ>::uint c)
 	{
 		uint8_t t[SZ];

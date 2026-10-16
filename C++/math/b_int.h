@@ -139,12 +139,12 @@ public:
 		while(k > 3)
 		{
 			k -= 4;
-			bconv<1, endianness::BIG_ENDIAN>::pack(v + k, 4, n[i]);
+			bconv<1, endianness::BE>::pack(v + k, 4, n[i]);
 			i++;
 		}
 		if(k != 0)
 		{
-			bconv<1, endianness::BIG_ENDIAN>::pack(v, static_cast<uint_fast8_t>(k), n[i]);
+			bconv<1, endianness::BE>::pack(v, static_cast<uint_fast8_t>(k), n[i]);
 		}
 	}
 
@@ -160,7 +160,7 @@ public:
 			if ((c >> 8 * d) != 0)
 				return false;
 			uint8_t t[4];
-			bconv<1, endianness::BIG_ENDIAN>::unpack(c, 4, t);
+			bconv<1, endianness::BE>::unpack(c, 4, t);
 			std::copy(t + 4 - d, t + 4, v);
 			v += d;
 			sz = n.size() - 1;
@@ -177,7 +177,7 @@ public:
 		}
 		while (sz--)
 		{
-			bconv<1, endianness::BIG_ENDIAN>::unpack(n[sz], 4, v);
+			bconv<1, endianness::BE>::unpack(n[sz], 4, v);
 			v += 4;
 		}
 		return true;

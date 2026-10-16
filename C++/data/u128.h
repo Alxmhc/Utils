@@ -24,10 +24,10 @@ template<> struct UINT_<16>
 			return *this;
 		}
 
-		template <unsigned char SZ, char E>
+		template <unsigned char SZ, endianness E>
 		void pack(const typename UINT_<SZ>::uint* a)
 		{
-			if constexpr (E == endianness::BIG_ENDIAN)
+			if constexpr (E == endianness::BE)
 			{
 				bconv<SZ, E>::pack(a + 8 / SZ, 8 / SZ, l);
 				bconv<SZ, E>::pack(a, 8 / SZ, h);
@@ -38,10 +38,10 @@ template<> struct UINT_<16>
 				bconv<SZ, E>::pack(a, 8 / SZ, l);
 			}
 		}
-		template <unsigned char SZ, char E>
+		template <unsigned char SZ, endianness E>
 		void unpack(typename UINT_<SZ>::uint* a) const
 		{
-			if constexpr (E == endianness::BIG_ENDIAN)
+			if constexpr (E == endianness::BE)
 			{
 				bconv<SZ, E>::unpack(h, 8 / SZ, a);
 				bconv<SZ, E>::unpack(l, 8 / SZ, a + 8 / SZ);

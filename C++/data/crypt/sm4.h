@@ -12,12 +12,12 @@ namespace crypt
 		static void sb(uint32_t &c)
 		{
 			uint8_t t[4];
-			bconv<1, endianness::LITTLE_ENDIAN>::unpack(c, 4, t);
+			bconv<1, endianness::LE>::unpack(c, 4, t);
 			t[0] = Sbox[t[0]];
 			t[1] = Sbox[t[1]];
 			t[2] = Sbox[t[2]];
 			t[3] = Sbox[t[3]];
-			bconv<1, endianness::LITTLE_ENDIAN>::pack(t, 4, c);
+			bconv<1, endianness::LE>::pack(t, 4, c);
 		}
 
 		static uint32_t kg(uint32_t c)
@@ -35,7 +35,7 @@ namespace crypt
 		static void Init(const uint8_t* k, uint32_t* key)
 		{
 			uint32_t K[4];
-			conv::pack<4, endianness::BIG_ENDIAN>(k, 16, K);
+			conv::pack<4, endianness::BE>(k, 16, K);
 			K[0] ^= 0xa3b1bac6;
 			K[1] ^= 0x56aa3350;
 			K[2] ^= 0x677d9197;
@@ -57,7 +57,7 @@ namespace crypt
 		static void Process(const uint32_t* key, uint8_t* r)
 		{
 			uint32_t e[4];
-			conv::pack<4, endianness::BIG_ENDIAN>(r, 16, e);
+			conv::pack<4, endianness::BE>(r, 16, e);
 			for(uint_fast8_t i = 0; i < 32; i+=4)
 			{
 				e[0] ^= cr(e[1] ^ e[2] ^ e[3] ^ key[i]);
@@ -65,10 +65,10 @@ namespace crypt
 				e[2] ^= cr(e[3] ^ e[0] ^ e[1] ^ key[i+2]);
 				e[3] ^= cr(e[0] ^ e[1] ^ e[2] ^ key[i+3]);
 			}
-			bconv<1, endianness::BIG_ENDIAN>::unpack(e[3], 4, r);
-			bconv<1, endianness::BIG_ENDIAN>::unpack(e[2], 4, r + 4);
-			bconv<1, endianness::BIG_ENDIAN>::unpack(e[1], 4, r + 8);
-			bconv<1, endianness::BIG_ENDIAN>::unpack(e[0], 4, r + 12);
+			bconv<1, endianness::BE>::unpack(e[3], 4, r);
+			bconv<1, endianness::BE>::unpack(e[2], 4, r + 4);
+			bconv<1, endianness::BE>::unpack(e[1], 4, r + 8);
+			bconv<1, endianness::BE>::unpack(e[0], 4, r + 12);
 		}
 
 	public:

@@ -106,7 +106,7 @@ namespace crypt
 		static void proc(uint8_t* r, const uint64_t* key)
 		{
 			uint_fast64_t t;
-			bconv<1, endianness::BIG_ENDIAN>::pack(r, 8, t);
+			bconv<1, endianness::BE>::pack(r, 8, t);
 			{
 				static const uint8_t IP[] = {
 					6, 14, 22, 30, 38, 46, 54, 62, 4, 12, 20, 28, 36, 44, 52, 60,
@@ -134,7 +134,7 @@ namespace crypt
 				};
 				prm(t, IPr, 64);
 			}
-			bconv<1, endianness::BIG_ENDIAN>::unpack(t, 8, r);
+			bconv<1, endianness::BE>::unpack(t, 8, r);
 		}
 
 		static void Init(const uint8_t* k, uint64_t* key)
@@ -148,7 +148,7 @@ namespace crypt
 					50, 58,  3, 11, 19, 27, 35, 43, 51, 59, 36, 44, 52, 60
 				};
 				uint_fast64_t t;
-				bconv<1, endianness::BIG_ENDIAN>::pack(k, 8, t);
+				bconv<1, endianness::BE>::pack(k, 8, t);
 				prm(t, PC1, 56);
 				C = static_cast<uint_fast32_t>(t >> 28);
 				D = static_cast<uint_fast32_t>(getBits(t, 28));

@@ -67,7 +67,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<4, endianness::BIG_ENDIAN>(v, this->bsize, x);
+				conv::pack<4, endianness::BE>(v, this->bsize, x);
 				Transform();
 			}
 		public:
@@ -90,7 +90,7 @@ namespace hash
 				else if(this->size() != 0)
 				{
 					this->fill_e(0);
-					conv::pack<4, endianness::BIG_ENDIAN>(this->data(), this->bsize, x);
+					conv::pack<4, endianness::BE>(this->data(), this->bsize, x);
 				}
 				else
 				{
@@ -115,7 +115,7 @@ namespace hash
 		void Final(uint8_t* r)
 		{
 			buf.Fin();
-			conv::unpack<4, endianness::BIG_ENDIAN>(buf.st, SZ>>2, r);
+			conv::unpack<4, endianness::BE>(buf.st, SZ>>2, r);
 			buf.Init();
 		}
 	};
@@ -206,7 +206,7 @@ namespace hash
 
 			void process(const uint8_t* v)
 			{
-				conv::pack<8, endianness::BIG_ENDIAN>(v, this->bsize, x);
+				conv::pack<8, endianness::BE>(v, this->bsize, x);
 				Transform();
 			}
 		public:
@@ -229,7 +229,7 @@ namespace hash
 				else if(this->size() != 0)
 				{
 					this->fill_e(0);
-					conv::pack<8, endianness::BIG_ENDIAN>(this->data(), this->bsize, x);
+					conv::pack<8, endianness::BE>(this->data(), this->bsize, x);
 				}
 				else
 				{
@@ -256,7 +256,7 @@ namespace hash
 		void Final(uint8_t* r)
 		{
 			buf.Fin();
-			conv::unpack<8, endianness::BIG_ENDIAN>(buf.st, SZ>>3, r);
+			conv::unpack<8, endianness::BE>(buf.st, SZ>>3, r);
 			buf.Init();
 		}
 	};
