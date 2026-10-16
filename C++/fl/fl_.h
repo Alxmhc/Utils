@@ -99,7 +99,7 @@ class bw_fstream : public byteWriter
 {
 	std::ofstream fst;
 public:
-	bw_fstream(const std::filesystem::path &pth, bool append = false) : fst(pth, std::ios_base::binary | (append ? std::ios_base::app : 0)) {}
+	bw_fstream(const std::filesystem::path &pth, bool append = false) : fst(pth, append ? (std::ios_base::binary | std::ios_base::app) : std::ios_base::binary) {}
 
 	void writeN(const uint8_t* v, std::size_t n)
 	{
