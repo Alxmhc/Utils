@@ -10,7 +10,7 @@
 class br_fstream : public byteReader
 {
 	std::ifstream fst;
-	uint8_t buf[256];
+	uint8_t buf[255];
 protected:
 	void pos_set(std::size_t p)
 	{

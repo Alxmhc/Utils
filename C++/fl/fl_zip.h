@@ -91,21 +91,19 @@ namespace fl_pr
 
 			std::vector<uint8_t> key(ssz*4 + 2);
 			{
-				std::vector<uint8_t> s(ssz + 2);
-				br->readN(s.data(), s.size());
+				auto s = br->read_data(ssz + 2);
 				const PBKDF2_HMAC<hash::SHA1> kg(1000);
-				kg.gen(psw.data(), psw.size(), s.data(), ssz, key.data(), key.size());
+				kg.gen(psw.data(), psw.size(), s, ssz, key.data(), key.size());
 				if(key[ssz*4] != s[ssz] || key[ssz*4+1] != s[ssz+1])
 					return false;
 			}
 			br->readN(data, br->get_rsize() - 10);
 			{
-				uint8_t hsh[10];
-				br->readN(hsh, 10);
 				hash::HMAC<hash::SHA1> h(key.data() + ssz*2, ssz*2);
 				h.Update(data.data(), data.size());
 				uint8_t hs[hash::SHA1::hash_size];
 				h.Final(hs);
+				auto hsh = br->read_data(10);
 				if(std::memcmp(hsh, hs, 10) != 0)
 					return false;
 			}
@@ -182,8 +180,8 @@ namespace fl_pr
 		{
 			uint_fast16_t szex;
 			{
-				uint8_t h[26];
-				if(!br->readN(h, 26))
+				auto h = br->read_data(26);
+				if(h == nullptr)
 					return false;
 				inf.encryption = h[2] & 1;
 				bconv<1, endianness::LE>::pack(h+4, 2, inf.method);
@@ -202,8 +200,8 @@ namespace fl_pr
 				{
 					if(szex < 11)
 						return false;
-					uint8_t ext[11];
-					if( !br->readN(ext, 11) )
+					auto ext = br->read_data(11);
+					if(ext == nullptr)
 						return false;
 					inf.encryption = ext[8] + 1;
 					bconv<1, endianness::LE>::pack(ext + 9, 2, inf.method);
@@ -223,8 +221,8 @@ namespace fl_pr
 			infFs.clear();
 			for(;;)
 			{
-				uint8_t hdr[4];
-				if(!br->readN(hdr, 4))
+				auto hdr = br->read_data(4);
+				if(hdr == nullptr)
 					break;
 				if(std::memcmp(hdr, "\x50\x4b\x03\x04", 4) != 0)
 					break;
@@ -255,7 +253,7 @@ namespace fl_pr
 
 		bool GetData(std::size_t n, byteWriter &bw)
 		{
-			if(infFs[n].fsize == 0)
+			if(infFs[n].data_size == 0)
 				return true;
 
 			br->set_pos(infFs[n].data_pos);

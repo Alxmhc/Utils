@@ -23,8 +23,8 @@ namespace fl_pr
 
 			uint8_t flg;
 			{
-				uint8_t hdr[4];
-				if( !br->readN(hdr, 4) )
+				auto hdr = br->read_data(4);
+				if(hdr == nullptr)
 					return false;
 				if(std::memcmp(hdr, "\x1f\x8b\x08", 3) != 0)
 					return false;

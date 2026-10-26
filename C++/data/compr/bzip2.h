@@ -232,8 +232,8 @@ namespace compr
 		static bool Decode(byteReader &br, byteWriter &bw)
 		{
 			{
-				uint8_t hdr[4];
-				if( !br.readN(hdr, 4) )
+				auto hdr = br.read_data(4);
+				if(hdr == nullptr)
 					return false;
 				if(std::memcmp(hdr, "\x42\x5a\x68", 3) != 0)
 					return false;

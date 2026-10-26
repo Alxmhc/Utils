@@ -232,8 +232,8 @@ namespace compr
 		{
 			props pr;
 			{
-				uint8_t h[5];
-				if( !br.readN(h, 5) )
+				auto h = br.read_data(5);
+				if(h == nullptr)
 					return false;
 				if( !pr.Init(h) )
 					return false;

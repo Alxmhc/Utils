@@ -124,6 +124,13 @@ public:
 		return true;
 	}
 
+	const uint8_t* read_data(uint_fast8_t sz)
+	{
+		if(sz > get_rsize())
+			return nullptr;
+		return get_data(sz);
+	}
+
 	virtual std::size_t find(uint8_t) = 0;
 	virtual std::size_t find(const uint8_t*, uint_fast8_t) = 0;
 

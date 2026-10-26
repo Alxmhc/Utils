@@ -109,8 +109,8 @@ namespace fl_pr
 
 		static bool getHeader(byteReader &br, std::vector<uint8_t> &hdr)
 		{
-			uint8_t header[32];
-			if(!br.readN(header, 32))
+			auto header = br.read_data(32);
+			if(header == nullptr)
 				return false;
 			if(std::memcmp(header, "\x37\x7a\xbc\xaf\x27\x1c", 6) != 0)
 				return false;
