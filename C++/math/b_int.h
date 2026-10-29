@@ -221,28 +221,28 @@ public:
 		return !operator<(c);
 	}
 
-	uint_fast8_t getBit(std::size_t p) const
+	bool getBit(std::size_t p) const
 	{
 		const auto k = p/BSZ;
 		if(k < n.size())
 			return ::getBit(n[k], p%BSZ);
-		return 0;
+		return false;
 	}
 	void setBit(std::size_t p, bool b)
 	{
 		const auto k = p/BSZ;
-		if(k < n.size())
+		if (b)
 		{
-			::setBit(n[k], p%BSZ, b);
-			if(!b)
+			if (k >= n.size())
 			{
-				fix();
+				n.resize(k + 1);
 			}
+			::setBit1(n[k], p % BSZ);
 		}
-		else if(b)
+		else if(k < n.size())
 		{
-			n.resize(k + 1);
-			::setBit(n[k], p%BSZ, true);
+			::setBit0(n[k], p % BSZ);
+			fix();
 		}
 	}
 
@@ -555,7 +555,10 @@ public:
 				break;
 			d--;
 			*this <<= 1;
-			n[0] |= t.getBit(d);
+			if (t.getBit(d))
+			{
+				n[0] |= 1;
+			}
 		}
 		return *this;
 	}
@@ -600,7 +603,7 @@ public:
 		b_uint res(1);
 		for(std::size_t i = 0; i < p.log2i(); i++)
 		{
-			if(p.getBit(i) != 0)
+			if(p.getBit(i))
 			{
 				res *= t;
 				res %= m;

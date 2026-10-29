@@ -15,9 +15,9 @@ namespace crypt
 			T r = 0;
 			for(uint_fast8_t i = 0; i < tsz; i++)
 			{
-				if( getBit(c, t[i]) != 0 )
+				if(getBit(c, t[i]))
 				{
-					setBit(r, tsz - 1 - i, true);
+					setBit1(r, tsz - 1 - i);
 				}
 			}
 			c = r;

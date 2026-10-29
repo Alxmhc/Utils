@@ -10,18 +10,17 @@ class binTree
 	binTree* right;
 	bool fin;
 	T val;
-
 public:
 	binTree() : left(nullptr), right(nullptr), fin(false) {}
 
-	binTree(binTree &&t) : left(t.left), right(t.right), fin(t.fin), val(t.val)
+	binTree(binTree &&t) noexcept : left(t.left), right(t.right), fin(t.fin), val(t.val)
 	{
 		t.left = nullptr;
 		t.right = nullptr;
 		t.fin = false;
 	}
 
-	binTree& operator=(binTree &&t)
+	binTree& operator=(binTree &&t) noexcept
 	{
 		if(this != &t)
 		{

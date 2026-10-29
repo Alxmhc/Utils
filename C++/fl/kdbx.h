@@ -16,8 +16,8 @@ namespace fl_pr
 
 		bool read_Ver(byteReader &br)
 		{
-			uint8_t hdr[8];
-			if( !br.readN(hdr, 8) )
+			auto hdr = br.read_data(8);
+			if(hdr == nullptr)
 				return false;
 			if(std::memcmp(hdr, "\x03\xd9\xa2\x9a", 4) != 0)
 				return false;
@@ -55,10 +55,7 @@ namespace fl_pr
 
 		bool Decrypt1(byteReader &br)
 		{
-			uint32_t f;
-			if(!br.readC<endianness::LE>(4, f))
-				return false;
-			if(!br.skip(4))
+			if(!br.skip(8))
 				return false;
 
 			uint8_t iv[16];
@@ -174,7 +171,7 @@ namespace fl_pr
 					{
 						if(sz != 32)
 							return false;
-						if(!br.readN(t_seed, sz))
+						if(!br.readN(t_seed, 32))
 							return false;
 						break;
 					}
