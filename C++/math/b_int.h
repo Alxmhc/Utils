@@ -228,22 +228,23 @@ public:
 			return ::getBit(n[k], p%BSZ);
 		return false;
 	}
-	void setBit(std::size_t p, bool b)
+	void setBit0(std::size_t p)
 	{
 		const auto k = p/BSZ;
-		if (b)
-		{
-			if (k >= n.size())
-			{
-				n.resize(k + 1);
-			}
-			::setBit1(n[k], p % BSZ);
-		}
-		else if(k < n.size())
+		if(k < n.size())
 		{
 			::setBit0(n[k], p % BSZ);
 			fix();
 		}
+	}
+	void setBit1(std::size_t p)
+	{
+		const auto k = p/BSZ;
+		if (k >= n.size())
+		{
+			n.resize(k + 1);
+		}
+		::setBit1(n[k], p % BSZ);
 	}
 
 	// % (1<<c)
@@ -548,7 +549,7 @@ public:
 				*this -= m;
 				if(r != nullptr)
 				{
-					r->setBit(d, true);
+					r->setBit1(d);
 				}
 			}
 			if(d == 0)

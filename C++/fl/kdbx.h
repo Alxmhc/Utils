@@ -13,10 +13,17 @@ namespace fl_pr
 	class kdbx
 	{
 		uint_fast8_t ver;
+		bool g;
+		uint8_t key[32];
+		std::string comment;
+		bool compressed;
+		std::vector<uint8_t> data;
+		uint32_t s_id;
+		uint8_t p_key[32];
 
-		bool read_Ver(byteReader &br)
+		bool read_Ver(byteReader &r)
 		{
-			auto hdr = br.read_data(8);
+			auto hdr = r.read_data(8);
 			if(hdr == nullptr)
 				return false;
 			if(std::memcmp(hdr, "\x03\xd9\xa2\x9a", 4) != 0)
@@ -26,9 +33,6 @@ namespace fl_pr
 			ver = hdr[4] - 0x64;
 			return true;
 		}
-
-		bool g;
-		uint8_t key[32];
 
 		void make_key(const uint8_t* t_seed, uint_fast64_t tr_rnd, const uint8_t* m_seed, uint_fast8_t msz)
 		{
@@ -47,39 +51,33 @@ namespace fl_pr
 			hs.Final(key);
 		}
 
-		std::string comment;
-		bool compressed;
-		std::vector<uint8_t> data;
-		uint32_t s_id;
-		uint8_t p_key[32];
-
-		bool Decrypt1(byteReader &br)
+		bool Decrypt1(byteReader &r)
 		{
-			if(!br.skip(8))
+			if(!r.skip(8))
 				return false;
 
 			uint8_t iv[16];
 			uint8_t hash[32];
 			{
 				uint8_t m_seed[16];
-				if(!br.readN(m_seed, 16))
+				if(!r.readN(m_seed, 16))
 					return false;
-				if(!br.readN(iv, 16))
+				if(!r.readN(iv, 16))
 					return false;
-				if(!br.skip(8))
+				if(!r.skip(8))
 					return false;
-				if(!br.readN(hash, 32))
+				if(!r.readN(hash, 32))
 					return false;
 				uint8_t t_seed[32];
-				if(!br.readN(t_seed, 32))
+				if(!r.readN(t_seed, 32))
 					return false;
 				uint32_t tr_rnd;
-				if(!br.readC<endianness::LE>(4, tr_rnd))
+				if(!r.readC<endianness::LE>(4, tr_rnd))
 					return false;
 				make_key(t_seed, tr_rnd, m_seed, 16);
 			}
 
-			br.readN(data, br.get_rsize());
+			r.readN(data, r.get_rsize());
 			if((data.size() & 15) != 0)
 				return false;
 			crypt::AES::Dec de(key, 32);
@@ -103,9 +101,9 @@ namespace fl_pr
 			return true;
 		}
 
-		bool Decrypt2(byteReader &br)
+		bool Decrypt2(byteReader &r)
 		{
-			if(!br.skip(4))
+			if(!r.skip(4))
 				return false;
 
 			std::vector<uint8_t> iv;
@@ -117,14 +115,14 @@ namespace fl_pr
 				for(;;)
 				{
 					uint8_t t;
-					if(!br.get(t))
+					if(!r.get(t))
 						return false;
 					uint16_t sz;
-					if(!br.readC<endianness::LE>(2, sz))
+					if(!r.readC<endianness::LE>(2, sz))
 						return false;
 					if(t == 0)
 					{
-						if(!br.skip(sz))
+						if(!r.skip(sz))
 							return false;
 						break;
 					}
@@ -132,7 +130,7 @@ namespace fl_pr
 					{
 					case 1:
 					{
-						if(!br.readN(comment, sz))
+						if(!r.readN(comment, sz))
 							return false;
 						break;
 					}
@@ -141,7 +139,7 @@ namespace fl_pr
 						if(sz != 16)
 							return false;
 						uint8_t h[16];
-						if(!br.readN(h, 16))
+						if(!r.readN(h, 16))
 							return false;
 						if(std::memcmp(h, "\x31\xc1\xf2\xe6\xbf\x71\x43\x50\xbe\x58\x05\x21\x6a\xfc\x5a\xff", 16) != 0)
 							return false;
@@ -152,7 +150,7 @@ namespace fl_pr
 						if(sz != 4)
 							return false;
 						uint32_t c;
-						if(!br.readC<endianness::LE>(4, c))
+						if(!r.readC<endianness::LE>(4, c))
 							return false;
 						if(c > 1)
 							return false;
@@ -163,7 +161,7 @@ namespace fl_pr
 					{
 						if(sz != 32)
 							return false;
-						if(!br.readN(m_seed, 32))
+						if(!r.readN(m_seed, 32))
 							return false;
 						break;
 					}
@@ -171,7 +169,7 @@ namespace fl_pr
 					{
 						if(sz != 32)
 							return false;
-						if(!br.readN(t_seed, 32))
+						if(!r.readN(t_seed, 32))
 							return false;
 						break;
 					}
@@ -179,20 +177,20 @@ namespace fl_pr
 					{
 						if(sz != 8)
 							return false;
-						if(!br.readC<endianness::LE>(8, tr_rnd))
+						if(!r.readC<endianness::LE>(8, tr_rnd))
 							return false;
 						break;
 					}
 					case 7:
 					{
-						if(!br.readN(iv, sz))
+						if(!r.readN(iv, sz))
 							return false;
 						break;
 					}
 					case 8:
 					{
 						std::vector<uint8_t> tmp;
-						if(!br.readN(tmp, sz))
+						if(!r.readN(tmp, sz))
 							return false;
 						hash::SHA2_256 hs;
 						hs.Update(tmp.data(), sz);
@@ -203,7 +201,7 @@ namespace fl_pr
 					{
 						if(sz != 32)
 							return false;
-						if(!br.readN(s_start, sz))
+						if(!r.readN(s_start, sz))
 							return false;
 						break;
 					}
@@ -211,7 +209,7 @@ namespace fl_pr
 					{
 						if(sz != 4)
 							return false;
-						if(!br.readC<endianness::LE>(4, s_id))
+						if(!r.readC<endianness::LE>(4, s_id))
 							return false;
 						break;
 					}
@@ -227,14 +225,14 @@ namespace fl_pr
 				crypt::CR_CBC::Dec<crypt::AES> dec(de, iv.data());
 
 				uint8_t st[32];
-				if(!br.readN(st, 32))
+				if(!r.readN(st, 32))
 					return false;
 				dec.process(st);
 				dec.process(st + 16);
 				if(std::memcmp(st, s_start, 32) != 0)
 					return false;
 
-				br.readN(data, br.get_rsize());
+				r.readN(data, r.get_rsize());
 				if((data.size() & 15) != 0)
 					return false;
 				for(std::size_t i = 0; i < data.size(); i += 16)
@@ -320,9 +318,9 @@ namespace fl_pr
 			}
 		}
 	public:
-		kdbx(byteReader &br, const uint8_t* psw, std::size_t psz) : g(false)
+		kdbx(byteReader &r, const uint8_t* psw, std::size_t psz) : g(false)
 		{
-			if(!read_Ver(br))
+			if(!read_Ver(r))
 				return;
 
 			hash::SHA2_256 hs;
@@ -331,13 +329,13 @@ namespace fl_pr
 
 			if(ver == 1)
 			{
-				g = Decrypt1(br);
+				g = Decrypt1(r);
 			}
 			else
 			{
 				hs.Update(key, 32);
 				hs.Final(key);
-				g = Decrypt2(br);
+				g = Decrypt2(r);
 			}
 			std::fill_n(key, 32, uint8_t(0));
 		}

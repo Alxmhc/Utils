@@ -42,9 +42,9 @@ namespace BER
 			return b_sint(c, true);
 
 		const auto p = (sz << 3) - 1;
-		c.setBit(p, false);
+		c.setBit0(p);
 		b_uint t;
-		t.setBit(p, true);
+		t.setBit1(p);
 		t -= c;
 		return b_sint(t, false);
 	}
