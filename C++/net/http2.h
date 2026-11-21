@@ -23,10 +23,38 @@ static const unsigned char http2_hcode[257] = {
 	20, 24, 20, 21, 22, 21, 21, 23, 22, 22, 25, 25, 24, 24, 26, 23,
 	26, 27, 26, 26, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, 27, 26,
 	30};
-static const hTree<unsigned int> http2_htr(http2_hcode, 257);
+static const binTree<unsigned int> http2_htr(make_Htree(http2_hcode, (unsigned int)257));
 
 class HTTP2
 {
+	static void int_encode(uint8_t c, uint_fast32_t n, uint_fast8_t nBit, byteWriter &bw)
+	{
+		c <<= nBit;
+		const uint_fast8_t p = (1 << nBit) - 1;
+		if (n < p)
+		{
+			c |= n;
+			bw.write(c);
+			return;
+		}
+		c |= p;
+		bw.write(c);
+		n -= p;
+		while (n > 0x7f)
+		{
+			c = (n & 0xff) | 0x80;
+			bw.write(c);
+			n >>= 7;
+		}
+		bw.write(static_cast<uint8_t>(n));
+	}
+
+	static void string_encode_s(std::string_view s, byteWriter& bw)
+	{
+		int_encode(0, static_cast<uint_fast32_t>(s.size()), 7, bw);
+		bw.writeS(s);
+	}
+
 	static bool int_decode(br_array &br, uint_fast32_t &res, uint_fast8_t nBit)
 	{
 		{
@@ -52,13 +80,12 @@ class HTTP2
 		uint8_t t;
 		if( !br.get(t) )
 			return false;
-		const bool is_huff = (t & 0x80) != 0;
 
 		uint_fast32_t size = t;
 		if( !int_decode(br, size, 7) )
 			return false;
 
-		if( !is_huff )
+		if((t & 0x80) == 0)
 			return br.readN(out_str, size);
 
 		if( !br.set_rsize(size) )

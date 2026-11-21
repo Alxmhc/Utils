@@ -1,6 +1,8 @@
 #ifndef H_BIN_TREE
 #define H_BIN_TREE
 
+#include <map>
+
 #include "bit_reader.h"
 
 template<typename T>
@@ -11,6 +13,8 @@ class binTree
 	bool fin;
 	T val;
 public:
+	typedef std::map<T, std::pair<uint_fast64_t, uint_fast8_t>> Tmap;
+
 	binTree() : left(nullptr), right(nullptr), fin(false) {}
 
 	binTree(binTree &&t) noexcept : left(t.left), right(t.right), fin(t.fin), val(t.val)
@@ -18,6 +22,14 @@ public:
 		t.left = nullptr;
 		t.right = nullptr;
 		t.fin = false;
+	}
+
+	binTree(const Tmap &mp) : left(nullptr), right(nullptr), fin(false)
+	{
+		for (const auto& e : mp)
+		{
+			add(e.second.first, e.second.second, e.first);
+		}
 	}
 
 	binTree& operator=(binTree &&t) noexcept

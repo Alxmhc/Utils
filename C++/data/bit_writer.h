@@ -47,8 +47,7 @@ class bitWriterR : public bitWriter
 public:
 	bitWriterR(byteWriter &d) : bitWriter(d){}
 
-	template<typename T>
-	void writeLE(T c, uint_fast8_t n)
+	void writeLE(uint_fast64_t c, uint_fast8_t n)
 	{
 		while(n--)
 		{
@@ -57,8 +56,7 @@ public:
 		}
 	}
 
-	template<typename T>
-	void writeBE(T c, uint_fast8_t n)
+	void writeBE(uint_fast64_t c, uint_fast8_t n)
 	{
 		while(n--)
 		{
@@ -77,8 +75,7 @@ class bitWriterL : public bitWriter
 public:
 	bitWriterL(byteWriter &d) : bitWriter(d){}
 
-	template<typename T>
-	void writeLE(T c, uint_fast8_t n)
+	void writeLE(uint_fast64_t c, uint_fast8_t n)
 	{
 		while(n--)
 		{
@@ -86,8 +83,7 @@ public:
 		}
 	}
 
-	template<typename T>
-	void writeBE(T c, uint_fast8_t n)
+	void writeBE(uint_fast64_t c, uint_fast8_t n)
 	{
 		while(n--)
 		{

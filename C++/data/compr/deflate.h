@@ -77,7 +77,7 @@ namespace compr
 			return true;
 		}
 
-		static bool decode(const hTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd, std::vector<uint_fast8_t> &vcodes)
+		static bool decode(const binTree<uint_fast8_t> &codes, uint_fast16_t ncode, bitReaderL &brd, std::vector<uint_fast8_t> &vcodes)
 		{
 			vcodes.resize(ncode);
 			uint_fast16_t n = 0;
@@ -191,12 +191,12 @@ namespace compr
 
 			std::vector<uint_fast8_t> vcodes;
 			{
-				const hTree<uint_fast8_t> codes(clen, csz);
+				const binTree<uint_fast8_t> codes(make_Htree(clen, csz));
 				if( !decode(codes, HLIT + HDIST, brd, vcodes) )
 					return false;
 			}
-			const hTree<uint_fast16_t> hlit(vcodes.data(), HLIT);
-			const hTree<uint_fast8_t> hdist(vcodes.data() + HLIT, HDIST);
+			const binTree<uint_fast16_t> hlit(make_Htree(vcodes.data(), HLIT));
+			const binTree<uint_fast8_t> hdist(make_Htree(vcodes.data() + HLIT, HDIST));
 
 			for(;;)
 			{

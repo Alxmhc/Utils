@@ -115,7 +115,7 @@ namespace compr
 				return false;
 
 			//construct trees
-			typedef hTree<uint_fast16_t> Tree;
+			typedef binTree<uint_fast16_t> Tree;
 			std::vector<Tree> htrs;
 			htrs.reserve(tsz);
 			{
@@ -124,7 +124,7 @@ namespace compr
 				{
 					if( !read_tree(br, tree) )
 						return false;
-					htrs.emplace_back(tree.data(), static_cast<uint_fast16_t>(tree.size()));
+					htrs.emplace_back(make_Htree(tree.data(), static_cast<uint_fast16_t>(tree.size())));
 				}
 			}
 
