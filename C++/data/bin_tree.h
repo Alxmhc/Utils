@@ -4,112 +4,143 @@
 #include <map>
 
 #include "bit_reader.h"
+#include "bit_writer.h"
 
 template<typename T>
-class binTree
+struct binTree
 {
-	binTree* left;
-	binTree* right;
-	bool fin;
-	T val;
-public:
 	typedef std::map<T, std::pair<uint_fast64_t, uint_fast8_t>> Tmap;
 
-	binTree() : left(nullptr), right(nullptr), fin(false) {}
-
-	binTree(binTree &&t) noexcept : left(t.left), right(t.right), fin(t.fin), val(t.val)
+	class Dec
 	{
-		t.left = nullptr;
-		t.right = nullptr;
-		t.fin = false;
-	}
+		Dec* left;
+		Dec* right;
+		bool fin;
+		T val;
+	public:
+		Dec() : left(nullptr), right(nullptr), fin(false) {}
 
-	binTree(const Tmap &mp) : left(nullptr), right(nullptr), fin(false)
-	{
-		for (const auto& e : mp)
+		Dec(Dec&& t) noexcept : left(t.left), right(t.right), fin(t.fin), val(t.val)
 		{
-			add(e.second.first, e.second.second, e.first);
+			t.left = nullptr;
+			t.right = nullptr;
+			t.fin = false;
 		}
-	}
 
-	binTree& operator=(binTree &&t) noexcept
-	{
-		if(this != &t)
+		Dec& operator=(Dec &&t) noexcept
+		{
+			if (this != &t)
+			{
+				delete left;
+				left = t.left;
+				t.left = nullptr;
+
+				delete right;
+				right = t.right;
+				t.right = nullptr;
+
+				fin = t.fin;
+				if (fin)
+				{
+					val = std::move(t.val);
+					t.fin = false;
+				}
+			}
+			return *this;
+		}
+
+		~Dec()
 		{
 			delete left;
-			left = t.left;
-			t.left = nullptr;
-
 			delete right;
-			right = t.right;
-			t.right = nullptr;
-
-			fin = t.fin;
-			if (fin)
-			{
-				val = t.val;
-				t.fin = false;
-			}
 		}
-		return *this;
-	}
 
-	~binTree()
-	{
-		delete left;
-		delete right;
-	}
-
-	bool add(uint_fast64_t n, uint_fast8_t nbit, const T &v)
-	{
-		binTree<T>* a = this;
-		while(nbit--)
+		bool add(uint_fast64_t n, uint_fast8_t nbit, const T &v)
 		{
-			if (a->fin)
+			Dec* a = this;
+			while (nbit--)
+			{
+				if (a->fin)
+					return false;
+				const uint_fast8_t c = (n >> nbit) & 1;
+				if (c == 0)
+				{
+					if (a->left == nullptr)
+					{
+						a->left = new Dec();
+					}
+					a = a->left;
+				}
+				else
+				{
+					if (a->right == nullptr)
+					{
+						a->right = new Dec();
+					}
+					a = a->right;
+				}
+			}
+			if (a->fin || a->left != nullptr || a->right != nullptr)
 				return false;
-			const uint_fast8_t c = (n >> nbit) & 1;
-			if(c == 0)
-			{
-				if(a->left == nullptr)
-				{
-					a->left = new binTree();
-				}
-				a = a->left;
-			}
-			else
-			{
-				if(a->right == nullptr)
-				{
-					a->right = new binTree();
-				}
-				a = a->right;
-			}
+			a->val = v;
+			a->fin = true;
+			return true;
 		}
-		if (a->fin || a->left != nullptr || a->right != nullptr)
-			return false;
-		a->val = v;
-		a->fin = true;
-		return true;
-	}
 
-	bool decode(bitReader &rd, T &res) const
-	{
-		const binTree<T>* tr = this;
-		for(;;)
+		bool read(bitReader &rd, T &res) const
 		{
-			if (tr->fin)
+			const Dec* tr = this;
+			for (;;)
 			{
-				res = tr->val;
-				return true;
+				if (tr->fin)
+				{
+					res = tr->val;
+					return true;
+				}
+				uint_fast8_t b;
+				if (!rd.get(b))
+					return false;
+				tr = b == 0 ? tr->left : tr->right;
+				if (tr == nullptr)
+					return false;
 			}
-			uint_fast8_t b;
-			if( !rd.get(b) )
-				return false;
-			tr = b == 0 ? tr->left : tr->right;
-			if(tr == nullptr)
-				return false;
 		}
-	}
+	};
+
+	class Enc
+	{
+		Tmap mp;
+	public:
+		const Tmap& get_map() const
+		{
+			return mp;
+		}
+
+		bool add(uint_fast64_t n, uint_fast8_t nbit, const T &v)
+		{
+			if (mp.find(v) != mp.end())
+				return false;
+			mp[v] = std::pair<uint_fast64_t, uint_fast8_t>(n, nbit);
+			return true;
+		}
+
+		bool write(const T &v, bitWriterL &bw) const
+		{
+			const auto e = mp.find(v);
+			if (e == mp.cend())
+				return false;
+			bw.writeLE(e->second.first, e->second.second);
+			return true;
+		}
+		bool write(const T &v, bitWriterR &bw) const
+		{
+			const auto e = mp.find(v);
+			if (e == mp.cend())
+				return false;
+			bw.writeBE(e->second.first, e->second.second);
+			return true;
+		}
+	};
 };
 
 #endif

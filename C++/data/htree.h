@@ -3,8 +3,8 @@
 
 #include "bin_tree.h"
 
-template<typename T>
-static binTree<T>::Tmap make_Htree(const uint_fast8_t* m, T n)
+template<typename T, class C>
+static void make_Htree(const uint_fast8_t* m, T n, C &cl)
 {
 	typedef std::pair<uint_fast8_t, T> pr;
 	std::vector<pr> tmp(n);
@@ -19,8 +19,6 @@ static binTree<T>::Tmap make_Htree(const uint_fast8_t* m, T n)
 	}
 	std::stable_sort(tmp.begin(), tmp.begin() + sz);
 
-	typename binTree<T>::Tmap res;
-
 	uint_fast64_t k = 0;
 	uint_fast8_t p = 0;
 	for(T i = 0; i < sz; ++i)
@@ -31,11 +29,9 @@ static binTree<T>::Tmap make_Htree(const uint_fast8_t* m, T n)
 			k <<= s - p;
 			p = s;
 		}
-		res[tmp[i].second] = std::pair<uint_fast64_t, uint_fast8_t>(k, s);
+		cl.add(k, s, tmp[i].second);
 		k++;
 	}
-
-	return res;
 }
 
 #endif

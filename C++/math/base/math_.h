@@ -91,7 +91,7 @@ namespace vt
 }
 
 //(a^b)%c
-static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
+static uint_fast64_t pw_m(uint_fast64_t a, uint_fast64_t b, uint_fast64_t c)
 {
 	if(c == 1)
 		return 0;
@@ -99,7 +99,7 @@ static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
 		return 1;
 	a %= c;
 	if(a < 2)
-		return static_cast<uint32_t>(a);
+		return a;
 	uint_fast64_t r = 1;
 	for(;;)
 	{
@@ -116,7 +116,7 @@ static uint32_t pw_m(uint64_t a, uint_fast64_t b, uint32_t c)
 			break;
 		b >>= 1;
 	}
-	return static_cast<uint32_t>(r);
+	return r;
 }
 
 #endif
