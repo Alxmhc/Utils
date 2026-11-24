@@ -114,9 +114,9 @@ struct URL
 		return true;
 	}
 
-	static bool Parse_params(const std::string &s, std::map<std::string, std::string> &par)
+	static bool Parse_params(std::string_view s, std::map<std::string, std::string> &par)
 	{
-		const char* cb = s.c_str();
+		const char* cb = s.data();
 		const char* ce = cb + s.length();
 		par.clear();
 		static const dict_reader rd("&", "=");
@@ -125,7 +125,10 @@ struct URL
 		{
 			if (!rd.nxt(cb, ce, s1, s2))
 				return false;
-			par[std::string(s1)] = s2;
+			const std::string name(s1);
+			if (par.find(name) != par.end())
+				return false;
+			par[name] = s2;
 		}
 		return true;
 	}

@@ -5,10 +5,13 @@
 
 #include "http.h"
 
-class h2_Tree : public binTree<unsigned int>::Dec
+class h2_hpack
 {
+	typedef unsigned int uint;
+	binTree<uint>::Enc enc;
+	binTree<uint>::Dec dec;
 public:
-	h2_Tree() : binTree<unsigned int>::Dec()
+	h2_hpack()
 	{
 		static const unsigned char hcode[257] = {
 			13, 23, 28, 28, 28, 28, 28, 28, 28, 24, 30, 28, 28, 30, 28, 28,
@@ -28,14 +31,30 @@ public:
 			20, 24, 20, 21, 22, 21, 21, 23, 22, 22, 25, 25, 24, 24, 26, 23,
 			26, 27, 26, 26, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, 27, 26,
 			30};
-		make_Htree(hcode, (unsigned int)257, *this);
+		make_Htree(hcode, (uint)257, enc);
+		enc.make_decoder(dec);
 	}
-};
 
-static const h2_Tree http2_htr;
+	static bool int_decode(br_array &br, uint_fast32_t &res, uint_fast8_t nBit)
+	{
+		{
+			const uint_fast8_t p = (1 << nBit) - 1;
+			res &= p;
+			if(res != p)
+				return true;
+		}
+		for(uint_fast8_t i = 0; i < 4; i++)
+		{
+			uint8_t t;
+			if(!br.get(t))
+				return false;
+			res += static_cast<uint_fast32_t>(t & 0x7f) << (7*i);
+			if((t & 0x80) == 0)
+				return true;
+		}
+		return false;
+	}
 
-class HTTP2
-{
 	static void int_encode(uint8_t c, uint_fast32_t n, uint_fast8_t nBit, byteWriter &bw)
 	{
 		c <<= nBit;
@@ -58,38 +77,11 @@ class HTTP2
 		bw.write(static_cast<uint8_t>(n));
 	}
 
-	static void string_encode_s(std::string_view s, byteWriter &bw)
-	{
-		int_encode(0, static_cast<uint_fast32_t>(s.size()), 7, bw);
-		bw.writeS(s);
-	}
-
-	static bool int_decode(br_array &br, uint_fast32_t &res, uint_fast8_t nBit)
-	{
-		{
-			const uint_fast8_t p = (1 << nBit) - 1;
-			res &= p;
-			if(res != p)
-				return true;
-		}
-		for(uint_fast8_t i = 0; i < 4; i++)
-		{
-			uint8_t t;
-			if( !br.get(t) )
-				return false;
-			res += static_cast<uint_fast32_t>(t & 0x7f) << (7*i);
-			if((t & 0x80) == 0)
-				return true;
-		}
-		return false;
-	}
-
-	static bool string_decode(br_array &br, std::string &out_str)
+	bool string_decode(br_array &br, std::string &out_str) const
 	{
 		uint8_t t;
 		if( !br.get(t) )
 			return false;
-
 		uint_fast32_t size = t;
 		if( !int_decode(br, size, 7) )
 			return false;
@@ -100,22 +92,50 @@ class HTTP2
 		if( !br.set_rsize(size) )
 			return false;
 		out_str.clear();
-		bitReaderR br1(br);
+		bitReaderR r(br);
 		for(;;)
 		{
-			unsigned int r;
-			if(!http2_htr.read(br1, r))
+			uint c;
+			if(!dec.read(r, c))
 				break;
-			if(r == 256)
+			if(c == 256)
 				return false;
-			out_str.push_back(static_cast<char>(r));
+			out_str.push_back(static_cast<char>(c));
 		}
 		if(br.get_rsize() != 0)
 			return false;
 		br.reset_size();
+
 		return true;
 	}
 
+	void string_encode(std::string_view s, byteWriter &bw, bool is_huff) const
+	{
+		if(is_huff)
+		{
+			std::vector<uint8_t> v;
+			bw_vector w(v);
+			bitWriterR wb(w);
+			for (const char c : s)
+			{
+				enc.write(c, wb);
+			}
+			wb.pad1();
+			int_encode(1, static_cast<uint_fast32_t>(v.size()), 7, bw);
+			bw.writeN(v.data(), v.size());
+		}
+		else
+		{
+			int_encode(0, static_cast<uint_fast32_t>(s.size()), 7, bw);
+			bw.writeS(s);
+		}
+	}
+};
+
+static const h2_hpack h2_st;
+
+class HTTP2
+{
 	static const unsigned char hdr_size = 24;
 
 	typedef std::pair<std::string, std::string> field;
@@ -179,7 +199,7 @@ class HTTP2
 			std::string name, val;
 			if((id & 0x80) != 0)
 			{
-				if( !int_decode(br, id, 7) )
+				if( !h2_st.int_decode(br, id, 7) )
 					return false;
 				if(!dtbl.get(id, name, val))
 					return false;
@@ -188,23 +208,23 @@ class HTTP2
 			{
 				if(id != 0x40)
 				{
-					if( !int_decode(br, id, 6) )
+					if( !h2_st.int_decode(br, id, 6) )
 						return false;
 					if(!dtbl.get(id, name, val))
 						return false;
 				}
 				else
 				{
-					if( !string_decode(br, name) )
+					if( !h2_st.string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, val) )
+				if( !h2_st.string_decode(br, val) )
 					return false;
 				dtbl.addFld(name, val);
 			}
 			else if((id & 0x20) != 0)
 			{
-				if( !int_decode(br, id, 5) )
+				if( !h2_st.int_decode(br, id, 5) )
 					return false;
 				dtbl.set_msize(id);
 				continue;
@@ -213,34 +233,34 @@ class HTTP2
 			{
 				if(id != 0x10)
 				{
-					if( !int_decode(br, id, 4) )
+					if( !h2_st.int_decode(br, id, 4) )
 						return false;
 					if(!dtbl.get(id, name, val))
 						return false;
 				}
 				else
 				{
-					if( !string_decode(br, name) )
+					if( !h2_st.string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, val) )
+				if( !h2_st.string_decode(br, val) )
 					return false;
 			}
 			else
 			{
 				if(id != 0)
 				{
-					if( !int_decode(br, id, 4) )
+					if( !h2_st.int_decode(br, id, 4) )
 						return false;
 					if(!dtbl.get(id, name, val))
 						return false;
 				}
 				else
 				{
-					if( !string_decode(br, name) )
+					if( !h2_st.string_decode(br, name) )
 						return false;
 				}
-				if( !string_decode(br, val) )
+				if( !h2_st.string_decode(br, val) )
 					return false;
 			}
 			if(name.empty())

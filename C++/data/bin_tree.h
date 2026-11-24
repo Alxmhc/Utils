@@ -9,8 +9,6 @@
 template<typename T>
 struct binTree
 {
-	typedef std::map<T, std::pair<uint_fast64_t, uint_fast8_t>> Tmap;
-
 	class Dec
 	{
 		Dec* left;
@@ -109,13 +107,8 @@ struct binTree
 
 	class Enc
 	{
-		Tmap mp;
+		std::map<T, std::pair<uint_fast64_t, uint_fast8_t>> mp;
 	public:
-		const Tmap& get_map() const
-		{
-			return mp;
-		}
-
 		bool add(uint_fast64_t n, uint_fast8_t nbit, const T &v)
 		{
 			if (mp.find(v) != mp.end())
@@ -139,6 +132,14 @@ struct binTree
 				return false;
 			bw.writeBE(e->second.first, e->second.second);
 			return true;
+		}
+
+		void make_decoder(Dec &d) const
+		{
+			for (const auto& e : mp)
+			{
+				d.add(e.second.first, e.second.second, e.first);
+			}
 		}
 	};
 };
