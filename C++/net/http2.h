@@ -43,7 +43,7 @@ public:
 			if(res != p)
 				return true;
 		}
-		for(uint_fast8_t i = 0; i < 4; i++)
+		for(uint_fast8_t i = 0; i < 5; i++)
 		{
 			uint8_t t;
 			if(!br.get(t))
@@ -109,26 +109,24 @@ public:
 		return true;
 	}
 
-	void string_encode(std::string_view s, byteWriter &bw, bool is_huff) const
+	void string_encode_s(std::string_view s, byteWriter &bw) const
 	{
-		if(is_huff)
+		int_encode(0, static_cast<uint_fast32_t>(s.size()), 7, bw);
+		bw.writeS(s);
+	}
+
+	void string_encode_h(std::string_view s, byteWriter &bw) const
+	{
+		std::vector<uint8_t> v;
+		bw_vector w(v);
+		bitWriterR wb(w);
+		for (const char c : s)
 		{
-			std::vector<uint8_t> v;
-			bw_vector w(v);
-			bitWriterR wb(w);
-			for (const char c : s)
-			{
-				enc.write(c, wb);
-			}
-			wb.pad1();
-			int_encode(1, static_cast<uint_fast32_t>(v.size()), 7, bw);
-			bw.writeN(v.data(), v.size());
+			enc.write(c, wb);
 		}
-		else
-		{
-			int_encode(0, static_cast<uint_fast32_t>(s.size()), 7, bw);
-			bw.writeS(s);
-		}
+		wb.pad1();
+		int_encode(1, static_cast<uint_fast32_t>(v.size()), 7, bw);
+		bw.writeN(v.data(), v.size());
 	}
 };
 
