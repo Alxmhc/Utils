@@ -652,15 +652,9 @@ public:
 	{
 		if(a == 0)
 			return !p;
-		if(a < 0)
-		{
-			if(p)
-				return false;
-			return u > -a;
-		}
-		if(!p)
-			return true;
-		return u < a;
+		if(a > 0)
+			return !p || u < a;
+		return !p && u > -a;
 	}
 
 	bool operator==(const b_sint &c) const

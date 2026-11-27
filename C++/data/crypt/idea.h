@@ -29,10 +29,6 @@ namespace crypt
 				return 1 - a - b;
 			return (t % 65537) & 0xffff;
 		}
-		static uint16_t mulI(uint16_t x)
-		{
-			return static_cast<uint16_t>(pw_m(x, 0xffff, 0x10001));
-		}
 
 		static void Process(const uint16_t* key, uint8_t* r)
 		{
@@ -60,7 +56,6 @@ namespace crypt
 			d[3] = mul(d[3], key[51]);
 			conv::unpack<2, endianness::BE>(d, 4, r);
 		}
-
 	public:
 		static const uint_fast8_t block_size = 8;
 
@@ -84,6 +79,11 @@ namespace crypt
 		class Dec
 		{
 			uint16_t key[52];
+
+			static uint16_t mulI(uint16_t x)
+			{
+				return static_cast<uint16_t>(pw_m(x, 0xffff, 0x10001));
+			}
 		public:
 			static const uint_fast8_t block_size = 8;
 
